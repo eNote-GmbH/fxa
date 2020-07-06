@@ -25,7 +25,7 @@ export const PaymentConfirmation = ({
 }: PaymentConfirmationProps) => {
   const { amount, currency, interval, interval_count } = selectedPlan;
   const { displayName, email } = profile;
-  const { brand, last4, subscriptions } = customer;
+  const { brand = 'MISSING', last4 = 'MISSING', subscriptions } = customer;
   const invoiceNumber = subscriptions[0].latest_invoice;
   const date = new Date().toLocaleDateString(navigator.language, {
     year: 'numeric',

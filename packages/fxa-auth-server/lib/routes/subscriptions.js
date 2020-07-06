@@ -585,7 +585,7 @@ class DirectStripeRoutes {
    * @param {*} request
    */
   async createCustomer(request) {
-    this.log.begin('subscriptions.getCustomer', request);
+    this.log.begin('subscriptions.createCustomer', request);
     const { uid, email } = await handleAuth(this.db, request.auth, true);
     await this.customs.check(request, email, 'createCustomer');
 
@@ -1308,7 +1308,7 @@ const directRoutes = (
           strategy: 'oauthToken',
         },
         response: {
-          schema: validators.subscriptionsCustomerValidator,
+          //schema: validators.subscriptionsCustomerValidator,
         },
       },
       handler: (request) => directStripeRoutes.getCustomer(request),
@@ -1322,7 +1322,7 @@ const directRoutes = (
           strategy: 'oauthToken',
         },
         response: {
-          schema: validators.subscriptionsStripeCustomerValidator,
+          // schema: validators.subscriptionsStripeCustomerValidator,
         },
         validate: {
           payload: {
@@ -1344,7 +1344,7 @@ const directRoutes = (
           strategy: 'oauthToken',
         },
         response: {
-          schema: validators.subscriptionsStripeSubscriptionValidator,
+          // schema: validators.subscriptionsStripeSubscriptionValidator,
         },
         validate: {
           payload: {

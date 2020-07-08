@@ -1,3 +1,73 @@
+## 1.178.0
+
+### New features
+
+- oauth: Store refresh_token last-used-at timestamp in redis. ([d92005bb6](https://github.com/mozilla/fxa/commit/d92005bb6))
+- emails: Add onMobileDevice mailOption for post registration email ([777a31e74](https://github.com/mozilla/fxa/commit/777a31e74))
+- devices: Emit events for a basic "device commands" delivery funnel. ([5705fe683](https://github.com/mozilla/fxa/commit/5705fe683))
+
+### Bug fixes
+
+- reminders: only send reminders if the user has not logged into another device ([9f03c12e9](https://github.com/mozilla/fxa/commit/9f03c12e9))
+- metrics: Create a new oauth token created event that includes sync device data ([19ce4152a](https://github.com/mozilla/fxa/commit/19ce4152a))
+- auth-server: remove plan_name requirement ([5556f6335](https://github.com/mozilla/fxa/commit/5556f6335))
+- l10n: polyfill Intl.NumberFormat for emails ([2a2fcf7ed](https://github.com/mozilla/fxa/commit/2a2fcf7ed))
+- tests: fix l10n fallback language tests ([bbcae8a88](https://github.com/mozilla/fxa/commit/bbcae8a88))
+- auth: use stage-specific sync url in post verify emails, when in stage ([2d566e40d](https://github.com/mozilla/fxa/commit/2d566e40d))
+
+### Refactorings
+
+- auth-server: restore TS check on stripe ([c342deb86](https://github.com/mozilla/fxa/commit/c342deb86))
+
+### Other changes
+
+- update hawk to @hapi/hawk ([cbe94f4ec](https://github.com/mozilla/fxa/commit/cbe94f4ec))
+- deps: update deps ([27cd24c63](https://github.com/mozilla/fxa/commit/27cd24c63))
+- docs: Replace 'master' with 'main' throughout ([20a0acf8b](https://github.com/mozilla/fxa/commit/20a0acf8b))
+
+## 1.177.1
+
+No changes.
+
+## 1.177.0
+
+### New features
+
+- dev: handle skip ci label to skip tests ([ce0788085](https://github.com/mozilla/fxa/commit/ce0788085))
+- emails: Add CAD reminder templates ([9e1046fb5](https://github.com/mozilla/fxa/commit/9e1046fb5))
+- auth + content: add endpoint and hook up CAD QR flow to trigger reminder ([3ccc3b366](https://github.com/mozilla/fxa/commit/3ccc3b366))
+- reminders: added CAD reminders to scripts/verification-reminders ([773ed269c](https://github.com/mozilla/fxa/commit/773ed269c))
+- cad: Add remind me later CAD redis manager ([1032fde91](https://github.com/mozilla/fxa/commit/1032fde91))
+- auth-server: use ToS ## 1.176.0 privacy links from Stripe metadata in subplat emails ([6b2817090](https://github.com/mozilla/fxa/commit/6b2817090))
+- auth-server: update stripe api version ([822748e27](https://github.com/mozilla/fxa/commit/822748e27))
+
+### Bug fixes
+
+- emails: Swap grammatically incorrect 'How-To' for 'How To' ([31e141635](https://github.com/mozilla/fxa/commit/31e141635))
+- oauth: Allow token requests to specify arbitrarily large TTL values ([0e9b4fa7b](https://github.com/mozilla/fxa/commit/0e9b4fa7b))
+- payments: handle "charges" missing from the subscription object graph ([a4fe1fb94](https://github.com/mozilla/fxa/commit/a4fe1fb94))
+- auth-server: use individual assignments ([c1b4d7a2f](https://github.com/mozilla/fxa/commit/c1b4d7a2f))
+
+### Other changes
+
+- deps: updated dependencies ([3fa952919](https://github.com/mozilla/fxa/commit/3fa952919))
+- pm2: Add ISO timestamp to pm2 log lines ([2c5630adb](https://github.com/mozilla/fxa/commit/2c5630adb))
+
+## 1.176.0
+
+### New features
+
+- password: Add force password screens ([14b0c2960](https://github.com/mozilla/fxa/commit/14b0c2960))
+- ci: use store_test_results in circleci for auth-server ([4aab0ce02](https://github.com/mozilla/fxa/commit/4aab0ce02))
+
+### Bug fixes
+
+- devices: improve lastAccessTime accuracy for OAuth devices ([6bee0dfc1](https://github.com/mozilla/fxa/commit/6bee0dfc1))
+
+### Refactorings
+
+- oauth: drop the email column from codes, tokens and refreshTokens tables ([f51341d78](https://github.com/mozilla/fxa/commit/f51341d78))
+
 ## 1.175.0
 
 ### New features

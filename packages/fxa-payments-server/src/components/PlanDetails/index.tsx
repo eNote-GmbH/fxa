@@ -1,7 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { Localized } from '@fluent/react';
 import { getLocalizedCurrency, formatPlanPricing } from '../../lib/formats';
-import { metadataFromPlan, productDetailsFromPlan } from '../../store/utils';
+import {
+  metadataFromPlan,
+  productDetailsFromPlan,
+} from 'fxa-shared/subscriptions/metadata';
 import { AppContext } from '../../lib/AppContext';
 
 // this is a fallback incase webIconURL is undefined,
@@ -73,17 +76,20 @@ export const PlanDetails = ({
                   {product_name}
                 </h3>
                 <p className="plan-details-description">
-                  {productDetails.subtitle}
+                  <Localized
+                    id={`plan-price-${interval}`}
+                    $amount={getLocalizedCurrency(amount, currency)}
+                    $intervalCount={interval_count}
+                  >
+                    {planPrice}
+                  </Localized>
+                  &nbsp;&bull;&nbsp;
+                  <span className="plan-details-subtitle">
+                    {productDetails.subtitle}
+                  </span>
                 </p>
               </div>
             </div>
-            <Localized
-              id={`plan-price-${interval}`}
-              $amount={getLocalizedCurrency(amount, currency)}
-              $intervalCount={interval_count}
-            >
-              <p>{planPrice}</p>
-            </Localized>
           </div>
           {!detailsHidden && productDetails.details ? (
             <div className="plan-details-list" data-testid="list">

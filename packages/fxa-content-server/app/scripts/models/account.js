@@ -169,7 +169,7 @@ const Account = Backbone.Model.extend(
       return this.createOAuthToken(this._oAuthClientId, {
         scope: CONTENT_SERVER_OAUTH_SCOPE,
         // set authorization TTL to 5 minutes.
-        // Docs: github.com/mozilla/fxa-oauth-server/blob/master/docs/api.md#post-v1authorization
+        // Docs: https://github.com/mozilla/fxa/blob/main/packages/fxa-auth-server/docs/oauth/api.md#post-v1authorization
         // Issue: https://github.com/mozilla/fxa-content-server/issues/3982
         ttl: 300,
       }).then((accessToken) => {
@@ -1681,6 +1681,15 @@ const Account = Backbone.Model.extend(
      */
     createSigninCode() {
       return this._fxaClient.createSigninCode(this.get('sessionToken'));
+    },
+
+    /**
+     * Queues up a reminder to CAD to be delivered at a later time.
+     *
+     * @returns {Promise} resolves with response when complete.
+     */
+    createCadReminder() {
+      return this._fxaClient.createCadReminder(this.get('sessionToken'));
     },
   },
   {

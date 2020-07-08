@@ -34,6 +34,7 @@ import { AppContext } from '../../lib/AppContext';
 
 import './index.scss';
 import { Plan, PlanInterval } from '../../store/types';
+import { productDetailsFromPlan } from 'fxa-shared/subscriptions/metadata';
 import { TermsAndPrivacy } from '../TermsAndPrivacy';
 
 // Define a minimal type for what we use from the Stripe API, which makes
@@ -133,10 +134,18 @@ export const PaymentForm = ({
     ]
   );
 
-  const { matchMedia } = useContext(AppContext);
+  const { matchMedia, navigatorLanguages } = useContext(AppContext);
   const stripeElementStyles = mkStripeElementStyles(
     matchMedia(SMALL_DEVICE_RULE)
   );
+
+  let termsOfServiceURL, privacyNoticeURL;
+  if (confirm && plan) {
+    ({ termsOfServiceURL, privacyNoticeURL } = productDetailsFromPlan(
+      plan,
+      navigatorLanguages
+    ));
+  }
 
   return (
     <Form
@@ -169,6 +178,7 @@ export const PaymentForm = ({
           label="Card number"
           style={stripeElementStyles}
           className="input-row input-row--xl"
+          getString={getString}
           required
         />
       </Localized>
@@ -180,6 +190,7 @@ export const PaymentForm = ({
             name="expDate"
             label="Exp. date"
             style={stripeElementStyles}
+            getString={getString}
             required
           />
         </Localized>
@@ -190,6 +201,7 @@ export const PaymentForm = ({
             name="cvc"
             label="CVC"
             style={stripeElementStyles}
+            getString={getString}
             required
           />
         </Localized>
@@ -199,8 +211,6 @@ export const PaymentForm = ({
             type="text"
             name="zip"
             label="ZIP code"
-            maxLength={5}
-            minLength={5}
             required
             data-testid="zip"
             placeholder="12345"
@@ -214,24 +224,27 @@ export const PaymentForm = ({
       <hr />
 
       {confirm && plan && (
-        <Localized
-          id={`payment-confirm-${plan.interval}`}
-          $intervalCount={plan.interval_count}
-          $amount={getLocalizedCurrency(plan.amount, plan.currency)}
-          strong={<strong></strong>}
-        >
-          <Checkbox data-testid="confirm" name="confirm" required>
-            {getDefaultPaymentConfirmText(
-              plan.amount,
-              plan.currency,
-              plan.interval,
-              plan.interval_count
-            )}
-          </Checkbox>
-        </Localized>
+        <>
+          <Localized
+            id={`payment-confirm-with-legal-links-${plan.interval}`}
+            $intervalCount={plan.interval_count}
+            $amount={getLocalizedCurrency(plan.amount, plan.currency)}
+            strong={<strong></strong>}
+            termsOfServiceLink={<a href={termsOfServiceURL}></a>}
+            privacyNoticeLink={<a href={privacyNoticeURL}></a>}
+          >
+            <Checkbox data-testid="confirm" name="confirm" required>
+              {getDefaultPaymentConfirmText(
+                plan.amount,
+                plan.currency,
+                plan.interval,
+                plan.interval_count
+              )}
+            </Checkbox>
+          </Localized>
+          <hr />
+        </>
       )}
-
-      <hr />
 
       {onCancel ? (
         <div className="button-row">
@@ -285,7 +298,7 @@ export const PaymentForm = ({
       )}
 
       <PaymentLegalBlurb />
-      <TermsAndPrivacy />
+      {plan && <TermsAndPrivacy plan={plan} />}
     </Form>
   );
 };
@@ -341,21 +354,14 @@ const validateName: OnValidateFunction = (
 };
 
 const validateZip: OnValidateFunction = (value, focused, _props, getString) => {
-  let valid = undefined;
+  let valid = true;
   let error = null;
-  value = ('' + value).replace(/[^\d]+/g, '').substr(0, 5);
+  value = ('' + value).trim();
   if (!value) {
     valid = false;
     error = getString
       ? getString('payment-validate-zip-required')
       : 'Zip code is required';
-  } else if (value.length !== 5 && !focused) {
-    valid = false;
-    error = getString
-      ? getString('payment-validate-zip-short')
-      : 'Zip code is too short';
-  } else if (value.length === 5) {
-    valid = true;
   }
   return {
     value,

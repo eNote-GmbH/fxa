@@ -43,7 +43,7 @@ The Firefox Accounts (fxa) monorepo
 
 Note: If `yarn install` fails, ensure your `yarn -v` is at least `1.22.0`.
 
-Note this starts up all required services, including Redis, MySQL, and Memcached. It is recommended that you don't run these services yourself, or occupy any of the [server ports](https://github.com/mozilla/fxa/blob/master/mysql_servers.json). Doing so may result in errors.
+Note this starts up all required services, including Redis, MySQL, and Memcached. It is recommended that you don't run these services yourself, or occupy any of the [server ports](https://github.com/mozilla/fxa/blob/main/mysql_servers.json). Doing so may result in errors.
 
 4. Visit [localhost:3030](http://localhost:3030/).
 
@@ -73,7 +73,7 @@ The most common commands are:
 
 ### Contributing
 
-See the separate [CONTRIBUTING.md](https://github.com/mozilla/fxa/blob/master/CONTRIBUTING.md) to learn how to contribute.
+See the separate [CONTRIBUTING.md](https://github.com/mozilla/fxa/blob/main/CONTRIBUTING.md) to learn how to contribute.
 
 ### Workflow
 
@@ -217,8 +217,8 @@ When developing locally you may need to set up some secrets in order to effectiv
 
 Check out the Secrets section in the following READMEs:
 
-- [fxa-auth-server](https://github.com/mozilla/fxa/tree/master/packages/fxa-auth-server#secrets)
-- [fxa-payments-server](https://github.com/mozilla/fxa/tree/master/packages/fxa-payments-server#secrets)
+- [fxa-auth-server](https://github.com/mozilla/fxa/tree/main/packages/fxa-auth-server#secrets)
+- [fxa-payments-server](https://github.com/mozilla/fxa/tree/main/packages/fxa-payments-server#secrets)
 
 ---
 
@@ -228,24 +228,26 @@ Check out the Secrets section in the following READMEs:
 
 #### Test all or some packages
 
+- You might need to run `yarn start infrastructure` before running tests to start services.
+
 From the root directory you may test all or some FxA packages:
 
 ```bash
 # Test only `fxa-shared`
-npm test fxa-shared
+yarn test fxa-shared
 
 # Test `fxa-auth-db-mysql` and `fxa-auth-server`
-npm test fxa-auth-db-mysql fxa-auth-server
+yarn test fxa-auth-db-mysql fxa-auth-server
 
 # Test all packages
-npm test all
+yarn test all
 ```
 
-Note that this invokes the same test suite that CI uses, and is not necessarily the same as running `npm test` in any given package.
+- Note that this invokes the same test suite that CI uses, and is not necessarily the same as running `yarn test` in any given package.
 
 #### Emulating CI environment
 
-It is possible to run various test suites (known as Jobs) acting as Circle CI. This is useful if you're encountering CI-specific failures. Please refer to [this documentation](https://github.com/mozilla/fxa/tree/master/.circleci#local-testing).
+It is possible to run various test suites (known as Jobs) acting as Circle CI. This is useful if you're encountering CI-specific failures. Please refer to [this documentation](https://github.com/mozilla/fxa/tree/main/.circleci#local-testing).
 
 ---
 
@@ -417,3 +419,26 @@ In addition to the ecosystem docs, each package has it's own README.md and `docs
 - fxa-profile-server [README](./packages/fxa-profile-server/README.md) / [docs/](./packages/fxa-profile-server/docs)
 - fxa-shared [README](./packages/fxa-shared/README.md)
 - fxa-support-panel [README](./packages/fxa-support-panel/README.md)
+
+---
+
+### Documentation for Scripts
+
+#### \_scripts/legal-md-to-pdf.sh
+
+##### Purpose
+
+This bash script allows for the conversion of markdown files to pdfs. The purpose is to create a way for legal documents to be easily converted and made available for end-users.
+
+##### Usage
+
+_Pre-requisites_: The script requires that you have pandoc and LaTeX installed on your machine.
+
+- pandoc: https://github.com/jgm/pandoc/blob/master/INSTALL.md
+- LaTeX: https://www.latex-project.org/get/
+
+The script will check that pandoc is installed before asking you for the file or directory on your machine that you would like to be converted. If a directory is provided, then all markdown files within that folder will be convered. If a single file is provided, only that file will be converted.
+The resulting output will be stored within `assets/legal`.
+Example:
+file provided to convert: `/Users/test/github/mozilla/legal-docs/firefox_cloud_services_ToS/en-US.md`
+resulting file: `assets/legal/firefox_cloud_services_ToS/en-US.pdf`

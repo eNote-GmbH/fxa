@@ -1,3 +1,25 @@
+## 1.178.0
+
+### Other changes
+
+- deps: update deps ([27cd24c63](https://github.com/mozilla/fxa/commit/27cd24c63))
+- docs: Replace 'master' with 'main' throughout ([20a0acf8b](https://github.com/mozilla/fxa/commit/20a0acf8b))
+
+## 1.177.1
+
+No changes.
+
+## 1.177.0
+
+### Other changes
+
+- deps: updated dependencies ([3fa952919](https://github.com/mozilla/fxa/commit/3fa952919))
+- pm2: Add ISO timestamp to pm2 log lines ([2c5630adb](https://github.com/mozilla/fxa/commit/2c5630adb))
+
+## 1.176.0
+
+No changes.
+
 ## 1.175.0
 
 ### New features

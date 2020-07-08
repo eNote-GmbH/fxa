@@ -27,12 +27,14 @@ module.exports = function (
   const push = require('../push')(log, db, config, statsd);
   const pushbox = require('../pushbox')(log, config, statsd);
   const devicesImpl = require('../devices')(log, db, oauthdb, push);
+  const cadReminders = require('../cad-reminders')(config, log);
   const signinUtils = require('./utils/signin')(
     log,
     config,
     customs,
     db,
-    mailer
+    mailer,
+    cadReminders
   );
   const clientUtils = require('./utils/clients')(log, config);
   const verificationReminders = require('../verification-reminders')(
@@ -101,6 +103,7 @@ module.exports = function (
     customs,
     push,
     verificationReminders,
+    cadReminders,
     signupUtils,
     zendeskClient,
     stripeHelper

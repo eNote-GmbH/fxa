@@ -7,13 +7,14 @@
 const Sentry = require('@sentry/node');
 const error = require('../error');
 const isA = require('@hapi/joi');
+const { omitBy } = require('lodash');
+// @ts-ignore
 const ScopeSet = require('fxa-shared').oauth.scopes;
 const validators = require('./validators');
-const {
-  metadataFromPlan,
-  splitCapabilities,
-} = require('./utils/subscriptions');
+const { splitCapabilities } = require('./utils/subscriptions');
 const { SUBSCRIPTION_UPDATE_TYPES } = require('../payments/stripe');
+// @ts-ignore
+const { metadataFromPlan } = require('fxa-shared').subscriptions.metadata;
 
 const SUBSCRIPTIONS_MANAGEMENT_SCOPE =
   'https://identity.mozilla.com/account/subscriptions';
@@ -23,7 +24,7 @@ const IGNORABLE_STRIPE_WEBHOOK_ERRNOS = [
   error.ERRNO.BOUNCE_HARD,
 ];
 
-/** @typedef {import('hapi').Request} Request */
+/** @typedef {import('@hapi/hapi').Request} Request */
 /** @typedef {import('stripe').Stripe.Customer} Customer */
 /** @typedef {import('stripe').Stripe.Source} Source */
 /** @typedef {import('stripe').Stripe.Source.Card} Card */
@@ -37,6 +38,13 @@ const IGNORABLE_STRIPE_WEBHOOK_ERRNOS = [
 /** @typedef {import('stripe').Stripe.Charge} Charge */
 /** @typedef {import('../payments/stripe.js').AbbrevPlan} AbbrevPlan*/
 
+/**
+ * Authentication handler for subscription routes.
+ *
+ * @param {*} db
+ * @param {*} auth
+ * @param {*} fetchEmail
+ */
 async function handleAuth(db, auth, fetchEmail = false) {
   const scope = ScopeSet.fromArray(auth.credentials.scope);
   if (!scope.contains(SUBSCRIPTIONS_MANAGEMENT_SCOPE)) {
@@ -53,29 +61,21 @@ async function handleAuth(db, auth, fetchEmail = false) {
   return { uid, email };
 }
 
-// Delete any metadata keys prefixed by `capabilities:` before
-// sending response. We don't need to reveal those.
-// https://github.com/mozilla/fxa/issues/3273#issuecomment-552637420
+/**
+ * Delete any metadata keys prefixed by `capabilities:` before
+ * sending response. We don't need to reveal those.
+ * https://github.com/mozilla/fxa/issues/3273#issuecomment-552637420
+ *
+ * @param {AbbrevPlan[]} plans
+ */
 function sanitizePlans(plans) {
   return plans.map((planIn) => {
     // Try not to mutate the original in case we cache plans in memory.
     const plan = { ...planIn };
-    for (const metadataKey of ['plan_metadata', 'product_metadata']) {
-      if (plan[metadataKey]) {
-        // Make a clone of the metadata object so we don't mutate the original.
-        const metadata = { ...plan[metadataKey] };
-        const capabilityKeys = [
-          'capabilities',
-          ...Object.keys(metadata).filter((key) =>
-            key.startsWith('capabilities:')
-          ),
-        ];
-        for (const key of capabilityKeys) {
-          delete metadata[key];
-        }
-        plan[metadataKey] = metadata;
-      }
-    }
+    /** @type {(value: string, key: string) => boolean} */
+    const isCapabilityKey = (value, key) => key.startsWith('capabilities');
+    plan.plan_metadata = omitBy(plan.plan_metadata, isCapabilityKey);
+    plan.product_metadata = omitBy(plan.product_metadata, isCapabilityKey);
     return plan;
   });
 }
@@ -103,6 +103,13 @@ class DirectStripeRoutes {
     this.stripeHelper = stripeHelper;
   }
 
+  /**
+   * Reload the customer data to reflect a change.
+   *
+   * @param {*} request
+   * @param {string} uid
+   * @param {string} email
+   */
   async customerChanged(request, uid, email) {
     const [devices] = await Promise.all([
       await request.app.devices,
@@ -116,12 +123,19 @@ class DirectStripeRoutes {
     });
   }
 
+  /**
+   * Retrieve the client capabilities
+   *
+   * @param {*} request
+   */
   async getClients(request) {
     this.log.begin('subscriptions.getClients', request);
+    /** @type {{[clientId: string]: string[]}} */
     const capabilitiesByClientId = {};
 
     const plans = await this.stripeHelper.allPlans();
 
+    /** @type {string[]} */
     const capabilitiesForAll = [];
     for (const plan of plans) {
       const metadata = metadataFromPlan(plan);
@@ -169,7 +183,7 @@ class DirectStripeRoutes {
     // Find the selected plan and get its product ID
     const selectedPlan = await this.stripeHelper.findPlanById(planId);
     const productId = selectedPlan.product_id;
-    const planMetadata = metadataFromPlan(selectedPlan);
+    const productMetadata = metadataFromPlan(selectedPlan);
 
     const customer = await this.stripeHelper.fetchCustomer(uid, email, [
       'data.subscriptions.data.latest_invoice',
@@ -195,21 +209,9 @@ class DirectStripeRoutes {
       );
     }
 
-    // Get the country from the payment details.
-    // There's only one charge (the latest), per Stripe's docs.
-    let sourceCountry;
-    const paymentMethodDetails =
-      subscription.latest_invoice.payment_intent.charges.data[0]
-        .payment_method_details;
-
-    if (
-      paymentMethodDetails &&
-      paymentMethodDetails.type &&
-      paymentMethodDetails[paymentMethodDetails.type] &&
-      paymentMethodDetails[paymentMethodDetails.type].country
-    ) {
-      sourceCountry = paymentMethodDetails[paymentMethodDetails.type].country;
-    }
+    const sourceCountry = this.stripeHelper.extractSourceCountryFromSubscription(
+      subscription
+    );
 
     await this.customerChanged(request, uid, email);
 
@@ -220,10 +222,11 @@ class DirectStripeRoutes {
       planId,
       planName: selectedPlan.plan_name,
       productName: selectedPlan.product_name,
-      planEmailIconURL: planMetadata.emailIconURL,
-      planDownloadURL: planMetadata.downloadURL,
-      appStoreLink: planMetadata.appStoreLink,
-      playStoreLink: planMetadata.playStoreLink,
+      planEmailIconURL: productMetadata.emailIconURL,
+      planDownloadURL: productMetadata.downloadURL,
+      appStoreLink: productMetadata.appStoreLink,
+      playStoreLink: productMetadata.playStoreLink,
+      productMetadata,
     });
     this.log.info('subscriptions.createSubscription.success', {
       uid,
@@ -566,6 +569,87 @@ class DirectStripeRoutes {
       customer.subscriptions
     );
     return response;
+  }
+
+  /**
+   * Create a customer.
+   *
+   * New PaymentMethod flow.
+   *
+   * @param {*} request
+   */
+  async createCustomer(request) {
+    this.log.begin('subscriptions.getCustomer', request);
+    const { uid, email } = await handleAuth(this.db, request.auth, true);
+    await this.customs.check(request, email, 'createCustomer');
+
+    const customer = await this.stripeHelper.customer(uid, email);
+    if (customer) {
+      return customer;
+    }
+
+    const { displayName, idempotencyKey } = request.payload;
+    const customerIdempotencyKey = `${idempotencyKey}-customer`;
+    return this.stripeHelper.createPlainCustomer(
+      uid,
+      email,
+      displayName,
+      customerIdempotencyKey
+    );
+  }
+
+  /**
+   * Retry an invoice by attaching a new payment method id for use.
+   *
+   * New PaymentMethod flow.
+   *
+   * @param {*} request
+   */
+  async retryInvoice(request) {
+    this.log.begin('subscriptions.retryInvoice', request);
+    const { uid, email } = await handleAuth(this.db, request.auth, true);
+    await this.customs.check(request, email, 'retryInvoice');
+
+    const customer = await this.stripeHelper.customer(uid, email);
+    if (!customer) {
+      throw error.unknownCustomer(uid);
+    }
+
+    const { invoiceId, paymentMethodId, idempotencyKey } = request.payload;
+    const retryIdempotencyKey = `${idempotencyKey}-retryInvoice`;
+    return this.stripeHelper.retryInvoiceWithPaymentId(
+      customer.id,
+      invoiceId,
+      paymentMethodId,
+      retryIdempotencyKey
+    );
+  }
+
+  /**
+   * Create a subscription for a user.
+   *
+   * New PaymentMethod flow.
+   *
+   * @param {*} request
+   */
+  async createSubscriptionWithPMI(request) {
+    this.log.begin('subscriptions.createSubscriptionWithPMI', request);
+    const { uid, email } = await handleAuth(this.db, request.auth, true);
+    await this.customs.check(request, email, 'createSubscriptionWithPMI');
+
+    const customer = await this.stripeHelper.customer(uid, email);
+    if (!customer) {
+      throw error.unknownCustomer(uid);
+    }
+
+    const { priceId, paymentMethodId, idempotencyKey } = request.payload;
+    const subIdempotencyKey = `${idempotencyKey}-createSub`;
+    return this.stripeHelper.createSubscriptionWithPMI(
+      customer.id,
+      priceId,
+      paymentMethodId,
+      subIdempotencyKey
+    );
   }
 
   /**
@@ -1167,6 +1251,71 @@ const directRoutes = (
       handler: (request) => directStripeRoutes.getCustomer(request),
     },
     {
+      method: 'POST',
+      path: '/oauth/subscriptions/customer',
+      options: {
+        auth: {
+          payload: false,
+          strategy: 'oauthToken',
+        },
+        response: {
+          schema: validators.subscriptionsCustomerValidator,
+        },
+        validate: {
+          payload: {
+            displayName: isA.string().required(),
+            idempotencyKey: isA.string().required(),
+          },
+        },
+      },
+      handler: (request) => directStripeRoutes.createCustomer(request),
+    },
+    {
+      method: 'POST',
+      // Avoid conflict with existing, this can be updated to remove `/new` at the
+      // same time the old routes are removed when the client is updated.
+      path: '/oauth/subscriptions/active/new',
+      options: {
+        auth: {
+          payload: false,
+          strategy: 'oauthToken',
+        },
+        response: {
+          schema: validators.subscriptionsSubscriptionExpandedValidator,
+        },
+        validate: {
+          payload: {
+            priceId: isA.string().required(),
+            paymentMethodId: validators.stripePaymentMethodId.required(),
+            idempotencyKey: isA.string().required(),
+          },
+        },
+      },
+      handler: (request) =>
+        directStripeRoutes.createSubscriptionWithPMI(request),
+    },
+    {
+      method: 'POST',
+      path: '/oauth/subscriptions/invoice/retry',
+      options: {
+        auth: {
+          payload: false,
+          strategy: 'oauthToken',
+        },
+        response: {
+          schema: validators.subscriptionsInvoicePIExpandedValidator,
+        },
+        validate: {
+          payload: {
+            invoiceId: isA.string().required(),
+            paymentMethodId: validators.stripePaymentMethodId.required(),
+            idempotencyKey: isA.string().required(),
+          },
+        },
+      },
+      handler: (request) => directStripeRoutes.retryInvoice(request),
+    },
+    {
       method: 'GET',
       path: '/oauth/subscriptions/search',
       options: {
@@ -1262,6 +1411,17 @@ const directRoutes = (
   ];
 };
 
+/**
+ *
+ * @param {*} log
+ * @param {*} db
+ * @param {*} config
+ * @param {*} customs
+ * @param {*} push
+ * @param {*} mailer
+ * @param {*} profile
+ * @param {*} stripeHelper
+ */
 const createRoutes = (
   log,
   db,

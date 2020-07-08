@@ -215,6 +215,7 @@ module.exports = {
   mockSubHub,
   mockProfile,
   mockVerificationReminders,
+  mockCadReminders,
   mockStripeHelper,
 };
 
@@ -580,6 +581,16 @@ function mockPush(methods) {
 
 function mockPushbox(methods) {
   const pushbox = Object.assign({}, methods);
+  if (!pushbox.retrieve) {
+    // Route code expects the `retrieve` method to return a properly-structured object.
+    pushbox.retrieve = sinon.spy(() =>
+      P.resolve({
+        last: true,
+        index: 0,
+        messages: [],
+      })
+    );
+  }
   PUSHBOX_METHOD_NAMES.forEach((name) => {
     if (!pushbox[name]) {
       pushbox[name] = sinon.spy(() => P.resolve());
@@ -789,6 +800,20 @@ function mockVerificationReminders(data = {}) {
     keys: ['first', 'second', 'third'],
     create: sinon.spy(() => data.create || { first: 1, second: 1, third: 1 }),
     delete: sinon.spy(() => data.delete || { first: 1, second: 1, third: 1 }),
+    process: sinon.spy(
+      () => data.process || { first: [], second: [], third: [] }
+    ),
+  };
+}
+
+function mockCadReminders(data = {}) {
+  return {
+    keys: ['first', 'second', 'third'],
+    create: sinon.spy(() => data.create || { first: 1, second: 1, third: 1 }),
+    delete: sinon.spy(() => data.delete || { first: 1, second: 1, third: 1 }),
+    get: sinon.spy(
+      () => data.get || { first: null, second: null, third: null }
+    ),
     process: sinon.spy(
       () => data.process || { first: [], second: [], third: [] }
     ),

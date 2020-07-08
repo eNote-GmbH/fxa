@@ -14,6 +14,9 @@ import { useNonce } from '../../lib/hooks';
 function init() {
   storiesOf('components/PaymentForm', module)
     .add('default', () => <Subject />)
+    .add('without plan', () => <Subject noPlan />)
+    .add('without confirmation', () => <Subject confirm={false} />)
+    .add('fr locale (for legal links)', () => <Subject locale="fr" />)
     .add('in progress', () => <Subject inProgress={true} />)
     .add('all invalid', () => {
       const state = mockValidatorState();
@@ -44,28 +47,42 @@ const PLAN = {
   amount: 1099,
   interval: 'month' as const,
   interval_count: 1,
+  product_metadata: {
+    'product:termsOfServiceURL':
+      'https://www.mozilla.org/en-US/about/legal/terms/services/',
+    'product:termsOfServiceURL:fr':
+      'https://www.mozilla.org/fr/about/legal/terms/services/',
+    'product:privacyNoticeURL':
+      'https://www.mozilla.org/en-US/privacy/websites/',
+    'product:privacyNoticeURL:fr':
+      'https://www.mozilla.org/fr/privacy/websites/',
+  },
 };
 
 type SubjectProps = {
   inProgress?: boolean;
   confirm?: boolean;
+  noPlan?: boolean;
   plan?: Plan;
   onPayment?: (tokenResponse: stripe.TokenResponse) => void;
   onPaymentError?: (error: any) => void;
   onChange?: Function;
   validatorInitialState?: ValidatorState;
   validatorMiddlewareReducer?: ValidatorMiddlewareReducer;
+  locale?: string;
 };
 
 const Subject = ({
   inProgress = false,
   confirm = true,
+  noPlan = false,
   plan = PLAN,
   onPayment = action('onPayment'),
   onPaymentError = action('onPaymentError'),
   validatorInitialState,
   validatorMiddlewareReducer,
   onChange = () => {},
+  locale = 'en-US',
 }: SubjectProps) => {
   const [submitNonce, refreshSubmitNonce] = useNonce();
 
@@ -73,7 +90,7 @@ const Subject = ({
     submitNonce,
     inProgress,
     confirm,
-    plan,
+    plan: noPlan ? undefined : plan,
     onPayment,
     onPaymentError,
     onChange,
@@ -84,7 +101,7 @@ const Subject = ({
     getString: () => {},
   };
   return (
-    <MockPage>
+    <MockPage locale={locale}>
       <div className="product-payment">
         <button onClick={refreshSubmitNonce}>Refresh submit nonce</button>
         <p>Current nonce: {submitNonce}</p>
@@ -95,12 +112,13 @@ const Subject = ({
 };
 
 type MockPageProps = {
+  locale: string;
   children: React.ReactNode;
 };
 
-const MockPage = ({ children }: MockPageProps) => {
+const MockPage = ({ locale, children }: MockPageProps) => {
   return (
-    <MockApp>
+    <MockApp languages={[locale]}>
       <SignInLayout>{children}</SignInLayout>
     </MockApp>
   );

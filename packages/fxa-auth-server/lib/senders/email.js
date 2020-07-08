@@ -11,6 +11,7 @@ const P = require('bluebird');
 const safeUserAgent = require('../userAgent/safe');
 const url = require('url');
 const { URL } = url;
+const { productDetailsFromPlan } = require('fxa-shared').subscriptions.metadata;
 
 const TEMPLATE_VERSIONS = require('./templates/_versions.json');
 
@@ -21,12 +22,21 @@ const UTM_PREFIX = 'fx-';
 const X_SES_CONFIGURATION_SET = 'X-SES-CONFIGURATION-SET';
 const X_SES_MESSAGE_TAGS = 'X-SES-MESSAGE-TAGS';
 
+// Polyfill Intl.NumberFormat until we are using Node >= 13
+if (parseInt(process.versions.node) > 12) {
+  console.error('Time to remove the intl polyfill module!!1!');
+} else {
+  const IntlPolyfill = require('intl');
+  Intl.NumberFormat = IntlPolyfill.NumberFormat;
+}
+
 module.exports = function (log, config, oauthdb) {
   const oauthClientInfo = require('./oauth_client_info')(log, config, oauthdb);
   const verificationReminders = require('../verification-reminders')(
     log,
     config
   );
+  const cadReminders = require('../cad-reminders')(config, log);
 
   // Email template to UTM campaign map, each of these should be unique and
   // map to exactly one email template.
@@ -1266,7 +1276,7 @@ module.exports = function (log, config, oauthdb) {
       email: message.email,
       uid: message.uid,
     });
-
+    const onDesktopOrTabletDevice = !message.onMobileDevice;
     const templateName = 'postVerify';
     const subject = gettext(
       'Account verified. Next, sync another device to finish setup'
@@ -1293,9 +1303,11 @@ module.exports = function (log, config, oauthdb) {
       template: templateName,
       templateValues: {
         action,
+        onDesktopOrTabletDevice,
         androidLinkAttributes: linkAttributes(links.androidLink),
         androidUrl: links.androidLink,
         cadLinkAttributes: linkAttributes(links.link),
+        desktopLinkAttributes: linkAttributes(config.smtp.firefoxDesktopUrl),
         iosLinkAttributes: linkAttributes(links.iosLink),
         iosUrl: links.iosLink,
         link: links.link,
@@ -1817,6 +1829,7 @@ module.exports = function (log, config, oauthdb) {
         email,
         productIconURLNew,
         productIconURLOld,
+        productName: productNameNew,
         productNameOld,
         paymentAmountOld: this._getLocalizedCurrencyString(
           paymentAmountOldInCents,
@@ -1895,6 +1908,7 @@ module.exports = function (log, config, oauthdb) {
         email,
         productIconURLNew,
         productIconURLOld,
+        productName: productNameNew,
         productNameOld,
         paymentAmountOld: this._getLocalizedCurrencyString(
           paymentAmountOldInCents,
@@ -2437,6 +2451,70 @@ module.exports = function (log, config, oauthdb) {
     });
   };
 
+  cadReminders.keys.forEach((key, index) => {
+    // Template names are generated in the form `cadReminderFirstEmail`,
+    // where `First` is the key derived from config, with an initial capital letter.
+    const template = `cadReminder${key[0].toUpperCase()}${key.substr(1)}`;
+
+    const isFirstCadReminderEmail = index < cadReminders.keys.length - 1;
+
+    const subject = isFirstCadReminderEmail
+      ? gettext('Your Friendly Reminder: How To Complete Your Sync Setup')
+      : gettext('Final Reminder: Complete Sync Setup');
+
+    const headerText = isFirstCadReminderEmail
+      ? gettext("Here's your reminder to sync devices.")
+      : gettext('Last reminder to sync devices!');
+
+    const bodyText = isFirstCadReminderEmail
+      ? gettext(
+          'It takes two to sync. Syncing another device with Firefox privately keeps your bookmarks, passwords and other Firefox data the same everywhere you use Firefox.'
+        )
+      : gettext(
+          'Syncing another device with Firefox privately keeps your bookmarks, passwords and other Firefox data the same everywhere you use Firefox.'
+        );
+
+    const action = gettext('Sync another device');
+    const query = {};
+
+    templateNameToCampaignMap[template] = `cad-reminder-${key}`;
+    templateNameToContentMap[template] = 'connect-device';
+
+    Mailer.prototype[`${template}Email`] = async function (message) {
+      const { code, email, uid } = message;
+
+      log.trace(`mailer.${template}`, { code, email, uid });
+
+      const links = this._generateLinks(this.syncUrl, message, query, template);
+      const headers = {
+        'X-Link': links.link,
+      };
+
+      return this.send({
+        ...message,
+        headers,
+        subject,
+        template,
+        templateValues: {
+          action,
+          androidLinkAttributes: linkAttributes(links.androidLink),
+          androidUrl: links.androidLink,
+          cadLinkAttributes: linkAttributes(links.link),
+          iosLinkAttributes: linkAttributes(links.iosLink),
+          iosUrl: links.iosLink,
+          link: links.link,
+          privacyUrl: links.privacyUrl,
+          style: message.style,
+          subject,
+          supportLinkAttributes: links.supportLinkAttributes,
+          supportUrl: links.supportUrl,
+          headerText,
+          bodyText,
+        },
+      });
+    };
+  });
+
   Mailer.prototype._generateUTMLink = function (
     link,
     query,
@@ -2475,12 +2553,25 @@ module.exports = function (log, config, oauthdb) {
 
   Mailer.prototype._generateLinks = function (
     primaryLink,
-    { email, uid },
+    message,
     query,
     templateName,
     appStoreLink,
     playStoreLink
   ) {
+    const { email, uid } = message;
+
+    const translator = this.translator(message.acceptLanguage);
+    const {
+      termsOfServiceURL = this.subscriptionTermsUrl,
+      privacyNoticeURL = this.privacyUrl,
+    } = productDetailsFromPlan(
+      {
+        product_metadata: message.productMetadata,
+      },
+      translator.language
+    );
+
     // Generate all possible links. The option to use a specific link
     // is left up to the template.
     const links = {};
@@ -2600,10 +2691,16 @@ module.exports = function (log, config, oauthdb) {
     links.cancellationSurveyLinkAttributes = `href="${links.cancellationSurveyUrl}" style="text-decoration: none; color: #0060DF;"`;
 
     links.subscriptionTermsUrl = this._generateUTMLink(
-      this.subscriptionTermsUrl,
+      termsOfServiceURL,
       {},
       templateName,
       'subscription-terms'
+    );
+    links.subscriptionPrivacyUrl = this._generateUTMLink(
+      privacyNoticeURL,
+      {},
+      templateName,
+      'subscription-privacy'
     );
     links.cancelSubscriptionUrl = this._generateUTMLink(
       this.subscriptionSettingsUrl,

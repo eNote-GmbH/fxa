@@ -1,5 +1,40 @@
 # Change history
 
+## 1.178.0
+
+### Bug fixes
+
+- build: added postinstall to fxa-shared ([39345629b](https://github.com/mozilla/fxa/commit/39345629b))
+
+### Other changes
+
+- deps: update deps ([27cd24c63](https://github.com/mozilla/fxa/commit/27cd24c63))
+- l10n: add en-US to shared list of supported locales ([56d735061](https://github.com/mozilla/fxa/commit/56d735061))
+- docs: Replace 'master' with 'main' throughout ([20a0acf8b](https://github.com/mozilla/fxa/commit/20a0acf8b))
+
+## 1.177.1
+
+No changes.
+
+## 1.177.0
+
+### New features
+
+- auth-server: use ToS ## 1.176.0 privacy links from Stripe metadata in subplat emails ([6b2817090](https://github.com/mozilla/fxa/commit/6b2817090))
+
+### Bug fixes
+
+- shared: ensure \*.ts tests run ([ea09677c3](https://github.com/mozilla/fxa/commit/ea09677c3))
+
+### Other changes
+
+- deps: updated dependencies ([3fa952919](https://github.com/mozilla/fxa/commit/3fa952919))
+- pm2: Add ISO timestamp to pm2 log lines ([2c5630adb](https://github.com/mozilla/fxa/commit/2c5630adb))
+
+## 1.176.0
+
+No changes.
+
 ## 1.175.0
 
 ### New features

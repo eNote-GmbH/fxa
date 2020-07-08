@@ -9,7 +9,7 @@ const ROOT_DIR = '../..';
 const { assert } = require('chai');
 const EndpointError = require('poolee/lib/error')(require('util').inherits);
 const error = require(`${ROOT_DIR}/lib/error`);
-const hawk = require('hawk');
+const hawk = require('@hapi/hawk');
 const knownIpLocation = require('../known-ip-location');
 const mocks = require('../mocks');
 const server = require(`${ROOT_DIR}/lib/server`);
@@ -455,7 +455,7 @@ describe('lib/server', () => {
             errno: 125,
             error: 'Request blocked',
             info:
-              'https://github.com/mozilla/fxa/blob/master/packages/fxa-auth-server/docs/api.md#response-format',
+              'https://github.com/mozilla/fxa/blob/main/packages/fxa-auth-server/docs/api.md#response-format',
             message: 'The request was blocked for security reasons',
           };
           beforeEach(() => {

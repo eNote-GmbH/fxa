@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useContext } from 'react';
 import { Localized } from '@fluent/react';
 
 import {
@@ -8,7 +8,6 @@ import {
   Profile,
 } from '../../../store/types';
 import { SelectorReturns } from '../../../store/selectors';
-import { metadataFromPlan } from '../../../store/utils';
 
 import * as Amplitude from '../../../lib/amplitude';
 
@@ -30,6 +29,8 @@ import { TermsAndPrivacy } from '../../../components/TermsAndPrivacy';
 
 import PlanUpgradeDetails from './PlanUpgradeDetails';
 import Header from '../../../components/Header';
+import { AppContext } from '../../../lib/AppContext';
+import { productDetailsFromPlan } from 'fxa-shared/subscriptions/metadata';
 
 import './index.scss';
 
@@ -58,6 +59,12 @@ export const SubscriptionUpgrade = ({
   resetUpdateSubscriptionPlan,
   updateSubscriptionPlanStatus,
 }: SubscriptionUpgradeProps) => {
+  const { navigatorLanguages } = useContext(AppContext);
+  const { termsOfServiceURL, privacyNoticeURL } = productDetailsFromPlan(
+    selectedPlan,
+    navigatorLanguages
+  );
+
   const validator = useValidatorState();
 
   const inProgress = updateSubscriptionPlanStatus.loading;
@@ -176,13 +183,15 @@ export const SubscriptionUpgrade = ({
             <hr />
 
             <Localized
-              id={`sub-update-confirm-${selectedPlan.interval}`}
+              id={`sub-update-confirm-with-legal-links-${selectedPlan.interval}`}
               strong={<strong></strong>}
               $amount={getLocalizedCurrency(
                 selectedPlan.amount,
                 selectedPlan.currency
               )}
               $intervalCount={selectedPlan.interval_count}
+              termsOfServiceLink={<a href={termsOfServiceURL}></a>}
+              privacyNoticeLink={<a href={privacyNoticeURL}></a>}
             >
               <Checkbox
                 data-testid="confirm"
@@ -220,7 +229,7 @@ export const SubscriptionUpgrade = ({
             </div>
 
             <PaymentLegalBlurb />
-            <TermsAndPrivacy />
+            <TermsAndPrivacy plan={selectedPlan} />
           </Form>
         </div>
         <PlanUpgradeDetails

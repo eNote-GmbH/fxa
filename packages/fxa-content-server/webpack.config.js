@@ -20,7 +20,6 @@ const webpackConfig = {
       'chosen-js',
       'cocktail-lib',
       'duration',
-      'es6-promise',
       'jquery',
       'js-md5',
       'modal',
@@ -58,7 +57,6 @@ const webpackConfig = {
       cocktail: require.resolve('./app/scripts/lib/cocktail'),
       draggable: require.resolve('jquery-ui/ui/widgets/draggable'),
       duration: require.resolve('duration-js/duration'),
-      'es6-promise': require.resolve('es6-promise/dist/es6-promise'),
       'fast-text-encoding': require.resolve('fast-text-encoding'),
       fxaCryptoDeriver: require.resolve(
         'fxa-crypto-relier/dist/fxa-crypto-relier/fxa-crypto-deriver'
@@ -78,6 +76,11 @@ const webpackConfig = {
       uuid: require.resolve('node-uuid/uuid'),
       vat: require.resolve('node-vat/vat'),
       'webcrypto-liner': require.resolve('webcrypto-liner/build/shim'),
+      // Webpack 4 doesn't support the "exports" property of package.json
+      // so unfortunately we need to remap it here as well.
+      'fxa-react/components/Survey': require.resolve(
+        'fxa-react/components/Survey'
+      ),
     },
   },
 
@@ -111,7 +114,15 @@ const webpackConfig = {
       },
       {
         test: /\.tsx?$/,
-        loader: ['cache-loader', 'awesome-typescript-loader'],
+        loader: [
+          'cache-loader',
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+            },
+          },
+        ],
       },
       {
         test: /\.jsx?$/,
@@ -140,7 +151,14 @@ const webpackConfig = {
               cacheDirectory: true,
               presets: [
                 ['@babel/preset-react', {}],
-                '@babel/preset-env',
+                [
+                  '@babel/preset-env',
+                  {
+                    targets: {
+                      firefox: '60',
+                    },
+                  },
+                ],
                 '@babel/preset-typescript',
               ],
               plugins: [

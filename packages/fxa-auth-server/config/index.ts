@@ -10,6 +10,9 @@ const url = require('url');
 const convict = require('convict');
 const DEFAULT_SUPPORTED_LANGUAGES = require('./supportedLanguages');
 
+convict.addFormats(require('convict-format-with-moment'));
+convict.addFormats(require('convict-format-with-validator'));
+
 const conf = convict({
   env: {
     doc: 'The current node.js environment',
@@ -304,10 +307,11 @@ const conf = convict({
         env: 'PREPEND_VERIFICATION_SUBDOMAIN_SUBDOMAIN',
       },
     },
-    syncUrl: {
-      doc: 'url to Sync product page',
+    firefoxDesktopUrl: {
+      doc: 'url to download Firefox page',
       format: String,
-      default: 'https://accounts.firefox.com/connect_another_device/',
+      default:
+        'https://firefox.com?utm_content=registration-confirmation&utm_medium=email&utm_source=fxa',
     },
     androidUrl: {
       doc: 'url to Android product page',
@@ -415,11 +419,47 @@ const conf = convict({
         format: String,
         doc: 'Key prefix for access tokens in Redis',
       },
-      accessTokenLimit: {
+      recordLimit: {
         default: 100,
         env: 'ACCESS_TOKEN_REDIS_LIMIT',
         format: Number,
         doc: 'Maximum number of access tokens per account at any one time',
+      },
+    },
+    refreshTokens: {
+      enabled: {
+        default: true,
+        doc: 'Enable Redis for refresh token metadata',
+        format: Boolean,
+        env: 'REFRESH_TOKEN_REDIS_ENABLED',
+      },
+      host: {
+        default: 'localhost',
+        env: 'REFRESH_TOKEN_REDIS_HOST',
+        format: String,
+      },
+      port: {
+        default: 6379,
+        env: 'REFRESH_TOKEN_REDIS_PORT',
+        format: 'port',
+      },
+      prefix: {
+        default: 'rt:',
+        env: 'REFRESH_TOKEN_REDIS_KEY_PREFIX',
+        format: String,
+        doc: 'Key prefix for refresh tokens in Redis',
+      },
+      maxttl: {
+        default: 86400000,
+        env: 'REFRESH_TOKEN_REDIS_MAX_TTL',
+        format: Number,
+        doc: 'ttl for redis data',
+      },
+      recordLimit: {
+        default: 20,
+        env: 'REFRESH_TOKEN_REDIS_LIMIT',
+        format: Number,
+        doc: 'Maximum number of refresh tokens per account stored in redis',
       },
     },
     sessionTokens: {
@@ -1042,7 +1082,7 @@ const conf = convict({
     },
     refreshToken: {
       updateAfter: {
-        doc: 'lastUsedAt only gets updated after this delay',
+        doc: 'lastUsedAt only gets updated in MySQL after this delay',
         format: 'duration',
         default: '24 hours',
         env: 'FXA_REFRESH_TOKEN_UPDATE_AFTER',
@@ -1628,6 +1668,46 @@ const conf = convict({
       },
     },
   },
+  cadReminders: {
+    rolloutRate: {
+      doc: 'Rollout rate in the range 0 .. 1',
+      default: 1,
+      env: 'CAD_REMINDERS_ROLLOUT_RATE',
+      format: Number,
+    },
+    firstInterval: {
+      doc: 'Time which the first reminder is sent',
+      default: '8 hours',
+      env: 'CAD_REMINDERS_FIRST_INTERVAL',
+      format: 'duration',
+    },
+    secondInterval: {
+      doc: 'Time which the second reminder is sent',
+      default: '3 days',
+      env: 'CAD_REMINDERS_SECOND_INTERVAL',
+      format: 'duration',
+    },
+    redis: {
+      prefix: {
+        default: 'cadReminders:',
+        doc: 'Key prefix for the cad reminders Redis pool',
+        env: 'CAD_REMINDERS_REDIS_PREFIX',
+        format: String,
+      },
+      maxConnections: {
+        default: 10,
+        doc: 'Maximum connection count for the cad reminders Redis pool',
+        env: 'CAD_REMINDERS_REDIS_MAX_CONNECTIONS',
+        format: 'nat',
+      },
+      minConnections: {
+        default: 1,
+        doc: 'Minimum connection count for the cad reminders Redis pool',
+        env: 'CAD_REMINDERS_REDIS_MIN_CONNECTIONS',
+        format: 'nat',
+      },
+    },
+  },
   zendesk: {
     username: {
       doc: 'Zendesk Username for support interaction',
@@ -1758,6 +1838,7 @@ conf.set('smtp.verifyPrimaryEmailUrl', `${baseUri}/verify_primary_email`);
 conf.set('smtp.verifySecondaryEmailUrl', `${baseUri}/verify_secondary_email`);
 conf.set('smtp.subscriptionSettingsUrl', `${baseUri}/subscriptions`);
 conf.set('smtp.subscriptionSupportUrl', `${baseUri}/support`);
+conf.set('smtp.syncUrl', `${baseUri}/connect_another_device`);
 
 conf.set('isProduction', conf.get('env') === 'prod');
 

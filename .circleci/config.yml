@@ -26,7 +26,19 @@ commands:
         default: none
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            # prefer the exact hash
+            - fxa-yarn-cache-{{ checksum "yarn.lock" }}
+            # any cache to start with is better than nothing
+            - fxa-yarn-cache-
       - run: ./.circleci/base-install.sh << parameters.package >>
+      - save_cache:
+          key: fxa-yarn-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - .yarn/cache
+            - .yarn/build-state.yml
+            - .yarn/install-state.gz
   test-content-server-part:
     parameters:
       index:
@@ -37,20 +49,13 @@ commands:
         default: 6
     steps:
       - base-install:
-          package: all
+          package: fxa-content-server
       - run:
           name: Running test section << parameters.index >> of << parameters.total >>
           environment:
             CIRCLE_NODE_INDEX: << parameters.index >>
             CIRCLE_NODE_TOTAL: << parameters.total >>
           command: ./.circleci/test-package.sh fxa-content-server
-      - run:
-          name: Clean up old Stripe customers from testing
-          command: |
-            cd packages/fxa-auth-server && \
-            yarn run clean-up-old-ci-stripe-customers
-      - store_test_results:
-          path: artifacts/tests
       - store_artifacts:
           path: ~/.pm2/logs
           destination: logs
@@ -90,7 +95,8 @@ jobs:
       - image: memcached
       - image: redis
     steps:
-      - base-install
+      - base-install:
+          package: many
       - run:
           name: Testing...
           command: |
@@ -219,7 +225,8 @@ jobs:
     docker:
       - image: circleci/node:12
     steps:
-      - base-install
+      - base-install:
+          package: many
       - run:
           name: Build and deploy Storybooks
           command: ./_scripts/build-storybooks.sh
@@ -230,7 +237,7 @@ workflows:
       - test-many:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-package:
@@ -238,43 +245,43 @@ workflows:
           package: fxa-auth-server
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-content-server-0:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-content-server-1:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-content-server-2:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-content-server-3:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-content-server-4:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-content-server-5:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
       - test-email-service:
@@ -291,7 +298,7 @@ workflows:
       - build-and-deploy-storybooks:
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
   deploy_branch:
@@ -300,7 +307,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
                 - /^feature.*/
                 - /^dockerpush.*/
             tags:
@@ -308,7 +315,7 @@ workflows:
       - build-and-deploy-storybooks:
           filters:
             branches:
-              only: master
+              only: main
             tags:
               ignore: /.*/
   test_and_deploy_tag:

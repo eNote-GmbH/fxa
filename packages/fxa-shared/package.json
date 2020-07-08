@@ -1,14 +1,15 @@
 {
   "name": "fxa-shared",
-  "version": "1.175.0",
+  "version": "1.178.0",
   "description": "Shared module for FxA repositories",
   "main": "dist/index.js",
   "scripts": {
+    "postinstall": "tsc --build || true",
     "build": "tsc --build",
     "start": "pm2 start pm2.config.js",
     "stop": "pm2 stop pm2.config.js",
     "restart": "pm2 restart pm2.config.js",
-    "test": "tsc --build && node ./scripts/mocha-coverage.js -r ts-node/register --recursive test",
+    "test": "tsc --build && node ./scripts/mocha-coverage.js -r ts-node/register --recursive test/**/*.{js,ts}",
     "audit": "npm audit --json | audit-filter --nsp-config=.nsprc --audit=-",
     "lint": "eslint .",
     "format": "prettier --write --config ../../_dev/.prettierrc '**'"
@@ -28,14 +29,14 @@
   "engines": {
     "node": ">=12"
   },
-  "homepage": "https://github.com/mozilla/fxa/tree/master/packages/fxa-shared#readme",
+  "homepage": "https://github.com/mozilla/fxa/tree/main/packages/fxa-shared#readme",
   "devDependencies": {
     "@types/chai": "^4.2.11",
     "@types/generic-pool": "^3.1.9",
     "@types/mocha": "^7.0.2",
     "@types/proxyquire": "^1.3.28",
     "@types/redis": "^2.8.16",
-    "@types/sinon": "^7.5.2",
+    "@types/sinon": "^9.0.4",
     "audit-filter": "^0.5.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
@@ -54,10 +55,10 @@
     "uuid": "^7.0.2"
   },
   "dependencies": {
-    "@sentry/browser": "^5.15.5",
+    "@sentry/browser": "^5.17.0",
     "@types/js-md5": "^0.4.2",
     "accept-language": "^2.0.17",
-    "ajv": "^6.12.0",
+    "ajv": "^6.12.2",
     "bluebird": "^3.7.2",
     "celebrate": "^10.0.1",
     "cors": "^2.8.5",

@@ -1,9 +1,10 @@
 {
   "extends": "../../_dev/tsconfig.browser.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "allowJs": false,
     "composite": true,
-    "types": ["jest", "testing-library__jest-dom"]
+    "types": ["jest", "@testing-library/jest-dom"]
   },
   "include": [
     "./components",

@@ -52,23 +52,9 @@ export default {
   },
 
   _closePanelReturnToSettings() {
-    this.navigate('settings');
     this.clearInput();
+    this.navigate('settings');
     this.closePanel();
-  },
-
-  clearInput() {
-    const $inputEls = this.$('input');
-
-    $inputEls.each((i, inputEl) => {
-      // Called to clear validation tooltips. issues/5680
-      $(inputEl).change();
-    });
-
-    const formEl = this.$('form')[0];
-    if (formEl) {
-      formEl.reset();
-    }
   },
 
   closePanel() {

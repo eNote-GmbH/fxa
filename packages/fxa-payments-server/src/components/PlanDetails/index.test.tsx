@@ -205,9 +205,7 @@ describe('PlanDetails', () => {
         expect(planPriceComponent.props.$intervalCount).toBe(
           plan.interval_count
         );
-        expect(planPriceComponent.props.children.props.children).toBe(
-          expectedMsg
-        );
+        expect(planPriceComponent.props.children).toBe(expectedMsg);
       }
 
       describe('When plan has day interval', () => {

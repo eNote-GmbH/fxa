@@ -77,6 +77,7 @@ const PLANS = [
     interval: 'week',
     amount: '123',
     currency: 'usd',
+    plan_metadata: {},
     product_metadata: {
       emailIconURL: 'http://example.com/image.jpg',
       downloadURL: 'http://getfirefox.com',
@@ -91,6 +92,7 @@ const PLANS = [
     interval: 'month',
     amount: '456',
     currency: 'usd',
+    plan_metadata: {},
     product_metadata: {
       'capabilities:client2': 'exampleCap2, exampleCap4',
     },
@@ -107,6 +109,7 @@ const PLANS = [
       // NOTE: whitespace in capabilities list should be flexible for human entry
       'capabilities:client2': 'exampleCap5,exampleCap6,   exampleCap7',
     },
+    product_metadata: {},
   },
 ];
 const SUBSCRIPTION_ID_1 = 'sub-8675309';
@@ -166,6 +169,7 @@ describe('sanitizePlans', () => {
         interval: 'week',
         amount: '123',
         currency: 'usd',
+        plan_metadata: {},
         product_metadata: {
           emailIconURL: 'http://example.com/image.jpg',
           downloadURL: 'http://getfirefox.com',
@@ -178,6 +182,7 @@ describe('sanitizePlans', () => {
         interval: 'month',
         amount: '456',
         currency: 'usd',
+        plan_metadata: {},
         product_metadata: {},
       },
       {
@@ -188,6 +193,7 @@ describe('sanitizePlans', () => {
         amount: 499,
         current: 'usd',
         plan_metadata: {},
+        product_metadata: {},
       },
     ];
 
@@ -573,6 +579,7 @@ describe('DirectStripeRoutes', () => {
   describe('createSubscription', () => {
     let expected, actual;
     let createForNewStub, createForExistingStub;
+    let latest_invoice, subscription;
     const planId = PLAN_ID_1;
     const plan = PLANS[2];
     const paymentToken = 'tok_visa';
@@ -598,11 +605,11 @@ describe('DirectStripeRoutes', () => {
     };
 
     beforeEach(() => {
-      const latest_invoice = {
+      latest_invoice = {
         ...subscriptionCreatedInvoice,
-        payment_intent: closedPaymementIntent,
+        payment_intent: { ...closedPaymementIntent },
       };
-      const subscription = { ...subscription2, latest_invoice };
+      subscription = { ...subscription2, latest_invoice };
       expected = { subscriptionId: subscription.id, sourceCountry: 'US' };
 
       createForNewStub = sandbox
@@ -620,6 +627,9 @@ describe('DirectStripeRoutes', () => {
     describe('when called for a new customer', () => {
       it('creates a new subscription', async () => {
         directStripeRoutesInstance.stripeHelper.fetchCustomer.resolves();
+        directStripeRoutesInstance.stripeHelper.extractSourceCountryFromSubscription.returns(
+          'US'
+        );
 
         actual = await directStripeRoutesInstance.createSubscription(request);
         assert.isTrue(log.begin.calledOnce);
@@ -647,6 +657,27 @@ describe('DirectStripeRoutes', () => {
         assert.isTrue(log.info.calledOnce);
         assert.deepEqual(actual, expected);
       });
+
+      it('handles missing subscription.latest_invoice.payment_intent.charges in Stripe response object graph', async () => {
+        const scopeContextSpy = sinon.fake();
+        const scopeSpy = {
+          setContext: scopeContextSpy,
+        };
+        sandbox.replace(Sentry, 'withScope', (fn) => fn(scopeSpy));
+        sandbox.replace(Sentry, 'captureMessage', sinon.stub());
+        subscription.latest_invoice.payment_intent.charges = undefined;
+        expected = {
+          subscriptionId: subscription.id,
+          sourceCountry: null,
+        };
+        directStripeRoutesInstance.stripeHelper.fetchCustomer.resolves();
+        directStripeRoutesInstance.stripeHelper.extractSourceCountryFromSubscription.returns(
+          null
+        );
+
+        actual = await directStripeRoutesInstance.createSubscription(request);
+        assert.deepEqual(actual, expected);
+      });
     });
 
     describe('when called for an existing customer', () => {
@@ -654,6 +685,9 @@ describe('DirectStripeRoutes', () => {
         const customer = deepCopy(customerFixture);
         directStripeRoutesInstance.stripeHelper.fetchCustomer.resolves(
           customer
+        );
+        directStripeRoutesInstance.stripeHelper.extractSourceCountryFromSubscription.returns(
+          'US'
         );
 
         actual = await directStripeRoutesInstance.createSubscription(request);
@@ -680,6 +714,101 @@ describe('DirectStripeRoutes', () => {
         assert.isTrue(log.info.calledOnce);
         assert.deepEqual(actual, expected);
       });
+    });
+  });
+
+  describe('createCustomer', () => {
+    it('creates a stripe customer', async () => {
+      const expected = deepCopy(emptyCustomer);
+      directStripeRoutesInstance.stripeHelper.createPlainCustomer.returns(
+        expected
+      );
+      VALID_REQUEST.payload = {
+        displayName: 'Jane Doe',
+        idempotencyKey: uuidv4(),
+      };
+
+      const actual = await directStripeRoutesInstance.createCustomer(
+        VALID_REQUEST
+      );
+
+      assert.deepEqual(expected, actual);
+    });
+  });
+
+  describe('createSubscriptionWithPMI', () => {
+    it('creates a subscription with a payment method', async () => {
+      const customer = deepCopy(emptyCustomer);
+      directStripeRoutesInstance.stripeHelper.customer.returns(customer);
+      const expected = deepCopy(subscriptionCreated);
+      directStripeRoutesInstance.stripeHelper.createSubscriptionWithPMI.returns(
+        expected
+      );
+      VALID_REQUEST.payload = {
+        priceId: 'Jane Doe',
+        paymentMethodId: 'pm_asdf',
+        idempotencyKey: uuidv4(),
+      };
+
+      const actual = await directStripeRoutesInstance.createSubscriptionWithPMI(
+        VALID_REQUEST
+      );
+
+      assert.deepEqual(expected, actual);
+    });
+
+    it('errors when a customer has not been created', async () => {
+      directStripeRoutesInstance.stripeHelper.customer.returns(undefined);
+      VALID_REQUEST.payload = {
+        displayName: 'Jane Doe',
+        idempotencyKey: uuidv4(),
+      };
+      try {
+        await directStripeRoutesInstance.createSubscriptionWithPMI(
+          VALID_REQUEST
+        );
+        assert.fail('Create customer should fail.');
+      } catch (err) {
+        assert.instanceOf(err, WError);
+        assert.equal(err.errno, error.ERRNO.UNKNOWN_SUBSCRIPTION_CUSTOMER);
+      }
+    });
+  });
+
+  describe('retryInvoice', () => {
+    it('retries the invoice with the payment method', async () => {
+      const customer = deepCopy(emptyCustomer);
+      directStripeRoutesInstance.stripeHelper.customer.returns(customer);
+      const expected = deepCopy(openInvoice);
+      directStripeRoutesInstance.stripeHelper.retryInvoiceWithPaymentId.returns(
+        expected
+      );
+      VALID_REQUEST.payload = {
+        invoiceId: 'in_testinvoice',
+        paymentMethodId: 'pm_asdf',
+        idempotencyKey: uuidv4(),
+      };
+
+      const actual = await directStripeRoutesInstance.retryInvoice(
+        VALID_REQUEST
+      );
+
+      assert.deepEqual(expected, actual);
+    });
+
+    it('errors when a customer has not been created', async () => {
+      directStripeRoutesInstance.stripeHelper.customer.returns(undefined);
+      VALID_REQUEST.payload = {
+        displayName: 'Jane Doe',
+        idempotencyKey: uuidv4(),
+      };
+      try {
+        await directStripeRoutesInstance.retryInvoice(VALID_REQUEST);
+        assert.fail('Create customer should fail.');
+      } catch (err) {
+        assert.instanceOf(err, WError);
+        assert.equal(err.errno, error.ERRNO.UNKNOWN_SUBSCRIPTION_CUSTOMER);
+      }
     });
   });
 

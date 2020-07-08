@@ -5,6 +5,9 @@ import convict from 'convict';
 import fs from 'fs';
 import path from 'path';
 
+convict.addFormats(require('convict-format-with-moment'));
+convict.addFormats(require('convict-format-with-validator'));
+
 export interface MySQLConfig {
   database: string;
   host: string;
@@ -36,19 +39,19 @@ function makeMySQLConfig(envPrefix: string, database: string) {
     password: {
       default: '',
       doc: 'MySQL password',
-      env: '_MYSQL_PASSWORD',
+      env: envPrefix + '_MYSQL_PASSWORD',
       format: String,
     },
     port: {
       default: 3306,
       doc: 'MySQL port',
-      env: '_MYSQL_PORT',
+      env: envPrefix + '_MYSQL_PORT',
       format: Number,
     },
     user: {
       default: 'root',
       doc: 'MySQL username',
-      env: '_MYSQL_USERNAME',
+      env: envPrefix + '_MYSQL_USERNAME',
       format: String,
     },
   };

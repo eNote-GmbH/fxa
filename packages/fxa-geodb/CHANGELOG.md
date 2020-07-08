@@ -1,5 +1,25 @@
 # Change history
 
+## 1.178.0
+
+### Other changes
+
+- docs: Replace 'master' with 'main' throughout ([20a0acf8b](https://github.com/mozilla/fxa/commit/20a0acf8b))
+
+## 1.177.1
+
+No changes.
+
+## 1.177.0
+
+### Other changes
+
+- deps: updated dependencies ([3fa952919](https://github.com/mozilla/fxa/commit/3fa952919))
+
+## 1.176.0
+
+No changes.
+
 ## 1.175.0
 
 No changes.

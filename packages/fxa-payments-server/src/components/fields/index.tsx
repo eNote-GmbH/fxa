@@ -47,7 +47,6 @@ type FieldProps = {
   maxLength?: number;
   minLength?: number;
   autoFocus?: boolean;
-  options?: object;
 };
 
 type FieldHOCProps = {
@@ -263,7 +262,6 @@ export const StripeElement = (props: StripeElementProps) => {
     className,
     autoFocus,
     getString,
-    options = {},
     ...childProps
   } = props;
   const { validator } = useContext(FormContext) as FormContextValue;
@@ -308,7 +306,6 @@ export const StripeElement = (props: StripeElementProps) => {
         <StripeElementComponent
           {...{
             ...childProps,
-            options,
             onChange,
             onBlur,
           }}

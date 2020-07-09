@@ -1308,7 +1308,7 @@ const directRoutes = (
           strategy: 'oauthToken',
         },
         response: {
-          //schema: validators.subscriptionsCustomerValidator,
+          schema: validators.subscriptionsCustomerValidator,
         },
       },
       handler: (request) => directStripeRoutes.getCustomer(request),
@@ -1322,7 +1322,7 @@ const directRoutes = (
           strategy: 'oauthToken',
         },
         response: {
-          // schema: validators.subscriptionsStripeCustomerValidator,
+          schema: validators.subscriptionsStripeCustomerValidator,
         },
         validate: {
           payload: {
@@ -1344,7 +1344,7 @@ const directRoutes = (
           strategy: 'oauthToken',
         },
         response: {
-          // schema: validators.subscriptionsStripeSubscriptionValidator,
+          schema: validators.subscriptionsStripeSubscriptionValidator,
         },
         validate: {
           payload: {

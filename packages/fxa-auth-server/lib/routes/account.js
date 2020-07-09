@@ -1487,6 +1487,38 @@ module.exports = (
         return { subscriptions };
       },
     },
+    {
+      method: 'PUT',
+      path: '/account/metrics/ecosystemAnonId',
+      apidoc: {
+        errors: [error.invalidScopes],
+      },
+      options: {
+        auth: {
+          strategy: 'oauthToken',
+        },
+        response: {
+          schema: {
+            anonId: isA.string().required(),
+          },
+        },
+      },
+      handler: async function (request) {
+        log.begin('account.updateEcosystemAnonId', request);
+
+        const { uid, scope } = request.auth.credentials;
+        const { anonId } = request.payload;
+        const scopeSet = ScopeSet.fromArray(scope);
+
+        if (!scopeSet.contains('profile:ecosystem_anon_id')) {
+          throw error.invalidScopes(scopeSet);
+        }
+
+        await db.updateEcosystemAnonId(uid, anonId);
+
+        return {};
+      },
+    },
   ];
 
   if (config.isProduction) {

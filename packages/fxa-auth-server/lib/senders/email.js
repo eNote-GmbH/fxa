@@ -20,13 +20,15 @@ const TEMPLATE_VERSIONS = require('./emails/templates/_versions.json');
 
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_TIMEZONE = 'Etc/UTC';
-const UTM_PREFIX = 'fx-';
 
 const X_SES_CONFIGURATION_SET = 'X-SES-CONFIGURATION-SET';
 const X_SES_MESSAGE_TAGS = 'X-SES-MESSAGE-TAGS';
 
 module.exports = function (log, config, bounces) {
   const oauthClientInfo = require('./oauth_client_info')(log, config);
+  const utm_prefix = config.smtp.utmPrefix;
+  const utm_disabled = config.smtp.utmDisabled
+  const linkStyle = config.smtp.linkStyle;
   const verificationReminders = require('../verification-reminders')(
     log,
     config
@@ -151,7 +153,7 @@ module.exports = function (log, config, bounces) {
   function linkAttributes(url) {
     // Not very nice to have presentation code in here, but this is to help l10n
     // contributors not deal with extraneous noise in strings.
-    return `href="${url}" style="color: #0a84ff; text-decoration: none; font-family: sans-serif;"`;
+    return `href="${url}" style="${linkStyle}"`;
   }
 
   function constructLocalTimeString(timeZone, locale) {
@@ -2747,16 +2749,16 @@ module.exports = function (log, config, bounces) {
       parsedLink.searchParams.set(key, value);
     });
 
-    if (this.metricsEnabled) {
+    if (!utm_disabled) {
       parsedLink.searchParams.set('utm_medium', 'email');
 
       const campaign = templateNameToCampaignMap[templateName];
       if (campaign && !parsedLink.searchParams.has('utm_campaign')) {
-        parsedLink.searchParams.set('utm_campaign', UTM_PREFIX + campaign);
+        parsedLink.searchParams.set('utm_campaign', utm_prefix + campaign);
       }
 
       if (content) {
-        parsedLink.searchParams.set('utm_content', UTM_PREFIX + content);
+        parsedLink.searchParams.set('utm_content', utm_prefix + content);
       }
     }
 

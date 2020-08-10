@@ -298,6 +298,12 @@ const conf = convict({
       default: 'Firefox Accounts <no-reply@lcip.org>',
       env: 'SMTP_SENDER',
     },
+    contentServerUrl: {
+      doc: 'Base URI for links to a specific content server entry page if other than the contentServer.url',
+      default: undefined,
+      format: 'url',
+      env: 'SMTP_CONTENT_SERVER_URL',
+    },
     prependVerificationSubdomain: {
       enabled: {
         doc: 'Flag to prepend a verification subdomain to verification emails',
@@ -367,6 +373,23 @@ const conf = convict({
       format: String,
       default: '',
       env: 'SES_CONFIGURATION_SET',
+    },
+    utmPrefix: {
+      doc: 'Prefix for UTM parameters',
+      format: String,
+      default: 'fx-',
+      env: 'UTM_PREFIX',
+    },
+    utmDisabled: {
+      doc: 'Disable UTM parameters in links',
+      format: Boolean,
+      default: false,
+      env: 'UTM_DISABLED',
+    },
+    linkStyle: {
+      doc: 'CSS that is applied to all generated links inside generated emails',
+      format: String,
+      default: 'color: #0a84ff; text-decoration: none; font-family: sans-serif;'
     },
   },
   maxEventLoopDelay: {
@@ -904,6 +927,12 @@ const conf = convict({
       format: Boolean,
       env: 'OAUTH_DEVICE_COMMANDS_ENABLED',
       default: true,
+    },
+    clientInfoDefault: {
+      doc: 'Display name of the OAuth client to show by default',
+      format: String,
+      default: 'Firefox',
+      env: 'OAUTH_CLIENT_INFO_DEFAULT'
     },
     clientInfoCacheTTL: {
       doc: 'TTL for OAuth client details (in milliseconds)',
@@ -1876,7 +1905,10 @@ conf.validate();
 conf.set('domain', url.parse(conf.get('publicUrl')).host);
 
 // derive fxa-auth-mailer configuration from our content-server url
-const baseUri = conf.get('contentServer.url');
+let baseUri = conf.get('contentServer.url');
+if (conf.has('smtp.contentServerUrl')) {
+  baseUri = conf.get('smtp.contentServerUrl')
+}
 conf.set('smtp.accountSettingsUrl', `${baseUri}/settings`);
 conf.set(
   'smtp.accountRecoveryCodesUrl',

@@ -32,8 +32,17 @@ async function init(log) {
 
   handlebars.html.registerHelper('t', translate);
   handlebars.txt.registerHelper('t', translate);
+  handlebars.txt.registerHelper('tt', translatePlainText);
   handlebars.html.registerHelper('or', orHelper);
   handlebars.txt.registerHelper('or', orHelper);
+
+  const translateString = function (translator, data, string) {
+    if (translator) {
+      return translator.format(translator.gettext(string), data);
+    }
+
+    return string;
+  }
 
   // helpers from https://gist.github.com/servel333/21e1eedbd70db5a7cfff327526c72bc5
   const reduceOp = function (args, reducer) {
@@ -62,11 +71,12 @@ async function init(log) {
   return { render };
 
   function translate(string) {
-    if (this.translator) {
-      return this.translator.format(this.translator.gettext(string), this);
-    }
+    return translateString(this.translator, this, string);
+  }
 
-    return string;
+  function translatePlainText(string) {
+    string = translateString(this.translator, this, string);
+    return string.replace(/<\/?[a-z][^>]*(>|$)/g, "");
   }
 
   function render(templateName, layoutName, data) {

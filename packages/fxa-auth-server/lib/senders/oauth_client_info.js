@@ -11,7 +11,7 @@ module.exports = (log, config) => {
   const OAUTH_CLIENT_INFO_CACHE_TTL = config.oauth.clientInfoCacheTTL;
   const OAUTH_CLIENT_INFO_CACHE_NAMESPACE = 'oauthClientInfo';
   const FIREFOX_CLIENT = {
-    name: 'Firefox',
+    name: config.oauth.clientInfoDefault,
   };
   // TODO: prob don't need this cache anymore now that it's just a db call
   const clientCache = new Keyv({

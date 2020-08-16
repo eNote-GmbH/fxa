@@ -4,7 +4,34 @@
 
 'use strict';
 
-module.exports = function () {
+module.exports = function (config) {
+  const apps = config.get('apple_app_site_association.apps');
+  const paths = config.get('apple_app_site_association.paths');
+  const components = paths.map((path) => {return {'/': path}});
+
+  // From Apple developer docs,
+  // https://developer.apple.com/documentation/xcode/allowing_apps_and_websites_to_link_to_your_content
+  // to enable universal link support for a specific domain you need to return
+  // a json doc from `/.well-known/apple-app-site-association` path, describing
+  // what apps can open which links.
+  const association = {
+    applinks: {
+      details: [
+        {
+          appIDs: apps,
+          components: components,
+        },
+      ],
+    },
+    webcredentials: {
+      apps: [],
+    },
+  };
+
+  if (config.get('apple_app_site_association.enable_shared_credentials')) {
+    association.webcredentials.apps = apps;
+  }
+
   const route = {};
   route.method = 'get';
   route.path = '/.well-known/apple-app-site-association';
@@ -12,33 +39,7 @@ module.exports = function () {
   route.process = function (req, res) {
     // charset must be set on json responses.
     res.charset = 'utf-8';
-
-    // From Apple developer docs,
-    // https://developer.apple.com/library/content/documentation/General/Conceptual/AppSearch/UniversalLinks.html#//apple_ref/doc/uid/TP40016308-CH12-SW2
-    // to enabled universal link support for a specific domain you need to return a json doc
-    // from `/.well-known/apple-app-site-association` path, describing what apps can open which links.
-    // The structure below enables FxiOS Fennec (developer builds), FirefoxBeta (Test Flight builds)
-    // and Firefox (App store builds) to open FxA links.
-    const paths = ['/verify_email', '/complete_signin'];
-    res.json({
-      applinks: {
-        apps: [],
-        details: [
-          {
-            appID: '43AQ936H96.org.mozilla.ios.Firefox',
-            paths: paths,
-          },
-          {
-            appID: '43AQ936H96.org.mozilla.ios.Fennec',
-            paths: paths,
-          },
-          {
-            appID: '43AQ936H96.org.mozilla.ios.FirefoxBeta',
-            paths: paths,
-          },
-        ],
-      },
-    });
+    res.json(association);
   };
 
   return route;

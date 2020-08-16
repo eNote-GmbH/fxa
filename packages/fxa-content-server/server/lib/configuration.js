@@ -424,6 +424,33 @@ const conf = (module.exports = convict({
     subject_types_supported: ['public'],
     token_endpoint_auth_methods_supported: ['client_secret_post'],
   },
+  apple_app_site_association: {
+    apps: {
+      default: [
+        '43AQ936H96.org.mozilla.ios.Firefox',
+        '43AQ936H96.org.mozilla.ios.Fennec',
+        '43AQ936H96.org.mozilla.ios.FirefoxBeta',
+      ],
+      doc: 'Apple App Site Association app IDs',
+      env: 'APPLE_APP_SITE_APPS',
+      format: Array,
+    },
+    paths: {
+      default: [
+        '/verify_email',
+        '/complete_signin',
+      ],
+      doc: 'Apple App Site Association allowed paths',
+      env: 'APPLE_APP_SITE_PATHS',
+      format: Array,
+    },
+    enable_shared_credentials: {
+      default: false,
+      doc: 'Also allow shared credentials for the configured apps',
+      env: 'APPLE_APP_SITE_SHARED_CREDS',
+      format: Boolean,
+    },
+  },
   page_template_root: {
     default: path.resolve(__dirname, '..', 'templates', 'pages'),
     doc: 'The root path of server-rendered page templates',

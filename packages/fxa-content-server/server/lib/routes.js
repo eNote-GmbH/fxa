@@ -11,7 +11,7 @@ module.exports = function (config, i18n, statsd) {
     redirectVersionedToUnversioned('complete_reset_password'),
     redirectVersionedToUnversioned('reset_password'),
     redirectVersionedToUnversioned('verify_email'),
-    require('./routes/get-apple-app-site-association')(),
+    require('./routes/get-apple-app-site-association')(config),
     require('./routes/get-frontend-pairing')(),
     require('./routes/get-frontend')(),
     require('./routes/get-oauth-success'),

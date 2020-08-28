@@ -34,3 +34,4 @@ npx yarn workspaces focus --production \
   fxa-support-panel
 npx yarn cache clean --all
 rm -rf artifacts
+cp -r packages/fxa-content-server/locale/en_US packages/fxa-content-server/locale/db_LB

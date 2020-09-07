@@ -1438,6 +1438,12 @@ const conf = convict({
       default: false,
       env: 'SIGNIN_CONFIRMATION_FORCE_GLOBALLY',
     },
+    skipGlobally: {
+      doc: 'Disable sign-in confirmation for all accounts',
+      format: Boolean,
+      default: false,
+      env: 'SIGNIN_CONFIRMATION_SKIP_GLOBALLY',
+    },
   },
   forcePasswordChange: {
     forcedEmailAddresses: {

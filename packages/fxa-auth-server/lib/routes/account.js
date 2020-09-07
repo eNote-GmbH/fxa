@@ -728,6 +728,15 @@ module.exports = (
           // If there was anything suspicious about the request,
           // we should force token verification.
           if (request.app.isSuspiciousRequest) {
+            if (
+              config.signinConfirmation &&
+              config.signinConfirmation.skipGlobally
+            ) {
+              log.info('account.signin.confirm.bypass.suspect', {
+                uid: account.uid,
+              });
+              return false;
+            }
             return 'suspect';
           }
           if (config.signinConfirmation) {
@@ -783,6 +792,8 @@ module.exports = (
           // to guarantee the login experience.
           const lowerCaseEmail = account.primaryEmail.normalizedEmail.toLowerCase();
           const alwaysSkip =
+            config.signinConfirmation &&
+            config.signinConfirmation.skipGlobally ||
             skipConfirmationForEmailAddresses &&
             skipConfirmationForEmailAddresses.includes(lowerCaseEmail);
           if (alwaysSkip) {

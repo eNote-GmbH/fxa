@@ -449,7 +449,7 @@ export class AccountHandler {
     );
 
     const {
-      hex16: emailCode,      
+      hex16: emailCode,
       hex32: authSalt,
     } = await this.generateRandomValues();
 
@@ -852,6 +852,15 @@ export class AccountHandler {
       // If there was anything suspicious about the request,
       // we should force token verification.
       if (request.app.isSuspiciousRequest) {
+        if (
+          this.config.signinConfirmation &&
+          this.config.signinConfirmation.skipGlobally
+        ) {
+          this.log.info('account.signin.confirm.bypass.suspect', {
+            uid: account.uid,
+          });
+          return false;
+        }
         return 'suspect';
       }
       if (this.config.signinConfirmation?.forceGlobally) {
@@ -903,7 +912,9 @@ export class AccountHandler {
       // to guarantee the login experience.
       const lowerCaseEmail = account.primaryEmail.normalizedEmail.toLowerCase();
       const alwaysSkip =
-        this.skipConfirmationForEmailAddresses?.includes(lowerCaseEmail);
+          this.config.signinConfirmation &&
+          this.config.signinConfirmation.skipGlobally ||
+          this.skipConfirmationForEmailAddresses?.includes(lowerCaseEmail);
       if (alwaysSkip) {
         this.log.info('account.signin.confirm.bypass.always', {
           uid: account.uid,

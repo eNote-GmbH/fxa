@@ -311,6 +311,12 @@ const conf = convict({
         env: 'PREPEND_VERIFICATION_SUBDOMAIN_SUBDOMAIN',
       },
     },
+    notificationsDisabled: {
+      doc: 'Flag to disable all notification emails (not recommended)',
+      format: Boolean,
+      default: false,
+      env: 'EMAIL_NOTIFICATIONS_DISABLED',
+    },
     firefoxDesktopUrl: {
       doc: 'url to download Firefox page',
       format: String,

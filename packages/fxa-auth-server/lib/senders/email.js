@@ -29,6 +29,7 @@ module.exports = function (log, config) {
     config
   );
   const cadReminders = require('../cad-reminders')(config, log);
+  const notificationsDisabled = config.smtp.notificationsDisabled;
 
   // Email template to UTM campaign map, each of these should be unique and
   // map to exactly one email template.
@@ -1238,7 +1239,13 @@ module.exports = function (log, config) {
     log.trace('mailer.newDeviceLoginEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
+
     const templateName = 'newDeviceLogin';
     const links = this._generateSettingLinks(message, templateName);
     const translator = this.translator(message.acceptLanguage);
@@ -1283,7 +1290,13 @@ module.exports = function (log, config) {
     log.trace('mailer.postVerifyEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
+
     const onDesktopOrTabletDevice = !message.onMobileDevice;
     const templateName = 'postVerify';
     const subject = gettext(
@@ -1332,7 +1345,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postVerifySecondaryEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postVerifySecondary';
     const links = this._generateSettingLinks(message, templateName);
@@ -1368,7 +1386,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postChangePrimaryEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postChangePrimary';
     const links = this._generateSettingLinks(message, templateName);
@@ -1404,7 +1427,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postRemoveSecondaryEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postRemoveSecondary';
     const links = this._generateSettingLinks(message, templateName);
@@ -1438,7 +1466,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postAddTwoStepAuthenticationEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postAddTwoStepAuthentication';
     const links = this._generateSettingLinks(message, templateName);
@@ -1481,7 +1514,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postRemoveTwoStepAuthenticationEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postRemoveTwoStepAuthentication';
     const links = this._generateSettingLinks(message, templateName);
@@ -1524,7 +1562,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postNewRecoveryCodesEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postNewRecoveryCodes';
     const links = this._generateSettingLinks(message, templateName);
@@ -1567,7 +1610,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postConsumeRecoveryCodeEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postConsumeRecoveryCode';
     const links = this._generateSettingLinks(message, templateName);
@@ -1612,8 +1660,13 @@ module.exports = function (log, config) {
     log.trace('mailer.lowRecoveryCodesEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
       numberRemaining,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'lowRecoveryCodes';
     const links = this._generateLowRecoveryCodesLinks(message, templateName);
@@ -1657,7 +1710,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postAddAccountRecoveryEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postAddAccountRecovery';
     const links = this._generateSettingLinks(message, templateName);
@@ -1703,7 +1761,12 @@ module.exports = function (log, config) {
     log.trace('mailer.postRemoveAccountRecoveryEmail', {
       email: message.email,
       uid: message.uid,
+      disabled: notificationsDisabled,
     });
+
+    if (notificationsDisabled) {
+      return;
+    }
 
     const templateName = 'postRemoveAccountRecovery';
     const links = this._generateSettingLinks(message, templateName);

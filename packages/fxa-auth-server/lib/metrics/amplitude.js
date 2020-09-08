@@ -300,7 +300,7 @@ module.exports = (log, config) => {
           productId,
           service,
           uid,
-          userAgent: request.headers['user-agent'],
+          userAgent: request.app.ua,
         },
       };
       log.info('rawAmplitudeData', rawEvent);

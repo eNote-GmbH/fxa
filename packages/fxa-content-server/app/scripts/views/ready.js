@@ -98,6 +98,11 @@ const View = FormView.extend({
     this._templateInfo =
       TEMPLATE_INFO[this.keyOfVerificationReason(options.type)];
     this.type = options.type;
+    this.showAccountButton = true;
+    this.config = options.config || {};
+    if (this.config.extras) {
+      this.showAccountButton = this.config.extras.disableAccountButton !== true;
+    }
   },
 
   setInitialContext(context) {
@@ -117,6 +122,7 @@ const View = FormView.extend({
       secondaryEmailVerified:
         this.getSearchParam('secondary_email_verified') || null,
       showContinueButton: !!this.model.get('continueBrokerMethod'),
+      showAccountButton: this.showAccountButton,
       isSignedIn: this.user.isSignedInAccount(this.getSignedInAccount()),
     });
   },

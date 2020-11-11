@@ -61,18 +61,24 @@
 
         {{/clients}}
         {{#showMobileApps}}
+          {{#linkIOS}}
           <li class="client mobile" data-os="iOS">
             <div class="client-name">{{#t}}Firefox for iOS{{/t}}</div>
             <div class="last-connected">{{#t}}None connected{{/t}}</div>
             <a target="_blank" href="{{ linkIOS }}" class="button settings-button secondary-button" data-get-app="ios">{{#t}}Download{{/t}}</a>
           </li>
+          {{/linkIOS}}
+          {{#linkAndroid}}
           <li class="client mobile" data-os="Android">
             <div class="client-name">{{#t}}Firefox for Android{{/t}}</div>
             <div class="last-connected">{{#t}}None connected{{/t}}</div>
             <a target="_blank" href="{{ linkAndroid }}" class="button settings-button secondary-button" data-get-app="android">{{#t}}Download{{/t}}</a>
           </li>
+          {{/linkAndroid}}
         {{/showMobileApps}}
+        {{#devicesSupportUrl}}
         <a href="{{devicesSupportUrl}}" target="_blank" class="device-support">{{#t}}Missing or duplicate items?{{/t}}</a>
+        {{/devicesSupportUrl}}
       </ul>
 
       <div class="button-row">

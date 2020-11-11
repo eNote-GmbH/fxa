@@ -48,6 +48,8 @@ module.exports = function (config) {
     config.get('oauth.prompt_none.enabled_client_ids')
   );
   const ECOSYSTEM_ANON_ID_PUBLIC_KEYS = config.get('ecosystem_anon_id.keys');
+  const ABOUT_URL = config.get('about_url');
+  const APPLE_ITUNES_APP = config.get('apple_itunes_app');
 
   // add version from package.json to config
   const RELEASE = require('../../../package.json').version;
@@ -79,6 +81,7 @@ module.exports = function (config) {
     surveys,
     surveyFeature: SURVEY_FEATURE,
     webpackPublicPath: WEBPACK_PUBLIC_PATH,
+    extras: config.get('frontend_config_extras'),
   };
 
   const NO_LONGER_SUPPORTED_CONTEXTS = new Set([
@@ -128,6 +131,8 @@ module.exports = function (config) {
         flowId: flowEventData.flowId,
         // Note that staticResourceUrl is added to templates as a build step
         staticResourceUrl: STATIC_RESOURCE_URL,
+        aboutUrl: ABOUT_URL,
+        appleItunesApp: APPLE_ITUNES_APP,
       });
 
       if (req.headers.dnt === '1') {

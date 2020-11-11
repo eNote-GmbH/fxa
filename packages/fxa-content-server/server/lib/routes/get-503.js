@@ -5,12 +5,16 @@
 'use strict';
 module.exports = function (config) {
   const STATIC_RESOURCE_URL = config.get('static_resource_url');
+  const ABOUT_URL = config.get('about_url');
 
   return {
     method: 'get',
     path: '/503.html',
     process: (req, res, next) => {
-      res.render('503', { staticResourceUrl: STATIC_RESOURCE_URL });
+      res.render('503', {
+        staticResourceUrl: STATIC_RESOURCE_URL,
+        aboutUrl: ABOUT_URL,
+      });
     },
   };
 };

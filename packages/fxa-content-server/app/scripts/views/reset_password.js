@@ -24,6 +24,12 @@ const ResetPasswordView = FormView.extend({
     this.template = Template;
     this.className = 'reset_password';
 
+    this.showAccountButton = true;
+    this.config = options.config || {};
+    if (this.config.extras) {
+      this.showAccountButton = this.config.extras.disableAccountButton !== true;
+    }
+
     // The form-prefill-mixin is not used, otherwise a blank email
     // address clears the email field in the formPrefill model if
     // the user doesn't enter an address. See comment in beforeDestroy
@@ -35,6 +41,7 @@ const ResetPasswordView = FormView.extend({
   setInitialContext(context) {
     context.set({
       forceEmail: this.model.get('forceEmail'),
+      showAccountButton: this.showAccountButton,
     });
     FormView.prototype.setInitialContext.call(this, context);
   },

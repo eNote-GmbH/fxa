@@ -34,6 +34,15 @@ const SignUpPasswordView = FormView.extend({
     'click .use-different': preventDefaultThen('useDifferentAccount'),
   }),
 
+  initialize(options = {}) {
+    this.config = options.config || {};
+    if (this.config.extras) {
+      if (this.config.extras.disableAdvertiseServices === true) {
+        delete this.partialTemplates.unsafeFirefoxFamilyHTML;
+      }
+    }
+  },
+
   useDifferentAccount() {
     // a user who came from an OAuth relier and was
     // directed directly to /signin will not be able

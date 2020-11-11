@@ -11,8 +11,11 @@ const url = require('url');
 const surveyList = require('../../config/surveys.json');
 
 function getOrigin(link) {
-  const parsed = url.parse(link);
-  return `${parsed.protocol}//${parsed.host}`;
+  if (link) {
+    const parsed = url.parse(link);
+    return `${parsed.protocol}//${parsed.host}`;
+  }
+  return null;
 }
 
 /**
@@ -26,6 +29,9 @@ module.exports = function (config) {
   const DATA = 'data:';
   const GRAVATAR = 'https://secure.gravatar.com';
   const GQL_SERVER = getOrigin(config.get('settings_gql_url'));
+  const MARKETING_EMAIL_SERVER = getOrigin(
+    config.get('marketing_email.api_url')
+  );
   const OAUTH_SERVER = getOrigin(config.get('oauth_url'));
   const PROFILE_SERVER = getOrigin(config.get('profile_url'));
   const PROFILE_IMAGES_SERVER = getOrigin(config.get('profile_images_url'));
@@ -34,7 +40,9 @@ module.exports = function (config) {
     config.get('pairing.server_base_uri')
   );
   const PAIRING_SERVER_HTTP = PAIRING_SERVER_WEBSOCKET.replace(/^ws/, 'http');
-  const SENTRY_SERVER = 'https://sentry.prod.mozaws.net';
+  const SENTRY_SERVER = getOrigin(
+    config.get('sentry.client_errors_dsn')
+  );
   // create a unique array of origins from survey urls
   const SURVEYS = [...new Set(surveyList.map((s) => getOrigin(s.url)))];
   const surveysEnabledAndSet =
@@ -57,13 +65,18 @@ module.exports = function (config) {
 
   const connectSrc = [
     SELF,
-    AUTH_SERVER,
-    GQL_SERVER,
-    OAUTH_SERVER,
-    PROFILE_SERVER,
-    PAIRING_SERVER_WEBSOCKET,
-    PAIRING_SERVER_HTTP,
-    SENTRY_SERVER,
+    ...new Set(
+      [
+        AUTH_SERVER,
+        GQL_SERVER,
+        OAUTH_SERVER,
+        PROFILE_SERVER,
+        MARKETING_EMAIL_SERVER,
+        PAIRING_SERVER_WEBSOCKET,
+        PAIRING_SERVER_HTTP,
+        SENTRY_SERVER,
+      ].filter(val => val)
+    ),
   ];
   const scriptSrc = addCdnRuleIfRequired([SELF]);
   const styleSrc = addCdnRuleIfRequired([SELF]);
@@ -83,10 +96,6 @@ module.exports = function (config) {
         SELF,
         BLOB,
         DATA,
-        // Gravatar support was removed in #4927, but we don't want
-        // to break the site for users who already use a Gravatar as
-        // their profile image.
-        GRAVATAR,
         PROFILE_IMAGES_SERVER,
       ]),
       mediaSrc: [BLOB],
@@ -104,6 +113,7 @@ module.exports = function (config) {
       DATA,
       GQL_SERVER,
       GRAVATAR,
+      MARKETING_EMAIL_SERVER,
       NONE,
       OAUTH_SERVER,
       PAIRING_SERVER_HTTP,

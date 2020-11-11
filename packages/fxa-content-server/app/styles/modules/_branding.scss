@@ -2,7 +2,7 @@
   $firefox-standalone-logo-size-large: 82px;
   $firefox-standalone-logo-size-small: 56px;
 
-  background-image: image-url('firefox-logo.svg');
+  background-image: image-url('logo-product.svg');
   background-position: center center;
   background-repeat: no-repeat;
   content: '';
@@ -54,7 +54,7 @@
 
 #about-mozilla {
   @include respond-to('big') {
-    background: image-url('mozilla.svg') no-repeat center center;
+    background: image-url('logo-company.svg') no-repeat center center;
     cursor: pointer;
     display: block;
     height: 48px;

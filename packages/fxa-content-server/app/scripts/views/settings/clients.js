@@ -109,6 +109,7 @@ const View = FormView.extend(
     viewName: 'settings.clients',
 
     initialize(options) {
+      this.config = options.config || {};
       this._attachedClients = options.attachedClients;
 
       if (!this._attachedClients) {
@@ -118,6 +119,40 @@ const View = FormView.extend(
       }
 
       this.listenTo(this._attachedClients, 'remove', this._onItemRemoved);
+
+      this._devicesSupportUrl = DEVICES_SUPPORT_URL;
+      this._linkAndroid = FIREFOX_ANDROID_DOWNLOAD_LINK;
+      this._linkIOS = FIREFOX_IOS_DOWNLOAD_LINK;
+      this._clientTypeFilter = null;
+
+      if (this.config.extras) {
+        var customizations = this.config.extras;
+        if (customizations.devicesSupportLink !== undefined) {
+          this._devicesSupportUrl = customizations.devicesSupportLink;
+        }
+        if (customizations.downloadLinkIOS !== undefined) {
+          this._linkIOS = customizations.downloadLinkIOS;
+        }
+        if (customizations.downloadLinkAndroid !== undefined) {
+          this._linkAndroid = customizations.downloadLinkAndroid;
+        }
+        if (customizations.displayClientTypes !== undefined) {
+          this._clientTypeFilter = customizations.displayClientTypes;
+          if (typeof this._clientTypeFilter === "string") {
+            this._clientTypeFilter = [this._clientTypeFilter];
+          }
+        }
+      }
+    },
+
+    _filter(items) {
+      if (this._clientTypeFilter == null) {
+        return items;
+      }
+
+      return _.filter(items, (item) => {
+        return this._clientTypeFilter.includes(item.deviceType);
+      });
     },
 
     _formatAccessTimeAndScope(items) {
@@ -196,11 +231,11 @@ const View = FormView.extend(
     setInitialContext(context) {
       const clients = this._attachedClients.toJSON();
       context.set({
-        clients: this._formatAccessTimeAndScope(clients),
-        devicesSupportUrl: DEVICES_SUPPORT_URL,
+        clients: this._formatAccessTimeAndScope(this._filter(clients)),
+        devicesSupportUrl: this._devicesSupportUrl,
         isPanelOpen: this.isPanelOpen(),
-        linkAndroid: FIREFOX_ANDROID_DOWNLOAD_LINK,
-        linkIOS: FIREFOX_IOS_DOWNLOAD_LINK,
+        linkAndroid: this._linkAndroid,
+        linkIOS: this._linkIOS,
         showMobileApps: this._showMobileApps(clients),
       });
     },

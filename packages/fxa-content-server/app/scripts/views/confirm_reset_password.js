@@ -25,11 +25,16 @@ const View = BaseView.extend({
   initialize(options = {}) {
     this._verificationPollMS =
       options.verificationPollMS || VERIFICATION_POLL_IN_MS;
+    this.showAccountButton = true;
+    this.config = options.config || {};
+    if (this.config.extras) {
+      this.showAccountButton = this.config.extras.disableAccountButton !== true;
+    }
   },
 
   setInitialContext(context) {
     var email = this.model.get('email');
-    var isSignInEnabled = this.relier.get('resetPasswordConfirm');
+    var isSignInEnabled = this.showAccountButton && this.relier.get('resetPasswordConfirm');
 
     context.set({
       email: email,

@@ -486,6 +486,7 @@ Start.prototype = {
         config: this._config,
         createView: this.createView.bind(this),
         experimentGroupingRules: this._experimentGroupingRules,
+        marketingEmailEnabled: this._config.marketingEmailEnabled,
         formPrefill: this._formPrefill,
         interTabChannel: this._interTabChannel,
         isCoppaEnabled: this._config.isCoppaEnabled,

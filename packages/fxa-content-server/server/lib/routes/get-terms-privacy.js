@@ -32,6 +32,10 @@ module.exports = function verRoute(i18n) {
   const DEFAULT_LANG = config.get('i18n.defaultLang');
   const DEFAULT_LEGAL_LANG = config.get('i18n.defaultLegalLang');
   const STATIC_RESOURCE_URL = config.get('static_resource_url');
+  const REDIRECTS = {
+    privacy: config.get('privacy_policy_url'),
+    terms: config.get('terms_of_service_url'),
+  };
 
   const getTemplate = templates(i18n, PAGE_TEMPLATE_DIRECTORY);
 
@@ -48,6 +52,10 @@ module.exports = function verRoute(i18n) {
   route.process = function (req, res, next) {
     const lang = req.params[0] || req.lang;
     const page = req.params[1];
+
+    if (REDIRECTS[page]) {
+      return res.redirect(REDIRECTS[page]);
+    }
 
     if (isUserRefreshingPage(req)) {
       // The user refreshed the TOS/PP page. Let the app handle

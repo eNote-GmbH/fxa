@@ -39,6 +39,11 @@ class IndexView extends FormView {
   constructor(options) {
     super(options);
     this.config = options.config || {};
+    if (this.config.extras) {
+      if (this.config.extras.disableAdvertiseServices === true) {
+        delete this.partialTemplates.unsafeFirefoxFamilyHTML;
+      }
+    }
   }
 
   get viewName() {

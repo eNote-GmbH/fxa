@@ -31,6 +31,14 @@ export default function (config) {
   return {
     dependsOn: [FlowEventsMixin, SyncAuthMixin],
 
+    initialize(options) {
+      this._enabled = true;
+      this.config = options.config || {};
+      if (this.config.extras) {
+        this._enabled = this.config.extras.disableSyncSuggestion !== true;
+      }
+    },
+
     events: {
       'click #suggest-sync .dismiss': 'onSuggestSyncDismiss',
     },
@@ -74,6 +82,7 @@ export default function (config) {
      */
     isSyncSuggestionEnabled() {
       return (
+        this._enabled &&
         !this.relier.get('service') &&
         this.relier.get('context') === 'web' &&
         // issue #6121 - skip sync suggestion if headed to subscription product page

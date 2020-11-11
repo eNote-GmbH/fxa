@@ -40,6 +40,11 @@ class Verified extends FormView {
     this._templateInfo =
       TEMPLATE_INFO[this.keyOfVerificationReason(options.type)];
     this.type = options.type;
+    this.buttonDisabled = false;
+    this.config = options.config || {};
+    if (this.config.extras) {
+      this.buttonDisabled = this.config.extras.disableVerifiedButton === true;
+    }
   }
 
   setInitialContext(context) {
@@ -85,6 +90,9 @@ class Verified extends FormView {
   }
 
   _getButtonText() {
+    if (this.buttonDisabled) {
+      return null;
+    }
     const buttonText = this._templateInfo.buttonText;
     // translateInTemplate HTML escapes
     return this.translateInTemplate(buttonText);

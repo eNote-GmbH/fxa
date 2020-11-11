@@ -33,6 +33,8 @@ module.exports = function (grunt) {
   var PROPAGATED_UNSAFE_TEMPLATE_FIELDS = [
     'downloadFirefoxUrl',
     'staticResourceUrl',
+    'appleItunesApp',
+    'aboutUrl',
   ];
 
   // Legal templates for each locale, key'ed by languages, e.g.

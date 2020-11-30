@@ -163,6 +163,8 @@ var BaseView = Backbone.View.extend({
   partialTemplates: {},
 
   constructor: function (options = {}) {
+    this.config = options.config || {};
+    const configExtras = this.config.extras || {};
     this.broker = options.broker;
     this.currentPage = options.currentPage;
     this.model = options.model || new Backbone.Model();

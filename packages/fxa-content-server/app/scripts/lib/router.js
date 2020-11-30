@@ -298,6 +298,10 @@ const Router = Backbone.Router.extend({
       type: VerificationReasons.SECONDARY_EMAIL_VERIFIED,
     }),
     'would_you_like_to_sync(/)': createViewHandler(WouldYouLikeToSync),
+    'beta/settings(/)': function (qs) {
+      this.navigateAway('/beta/settings?' + qs);
+    },
+    'app_only_link(/)': createViewHandler('app_only_link'),
   },
 
   initialize(options = {}) {

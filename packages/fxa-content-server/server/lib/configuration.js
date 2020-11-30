@@ -774,6 +774,12 @@ const conf = (module.exports = convict({
       doc: 'The value for the "apple-itunes-app" HTML meta tag',
       env: 'APPLE_ITUNES_APP',
   },
+  frontend_redirects: {
+    default: {},
+    doc: 'Mapping of target path to source paths for internal redirects',
+    env: 'FRONTEND_REDIRECTS_OBJECT',
+    format: Object,
+  },
   frontend_config_extras: {
     default: {},
     doc: 'Additional configuration data to be passed to the frontend',

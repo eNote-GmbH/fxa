@@ -3,7 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 'use strict';
-module.exports = function () {
+module.exports = function (config) {
+  const redirects = config.get("frontend_redirects") || {};
+  const redirectPaths = Object.values(redirects).flatMap((sources) => {
+    return sources.map(path => path.replace(/^\//, ''));
+  });
+
   // The array is converted into a RegExp
   const FRONTEND_ROUTES = [
     'account_recovery_confirm_key',
@@ -100,7 +105,10 @@ module.exports = function () {
     'verify_primary_email',
     'verify_secondary_email',
     'would_you_like_to_sync',
-  ].join('|'); // prepare for use in a RegExp
+    'app_only_link',
+  ].filter((path) => {
+    return !redirectPaths.includes(path);
+  }).join('|'); // prepare for use in a RegExp
 
   return {
     method: 'get',

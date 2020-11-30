@@ -199,6 +199,20 @@ function makeApp() {
     app.get(betaSettingsPath + '/*', modifySettingsStatic);
   }
 
+  const redirects = config.get("frontend_redirects") || {};
+  if (redirects) {
+    Object.entries(redirects).forEach(([target, sources]) => {
+      logger.info('redirects.frontend', {
+        'target': target,
+        'sources': sources,
+      });
+      const paths = new RegExp('^(' + sources.join('|') + ')/?$');
+      app.use(paths, function (req, res) {
+        res.redirect(target);
+      });
+    });
+  }
+
   // it's a four-oh-four not found.
   app.use(fourOhFour);
 

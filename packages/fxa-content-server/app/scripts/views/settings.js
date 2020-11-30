@@ -81,6 +81,9 @@ const View = BaseView.extend({
       options.subscriptionsManagementEnabled !== false;
     this._enableBeta = options.config.enableBeta;
 
+    const configExtras = options.config.extras || {};
+    this.disableViews = configExtras.disableViews || [];
+
     this.getUidAndSetSignedInAccount();
   },
 
@@ -258,6 +261,7 @@ const View = BaseView.extend({
    */
   _getPanelsToDisplay() {
     const areCommunicationPrefsVisible = this._areCommunicationPrefsVisible();
+    var view, hidden;
     return PANEL_VIEWS.filter((ChildView) => {
       if (ChildView === CommunicationPreferencesView) {
         return areCommunicationPrefsVisible;
@@ -265,7 +269,19 @@ const View = BaseView.extend({
       if (ChildView === SubscriptionView) {
         return this._subscriptionsManagementEnabled;
       }
-      return true;
+
+      var childModel = new Backbone.Model();
+      if (this.model) {
+        childModel.set(this.model.toJSON());
+      }
+      view = this._createView(ChildView, {
+        model: childModel,
+        parentView: this,
+      });
+      hidden = this.disableViews.includes(view.getViewName());
+      view.destroy();
+
+      return !hidden;
     });
   },
 

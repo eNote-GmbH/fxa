@@ -339,6 +339,7 @@ const Router = Backbone.Router.extend({
     'beta/settings(/)': function (qs) {
       this.navigateAway('/beta/settings?' + qs);
     },
+    'app_only_link(/)': createViewHandler('app_only_link'),
   },
 
   initialize(options = {}) {

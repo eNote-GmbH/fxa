@@ -15,6 +15,10 @@ module.exports.HEX_STRING = HEX_STRING;
 
 module.exports.BASE_36 = /^[a-zA-Z0-9]*$/;
 
+// RFC 4648, section 4
+const BASE_64_STRING = /^[A-Za-z0-9+\/]+\={0,2}$/;
+module.exports.BASE_64_STRING = BASE_64_STRING;
+
 // RFC 4648, section 5
 module.exports.URL_SAFE_BASE_64 = /^[A-Za-z0-9_-]+$/;
 
@@ -91,6 +95,7 @@ module.exports.service = isA
   .max(16)
   .regex(/^[a-zA-Z0-9\-]*$/);
 module.exports.hexString = isA.string().regex(HEX_STRING);
+module.exports.base64String = isA.string().regex(BASE_64_STRING);
 module.exports.clientId = module.exports.hexString.length(16);
 module.exports.clientSecret = module.exports.hexString;
 module.exports.idToken = module.exports.jwt;
@@ -266,8 +271,10 @@ module.exports.verificationMethod = isA.string().valid([
   'email-2fa', // Verification by email code using randomly generated code (used in login flow)
   'email-captcha', // Verification by email code using randomly generated code (used in unblock flow)
   'totp-2fa', // Verification by TOTP authenticator device code, secret is randomly generated
+  'user-subscription', // Verification by subscription status
 ]);
 
+module.exports.uid = isA.string().length(32).regex(HEX_STRING);
 module.exports.authPW = isA.string().length(64).regex(HEX_STRING).required();
 module.exports.wrapKb = isA.string().length(64).regex(HEX_STRING);
 
@@ -526,6 +533,19 @@ module.exports.subscriptionsStripeCustomerValidator = isA
       })
       .unknown(true)
       .optional(),
+  })
+  .unknown(true);
+
+module.exports.appleSubscriptionReceipt = module.exports.base64String
+  .min(64)
+  .max(2 ** 16);
+
+module.exports.subscriptionsSimpleSubscriptionValidator = isA
+  .object({
+    product_id: isA.string().optional(),
+    expires_at: isA.string().optional(),
+    auto_renew_product_id: isA.string().optional(),
+    auto_renew_status: isA.number().integer().min(0).max(1).optional(),
   })
   .unknown(true);
 

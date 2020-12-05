@@ -855,6 +855,28 @@ const conf = convict({
         default: false,
       },
     },
+    internal: {
+      url: {
+        default: 'http://localhost:8000',
+        doc: 'Subscription API url',
+        env: 'SUBSCRIPTION_INTERNAL_URL',
+        format: 'url',
+      },
+      uidNamespace: {
+        default: '5be74392-5a0f-52f6-8ccb-189be32ed836',
+        doc:
+          'The namespace UUID for generating uid values, defaults to UUID v5 "accounts.firefox.com" with DNS namespace',
+        format: String,
+        env: 'SUBSCRIPTION_INTERNAL_UID_NAMESPACE',
+      },
+      secretBearerToken: {
+        default: 'YOU MUST CHANGE ME',
+        doc:
+          'Secret for server-to-server bearer token auth for subscription service',
+        env: 'SUBSCRIPTION_INTERNAL_SECRET_BEARER_TOKEN',
+        format: String,
+      },
+    },
   },
   oauth: {
     url: {

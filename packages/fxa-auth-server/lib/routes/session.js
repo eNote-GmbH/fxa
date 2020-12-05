@@ -21,7 +21,8 @@ module.exports = function (
   signupUtils,
   mailer,
   push,
-  customs
+  customs,
+  subs
 ) {
   const otpUtils = require('../../lib/routes/utils/otp')(log, config, db);
 
@@ -114,6 +115,7 @@ module.exports = function (
             metricsContext: METRICS_CONTEXT_SCHEMA,
             originalLoginEmail: validators.email().optional(),
             verificationMethod: validators.verificationMethod.optional(),
+            subscription: isA.string().optional(),
           },
         },
         response: {
@@ -124,6 +126,7 @@ module.exports = function (
             verificationReason: isA.string().optional(),
             verified: isA.boolean().required(),
             authAt: isA.number().integer(),
+            subscription: validators.subscriptionsSimpleSubscriptionValidator.optional(),
           },
         },
       },
@@ -133,8 +136,10 @@ module.exports = function (
         const sessionToken = request.auth.credentials;
         const { authPW, email, originalLoginEmail } = request.payload;
         const service = request.payload.service || request.query.service;
+        const subscription = request.payload.subscription;
 
         let { verificationMethod } = request.payload;
+        let subscriptionInfo;
 
         request.validateMetricsContext();
         if (OAUTH_DISABLE_NEW_CONNECTIONS_FOR_CLIENTS.has(service)) {
@@ -196,6 +201,53 @@ module.exports = function (
           sessionToken.mustVerify = true;
         }
 
+        // Subscription check
+        if (verificationMethod === 'user-subscription') {
+          if (!subscription) {
+            throw error.missingRequestParameter('subscription');
+          }
+          if (!subs) {
+            throw error.invalidRequestParameter('verificationMethod');
+          }
+
+          try {
+            subscriptionInfo = await subs.verify(
+              sessionToken.uid,
+              subscription
+            );
+            if (Object.hasOwnProperty.call(subscriptionInfo, 'expires_date')) {
+              subscriptionInfo.expires_at = subscriptionInfo.expires_date;
+              delete subscriptionInfo.expires_date;
+            }
+            if (Object.hasOwnProperty.call(subscriptionInfo, 'valid')) {
+              sessionToken.mustVerify = !subscriptionInfo.valid;
+              subscriptionInfo.verified = !!subscriptionInfo.valid;
+              delete subscriptionInfo.valid;
+            }
+          } catch (err) {
+            if (err.code && err.code === 400) {
+              subscriptionInfo = {
+                verified: false,
+                processing_error: err.message,
+              };
+            } else {
+              throw error.featureNotEnabled(90);
+            }
+          }
+
+          if (sessionToken.mustVerify) {
+            // subscription not valid for any reason
+            log.warn('Session.reauth.error', {
+              uid: sessionToken.uid,
+              ...subscriptionInfo,
+            });
+            throw error.invalidRequestParameter({
+              field: 'subscription',
+              details: subscriptionInfo,
+            });
+          }
+        }
+
         await db.updateSessionToken(sessionToken);
 
         await signinUtils.sendSigninNotifications(
@@ -218,6 +270,10 @@ module.exports = function (
             sessionToken
           );
           response.keyFetchToken = keyFetchToken.data;
+        }
+
+        if (subscriptionInfo) {
+          response.subscription = subscriptionInfo;
         }
 
         Object.assign(

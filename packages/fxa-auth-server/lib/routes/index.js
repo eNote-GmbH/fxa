@@ -26,6 +26,7 @@ module.exports = function (
   const push = require('../push')(log, db, config, statsd);
   const pushbox = require('../pushbox')(log, config, statsd);
   const devicesImpl = require('../devices')(log, db, push);
+  const subs = require('../subscriptions/client')(log, config, statsd);
   const cadReminders = require('../cad-reminders')(config, log);
   const signinUtils = require('./utils/signin')(
     log,
@@ -64,7 +65,8 @@ module.exports = function (
     push,
     verificationReminders,
     oauthRawDB,
-    stripeHelper
+    stripeHelper,
+    subs
   );
   const oauth = require('./oauth')(log, config, db, mailer, devicesImpl);
   const devicesSessions = require('./devices-and-sessions')(
@@ -121,7 +123,8 @@ module.exports = function (
     signupUtils,
     mailer,
     push,
-    customs
+    customs,
+    subs
   );
   const sign = require('./sign')(log, signer, db, config.domain, devicesImpl);
   const signinCodes = require('./signin-codes')(log, db, customs, config);

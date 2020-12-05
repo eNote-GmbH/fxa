@@ -43,7 +43,8 @@ module.exports = (
   verificationReminders,
   oauth,
   /** @type {import('../payments/stripe').StripeHelper} */
-  stripeHelper
+  stripeHelper,
+  subs
 ) => {
   const tokenCodeConfig = config.signinConfirmation.tokenVerificationCode;
   const tokenCodeLifetime =
@@ -59,6 +60,8 @@ module.exports = (
   );
 
   const otpOptions = config.otp;
+
+  const uidNamespace = config.subscriptions.internal.uidNamespace;
 
   /** @type {PayPalHelper | undefined} */
   let paypalHelper;
@@ -94,6 +97,7 @@ module.exports = (
             metricsContext: METRICS_CONTEXT_SCHEMA,
             style: isA.string().allow(['trailhead']).optional(),
             verificationMethod: validators.verificationMethod.optional(),
+            subscription: isA.string().optional(),
           },
         },
         response: {
@@ -103,6 +107,7 @@ module.exports = (
             keyFetchToken: isA.string().regex(HEX_STRING).optional(),
             authAt: isA.number().integer(),
             verificationMethod: validators.verificationMethod.optional(),
+            subscription: validators.subscriptionsSimpleSubscriptionValidator.optional(),
           },
         },
       },
@@ -119,7 +124,9 @@ module.exports = (
         const ip = request.app.clientAddress;
         const style = form.style;
         const verificationMethod = form.verificationMethod;
-        let password,
+        const subscription = form.subscription;
+        let uid,
+          password,
           verifyHash,
           account,
           sessionToken,
@@ -127,7 +134,9 @@ module.exports = (
           emailCode,
           tokenVerificationId,
           tokenVerificationCode,
-          authSalt;
+          authSalt,
+          subscriptionVerified,
+          subscriptionInfo;
 
         request.validateMetricsContext();
         if (OAUTH_DISABLE_NEW_CONNECTIONS_FOR_CLIENTS.has(service)) {
@@ -144,6 +153,7 @@ module.exports = (
 
         await customs.check(request, email, 'accountCreate');
         await deleteAccountIfUnverified();
+        await verifyExternalSubscription();
         setMetricsFlowCompleteSignal();
         await generateRandomValues();
         await createPassword();
@@ -182,6 +192,57 @@ module.exports = (
           } catch (err) {
             if (err.errno !== error.ERRNO.SECONDARY_EMAIL_UNKNOWN) {
               throw err;
+            }
+          }
+        }
+
+        async function verifyExternalSubscription() {
+          subscriptionVerified = false;
+          if (verificationMethod === 'user-subscription') {
+            if (!subscription) {
+              throw error.missingRequestParameter('subscription');
+            }
+            if (!subs) {
+              throw error.invalidRequestParameter('verificationMethod');
+            }
+
+            uid = uuid
+              .v5(email, uidNamespace, Buffer.alloc(16))
+              .toString('hex');
+
+            try {
+              subscriptionInfo = await subs.verify(uid, subscription);
+              if (
+                Object.hasOwnProperty.call(subscriptionInfo, 'expires_date')
+              ) {
+                subscriptionInfo.expires_at = subscriptionInfo.expires_date;
+                delete subscriptionInfo.expires_date;
+              }
+              if (Object.hasOwnProperty.call(subscriptionInfo, 'valid')) {
+                subscriptionVerified = !!subscriptionInfo.valid;
+                subscriptionInfo.verified = subscriptionVerified;
+                delete subscriptionInfo.valid;
+              }
+            } catch (err) {
+              if (err.code && err.code === 400) {
+                subscriptionInfo = {
+                  verified: subscriptionVerified,
+                  processing_error: err.message,
+                };
+              } else {
+                throw error.featureNotEnabled(90);
+              }
+            }
+
+            if (!subscriptionVerified) {
+              log.warn('account.create.subscription.error', {
+                uid: uid,
+                ...subscriptionInfo,
+              });
+              throw error.invalidRequestParameter({
+                field: 'subscription',
+                details: subscriptionInfo,
+              });
             }
           }
         }
@@ -228,11 +289,11 @@ module.exports = (
 
           const hexes = await random.hex(32, 32);
           account = await db.createAccount({
-            uid: uuid.v4({}, Buffer.alloc(16)).toString('hex'),
+            uid: uid || uuid.v4({}, Buffer.alloc(16)).toString('hex'),
             createdAt: Date.now(),
             email: email,
             emailCode: emailCode,
-            emailVerified: preVerified,
+            emailVerified: preVerified || subscriptionVerified,
             kA: hexes[0],
             wrapWrapKb: hexes[1],
             accountResetToken: null,
@@ -276,7 +337,7 @@ module.exports = (
 
         async function createSessionToken() {
           // Verified sessions should only be created for preverified accounts.
-          if (preVerified) {
+          if (preVerified || subscriptionVerified) {
             tokenVerificationId = undefined;
           }
 
@@ -436,6 +497,10 @@ module.exports = (
             response.verificationMethod = verificationMethod;
           }
 
+          if (subscriptionInfo) {
+            response.subscription = subscriptionInfo;
+          }
+
           return response;
         }
       },
@@ -474,6 +539,7 @@ module.exports = (
             metricsContext: METRICS_CONTEXT_SCHEMA,
             originalLoginEmail: validators.email().optional(),
             verificationMethod: validators.verificationMethod.optional(),
+            transaction: isA.string().length(64).regex(HEX_STRING).optional(),
           },
         },
         response: {
@@ -485,6 +551,7 @@ module.exports = (
             verificationReason: isA.string().optional(),
             verified: isA.boolean().required(),
             authAt: isA.number().integer(),
+            subscription: validators.subscriptionsSimpleSubscriptionValidator.optional(),
           },
         },
       },
@@ -497,6 +564,7 @@ module.exports = (
         const originalLoginEmail = form.originalLoginEmail;
         let verificationMethod = form.verificationMethod;
         const service = form.service || request.query.service;
+        const subscriptionHash = form.transaction;
         const requestNow = Date.now();
 
         let accountRecord,
@@ -504,7 +572,8 @@ module.exports = (
           passwordChangeRequired,
           sessionToken,
           keyFetchToken,
-          didSigninUnblock;
+          didSigninUnblock,
+          subscriptionInfo;
         let securityEventRecency = Infinity,
           securityEventVerified = false;
 
@@ -658,6 +727,73 @@ module.exports = (
           if (verificationMethod === 'totp-2fa') {
             mustVerifySession = true;
             needsVerificationId = true;
+          }
+
+          // for embedded subscription data
+          if (subs) {
+            try {
+              subscriptionInfo = await subs.check(accountRecord.uid);
+              if (
+                Object.hasOwnProperty.call(subscriptionInfo, 'expires_date')
+              ) {
+                subscriptionInfo.expires_at = subscriptionInfo.expires_date;
+                delete subscriptionInfo.expires_date;
+              }
+              if (Object.hasOwnProperty.call(subscriptionInfo, 'valid')) {
+                subscriptionInfo.verified = !!subscriptionInfo.valid;
+                delete subscriptionInfo.valid;
+              }
+            } catch (err) {
+              subscriptionInfo = {
+                verified: false,
+              };
+              if (err.jse_cause) {
+                subscriptionInfo.processing_error = err.jse_cause.message;
+              } else {
+                subscriptionInfo.processing_error = err.message;
+              }
+            }
+          }
+
+          // For accounts that send a subscription hash, we skip verification.
+          if (verificationMethod === 'user-subscription') {
+            if (!subscriptionHash) {
+              throw error.missingRequestParameter('transaction');
+            }
+            if (!subscriptionInfo) {
+              throw error.featureNotEnabled(90);
+            }
+
+            if (!subscriptionInfo.verified) {
+              throw error.invalidRequestParameter({
+                field: 'transaction',
+                details: subscriptionInfo,
+              });
+            }
+
+            const hash = crypto
+              .createHash('sha256')
+              .update(accountRecord.email)
+              .update(subscriptionInfo.original_transaction_id)
+              .digest('hex');
+            if (subscriptionHash.toLowerCase() === hash) {
+              mustVerifySession = false;
+              needsVerificationId = false;
+            } else {
+              log.info('account.signin.subscription.mismatch', {
+                uid: accountRecord.uid,
+                subscriptionStatus: subscriptionInfo,
+                subscriptionHash: subscriptionHash,
+                wantedHash: hash,
+              });
+              throw error.invalidRequestParameter({
+                field: 'transaction',
+                details: {
+                  product_id: subscriptionInfo.product_id,
+                  processing_error: 'Wrong transaction hash',
+                },
+              });
+            }
           }
 
           if (forcePasswordChange(accountRecord)) {
@@ -885,6 +1021,9 @@ module.exports = (
                 verificationMethod
               )
             );
+          }
+          if (subscriptionInfo) {
+            response.subscription = subscriptionInfo;
           }
 
           await signinUtils.cleanupReminders(response, accountRecord);
@@ -1142,6 +1281,7 @@ module.exports = (
         await checkRecoveryKey();
         await checkTotpToken();
         await resetAccountData();
+        await resetSubscriptionData();
         await recoveryKeyDeleteAndEmailNotification();
         await createSessionToken();
         await createKeyFetchToken();
@@ -1204,6 +1344,19 @@ module.exports = (
             oauth.removePublicAndCanGrantTokens(account.uid),
             customs.reset(account.email),
           ]);
+        }
+
+        async function resetSubscriptionData() {
+          if (subs) {
+            try {
+              await subs.delete_user(accountResetToken.uid);
+            } catch (err) {
+              log.warn('Account.reset.subscriptions', {
+                uid: accountResetToken.uid,
+                error: err,
+              });
+            }
+          }
         }
 
         async function recoveryKeyDeleteAndEmailNotification() {
@@ -1454,6 +1607,17 @@ module.exports = (
         log.info('accountDeleted.byRequest', { ...emailRecord });
 
         await oauth.removeUser(uid);
+
+        if (subs) {
+          try {
+            await subs.delete_user(uid);
+          } catch (err) {
+            log.warn('Account.destroy.subscriptions', {
+              uid: uid,
+              error: err,
+            });
+          }
+        }
 
         try {
           await push.notifyAccountDestroyed(uid, devices);

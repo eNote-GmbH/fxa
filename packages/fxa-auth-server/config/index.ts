@@ -374,6 +374,12 @@ const conf = convict({
     default: 0,
     env: 'MAX_EVENT_LOOP_DELAY',
   },
+  maxPayloadBytes: {
+    doc: 'Max Bytes to allow for request payloads',
+    format: 'nat',
+    default: 16384,
+    env: 'MAX_PAYLOAD_BYTES',
+  },
   scrypt: {
     maxPending: {
       doc: 'Max number of scrypt hash operations that can be pending',

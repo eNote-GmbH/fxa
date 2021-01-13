@@ -131,7 +131,7 @@ async function create(log, error, config, routes, db, translator, statsd) {
         parse: false,
       },
       payload: {
-        maxBytes: 16384,
+        maxBytes: config.maxPayloadBytes,
       },
       files: {
         relativeTo: path.dirname(__dirname),

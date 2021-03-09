@@ -43,6 +43,7 @@ module.exports = function (config) {
   const FLOW_ID_KEY = config.get('flow_id_key');
   const FLOW_EVENT_NAME = 'flow.begin';
   const UPDATE_FIREFOX_FLOW_EVENT_NAME = 'flow.update-firefox.view';
+  const APPLE_ITUNES_APP = config.get('apple_itunes_app');
 
   return {
     method: 'get',
@@ -107,6 +108,7 @@ module.exports = function (config) {
 
       res.render('update_firefox', {
         downloadFirefoxUrl,
+        appleItunesApp: APPLE_ITUNES_APP,
       });
     },
   };

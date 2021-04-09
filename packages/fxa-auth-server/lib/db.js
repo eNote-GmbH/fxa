@@ -50,7 +50,7 @@ module.exports = (config, log, Token, UnblockCode = null) => {
       pooleeOptions = config.db.poolee;
     }
 
-    this.pool = new Pool(options.url, pooleeOptions);
+    this.pool = new Pool(options.url, log, pooleeOptions);
     this.redis =
       options.redis ||
       require('./redis')(

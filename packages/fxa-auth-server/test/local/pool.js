@@ -26,11 +26,11 @@ describe('Pool', () => {
   });
 
   it('pool cannot be constructed with an unsupported protocol', () => {
-    assert.throws(() => new Pool('ftp://example.com/'));
+    assert.throws(() => new Pool('ftp://example.com/', log));
   });
 
   it('pool.request with default options', () => {
-    const pool = new Pool('http://example.com/ignore/me');
+    const pool = new Pool('http://example.com/ignore/me', log);
     pool.request(null, new SafeUrl(''));
 
     assert.equal(poolee.request.callCount, 1, 'poolee.request was called once');
@@ -56,7 +56,7 @@ describe('Pool', () => {
   });
 
   it('pool.request with alternative options', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     pool.request(
       'POST',
       new SafeUrl('/:foo'),
@@ -103,7 +103,7 @@ describe('Pool', () => {
   });
 
   it('pool.request with string path', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     pool.request(null, '/foo').then(
       () => assert(false, 'request should have failed'),
       (err) => assert(err instanceof Error)
@@ -111,7 +111,7 @@ describe('Pool', () => {
   });
 
   it('pool.request with missing param', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     pool.request(null, new SafeUrl('/:foo'), {}).then(
       () => assert(false, 'request should have failed'),
       (err) => assert(err instanceof Error)
@@ -119,7 +119,7 @@ describe('Pool', () => {
   });
 
   it('pool.request callback with error', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     const p = pool.request(null, new SafeUrl('')).then(
       () => {
         assert(false, 'request should have failed');
@@ -137,7 +137,7 @@ describe('Pool', () => {
   });
 
   it('pool.request callback with HTTP error response', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     const p = pool.request(null, new SafeUrl('')).then(
       () => {
         assert(false, 'request should have failed');
@@ -156,7 +156,7 @@ describe('Pool', () => {
   });
 
   it('pool.request callback with HTTP error response and JSON body', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     const p = pool.request(null, new SafeUrl('')).then(
       () => {
         assert(false, 'request should have failed');
@@ -180,7 +180,7 @@ describe('Pool', () => {
   });
 
   it('pool.request callback with HTTP success response and empty body', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     const p = pool.request(null, new SafeUrl('')).then((result) => {
       assert.equal(result, undefined, 'result is undefined');
     });
@@ -192,7 +192,7 @@ describe('Pool', () => {
   });
 
   it('pool.request callback with HTTP success response and valid JSON body', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     const p = pool.request(null, new SafeUrl('')).then((result) => {
       assert.equal(typeof result, 'object', 'result is object');
       assert.equal(Object.keys(result).length, 1, 'result has 1 property');
@@ -206,7 +206,7 @@ describe('Pool', () => {
   });
 
   it('pool.request callback with HTTP success response and invalid JSON body', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     const p = pool.request(null, new SafeUrl('')).then(
       () => {
         assert(false, 'request should have failed');
@@ -229,7 +229,7 @@ describe('Pool', () => {
   });
 
   it('pool.get', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     sinon.stub(pool, 'request').callsFake(() => {});
     pool.get('foo', 'bar');
 
@@ -246,7 +246,7 @@ describe('Pool', () => {
   });
 
   it('pool.put', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     sinon.stub(pool, 'request').callsFake(() => {});
     pool.put('baz', 'qux', 'wibble');
 
@@ -267,7 +267,7 @@ describe('Pool', () => {
   });
 
   it('pool.post', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     sinon.stub(pool, 'request').callsFake(() => {});
     pool.post('foo', 'bar', 'baz');
 
@@ -284,7 +284,7 @@ describe('Pool', () => {
   });
 
   it('pool.post with query params and extra headers', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     sinon.stub(pool, 'request').callsFake(() => {});
     pool.post('foo', 'bar', 'baz', {
       query: { bar: 'foo' },
@@ -312,7 +312,7 @@ describe('Pool', () => {
   });
 
   it('pool.del', () => {
-    const pool = new Pool('http://example.com/');
+    const pool = new Pool('http://example.com/', log);
     sinon.stub(pool, 'request').callsFake(() => {});
     pool.del('foo', 'bar', 'baz');
 

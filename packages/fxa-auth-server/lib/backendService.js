@@ -87,7 +87,7 @@ module.exports = function createBackendServiceAPI(
 
   function Service(url, options = {}) {
     this._headers = options.headers;
-    this._pool = new Pool(url, options);
+    this._pool = new Pool(url, log, options);
   }
 
   Service.prototype.close = function close() {

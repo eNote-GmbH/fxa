@@ -300,6 +300,133 @@ const conf = convict({
       auth: makeMySQLConfig('AUTH', 'fxa'),
     },
   },
+  db: {
+    backend: {
+      default: 'httpdb',
+      env: 'DB_BACKEND',
+    },
+    connectionRetry: {
+      default: '10 seconds',
+      env: 'DB_CONNECTION_RETRY',
+      doc: 'Time in milliseconds to retry a database connection attempt',
+      format: 'duration',
+    },
+    connectionTimeout: {
+      default: '5 minutes',
+      env: 'DB_CONNECTION_TIMEOUT',
+      doc:
+        'Timeout in milliseconds after which the mailer will stop trying to connect to the database',
+      format: 'duration',
+    },
+    poolee: {
+      timeout: {
+        default: '5 seconds',
+        format: 'duration',
+        env: 'DB_POOLEE_TIMEOUT',
+        doc: 'Time in milliseconds to wait for db query completion',
+      },
+      logSlow: {
+        default: false,
+        format: 'Boolean',
+        env: 'DB_POOLEE_LOG_SLOW',
+        doc: 'Enable logging of slow requests',
+      },
+      timeSlow: {
+        default: undefined,
+        format: 'duration',
+        env: 'DB_POOLEE_SLOW_TIME',
+        doc:
+          'Time in milliseconds at which request duration becomes "slow". Defaults to half of "timeout"',
+      },
+      logRetry: {
+        default: false,
+        format: 'Boolean',
+        env: 'DB_POOLEE_LOG_RETRY',
+        doc: 'Enable logging of request retries',
+      },
+      maxPending: {
+        default: 1000,
+        format: 'int',
+        env: 'DB_POOLEE_MAX_PENDING',
+        doc: 'Number of pending requests to auth-db-mysql to allow',
+      },
+      maxSockets: {
+        default: undefined,
+        format: 'int',
+        env: 'DB_POOLEE_MAX_SOCKETS',
+        doc: 'Number of sockets per node to auth-db-mysql to allow',
+      },
+      resolution: {
+        default: undefined,
+        format: 'duration',
+        env: 'DB_POOLEE_RESOLUTION',
+        doc: 'Interval in milliseconds to check for query timeout condition',
+      },
+      keepAlive: {
+        default: undefined,
+        format: 'Boolean',
+        env: 'DB_POOLEE_KEEP_ALIVE',
+        doc: 'Handle keep-alive properly',
+      },
+      ping: {
+        default: undefined,
+        format: 'url',
+        env: 'DB_POOLEE_PING_URL',
+        doc: 'URL to use for health checks',
+      },
+      pingTimeout: {
+        default: undefined,
+        format: 'duration',
+        env: 'DB_POOLEE_PING_TIMEOUT',
+        doc: 'Time in milliseconds to wait for health check requests',
+      },
+      retryDelay: {
+        default: undefined,
+        format: 'int',
+        env: 'DB_POOLEE_RETRY_BACKOFF_FACTOR',
+        doc: 'A factor to multiply the exponential backoff delay for retries',
+      },
+      maxRetries: {
+        default: undefined,
+        format: 'int',
+        env: 'DB_POOLEE_MAX_RETRIES',
+        doc: 'Number of retries to attempt for recovering from errors',
+      },
+      request: {
+        attempts: {
+          default: undefined,
+          format: 'int',
+          env: 'DB_POOLEE_REQUEST_ATTEMPTS',
+          doc: 'Number of attempts for recovering from errors',
+        },
+        maxHangups: {
+          default: undefined,
+          format: 'int',
+          env: 'DB_POOLEE_REQUEST_HANGUPS',
+          doc: 'Number of socket hangups to tolerate and retry',
+        },
+        maxAborts: {
+          default: undefined,
+          format: 'int',
+          env: 'DB_POOLEE_REQUEST_ATTEMPTS',
+          doc: 'Number of request aborts to tolerate and retry',
+        },
+        retryDelay: {
+          default: undefined,
+          format: 'int',
+          env: 'DB_POOLEE_REQUEST_RETRY_DELAY',
+          doc: 'Time in milliseconds for delaying retries',
+        },
+      },
+    },
+  },
+  httpdb: {
+    url: {
+      doc: 'database api url',
+      default: 'http://localhost:8000',
+      env: 'HTTPDB_URL',
+    },
+  },
   listen: {
     host: {
       doc: 'The ip address the server should bind',
@@ -1012,11 +1139,98 @@ const conf = convict({
         env: 'OAUTH_POOLEE_TIMEOUT',
         doc: 'Time in milliseconds to wait for oauth query completion',
       },
+      logSlow: {
+        default: false,
+        format: 'Boolean',
+        env: 'OAUTH_POOLEE_LOG_SLOW',
+        doc: 'Enable logging of slow requests',
+      },
+      timeSlow: {
+        default: undefined,
+        format: 'duration',
+        env: 'OAUTH_POOLEE_SLOW_TIME',
+        doc:
+          'Time in milliseconds at which request duration becomes "slow". Defaults to half of "timeout"',
+      },
+      logRetry: {
+        default: false,
+        format: 'Boolean',
+        env: 'OAUTH_POOLEE_LOG_RETRY',
+        doc: 'Enable logging of request retries',
+      },
       maxPending: {
         default: 1000,
         format: 'int',
         env: 'OAUTH_POOLEE_MAX_PENDING',
         doc: 'Number of pending requests to fxa-oauth-server to allow',
+      },
+      maxSockets: {
+        default: undefined,
+        format: 'int',
+        env: 'OAUTH_POOLEE_MAX_SOCKETS',
+        doc: 'Number of sockets per node to fxa-oauth-server to allow',
+      },
+      resolution: {
+        default: undefined,
+        format: 'duration',
+        env: 'OAUTH_POOLEE_RESOLUTION',
+        doc: 'Interval in milliseconds to check for query timeout condition',
+      },
+      keepAlive: {
+        default: undefined,
+        format: 'Boolean',
+        env: 'OAUTH_POOLEE_KEEP_ALIVE',
+        doc: 'Handle keep-alive properly',
+      },
+      ping: {
+        default: undefined,
+        format: 'url',
+        env: 'OAUTH_POOLEE_PING_URL',
+        doc: 'URL to use for health checks',
+      },
+      pingTimeout: {
+        default: undefined,
+        format: 'duration',
+        env: 'OAUTH_POOLEE_PING_TIMEOUT',
+        doc: 'Time in milliseconds to wait for health check requests',
+      },
+      retryDelay: {
+        default: undefined,
+        format: 'int',
+        env: 'OAUTH_POOLEE_RETRY_BACKOFF_FACTOR',
+        doc: 'A factor to multiply the exponential backoff delay for retries',
+      },
+      maxRetries: {
+        default: undefined,
+        format: 'int',
+        env: 'OAUTH_POOLEE_MAX_RETRIES',
+        doc: 'Number of retries to attempt for recovering from errors',
+      },
+      request: {
+        attempts: {
+          default: undefined,
+          format: 'int',
+          env: 'OAUTH_POOLEE_REQUEST_ATTEMPTS',
+          doc: 'Number of attempts for recovering from errors',
+        },
+        maxHangups: {
+          default: undefined,
+          format: 'int',
+          env: 'OAUTH_POOLEE_REQUEST_HANGUPS',
+          doc: 'Number of socket hangups to tolerate and retry',
+        },
+        maxAborts: {
+          default: undefined,
+          format: 'int',
+          env: 'OAUTH_POOLEE_REQUEST_ATTEMPTS',
+          doc: 'Number of request aborts to tolerate and retry',
+        },
+        retryDelay: {
+          default: undefined,
+          format: 'int',
+          env: 'OAUTH_POOLEE_REQUEST_RETRY_DELAY',
+          doc: 'Time in milliseconds for delaying retries',
+        },
       },
     },
   },
@@ -1054,11 +1268,98 @@ const conf = convict({
           env: 'AUTH_POOLEE_TIMEOUT',
           format: 'duration',
         },
+        logSlow: {
+          default: false,
+          format: 'Boolean',
+          env: 'AUTH_POOLEE_LOG_SLOW',
+          doc: 'Enable logging of slow requests',
+        },
+        timeSlow: {
+          default: undefined,
+          format: 'duration',
+          env: 'AUTH_POOLEE_SLOW_TIME',
+          doc:
+            'Time in milliseconds at which request duration becomes "slow". Defaults to half of "timeout"',
+        },
+        logRetry: {
+          default: false,
+          format: 'Boolean',
+          env: 'AUTH_POOLEE_LOG_RETRY',
+          doc: 'Enable logging of request retries',
+        },
         maxPending: {
           default: 1000,
           doc: 'Number of pending requests to fxa-auth-server to allow',
           env: 'AUTH_POOLEE_MAX_PENDING',
           format: 'int',
+        },
+        maxSockets: {
+          default: undefined,
+          format: 'int',
+          env: 'AUTH_POOLEE_MAX_SOCKETS',
+          doc: 'Number of sockets per node to fxa-auth-server to allow',
+        },
+        resolution: {
+          default: undefined,
+          format: 'duration',
+          env: 'AUTH_POOLEE_RESOLUTION',
+          doc: 'Interval in milliseconds to check for query timeout condition',
+        },
+        keepAlive: {
+          default: undefined,
+          format: 'Boolean',
+          env: 'AUTH_POOLEE_KEEP_ALIVE',
+          doc: 'Handle keep-alive properly',
+        },
+        ping: {
+          default: undefined,
+          format: 'url',
+          env: 'AUTH_POOLEE_PING_URL',
+          doc: 'URL to use for health checks',
+        },
+        pingTimeout: {
+          default: undefined,
+          format: 'duration',
+          env: 'AUTH_POOLEE_PING_TIMEOUT',
+          doc: 'Time in milliseconds to wait for health check requests',
+        },
+        retryDelay: {
+          default: undefined,
+          format: 'int',
+          env: 'AUTH_POOLEE_RETRY_BACKOFF_FACTOR',
+          doc: 'A factor to multiply the exponential backoff delay for retries',
+        },
+        maxRetries: {
+          default: undefined,
+          format: 'int',
+          env: 'AUTH_POOLEE_MAX_RETRIES',
+          doc: 'Number of retries to attempt for recovering from errors',
+        },
+        request: {
+          attempts: {
+            default: undefined,
+            format: 'int',
+            env: 'AUTH_POOLEE_REQUEST_ATTEMPTS',
+            doc: 'Number of attempts for recovering from errors',
+          },
+          maxHangups: {
+            default: undefined,
+            format: 'int',
+            env: 'AUTH_POOLEE_REQUEST_HANGUPS',
+            doc: 'Number of socket hangups to tolerate and retry',
+          },
+          maxAborts: {
+            default: undefined,
+            format: 'int',
+            env: 'AUTH_POOLEE_REQUEST_ATTEMPTS',
+            doc: 'Number of request aborts to tolerate and retry',
+          },
+          retryDelay: {
+            default: undefined,
+            format: 'int',
+            env: 'AUTH_POOLEE_REQUEST_RETRY_DELAY',
+            doc: 'Time in milliseconds for delaying retries',
+          },
         },
       },
       jwtSecretKey: {

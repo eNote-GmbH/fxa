@@ -27,7 +27,7 @@ const X_SES_MESSAGE_TAGS = 'X-SES-MESSAGE-TAGS';
 module.exports = function (log, config, bounces) {
   const oauthClientInfo = require('./oauth_client_info')(log, config);
   const utm_prefix = config.smtp.utmPrefix;
-  const utm_disabled = config.smtp.utmDisabled
+  const utm_disabled = config.smtp.utmDisabled;
   const linkStyle = config.smtp.linkStyle;
   const verificationReminders = require('../verification-reminders')(
     log,
@@ -304,6 +304,8 @@ module.exports = function (log, config, bounces) {
     this.verifyPrimaryEmailUrl = mailerConfig.verifyPrimaryEmailUrl;
     this.renderer = new Renderer(new NodeRendererBindings());
     this.metricsEnabled = true;
+
+    this.templateClientAppLinks = mailerConfig.templateClientAppLinks;
   }
 
   Mailer.prototype.stop = function () {
@@ -317,18 +319,27 @@ module.exports = function (log, config, bounces) {
   Mailer.prototype._passwordResetLinkAttributes = function (
     email,
     templateName,
-    emailToHashWith
+    emailToHashWith,
+    message
   ) {
     return linkAttributes(
-      this.createPasswordResetLink(email, templateName, emailToHashWith)
+      this.createPasswordResetLink(
+        email,
+        templateName,
+        emailToHashWith,
+        message
+      )
     );
   };
 
   Mailer.prototype._passwordChangeLinkAttributes = function (
     email,
-    templateName
+    templateName,
+    message
   ) {
-    return linkAttributes(this.createPasswordChangeLink(email, templateName));
+    return linkAttributes(
+      this.createPasswordChangeLink(email, templateName, message)
+    );
   };
 
   Mailer.prototype._formatUserAgentInfo = function (message) {
@@ -2734,6 +2745,66 @@ module.exports = function (log, config, bounces) {
     return `${paymentsServerURL.origin}/legal-docs?url=${encodeURIComponent(
       url
     )}`;
+  Mailer.prototype._toAppLink = function (link, templateName, message) {
+    if (!message.uaBrowser || !message.uaBrowserVersion) {
+      // no browser information available
+      log.debug(`mailer.${templateName}.app-links`, {
+        link: link,
+        appLink: null,
+        miss_reason: 'No client configuration',
+        message_data: {
+          ...message,
+        },
+      });
+      return link;
+    }
+
+    const client_config = this.templateClientAppLinks[message.uaBrowser];
+    if (!client_config) {
+      // no configuration for this browser
+      log.debug(`mailer.${templateName}.app-links`, {
+        link: link,
+        appLink: null,
+        miss_reason: 'No configuration for this client',
+        message_data: {
+          ...message,
+        },
+      });
+      return link;
+    }
+
+    // execute a natural search to account for actual version numbers
+    const sort_options = { numeric: true, ignorePunctuation: true };
+    const configured_versions = Object.keys(client_config)
+      .filter(
+        (version) =>
+          version.localeCompare(message.uaBrowserVersion, 'en', sort_options) <=
+          0
+      )
+      .sort((a, b) => b.localeCompare(a, 'en', sort_options));
+    if (!configured_versions[0]) {
+      // no applicable configuration for this version or lower
+      log.debug(`mailer.${templateName}.app-links`, {
+        link: link,
+        appLink: null,
+        miss_reason: 'Configuration not applicable to client',
+        message_data: {
+          ...message,
+        },
+      });
+      return link;
+    }
+
+    const parsedLink = new URL(link);
+    const appLink = client_config[configured_versions[0]][parsedLink.pathname];
+    log.debug(`mailer.${templateName}.app-links`, {
+      link,
+      appLink,
+      message_data: {
+        ...message,
+      },
+    });
+    return appLink || link;
   };
 
   Mailer.prototype._generateUTMLink = function (
@@ -2805,7 +2876,7 @@ module.exports = function (log, config, bounces) {
 
     if (primaryLink && utmContent) {
       links['link'] = this._generateUTMLink(
-        primaryLink,
+        this._toAppLink(primaryLink, templateName, message),
         query,
         templateName,
         utmContent
@@ -2843,22 +2914,26 @@ module.exports = function (log, config, bounces) {
 
     links['passwordChangeLink'] = this.createPasswordChangeLink(
       email,
-      templateName
+      templateName,
+      message
     );
     links['passwordChangeLinkAttributes'] = this._passwordChangeLinkAttributes(
       email,
-      templateName
+      templateName,
+      message
     );
 
     links['resetLink'] = this.createPasswordResetLink(
       email,
       templateName,
-      query.emailToHashWith
+      query.emailToHashWith,
+      message
     );
     links['resetLinkAttributes'] = this._passwordResetLinkAttributes(
       email,
       templateName,
-      query.emailToHashWith
+      query.emailToHashWith,
+      message
     );
 
     links['androidLink'] = this._generateUTMLink(
@@ -2891,13 +2966,18 @@ module.exports = function (log, config, bounces) {
       query
     );
 
-    links['revokeAccountRecoveryLink'] =
-      this.createRevokeAccountRecoveryLink(templateName);
-    links['revokeAccountRecoveryLinkAttributes'] =
-      this._revokeAccountRecoveryLinkAttributes(templateName);
+    links['revokeAccountRecoveryLink'] = this.createRevokeAccountRecoveryLink(
+      templateName,
+      message
+    );
+    links[
+      'revokeAccountRecoveryLinkAttributes'
+    ] = this._revokeAccountRecoveryLinkAttributes(templateName, message);
 
-    links['createAccountRecoveryLink'] =
-      this.createAccountRecoveryLink(templateName);
+    links['createAccountRecoveryLink'] = this.createAccountRecoveryLink(
+      templateName,
+      message
+    );
 
     links.accountSettingsUrl = this._generateUTMLink(
       this.accountSettingsUrl,
@@ -2952,7 +3032,7 @@ module.exports = function (log, config, bounces) {
     const queryOneClick = extend(query, { one_click: true });
     if (primaryLink && utmContent) {
       links['oneClickLink'] = this._generateUTMLink(
-        primaryLink,
+        this._toAppLink(primaryLink, templateName, message),
         queryOneClick,
         templateName,
         `${utmContent}-oneclick`
@@ -3024,7 +3104,8 @@ module.exports = function (log, config, bounces) {
   Mailer.prototype.createPasswordResetLink = function (
     email,
     templateName,
-    emailToHashWith
+    emailToHashWith,
+    message
   ) {
     // Default `reset_password_confirm` to false, to show warnings about
     // resetting password and sync data
@@ -3035,18 +3116,22 @@ module.exports = function (log, config, bounces) {
     };
 
     return this._generateUTMLink(
-      this.initiatePasswordResetUrl,
+      this._toAppLink(this.initiatePasswordResetUrl, templateName, message),
       query,
       templateName,
       'reset-password'
     );
   };
 
-  Mailer.prototype.createPasswordChangeLink = function (email, templateName) {
+  Mailer.prototype.createPasswordChangeLink = function (
+    email,
+    templateName,
+    message
+  ) {
     const query = { email: email };
 
     return this._generateUTMLink(
-      this.initiatePasswordChangeUrl,
+      this._toAppLink(this.initiatePasswordChangeUrl, templateName, message),
       query,
       templateName,
       'change-password'
@@ -3082,9 +3167,12 @@ module.exports = function (log, config, bounces) {
     return this._generateUTMLink(this.privacyUrl, {}, templateName, 'privacy');
   };
 
-  Mailer.prototype.createRevokeAccountRecoveryLink = function (templateName) {
+  Mailer.prototype.createRevokeAccountRecoveryLink = function (
+    templateName,
+    message
+  ) {
     return this._generateUTMLink(
-      this.revokeAccountRecoveryUrl,
+      this._toAppLink(this.revokeAccountRecoveryUrl, templateName, message),
       {},
       templateName,
       'report'
@@ -3092,14 +3180,20 @@ module.exports = function (log, config, bounces) {
   };
 
   Mailer.prototype._revokeAccountRecoveryLinkAttributes = function (
-    templateName
+    templateName,
+    message
   ) {
-    return linkAttributes(this.createRevokeAccountRecoveryLink(templateName));
+    return linkAttributes(
+      this.createRevokeAccountRecoveryLink(templateName, message)
+    );
   };
 
-  Mailer.prototype.createAccountRecoveryLink = function (templateName) {
+  Mailer.prototype.createAccountRecoveryLink = function (
+    templateName,
+    message
+  ) {
     return this._generateUTMLink(
-      this.createAccountRecoveryUrl,
+      this._toAppLink(this.createAccountRecoveryUrl, templateName, message),
       {},
       templateName
     );

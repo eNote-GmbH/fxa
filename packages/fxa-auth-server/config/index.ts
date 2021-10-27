@@ -299,10 +299,16 @@ const conf = convict({
       env: 'SMTP_SENDER',
     },
     contentServerUrl: {
-      doc: 'Base URI for links to a specific content server entry page if other than the contentServer.url',
+      doc:
+        'Base URI for links to a specific content server entry page if other than the contentServer.url',
       default: undefined,
       format: 'url',
       env: 'SMTP_CONTENT_SERVER_URL',
+    },
+    templateClientAppLinks: {
+      doc: 'Replace HTTP links with app-link for specific user agents',
+      format: Object,
+      default: {},
     },
     prependVerificationSubdomain: {
       enabled: {
@@ -389,7 +395,8 @@ const conf = convict({
     linkStyle: {
       doc: 'CSS that is applied to all generated links inside generated emails',
       format: String,
-      default: 'color: #0a84ff; text-decoration: none; font-family: sans-serif;'
+      default:
+        'color: #0a84ff; text-decoration: none; font-family: sans-serif;',
     },
   },
   maxEventLoopDelay: {
@@ -932,7 +939,7 @@ const conf = convict({
       doc: 'Display name of the OAuth client to show by default',
       format: String,
       default: 'Firefox',
-      env: 'OAUTH_CLIENT_INFO_DEFAULT'
+      env: 'OAUTH_CLIENT_INFO_DEFAULT',
     },
     clientInfoCacheTTL: {
       doc: 'TTL for OAuth client details (in milliseconds)',
@@ -1907,7 +1914,7 @@ conf.set('domain', url.parse(conf.get('publicUrl')).host);
 // derive fxa-auth-mailer configuration from our content-server url
 let baseUri = conf.get('contentServer.url');
 if (conf.has('smtp.contentServerUrl')) {
-  baseUri = conf.get('smtp.contentServerUrl')
+  baseUri = conf.get('smtp.contentServerUrl');
 }
 conf.set('smtp.accountSettingsUrl', `${baseUri}/settings`);
 conf.set(

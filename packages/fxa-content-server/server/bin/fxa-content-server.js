@@ -199,16 +199,31 @@ function makeApp() {
     app.get(betaSettingsPath + '/*', modifySettingsStatic);
   }
 
-  const redirects = config.get("frontend_redirects") || {};
+  const redirects = config.get('frontend_redirects');
   if (redirects) {
     Object.entries(redirects).forEach(([target, sources]) => {
       logger.info('redirects.frontend', {
-        'target': target,
-        'sources': sources,
+        target: target,
+        sources: sources,
       });
       const paths = new RegExp('^(' + sources.join('|') + ')/?$');
       app.use(paths, function (req, res) {
-        res.redirect(target);
+        let queryString = '';
+        const passQueryParams = config.get('frontend_redirect_params');
+        if (passQueryParams && req.query) {
+          passQueryParams.forEach((param) => {
+            const paramValue = req.query[param];
+            if (paramValue !== undefined && paramValue !== null) {
+              if (queryString === '') {
+                queryString = '?';
+              } else {
+                queryString += '&';
+              }
+              queryString += `${param}=${encodeURIComponent(paramValue)}`;
+            }
+          });
+        }
+        res.redirect(target + queryString);
       });
     });
   }

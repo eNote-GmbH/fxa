@@ -244,20 +244,23 @@ const conf = (module.exports = convict({
     format: 'url',
   },
   about_url: {
-    default: 'https://www.mozilla.org/about/?utm_source=firefox-accounts&amp;utm_medium=Referral',
+    default:
+      'https://www.mozilla.org/about/?utm_source=firefox-accounts&amp;utm_medium=Referral',
     doc: 'The URL to the "about" page',
     env: 'ABOUT_URL',
     format: 'url',
   },
   privacy_policy_url: {
     default: null,
-    doc: 'A URL to an external privacy policy to redirect to instead of delivering the built-in',
+    doc:
+      'A URL to an external privacy policy to redirect to instead of delivering the built-in',
     env: 'PRIVACY_POLICY_URL',
     format: 'url',
   },
   terms_of_service_url: {
     default: null,
-    doc: 'A URL to an external terms of service to redirect to instead of delivering the built-in',
+    doc:
+      'A URL to an external terms of service to redirect to instead of delivering the built-in',
     env: 'TERMS_OF_SERVICE_URL',
     format: 'url',
   },
@@ -770,15 +773,38 @@ const conf = (module.exports = convict({
     env: 'VAR_PATH',
   },
   apple_itunes_app: {
-      default: 'app-id=989804926, affiliate-data=ct=smartbanner-fxa',
-      doc: 'The value for the "apple-itunes-app" HTML meta tag',
-      env: 'APPLE_ITUNES_APP',
+    default: 'app-id=989804926, affiliate-data=ct=smartbanner-fxa',
+    doc: 'The value for the "apple-itunes-app" HTML meta tag',
+    env: 'APPLE_ITUNES_APP',
   },
   frontend_redirects: {
     default: {},
     doc: 'Mapping of target path to source paths for internal redirects',
     env: 'FRONTEND_REDIRECTS_OBJECT',
     format: Object,
+  },
+  frontend_redirect_baseuri: {
+    default: undefined,
+    doc: 'The base URI for every redirect',
+    env: 'FRONTEND_REDIRECT_BASEURI',
+  },
+  frontend_redirect_params: {
+    default: [
+      'code',
+      'email',
+      'emailToHashWith',
+      'keys',
+      'reason',
+      'redirectTo',
+      'service',
+      'token',
+      'type',
+      'uid',
+      'verificationMethod',
+    ],
+    doc: 'Names of query parameters that can be passed through to redirects',
+    env: 'FRONTEND_REDIRECT_PARAMS_ALLOWED',
+    format: Array,
   },
   frontend_config_extras: {
     default: {},

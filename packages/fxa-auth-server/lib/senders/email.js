@@ -185,6 +185,24 @@ module.exports = function (log, config, bounces) {
     return time.format('L');
   }
 
+  function constructLocalMoment(timeZone, locale) {
+    // if no timeZone is passed, use DEFAULT_TIMEZONE
+    moment.tz.setDefault(DEFAULT_TIMEZONE);
+    // if no locale is passed, use DEFAULT_LOCALE
+    locale = locale || DEFAULT_LOCALE;
+    moment.locale(locale);
+    let time = moment();
+    if (timeZone) {
+      time = time.tz(timeZone);
+    }
+    return time;
+  }
+
+  function constructLocalYearString(timeZone, locale) {
+    // return a locale-specific year
+    return constructLocalMoment(timeZone, locale).format('YYYY');
+  }
+
   // Borrowed from fxa-payments-server/src/lib/formats.ts
   // TODO: Would be nice to share this if/when TypeScript conversion reaches here.
   const baseCurrencyOptions = {
@@ -334,13 +352,71 @@ module.exports = function (log, config, bounces) {
     const uaOS = safeUserAgent.name(message.uaOS);
     const uaOSVersion = safeUserAgent.version(message.uaOSVersion);
 
-    return !uaBrowser && !uaOS
-      ? null
-      : {
-          uaBrowser,
-          uaOS,
-          uaOSVersion,
-        };
+    if (uaBrowser && uaOS && uaOSVersion) {
+      return translator.format(
+        translator.gettext('%(uaBrowser)s on %(uaOS)s %(uaOSVersion)s'),
+        { uaBrowser: uaBrowser, uaOS: uaOS, uaOSVersion: uaOSVersion }
+      );
+    } else if (uaBrowser && uaOS) {
+      return translator.format(
+        translator.gettext('%(uaBrowser)s on %(uaOS)s'),
+        { uaBrowser: uaBrowser, uaOS: uaOS }
+      );
+    } else {
+      if (uaBrowser) {
+        return uaBrowser;
+      } else if (uaOS) {
+        if (uaOSVersion) {
+          const parts = `${uaOS} ${uaOSVersion}`;
+          return parts;
+        } else {
+          return uaOS;
+        }
+      } else {
+        return '';
+      }
+    }
+  };
+
+  Mailer.prototype._commonTemplateValues = function (message) {
+    const acceptLanguage = message.acceptLanguage;
+    const timeZone = message.timeZone;
+    const translator = this.translator(acceptLanguage);
+    return {
+      current_year: constructLocalYearString(timeZone, translator.language),
+    };
+  };
+
+  Mailer.prototype._constructLocationString = function (message) {
+    const translator = this.translator(message.acceptLanguage);
+    const location = message.location;
+    // construct the location string from the location object
+    if (location) {
+      if (location.city && location.stateCode) {
+        return translator.format(
+          translator.gettext(
+            '%(city)s, %(stateCode)s, %(country)s (estimated)'
+          ),
+          location
+        );
+      } else if (location.city) {
+        return translator.format(
+          translator.gettext('%(city)s, %(country)s (estimated)'),
+          location
+        );
+      } else if (location.stateCode) {
+        return translator.format(
+          translator.gettext('%(stateCode)s, %(country)s (estimated)'),
+          location
+        );
+      } else {
+        return translator.format(
+          translator.gettext('%(country)s (estimated)'),
+          location
+        );
+      }
+    }
+    return '';
   };
 
   Mailer.prototype._constructLocalTimeString = function (
@@ -532,6 +608,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         device: this._formatUserAgentInfo(message),
         email: message.email,
         ip: message.ip,
@@ -578,6 +656,7 @@ module.exports = function (log, config, bounces) {
       metricsTemplate: metricsTemplateName,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         code,
         date,
         device: this._formatUserAgentInfo(message),
@@ -625,6 +704,8 @@ module.exports = function (log, config, bounces) {
         headers,
         template,
         templateValues: {
+          ...this._commonTemplateValues(message),
+          action,
           email,
           link: links.link,
           oneClickLink: links.oneClickLink,
@@ -730,6 +811,7 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         date,
         device: this._formatUserAgentInfo(message),
         email: message.email,
@@ -790,6 +872,8 @@ module.exports = function (log, config, bounces) {
         headers,
         template: templateName,
         templateValues: {
+          ...this._commonTemplateValues(message),
+          action,
           clientName,
           date,
           device: this._formatUserAgentInfo(message),
@@ -853,6 +937,7 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         code: message.code,
         date,
         device: this._formatUserAgentInfo(message),
@@ -916,7 +1001,9 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         date,
+        action,
         device: this._formatUserAgentInfo(message),
         email: message.primaryEmail,
         ip: message.ip,
@@ -955,6 +1042,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         code: message.code,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1014,6 +1103,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         code: message.code,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1052,6 +1143,7 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         date,
         device: this._formatUserAgentInfo(message),
         ip: message.ip,
@@ -1084,6 +1176,7 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         passwordManagerInfoUrl: links.passwordManagerInfoUrl,
         privacyUrl: links.privacyUrl,
         resetLink: links.resetLink,
@@ -1110,6 +1203,7 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         privacyUrl: links.privacyUrl,
         resetLink: links.resetLink,
         resetLinkAttributes: links.resetLinkAttributes,
@@ -1143,13 +1237,15 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
-        date,
+        ...this._commonTemplateValues(message),
         device: this._formatUserAgentInfo(message),
+        date,
         ip: message.ip,
         link: links.link,
         location: message.location,
         passwordChangeLink: links.passwordChangeLink,
         passwordChangeLinkAttributes: links.passwordChangeLinkAttributes,
+        passwordManagerInfoUrl: links.passwordManagerInfoUrl,
         privacyUrl: links.privacyUrl,
         providerName: message.providerName,
         supportLinkAttributes: links.supportLinkAttributes,
@@ -1183,6 +1279,8 @@ module.exports = function (log, config, bounces) {
         headers,
         template: templateName,
         templateValues: {
+          ...this._commonTemplateValues(message),
+          action,
           clientName,
           date,
           device: this._formatUserAgentInfo(message),
@@ -1225,6 +1323,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         onDesktopOrTabletDevice,
         androidLinkAttributes: linkAttributes(links.androidLink),
         androidUrl: links.androidLink,
@@ -1260,6 +1360,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         iosLink: links.iosLink,
         link: links.link,
@@ -1291,6 +1393,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         email: message.email,
         iosLink: links.iosLink,
@@ -1322,6 +1426,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         iosLink: links.iosLink,
         link: links.link,
@@ -1355,6 +1461,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1395,6 +1503,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1435,6 +1545,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1477,7 +1589,6 @@ module.exports = function (log, config, bounces) {
       templateValues: {
         androidLink: links.androidLink,
         date,
-        device: this._formatUserAgentInfo(message),
         email: message.email,
         iosLink: links.iosLink,
         ip: message.ip,
@@ -1514,6 +1625,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         email: message.email,
         iosLink: links.iosLink,
@@ -1550,6 +1663,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1593,6 +1708,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1636,6 +1753,8 @@ module.exports = function (log, config, bounces) {
       headers,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
+        action,
         androidLink: links.androidLink,
         date,
         device: this._formatUserAgentInfo(message),
@@ -1776,6 +1895,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -1847,6 +1967,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -1917,6 +2038,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -2004,6 +2126,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         productName,
         uid,
@@ -2049,6 +2172,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         productName,
         uid,
@@ -2106,6 +2230,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -2206,6 +2331,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -2335,6 +2461,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -2519,6 +2646,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -2679,6 +2807,7 @@ module.exports = function (log, config, bounces) {
       layout: 'subscription',
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         productName,
         uid,
@@ -2713,6 +2842,8 @@ module.exports = function (log, config, bounces) {
         headers,
         template,
         templateValues: {
+          ...this._commonTemplateValues(message),
+          action,
           androidLinkAttributes: linkAttributes(links.androidLink),
           androidUrl: links.androidLink,
           cadLinkAttributes: linkAttributes(links.link),

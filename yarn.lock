@@ -11453,9 +11453,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserid-crypto@git://github.com/mozilla-fxa/browserid-crypto.git#5979544d13eeb15a02d0b9a6a7a08a698d54d37d":
+"browserid-crypto@https://github.com/mozilla-fxa/browserid-crypto.git#5979544d13eeb15a02d0b9a6a7a08a698d54d37d":
   version: 0.9.1
-  resolution: "browserid-crypto@git://github.com/mozilla-fxa/browserid-crypto.git#commit=5979544d13eeb15a02d0b9a6a7a08a698d54d37d"
+  resolution: "browserid-crypto@https://github.com/mozilla-fxa/browserid-crypto.git#commit=5979544d13eeb15a02d0b9a6a7a08a698d54d37d"
   dependencies:
     bignum: ~0.13.0
     browserify: 13.1.0
@@ -12601,9 +12601,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chosen-js@git://github.com/mozilla-fxa/chosen.git#3bea55b356c249ae82980c04f67ccc98ff3b28b0":
+"chosen-js@https://github.com/mozilla-fxa/chosen.git#3bea55b356c249ae82980c04f67ccc98ff3b28b0":
   version: 1.8.7
-  resolution: "chosen-js@git://github.com/mozilla-fxa/chosen.git#commit=3bea55b356c249ae82980c04f67ccc98ff3b28b0"
+  resolution: "chosen-js@https://github.com/mozilla-fxa/chosen.git#commit=3bea55b356c249ae82980c04f67ccc98ff3b28b0"
   checksum: 4f0f8a9d744a7d6aa8a8b6e649ee131be017f074eec3c8befdab54035f4a955f4637832776b8d11d2e87f8b90c3c7a6dcde41bb4092600fbc8c5b09b9592fc65
   languageName: node
   linkType: hard
@@ -18232,7 +18232,7 @@ fsevents@^1.2.7:
     node-fetch: ^2.6.1
     ts-node: ^8.10.2
     typescript: 3.9.7
-    webcrypto-liner: "git://github.com/mozilla-fxa/webcrypto-liner.git#6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb"
+    webcrypto-liner: "https://github.com/mozilla-fxa/webcrypto-liner.git#6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb"
   languageName: unknown
   linkType: soft
 
@@ -18360,7 +18360,7 @@ fsevents@^1.2.7:
     mysql: ^2.18.1
     mysql-patcher: 0.7.0
     nock: ^13.0.7
-    node-uap: "git://github.com/mozilla-fxa/node-uap.git#96dc1f9f224422ec184395b6408cd1fc40ee452a"
+    node-uap: "https://github.com/mozilla-fxa/node-uap.git#96dc1f9f224422ec184395b6408cd1fc40ee452a"
     node-zendesk: ^2.0.3
     nodemailer: 2.7.2
     nyc: ^15.0.1
@@ -18436,7 +18436,7 @@ fsevents@^1.2.7:
     body-parser: ^1.19.0
     cache-loader: ^4.1.0
     chai: ^4.2.0
-    chosen-js: "git://github.com/mozilla-fxa/chosen.git#3bea55b356c249ae82980c04f67ccc98ff3b28b0"
+    chosen-js: "https://github.com/mozilla-fxa/chosen.git#3bea55b356c249ae82980c04f67ccc98ff3b28b0"
     connect-cachify: 0.0.17
     consolidate: 0.16.0
     convict: ^6.0.0
@@ -18480,7 +18480,7 @@ fsevents@^1.2.7:
     grunt-htmllint: 0.3.0
     grunt-jsonlint: 2.1.3
     grunt-newer: 1.3.0
-    grunt-po2json: "git://github.com/mozilla-fxa/grunt-po2json.git#2f415c8ac0435bf8942dc7131c3916ecd1684a46"
+    grunt-po2json: "https://github.com/mozilla-fxa/grunt-po2json.git#2f415c8ac0435bf8942dc7131c3916ecd1684a46"
     grunt-remarkable: 1.1.0
     grunt-sri: 0.2.0
     grunt-text-replace: 0.4.0
@@ -18497,14 +18497,14 @@ fsevents@^1.2.7:
     intern: ^4.9.0
     joi: ^14.3.1
     jquery: 3.5.1
-    jquery-modal: "git://github.com/mozilla-fxa/jquery-modal.git#0576775d1b4590314b114386019f4c7421c77503"
+    jquery-modal: "https://github.com/mozilla-fxa/jquery-modal.git#0576775d1b4590314b114386019f4c7421c77503"
     jquery-simulate: 1.0.2
     jquery-ui: 1.12.1
     jquery-ui-touch-punch-amd: 1.0.1
     js-md5: 0.6.0
     jsqr: 1.2.0
     jsxgettext-recursive-next: 1.1.0
-    legal-docs: "git://github.com/mozilla/legal-docs.git#9769a9f31cd5c32945b37509fb94c01b63e5f5d2"
+    legal-docs: "https://github.com/mozilla/legal-docs.git#9769a9f31cd5c32945b37509fb94c01b63e5f5d2"
     load-grunt-tasks: ^5.1.0
     lodash: ^4.17.19
     mkdirp: 0.5.1
@@ -18541,16 +18541,16 @@ fsevents@^1.2.7:
     ts-loader: ^8.0.12
     ts-node: ^8.10.2
     typescript: 3.9.7
-    ua-parser-js: "git://github.com/mozilla-fxa/ua-parser-js.git#fxa-version"
+    ua-parser-js: "https://github.com/mozilla-fxa/ua-parser-js.git#fxa-version"
     underscore: ^1.10.2
     upng-js: 2.1.0
     url-loader: 4.1.0
     verror: 1.10.0
-    webcrypto-liner: "git://github.com/mozilla-fxa/webcrypto-liner.git#6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb"
+    webcrypto-liner: "https://github.com/mozilla-fxa/webcrypto-liner.git#6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb"
     webpack: ^4.41.2
     webpack-cli: ^4.5.0
     webpack-dev-middleware: ^3.7.2
-    xmlhttprequest: "git://github.com/mozilla-fxa/node-XMLHttpRequest.git#onerror"
+    xmlhttprequest: "https://github.com/mozilla-fxa/node-XMLHttpRequest.git#onerror"
     yargs: ^15.0.2
   languageName: unknown
   linkType: soft
@@ -19228,7 +19228,7 @@ fsevents@^1.2.7:
     moment: ^2.29.1
     mozlog: ^3.0.1
     mysql: ^2.18.1
-    node-uap: "git://github.com/mozilla-fxa/node-uap.git#96dc1f9f224422ec184395b6408cd1fc40ee452a"
+    node-uap: "https://github.com/mozilla-fxa/node-uap.git#96dc1f9f224422ec184395b6408cd1fc40ee452a"
     nyc: ^15.0.1
     objection: ^2.2.7
     pm2: ^4.4.1
@@ -19851,9 +19851,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"gobbledygook@git://github.com/mozilla-fxa/gobbledygook.git#354042684056e57ca77f036989e907707a36cff2":
+"gobbledygook@https://github.com/mozilla-fxa/gobbledygook.git#354042684056e57ca77f036989e907707a36cff2":
   version: 0.0.4
-  resolution: "gobbledygook@git://github.com/mozilla-fxa/gobbledygook.git#commit=354042684056e57ca77f036989e907707a36cff2"
+  resolution: "gobbledygook@https://github.com/mozilla-fxa/gobbledygook.git#commit=354042684056e57ca77f036989e907707a36cff2"
   checksum: 69f46e961164c1b5d0d24cedc9dde939b043d40fee992503a9e5673cc84c7615caf86c58c5a3f73e1983c85da898f576873aaf35ac005aa21f474d8b99eef99a
   languageName: node
   linkType: hard
@@ -20339,9 +20339,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"grunt-po2json@git://github.com/mozilla-fxa/grunt-po2json.git#2f415c8ac0435bf8942dc7131c3916ecd1684a46":
+"grunt-po2json@https://github.com/mozilla-fxa/grunt-po2json.git#2f415c8ac0435bf8942dc7131c3916ecd1684a46":
   version: 0.2.0
-  resolution: "grunt-po2json@git://github.com/mozilla-fxa/grunt-po2json.git#commit=2f415c8ac0435bf8942dc7131c3916ecd1684a46"
+  resolution: "grunt-po2json@https://github.com/mozilla-fxa/grunt-po2json.git#commit=2f415c8ac0435bf8942dc7131c3916ecd1684a46"
   dependencies:
     po2json: "*"
   peerDependencies:
@@ -24002,9 +24002,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"jquery-modal@git://github.com/mozilla-fxa/jquery-modal.git#0576775d1b4590314b114386019f4c7421c77503":
+"jquery-modal@https://github.com/mozilla-fxa/jquery-modal.git#0576775d1b4590314b114386019f4c7421c77503":
   version: 0.7.1
-  resolution: "jquery-modal@git://github.com/mozilla-fxa/jquery-modal.git#commit=0576775d1b4590314b114386019f4c7421c77503"
+  resolution: "jquery-modal@https://github.com/mozilla-fxa/jquery-modal.git#commit=0576775d1b4590314b114386019f4c7421c77503"
   checksum: 35ebdf6c814763e963afed91dab18ecd861661c4fc04e17dfa2f324a0c133fbd25aa5aa9c86fc882b572c3e269638270558b2d4cc54d7d0260daddaa58183b91
   languageName: node
   linkType: hard
@@ -24945,9 +24945,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"legal-docs@git://github.com/mozilla/legal-docs.git#9769a9f31cd5c32945b37509fb94c01b63e5f5d2":
+"legal-docs@https://github.com/mozilla/legal-docs.git#9769a9f31cd5c32945b37509fb94c01b63e5f5d2":
   version: 1.0.0
-  resolution: "legal-docs@git://github.com/mozilla/legal-docs.git#commit=9769a9f31cd5c32945b37509fb94c01b63e5f5d2"
+  resolution: "legal-docs@https://github.com/mozilla/legal-docs.git#commit=9769a9f31cd5c32945b37509fb94c01b63e5f5d2"
   checksum: 0f2ab3408302a04757592c6fa41f0ec23e3bad8eac25446ef26204eff19ea9183ec658259c59e16925c6b0d76b0c774b80ada8fbc3be594144c45da90123e612
   languageName: node
   linkType: hard
@@ -27446,12 +27446,12 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"node-uap@git://github.com/mozilla-fxa/node-uap.git#96dc1f9f224422ec184395b6408cd1fc40ee452a":
+"node-uap@https://github.com/mozilla-fxa/node-uap.git#96dc1f9f224422ec184395b6408cd1fc40ee452a":
   version: 0.0.3
-  resolution: "node-uap@git://github.com/mozilla-fxa/node-uap.git#commit=96dc1f9f224422ec184395b6408cd1fc40ee452a"
+  resolution: "node-uap@https://github.com/mozilla-fxa/node-uap.git#commit=96dc1f9f224422ec184395b6408cd1fc40ee452a"
   dependencies:
     array.prototype.find: 2.0.0
-    uap-core: "git://github.com/ua-parser/uap-core#2e6c983e42e7aae7d957a263cb4d3de7ccbd92af"
+    uap-core: "https://github.com/ua-parser/uap-core#2e6c983e42e7aae7d957a263cb4d3de7ccbd92af"
     uap-ref-impl: 0.2.0
     yamlparser: 0.0.2
   checksum: aff0e5d33f7103f8b91a8355cb04b83823bf53522f5f410aa87babfe143e5b35214a035496edc0ec2e64b1cc7aae8358a1b3d3850f0493ca80bef57a0d39dade
@@ -37080,9 +37080,9 @@ typescript@~4.1.2:
   languageName: node
   linkType: hard
 
-"ua-parser-js@git://github.com/mozilla-fxa/ua-parser-js.git#fxa-version":
+"ua-parser-js@https://github.com/mozilla-fxa/ua-parser-js.git#fxa-version":
   version: 0.7.10
-  resolution: "ua-parser-js@git://github.com/mozilla-fxa/ua-parser-js.git#commit=643d1698aef5bed095e1264ae258902bf346175c"
+  resolution: "ua-parser-js@https://github.com/mozilla-fxa/ua-parser-js.git#commit=643d1698aef5bed095e1264ae258902bf346175c"
   checksum: 13d0efd3ecede7c73985c5f9d306b7c523d7f2f621ae753270f55902938ddbcc8627b8671284ad4684fd0e52d26b1c846d2e37f9102967af9dfba54c02462f4c
   languageName: node
   linkType: hard
@@ -37094,9 +37094,9 @@ typescript@~4.1.2:
   languageName: node
   linkType: hard
 
-"uap-core@git://github.com/ua-parser/uap-core#2e6c983e42e7aae7d957a263cb4d3de7ccbd92af":
+"uap-core@https://github.com/ua-parser/uap-core#2e6c983e42e7aae7d957a263cb4d3de7ccbd92af":
   version: 0.6.7
-  resolution: "uap-core@git://github.com/ua-parser/uap-core#commit=2e6c983e42e7aae7d957a263cb4d3de7ccbd92af"
+  resolution: "uap-core@https://github.com/ua-parser/uap-core#commit=2e6c983e42e7aae7d957a263cb4d3de7ccbd92af"
   checksum: d8446ab66b8fa41d6e7068fb00a5825b6de7b4f13e56637361bad9ec5a7528b9566ef98f3090efbd414fa9c3a0f0c5faa507549979bf6fb36e6c7827d405cb40
   languageName: node
   linkType: hard
@@ -38057,9 +38057,9 @@ typescript@~4.1.2:
   languageName: node
   linkType: hard
 
-"webcrypto-core@git://github.com/mozilla-fxa/webcrypto-core.git#e0bb9e60e7df2abc6d13caf4a15cf22188e2981a":
+"webcrypto-core@https://github.com/mozilla-fxa/webcrypto-core.git#e0bb9e60e7df2abc6d13caf4a15cf22188e2981a":
   version: 0.1.19
-  resolution: "webcrypto-core@git://github.com/mozilla-fxa/webcrypto-core.git#commit=e0bb9e60e7df2abc6d13caf4a15cf22188e2981a"
+  resolution: "webcrypto-core@https://github.com/mozilla-fxa/webcrypto-core.git#commit=e0bb9e60e7df2abc6d13caf4a15cf22188e2981a"
   dependencies:
     tslib: ^1.7.1
   checksum: 6a4fa403c250864d3d93f70a3e13f7f714a3dc4925ec4a1e6c5d2a89b8d3ebf5053c0686d9cf2e701020fa5335143ede5726f553473ffe7193eec52394099b60
@@ -38079,13 +38079,13 @@ typescript@~4.1.2:
   languageName: node
   linkType: hard
 
-"webcrypto-liner@git://github.com/mozilla-fxa/webcrypto-liner.git#6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb":
+"webcrypto-liner@https://github.com/mozilla-fxa/webcrypto-liner.git#6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb":
   version: 0.1.36
-  resolution: "webcrypto-liner@git://github.com/mozilla-fxa/webcrypto-liner.git#commit=6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb"
+  resolution: "webcrypto-liner@https://github.com/mozilla-fxa/webcrypto-liner.git#commit=6b3ad971b3b1f0d4da3855c6ceee9b3afa9f0eeb"
   dependencies:
     "@dannycoates/elliptic": ^6.4.2
     asmcrypto.js: ^0.22.0
-    webcrypto-core: "git://github.com/mozilla-fxa/webcrypto-core.git#e0bb9e60e7df2abc6d13caf4a15cf22188e2981a"
+    webcrypto-core: "https://github.com/mozilla-fxa/webcrypto-core.git#e0bb9e60e7df2abc6d13caf4a15cf22188e2981a"
   checksum: 49071032a81d9251cae4bd3671029cc6a98b482493164749d199d7f8b97eb67f2ee48ac5f9afcfe5845e3bbab2a5c38bf43e5faa3c7bc53fc30f12a739a09466
   languageName: node
   linkType: hard
@@ -39067,9 +39067,9 @@ typescript@~4.1.2:
   languageName: node
   linkType: hard
 
-"xmlhttprequest@git://github.com/mozilla-fxa/node-XMLHttpRequest.git#onerror":
+"xmlhttprequest@https://github.com/mozilla-fxa/node-XMLHttpRequest.git#onerror":
   version: 1.5.1
-  resolution: "xmlhttprequest@git://github.com/mozilla-fxa/node-XMLHttpRequest.git#commit=3f904613b860b4438e65a31b7b82f09a4d2d64dd"
+  resolution: "xmlhttprequest@https://github.com/mozilla-fxa/node-XMLHttpRequest.git#commit=3f904613b860b4438e65a31b7b82f09a4d2d64dd"
   checksum: b09ceea2d06bb865b99e0c0a351a489fbd4d94e79bdc9edd655fe089410d18658cdddbc004e10528231c0a6a9ee20acbd251b36c368977fb50926582adb7493e
   languageName: node
   linkType: hard

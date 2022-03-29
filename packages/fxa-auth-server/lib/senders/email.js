@@ -161,6 +161,24 @@ module.exports = function (log, config) {
     return time.format('L');
   }
 
+  function constructLocalMoment(timeZone, locale) {
+    // if no timeZone is passed, use DEFAULT_TIMEZONE
+    moment.tz.setDefault(DEFAULT_TIMEZONE);
+    // if no locale is passed, use DEFAULT_LOCALE
+    locale = locale || DEFAULT_LOCALE;
+    moment.locale(locale);
+    let time = moment();
+    if (timeZone) {
+      time = time.tz(timeZone);
+    }
+    return time;
+  }
+
+  function constructLocalYearString(timeZone, locale) {
+    // return a locale-specific year
+    return constructLocalMoment(timeZone, locale).format('YYYY');
+  }
+
   // Borrowed from fxa-payments-server/src/lib/formats.ts
   // TODO: Would be nice to share this if/when TypeScript conversion reaches here.
   const baseCurrencyOptions = {
@@ -335,6 +353,15 @@ module.exports = function (log, config) {
         return '';
       }
     }
+  };
+
+  Mailer.prototype._commonTemplateValues = function (message) {
+    const acceptLanguage = message.acceptLanguage;
+    const timeZone = message.timeZone;
+    const translator = this.translator(acceptLanguage);
+    return {
+      current_year: constructLocalYearString(timeZone, translator.language),
+    };
   };
 
   Mailer.prototype._constructLocationString = function (message) {
@@ -583,6 +610,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         device: this._formatUserAgentInfo(message),
         email: message.email,
@@ -630,6 +658,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         code,
         device: this._formatUserAgentInfo(message),
         email: message.email,
@@ -683,6 +712,7 @@ module.exports = function (log, config) {
         subject,
         template,
         templateValues: {
+          ...this._commonTemplateValues(message),
           action,
           email,
           link: links.link,
@@ -723,6 +753,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         device: this._formatUserAgentInfo(message),
         email: message.email,
         ip: message.ip,
@@ -788,6 +819,7 @@ module.exports = function (log, config) {
         subject,
         template: templateName,
         templateValues: {
+          ...this._commonTemplateValues(message),
           action,
           clientName,
           device: this._formatUserAgentInfo(message),
@@ -853,6 +885,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         code: message.code,
         device: this._formatUserAgentInfo(message),
         email: message.email,
@@ -918,6 +951,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         device: this._formatUserAgentInfo(message),
         email: message.primaryEmail,
@@ -983,6 +1017,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         device: this._formatUserAgentInfo(message),
         email: message.email,
@@ -1029,6 +1064,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         code: message.code,
         device: this._formatUserAgentInfo(message),
@@ -1091,6 +1127,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         code: message.code,
         device: this._formatUserAgentInfo(message),
@@ -1131,6 +1168,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         device: this._formatUserAgentInfo(message),
         ip: message.ip,
         location: this._constructLocationString(message),
@@ -1168,6 +1206,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         passwordManagerInfoUrl: links.passwordManagerInfoUrl,
         privacyUrl: links.privacyUrl,
         resetLink: links.resetLink,
@@ -1196,6 +1235,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         privacyUrl: links.privacyUrl,
         resetLink: links.resetLink,
         resetLinkAttributes: links.resetLinkAttributes,
@@ -1226,6 +1266,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         passwordManagerInfoUrl: links.passwordManagerInfoUrl,
         privacyUrl: links.privacyUrl,
         resetLink: links.resetLink,
@@ -1258,6 +1299,7 @@ module.exports = function (log, config) {
         subject,
         template: templateName,
         templateValues: {
+          ...this._commonTemplateValues(message),
           action,
           clientName,
           device: this._formatUserAgentInfo(message),
@@ -1310,6 +1352,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         onDesktopOrTabletDevice,
         androidLinkAttributes: linkAttributes(links.androidLink),
@@ -1349,6 +1392,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         iosLink: links.iosLink,
@@ -1385,6 +1429,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         email: message.email,
@@ -1421,6 +1466,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         iosLink: links.iosLink,
@@ -1455,6 +1501,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1498,6 +1545,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1541,6 +1589,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1584,6 +1633,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1637,6 +1687,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         email: message.email,
@@ -1674,6 +1725,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1720,6 +1772,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1766,6 +1819,7 @@ module.exports = function (log, config) {
       subject,
       template: templateName,
       templateValues: {
+        ...this._commonTemplateValues(message),
         action,
         androidLink: links.androidLink,
         device: this._formatUserAgentInfo(message),
@@ -1831,6 +1885,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -1910,6 +1965,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -1992,6 +2048,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         uid,
         email,
@@ -2039,6 +2096,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -2092,6 +2150,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -2157,6 +2216,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -2228,6 +2288,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -2311,6 +2372,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -2388,6 +2450,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         uid,
@@ -2461,6 +2524,7 @@ module.exports = function (log, config) {
       subject,
       template,
       templateValues: {
+        ...this._commonTemplateValues(message),
         ...links,
         ...translatorParams,
         action: translator.format(action, translatorParams),
@@ -2515,6 +2579,7 @@ module.exports = function (log, config) {
         subject,
         template,
         templateValues: {
+          ...this._commonTemplateValues(message),
           action,
           androidLinkAttributes: linkAttributes(links.androidLink),
           androidUrl: links.androidLink,

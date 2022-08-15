@@ -16,9 +16,15 @@ var View = BaseView.extend({
 
   afterRender() {
     //TO DO - Change time to configurable
+    const country = this.lang || 'us'
+
+    const url = new URL(this.appleItunesApp);
+    const params = new URLSearchParams(url.search);
+    const appId = params.get('app-id');
+
     return setTimeout(() => {
       this.navigateAway(
-        `https://itunes.apple.com/enote/${this.appleItunesApp}`
+        `https://apps.apple.com/${country}/app/enote-intelligent-sheet-music/id${appId}`
       );
     }, 3000);
   },

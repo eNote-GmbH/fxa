@@ -106,6 +106,7 @@ module.exports = function (config) {
     'verify_secondary_email',
     'would_you_like_to_sync',
     'app_only_link',
+    'app_link/*',
   ].filter((path) => {
     return !redirectPaths.includes(path);
   }).join('|'); // prepare for use in a RegExp

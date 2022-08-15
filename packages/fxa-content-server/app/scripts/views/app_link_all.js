@@ -3,23 +3,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import BaseView from './base';
-// import Template from 'templates/app_link_all.mustache';
+import Template from 'templates/app_link_all.mustache';
 
 var View = BaseView.extend({
   className: 'app-link-all',
-  // template: Template,
+  template: Template,
   initialize(options) {
     options = options || {};
 
-    this._appleItunesApp = options.appleItunesApp;
+    this.appleItunesApp = options.appleItunesApp;
   },
 
-  beforeRender() {
-    // TO REFACTOR, basic logic implementation
-    if (navigator.userAgent.toLowerCase().indexOf('iphone') > -1 || navigator.userAgent.toLowerCase().indexOf('ipad') > -1) {
-      window.location.href =
-        'https://itunes.apple.com/my/app/flipbizz/idexampleapp';
-    }
+  afterRender() {
+    //TO DO - Change time to configurable
+    return setTimeout(() => {
+      this.navigateAway(
+        `https://itunes.apple.com/enote/${this.appleItunesApp}`
+      );
+    }, 3000);
   },
 });
 

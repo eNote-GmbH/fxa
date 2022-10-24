@@ -46,6 +46,9 @@ export const selectors = {
   NOT_EMAIL_UNMET: '#password-same-as-email.password-strength-unmet',
   NOT_EMAIL_MET: '#password-same-as-email.password-strength-met',
   NOT_EMAIL_FAIL: '#password-same-as-email.password-strength-fail',
+  CWTS_HEADER: '#fxa-choose-what-to-sync-header',
+  CWTS_ENGINE_BOOKMARKS: '#sync-engine-bookmarks',
+  CWTS_ENGINE_HISTORY: '#sync-engine-history',
 };
 
 export class LoginPage extends BaseLayout {
@@ -324,6 +327,24 @@ export class LoginPage extends BaseLayout {
 
   async clickSubmit() {
     return this.page.locator(selectors.SUBMIT).click();
+  }
+
+  async isCWTSHeader() {
+    return this.page.isVisible(selectors.CWTS_HEADER, {
+      timeout: 100,
+    });
+  }
+
+  async isCWTSEngineBookmarks() {
+    return this.page.isVisible(selectors.CWTS_ENGINE_BOOKMARKS, {
+      timeout: 100,
+    });
+  }
+
+  async isCWTSEngineHistory() {
+    return this.page.isVisible(selectors.CWTS_ENGINE_HISTORY, {
+      timeout: 100,
+    });
   }
 
   async isSyncConnectedHeader() {

@@ -31,7 +31,6 @@ module.exports = testsSettings.concat([
   'tests/functional/post_verify/secondary_email.js',
   'tests/functional/push.js',
   'tests/functional/refreshes_metrics.js',
-  'tests/functional/robots_txt.js',
   'tests/functional/sign_in.js',
   'tests/functional/sign_in_blocked.js',
   'tests/functional/sign_in_cached.js',

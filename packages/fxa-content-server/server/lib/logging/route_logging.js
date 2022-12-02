@@ -26,6 +26,21 @@ const disabled = function (req, res, next) {
 
 function defaultFxaFormat(tokens, req, res) {
   const { clientAddress, addresses } = remoteAddress(req);
+  let responseTime = tokens['response-time'](req, res);
+  if (responseTime) {
+    // make sure we have an integer value (in milliseconds as in other components)
+    responseTime = parseInt(parseFloat(responseTime) * 1000)
+    if (Number.isNaN(responseTime)) {
+      responseTime = undefined;
+    }
+  }
+  let status = tokens.status(req, res);
+  if (status) {
+    status = parseInt(status)
+    if (Number.isNaN(status)) {
+      status = undefined;
+    }
+  }
   return JSON.stringify({
     clientAddress,
     contentLength: tokens.res(req, res, 'content-length'),
@@ -33,8 +48,8 @@ function defaultFxaFormat(tokens, req, res) {
     path: tokens.url(req, res),
     referer: req.headers['referer'],
     remoteAddressChain: addresses,
-    status: tokens.status(req, res),
-    t: tokens['response-time'](req, res),
+    status,
+    t: responseTime,
     userAgent: req.headers['user-agent'],
   });
 }

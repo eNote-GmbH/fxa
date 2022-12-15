@@ -5951,15 +5951,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:^6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/browser@npm:6.19.7"
+"@sentry/browser@npm:^7.26.0":
+  version: 7.26.0
+  resolution: "@sentry/browser@npm:7.26.0"
   dependencies:
-    "@sentry/core": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
+    "@sentry/core": 7.26.0
+    "@sentry/types": 7.26.0
+    "@sentry/utils": 7.26.0
     tslib: ^1.9.3
-  checksum: 071d00c76c2d0384580474c634c58c6196bbd1a3cf510da1309bd1565c57df7422fca8ceb717db189fa557f2c711a21664ee1ab935dfd9869faf416d388e6f78
+  checksum: dc4e15f55869528ea45483323d0e332216110c14b8af625e96e395a563d4f134789bc37f0761f389284569d9e6266aa691876809fe45fcc8f33ed6cd2331ef28
   languageName: node
   linkType: hard
 
@@ -5986,6 +5986,17 @@ __metadata:
     "@sentry/utils": 6.19.7
     tslib: ^1.9.3
   checksum: d212e8ef07114549de4a93b81f8bfa217ca1550ca7a5eeaa611e5629faef78ff72663ce561ffa2cff48f3dc556745ef65177044f9965cdd3cbccf617cf3bf675
+  languageName: node
+  linkType: hard
+
+"@sentry/core@npm:7.26.0":
+  version: 7.26.0
+  resolution: "@sentry/core@npm:7.26.0"
+  dependencies:
+    "@sentry/types": 7.26.0
+    "@sentry/utils": 7.26.0
+    tslib: ^1.9.3
+  checksum: d5f8c1e1b2463312438ec02d4878c3d248493c5cc566ef161bad0b8f5644efc40bb453e8f43d4a68b3c27b3990e33c983fcf5caa2e502ff19b5808e70ce71a57
   languageName: node
   linkType: hard
 
@@ -6180,6 +6191,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:7.26.0":
+  version: 7.26.0
+  resolution: "@sentry/types@npm:7.26.0"
+  checksum: 79cec061f989ba635f1278f46ff8a4b4a32a0c751a51abca43c286cf1da20302e2590102c312e44b2f25f541ee5dc21d03cf676da35d634751f93dbbd01b08f3
+  languageName: node
+  linkType: hard
+
 "@sentry/types@npm:7.3.1":
   version: 7.3.1
   resolution: "@sentry/types@npm:7.3.1"
@@ -6204,6 +6222,16 @@ __metadata:
     "@sentry/types": 6.19.7
     tslib: ^1.9.3
   checksum: a000223b9c646c64e3565e79cace1eeb75114342b768367c4dddd646476c215eb1bddfb70c63f05e2352d3bce2d7d415344e4757a001605d0e01ac74da5dd306
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:7.26.0":
+  version: 7.26.0
+  resolution: "@sentry/utils@npm:7.26.0"
+  dependencies:
+    "@sentry/types": 7.26.0
+    tslib: ^1.9.3
+  checksum: 51bac244259f68071f93cf74955b1aafb8e6ca50f84f2a8258cb447f3a7ce6e526fd3c695b3b44b6348c3ebbdf9766894b7d85feb2868c7a67cbfc40c576849b
   languageName: node
   linkType: hard
 
@@ -22906,7 +22934,7 @@ fsevents@~2.1.1:
     "@babel/preset-env": ^7.16.7
     "@babel/preset-react": ^7.16.7
     "@babel/preset-typescript": ^7.16.7
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.26.0
     "@sentry/integrations": ^6.19.1
     "@sentry/node": ^6.19.1
     "@sentry/tracing": ^6.19.1
@@ -23329,7 +23357,7 @@ fsevents@~2.1.1:
     "@fluent/langneg": ^0.6.2
     "@fluent/react": ^0.13.1
     "@rescripts/cli": ~0.0.16
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.26.0
     "@sentry/node": ^6.19.1
     "@sentry/tracing": ^6.19.1
     "@storybook/addon-actions": ^6.5.9
@@ -23549,7 +23577,7 @@ fsevents@~2.1.1:
     "@material-ui/core": v5.0.0-alpha.24
     "@reach/router": ^1.3.4
     "@rescripts/cli": 0.0.16
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.26.0
     "@sentry/integrations": ^6.19.1
     "@sentry/tracing": ^6.19.1
     "@storybook/addon-actions": ^6.5.9
@@ -23631,7 +23659,7 @@ fsevents@~2.1.1:
     "@nestjs/graphql": ^8.0.2
     "@nestjs/mapped-types": ^1.0.1
     "@nestjs/testing": ^8.4.6
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.26.0
     "@sentry/integrations": ^6.19.1
     "@sentry/node": ^6.19.1
     "@sentry/tracing": ^6.19.1

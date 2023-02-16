@@ -5951,15 +5951,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:^6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/browser@npm:6.19.7"
+"@sentry/browser@npm:^7.37.2":
+  version: 7.37.2
+  resolution: "@sentry/browser@npm:7.37.2"
   dependencies:
-    "@sentry/core": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
+    "@sentry/core": 7.37.2
+    "@sentry/replay": 7.37.2
+    "@sentry/types": 7.37.2
+    "@sentry/utils": 7.37.2
     tslib: ^1.9.3
-  checksum: 071d00c76c2d0384580474c634c58c6196bbd1a3cf510da1309bd1565c57df7422fca8ceb717db189fa557f2c711a21664ee1ab935dfd9869faf416d388e6f78
+  checksum: b43a7d6f4c1f23dc98a35142dea83e54d4c930963fa8e52b35f78998b7f43a1c6bc99bb487247213c2708f79b53c60c1efacb1390a5542b6971617069c52fa5e
   languageName: node
   linkType: hard
 
@@ -5998,6 +5999,17 @@ __metadata:
     "@sentry/utils": 7.3.1
     tslib: ^1.9.3
   checksum: db5d98d2c588f5cf37984b54319f9bbb01c7db1334c58b8242031857d1cf9a60105c52b592672d17c2aa5c792e455499913b52a83ed6bd10d7bb678f27221aa1
+  languageName: node
+  linkType: hard
+
+"@sentry/core@npm:7.37.2":
+  version: 7.37.2
+  resolution: "@sentry/core@npm:7.37.2"
+  dependencies:
+    "@sentry/types": 7.37.2
+    "@sentry/utils": 7.37.2
+    tslib: ^1.9.3
+  checksum: 7a84af7bdd95c217a592188a036cbaf15ae7243a91a7565b74fdab55a9145de88ee57d086138908471e71c644fbab335606988bd99f09f2a6062791433e4ab23
   languageName: node
   linkType: hard
 
@@ -6128,6 +6140,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/replay@npm:7.37.2":
+  version: 7.37.2
+  resolution: "@sentry/replay@npm:7.37.2"
+  dependencies:
+    "@sentry/core": 7.37.2
+    "@sentry/types": 7.37.2
+    "@sentry/utils": 7.37.2
+  checksum: 09484769b8aed4f8257b83e89c18f6150a0f3128f16f4d942c785fbcdf202f86b0ef11014fb275b9a5981b3dcce2035775df668ba8bf3ee888639e7fe85130a6
+  languageName: node
+  linkType: hard
+
 "@sentry/tracing@npm:6.19.7":
   version: 6.19.7
   resolution: "@sentry/tracing@npm:6.19.7"
@@ -6187,6 +6210,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:7.37.2":
+  version: 7.37.2
+  resolution: "@sentry/types@npm:7.37.2"
+  checksum: b6f09beba86700083e5014728c474f627063fa253360133e41ca2891b937dd0b11a878a1b4d62b24a56b985abb2aaad7cc1245642a2b75b05395101faa7bc9c3
+  languageName: node
+  linkType: hard
+
 "@sentry/utils@npm:6.19.2":
   version: 6.19.2
   resolution: "@sentry/utils@npm:6.19.2"
@@ -6214,6 +6244,16 @@ __metadata:
     "@sentry/types": 7.3.1
     tslib: ^1.9.3
   checksum: 37fb6db19c5a4eb79b8322c31f091e6bce39d8a5e4c8fe5232d9b554ad45dd72b25f7b3ac7c65cb35e3d2dc1097bf8578dbdc996e8f8df19fbb027cb446ecc8b
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:7.37.2":
+  version: 7.37.2
+  resolution: "@sentry/utils@npm:7.37.2"
+  dependencies:
+    "@sentry/types": 7.37.2
+    tslib: ^1.9.3
+  checksum: 1c7b38627e3d52106cc64c610c751265b9e4ff62d9e91d258e0479877fbdda76ba9daf6ed7be74e3c4723d4f0192a8ca1519bbce853520e1c94a168b48351b7c
   languageName: node
   linkType: hard
 
@@ -22906,7 +22946,7 @@ fsevents@~2.1.1:
     "@babel/preset-env": ^7.16.7
     "@babel/preset-react": ^7.16.7
     "@babel/preset-typescript": ^7.16.7
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.37.2
     "@sentry/integrations": ^6.19.1
     "@sentry/node": ^6.19.1
     "@sentry/tracing": ^6.19.1
@@ -23329,7 +23369,7 @@ fsevents@~2.1.1:
     "@fluent/langneg": ^0.6.2
     "@fluent/react": ^0.13.1
     "@rescripts/cli": ~0.0.16
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.37.2
     "@sentry/node": ^6.19.1
     "@sentry/tracing": ^6.19.1
     "@storybook/addon-actions": ^6.5.9
@@ -23549,7 +23589,7 @@ fsevents@~2.1.1:
     "@material-ui/core": v5.0.0-alpha.24
     "@reach/router": ^1.3.4
     "@rescripts/cli": 0.0.16
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.37.2
     "@sentry/integrations": ^6.19.1
     "@sentry/tracing": ^6.19.1
     "@storybook/addon-actions": ^6.5.9
@@ -23631,7 +23671,7 @@ fsevents@~2.1.1:
     "@nestjs/graphql": ^8.0.2
     "@nestjs/mapped-types": ^1.0.1
     "@nestjs/testing": ^8.4.6
-    "@sentry/browser": ^6.19.7
+    "@sentry/browser": ^7.37.2
     "@sentry/integrations": ^6.19.1
     "@sentry/node": ^6.19.1
     "@sentry/tracing": ^6.19.1

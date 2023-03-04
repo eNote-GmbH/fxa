@@ -75,6 +75,7 @@
     ]
   },
   "devDependencies": {
+    "@nrwl/nx-cloud": "latest",
     "eslint": "^7.32.0",
     "eslint-plugin-fxa": "^2.0.2",
     "eslint-plugin-jest": "^27.1.3",
@@ -82,6 +83,7 @@
     "json": "^11.0.0",
     "mocha-junit-reporter": "^2.2.0",
     "mocha-multi": "^1.1.7",
+    "nx": "15.8.4",
     "postcss": "^8.4.14",
     "stylelint": "^14.14.0",
     "stylelint-config-prettier": "^9.0.3",

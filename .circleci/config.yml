@@ -57,6 +57,8 @@ executors:
     environment:
       DOCKER_BUILDKIT: 1
       BUILDKIT_PROGRESS: plain
+      BUILDKIT_STEP_LOG_MAX_SIZE: 50000000
+      BUILDKIT_STEP_LOG_MAX_SPEED: 50000000
       # Note, the global cache is enabled, because otherwise two caches are created, one in .yarn/berry and one in .yarn/cache.
       # Turning this on results in a single cache - .yarn/berry
       YARN_ENABLE_GLOBAL_CACHE: true

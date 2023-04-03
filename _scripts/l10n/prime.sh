@@ -21,8 +21,29 @@ if [ ! -d "$ROOT_FOLDER/external/l10n/locale" ]; then
     exit 1
 fi
 
-# Check path is valid
+# Determine Target Folder
 TARGET_FOLDER="packages/$PACKAGE/$FOLDER"
+
+# Check if we've already primed
+if [ -f "$ROOT_FOLDER/$TARGET_FOLDER/git-head.txt" ]; then
+
+    target_head_rev=$(cat "$ROOT_FOLDER/$TARGET_FOLDER/git-head.txt")
+    cd "$ROOT_FOLDER/external/l10n"
+    current_head_rev=$(git rev-parse HEAD)
+
+    # If the two values are the same, then we can exit early.
+    if [ "$target_head_rev" == "$current_head_rev" ]; then
+        echo "$PREFIX: Already primed with latest l10n files."
+        exit 0
+    else
+        echo "$PREFIX: Primed l10n files are out of date. Updating..."
+        cd "$ROOT_FOLDER"
+    fi
+else
+    echo "$PREFIX: Priming l10n files..."
+fi
+
+# Check path is valid
 rm -rf "$TARGET_FOLDER"
 mkdir -p "$TARGET_FOLDER"
 

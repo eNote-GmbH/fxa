@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
 MODULE=$1
+TAG=$2
+
+
 
 if [[ "$(docker images -q "$MODULE")" == "" ]]; then
   # not all packages create docker images
@@ -8,6 +11,11 @@ if [[ "$(docker images -q "$MODULE")" == "" ]]; then
   echo "- skipping $MODULE"
   echo -e "--------------------------------------------------\n"
   exit 0
+fi
+
+if [[ -z "${TAG}" ]]; then
+  echo "No tag specified! Exiting..."
+  exit 1
 fi
 
 if [ "${CIRCLE_BRANCH}" == "main" ]; then
@@ -38,6 +46,14 @@ if [ -n "${DOCKER_TAG}" ] && [ -n "${!DOCKER_PASS}" ] && [ -n "${!DOCKER_USER}" 
   echo "# pushing ${DOCKERHUB_REPO}:${DOCKER_TAG}"
   echo -e "##################################################\n"
   echo "${!DOCKER_PASS}" | docker login -u "${!DOCKER_USER}" --password-stdin
-  docker tag "${MODULE}:build" "${DOCKERHUB_REPO}:${DOCKER_TAG}"
+
+  echo "pulling ${MODULE}:${TAG}"
+  time docker pull "${MODULE}:${TAG}"
+
+  echo "pushing ${DOCKERHUB_REPO}:${DOCKER_TAG} "
+  docker tag "${MODULE}:${TAG}" "${DOCKERHUB_REPO}:${DOCKER_TAG}"
   time docker push "${DOCKERHUB_REPO}:${DOCKER_TAG}"
+
+  echo "removing  ${MODULE}:${TAG}"
+  docker rmi "${MODULE}:${TAG}"
 fi

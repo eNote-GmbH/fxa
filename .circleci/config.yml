@@ -554,6 +554,8 @@ jobs:
       - run:
           name: Run unit tests
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-unit
+          environment:
+            - NODE_ENV: CI
 
   # Runs integration tests suites across packages with changes. Integration tests can take
   #  longer to run, so this job supports splitting.

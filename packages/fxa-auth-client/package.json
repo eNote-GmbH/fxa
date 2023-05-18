@@ -2,14 +2,14 @@
   "name": "fxa-auth-client",
   "version": "1.185.1",
   "description": "",
-  "main": "dist/server/server.js",
+  "main": "dist/server/packages/fxa-auth-client/server.js",
   "exports": {
-    ".": "./dist/packages/fxa-auth-client/server/server.js",
-    "./browser": "./dist/packages/fxa-auth-client/browser/browser.js",
-    "./lib/crypto": "./dist/packages/fxa-auth-client/server/lib/crypto.js",
-    "./lib/hawk": "./dist/packages/fxa-auth-client/server/lib/hawk.js",
-    "./lib/recoveryKey": "./dist/packages/fxa-auth-client/server/lib/recoveryKey.js",
-    "./lib/utils": "./dist/packages/fxa-auth-client/server/lib/utils.js",
+    ".": "./dist/server/packages/fxa-auth-client/server.js",
+    "./browser": "./dist/browser/packages/fxa-auth-client/browser.js",
+    "./lib/crypto": "./dist/server/packages/fxa-auth-client/lib/crypto.js",
+    "./lib/hawk": "./dist/server/packages/fxa-auth-client/lib/hawk.js",
+    "./lib/recoveryKey": "./dist/server/packages/fxa-auth-client/lib/recoveryKey.js",
+    "./lib/utils": "./dist/server/packages/fxa-auth-client/lib/utils.js",
     "./lib/": "./lib/"
   },
   "scripts": {

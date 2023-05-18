@@ -87,7 +87,6 @@
   "bugs": {
     "url": "https://github.com/mozilla/fxa/issues"
   },
-  "type": "module",
   "homepage": "https://github.com/mozilla/fxa/tree/main/packages/fxa-shared#readme",
   "devDependencies": {
     "@nestjs/testing": "^9.2.1",

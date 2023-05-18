@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "commonjs",
     "allowJs": true,
     // Permit, but do not report errors for JS files
     // TODO: Remove after transition to TS is complete

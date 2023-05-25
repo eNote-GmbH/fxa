@@ -5,7 +5,6 @@
 const testsSettings = require('./functional_settings');
 module.exports = testsSettings.concat([
   'tests/functional/fx_browser_relier.js',
-  'tests/functional/oauth_webchannel.js',
   'tests/functional/oauth_require_totp.js',
   // new and flaky tests above here',
   'tests/functional/500.js',

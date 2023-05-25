@@ -17,6 +17,12 @@ test.describe('oauth webchannel', () => {
     target,
     pages: { login },
   }) => {
+    // Listen to console.log() calls within the page context
+    page.on('console', (msg) => {
+      for (let i = 0; i < msg.args().length; ++i)
+        console.log(`${i}: ${msg.args()[i]}`);
+    });
+
     const email = login.createEmail();
 
     const query = new URLSearchParams({
@@ -29,8 +35,8 @@ test.describe('oauth webchannel', () => {
 
     await page.evaluate(() => {
       window.dispatchEvent(
-        new CustomEvent('WebChannelMessageToChrome', {
-          detail: JSON.stringify({
+        new CustomEvent('WebChannelMessageToContent', {
+          detail: {
             id: 'account_updates',
             message: {
               command: 'fxaccounts:fxa_status',
@@ -42,7 +48,7 @@ test.describe('oauth webchannel', () => {
                 signedInUser: null,
               },
             },
-          }),
+          },
         })
       );
     });

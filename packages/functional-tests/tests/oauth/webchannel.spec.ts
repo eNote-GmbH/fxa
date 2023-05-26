@@ -15,7 +15,7 @@ test.describe('oauth webchannel', () => {
     credentials,
     page,
     target,
-    pages: { login },
+    pages: { login, relier },
   }) => {
     // Listen to console.log() calls within the page context
     page.on('console', (msg) => {
@@ -23,35 +23,81 @@ test.describe('oauth webchannel', () => {
         console.log(`${i}: ${msg.args()[i]}`);
     });
 
+    async function respondToWebChannelMessage(webChannelMessage) {
+      const attachedId = Math.floor(Math.random() * 10000);
+
+      const expectedCommand = webChannelMessage.message.command;
+      const response = webChannelMessage.message.data;
+
+      await page.evaluate(
+        ({ expectedCommand, response, attachedId }) => {
+          function listener(e) {
+            const customEvent = e as CustomEvent;
+            const command = customEvent.detail.message.command;
+            const messageId = customEvent.detail.message.messageId;
+
+            if (command === expectedCommand) {
+              window.removeEventListener('WebChannelMessageToChrome', listener);
+              const event = new CustomEvent('WebChannelMessageToContent', {
+                detail: {
+                  id: 'account_updates',
+                  message: {
+                    command: command,
+                    data: response,
+                    messageId: messageId,
+                  },
+                },
+              });
+
+              window.dispatchEvent(event);
+            }
+          }
+
+          function startListening() {
+            try {
+              window.addEventListener('WebChannelMessageToChrome', listener);
+            } catch (e) {
+              // problem adding the listener, window may not be
+              // ready, try again.
+              setTimeout(startListening, 0);
+            }
+
+            const el = document.createElement('div');
+            el.classList.add(`attached${attachedId}`);
+            document.body.appendChild(el);
+          }
+
+          startListening();
+        },
+        { expectedCommand, response, attachedId }
+      );
+
+      // once the event is attached it adds a div with an attachedId.
+      await page.waitForSelector(`.attached${attachedId}`, {
+        state: 'attached',
+      });
+    }
+
     const email = login.createEmail();
 
-    const query = new URLSearchParams({
-      context: 'oauth_webchannel_v1',
-    });
-
-    await page.goto(`${target.contentServerUrl}/?${query.toString()}`, {
-      waitUntil: 'networkidle',
-    });
-
-    await page.evaluate(() => {
-      window.dispatchEvent(
-        new CustomEvent('WebChannelMessageToContent', {
-          detail: {
-            id: 'account_updates',
-            message: {
-              command: 'fxaccounts:fxa_status',
-              data: {
-                capabilities: {
-                  choose_what_to_sync: true,
-                  engines: ['bookmarks', 'history'],
-                },
-                signedInUser: null,
-              },
-            },
+    const customEventDetail = {
+      id: 'account_updates',
+      message: {
+        command: 'fxaccounts:fxa_status',
+        data: {
+          capabilities: {
+            choose_what_to_sync: true,
+            engines: ['bookmarks', 'history'],
           },
-        })
-      );
-    });
+          signedInUser: null,
+        },
+      },
+    };
+
+    await relier.goto('context=oauth_webchannel_v1');
+    await relier.clickEmailFirst();
+
+    await respondToWebChannelMessage(customEventDetail);
 
     await login.setEmail(email);
     await login.submit();

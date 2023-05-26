@@ -59,6 +59,7 @@ const OAuthWebChannelBroker = OAuthRedirectAuthenticationBroker.extend({
    * @private
    */
   onFxaStatus(response = {}) {
+    console.log('response in onFxaStatus', response);
     const cwtsStatus =
       (response.capabilities && response.capabilities.choose_what_to_sync) ||
       false;

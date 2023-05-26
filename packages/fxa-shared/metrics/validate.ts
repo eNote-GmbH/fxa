@@ -7,7 +7,7 @@ import {
   InvalidNavigationTimingError,
 } from './metric-errors';
 import * as Sentry from '@sentry/browser';
-import { InvalidL1Val } from '../speed-trap/navigation-timing';
+import { InvalidL1Val, InvalidL2Val } from '../speed-trap/navigation-timing';
 
 export const UTM_REGEX = /^[\w\/.%-]{1,128}$/;
 export const DEVICE_ID_REGEX = /^[0-9a-f]{32}$|^none$/;
@@ -185,7 +185,7 @@ export class MetricValidator {
   ) {
     // Check for magic numbers that indicate bad l1 navigation timing data.
     return Object.values(data.navigationTiming || []).some(
-      (x) => x === InvalidL1Val
+      (x) => x === InvalidL1Val || x === InvalidL2Val
     );
   }
 

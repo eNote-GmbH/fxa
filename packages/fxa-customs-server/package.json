@@ -12,6 +12,7 @@
   "homepage": "https://github.com/mozilla/fxa/tree/main/packages/fxa-customs-server",
   "bugs": "https://github.com/mozilla/fxa/issues/",
   "scripts": {
+    "clean": "rimraf dist",
     "outdated": "npm outdated --depth 0 || exit 0",
     "start": "pm2 start pm2.config.js",
     "stop": "pm2 stop pm2.config.js",
@@ -21,7 +22,8 @@
     "lint": "eslint .",
     "test": "scripts/test-local.sh",
     "test-unit": "yarn make-artifacts-dir && tap test/local --jobs=1 | tap-xunit > ../../artifacts/tests/$npm_package_name/tap-unit.xml",
-    "test-integration": "yarn make-artifacts-dir && tap test/remote test/scripts --jobs=1 | tap-xunit > ../../artifacts/tests/$npm_package_name/tap-integration.xml",
+    "test-integration": "yarn test-integration-api",
+    "test-integration-api": "yarn make-artifacts-dir && tap test/remote test/scripts --jobs=1 | tap-xunit > ../../artifacts/tests/$npm_package_name/tap-integration.xml",
     "format": "prettier --write --config ../../_dev/.prettierrc '**'",
     "make-artifacts-dir": "mkdir -p ../../artifacts/tests/$npm_package_name"
   },

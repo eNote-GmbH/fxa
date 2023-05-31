@@ -12,3 +12,4 @@
 **/artifacts
 **/configs
 **/temp
+!**/packages/fxa-react/configs

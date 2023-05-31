@@ -7,37 +7,90 @@
       "options": {
         "cacheableOperations": [
           "build",
+          "build-l10n",
+          "build-l10n-test",
+          "build-storybook",
+          "compile",
           "lint",
+          "prebuild",
           "test",
           "test-unit",
           "test-integration",
-          "e2e"
+          "test-e2e"
         ]
       }
     }
   },
   "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
+    "compile": {
+      "dependsOn": ["^compile"]
+    },
+    "prebuild": {
+      "dependsOn": ["^prebuild"],
+      "inputs": ["production", "^production"],
+      "outputs": [
+        "{projectRoot}/locale",
+        "{projectRoot}/public/locales",
+        "{projectRoot}/public/legal-docs",
+        "{projectRoot}/vendor",
+        "{projectRoot}/var",
+        "{projectRoot}/config/*.json"
       ]
+    },
+    "build": {
+      "dependsOn": ["^build", "prebuild"],
+      "inputs": ["production", "^production"],
+      "outputs": [
+        "{projectRoot}/.tmp",
+        "{projectRoot}/.tscompiled",
+        "{projectRoot}/app/i18n",
+        "{projectRoot}/app/i18n/styles/main.css",
+        "{projectRoot}/app/i18n/styles/tailwind.out.css",
+        "{projectRoot}/build",
+        "{projectRoot}/dist",
+        "{projectRoot}/locale",
+        "{projectRoot}/public/locales",
+        "{projectRoot}/public/legal-docs",
+        "{projectRoot}/styles",
+        "{projectRoot}/src/styles/tailwind.out.css",
+        "{projectRoot}/temp",
+        "{projectRoot}/var"
+      ]
+    },
+    "build-storybook": {
+      "dependsOn": ["build"],
+      "inputs": ["production", "^production"]
     },
     "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.json"
-      ]
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "outputs": ["{projectRoot}/.eslintcache"]
     },
     "test": {
-      "inputs": [
-        "default",
-        "^production",
-        "{workspaceRoot}/jest.preset.js"
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "dependsOn": ["test-unit", "test-integration", "test-e2e"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
       ]
+    },
+    "test-unit": {
+      "dependsOn": ["build"]
+    },
+    "test-integration": {
+      "dependsOn": ["build", "build-l10n-test"]
+    },
+    "test-e2e": {
+      "dependsOn": ["build"]
+    },
+    "start": {
+      "dependsOn": ["build"]
+    },
+    "storybook": {
+      "dependsOn": ["build"]
+    },
+    "restart": {
+      "dependsOn": ["build"]
     }
   },
   "namedInputs": {
@@ -49,10 +102,17 @@
       "default",
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/jest.config.[jt]s"
+      "!{projectRoot}/.vscode/**/*",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/locale/**/*",
+      "!{projectRoot}/public/locales/*",
+      "!{projectRoot}/tests/**/*",
+      "!{projectRoot}/test/**/*",
+      "!{projectRoot}/tsconfig.spec.json"
     ],
-    "sharedGlobals": []
+    "sharedGlobals": [
+      "{workspaceRoot}/packages/db-migrations/**/?(*.)+(js|sql|json)"
+    ]
   },
   "cli": {
     "packageManager": "yarn"

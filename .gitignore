@@ -33,7 +33,6 @@ secrets.json
 .es5
 .es5cache
 /artifacts
-/packages/test.list
 .last-audit
 .eslintcache
 storybooks-publish
@@ -155,4 +154,3 @@ packages/fxa-settings/test/
 Library
 .node
 process.yml
-.lists

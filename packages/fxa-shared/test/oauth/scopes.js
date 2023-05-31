@@ -162,7 +162,7 @@ describe('oauth/scopes:', () => {
     ];
 
     INVALID_SCOPE_VALUES_WHEN_URIENCODED.forEach((source) => {
-      it(`url-encoded scope "${source}" is invalid`, () => {
+      it(`url-encoded scope, ${source}, is invalid`, () => {
         assert.throws(
           () => scopes.fromURLEncodedString(source),
           Error,

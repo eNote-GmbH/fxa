@@ -4,7 +4,8 @@
   "description": "eslint plugin for Firefox Accounts",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "format": "prettier --write --config ../../_dev/.prettierrc '**'"
   },
   "dependencies": {
     "eslint": "6.6.0",

@@ -16,13 +16,14 @@ const config = require('../../config').config.getProperties();
 const fs = require('fs');
 
 const mocks = require(`${ROOT_DIR}/test/mocks`);
-const { assert } = require('chai');
+const sinon = require('sinon');
+const assert = { ...sinon.assert, ...require('chai').assert };
+
 const log = mocks.mockLog();
 const Token = require('../../lib/tokens')(log, config);
 const UnblockCode = require('../../lib/crypto/random').base32(
   config.signinUnblock.codeLength
 );
-const AuthClient = require('../client')();
 
 const DB = require('../../lib/db')(config, log, Token, UnblockCode);
 
@@ -37,30 +38,12 @@ const execOptions = {
     AUTH_FIRESTORE_EMULATOR_HOST: 'localhost:9090',
   },
 };
-const sinon = require('sinon');
 const axios = require('axios');
-const nock = require('nock');
-
-const PASSWORD_VALID = 'password';
-
-function createRandomEmailAddr(template) {
-  return `${Math.random() + template}`;
-}
-
-function generateRandomValue() {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const length = 16;
-  let transferSub = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    transferSub += characters.charAt(randomIndex);
-  }
-  return transferSub;
-}
+const { ApplePocketFxAMigration, AppleUser } = require('../../scripts/apple-transfer-users/apple-transfer-users');
 
 describe('#integration - scripts/apple-transfer-users:', async function () {
   this.timeout(30000);
-  let server, db, validClient, filename, sandbox;
+  let server, db, sandbox;
   before(async () => {
     server = await TestServer.start(config);
     db = await DB.connect(config);
@@ -85,46 +68,229 @@ describe('#integration - scripts/apple-transfer-users:', async function () {
         'node -r esbuild-register scripts/apple-transfer-users',
         execOptions
       );
-      assert(false, 'script should have failed');
+      assert.fail('script should have failed');
     } catch (err) {
       assert.include(err.message, 'Command failed');
     }
   });
+});
 
-  it('should transfer Pocket user with FxA uid', async () => {
+describe('ApplePocketFxAMigration', function() {
+  let sandbox, migration;
+  beforeEach(function() {
+    sandbox = sinon.createSandbox();
+
+    sandbox.stub(fs, 'readFileSync').returns(`transferSub,uid,email\n1,1,test1@example.com\n2,,test2@example.com\n3,3,test3@example.com\n4,,test4@example.com,"test5@example.com:test6@example.com"`);
+    sandbox.stub(axios, 'post').resolves({ data: { access_token: 'valid_access_token' } });
+    sandbox.stub(path, 'resolve').returns('valid.csv');
+    sandbox.stub(DB, 'connect').resolves({});
+
+    migration = new ApplePocketFxAMigration('valid.csv', config, DB);
+  });
+
+  afterEach(function() {
+    sandbox.restore();
+  });
+
+  it('should load users correctly from a CSV file', async function() {
+    await migration.load();
+
+    assert.equal(migration.users.length, 4);
+    assert.deepEqual(migration.users[0],{
+      email: 'test1@example.com',
+      uid: '1',
+      transferSub: '1',
+      alternateEmails: [],
+      db: {}
+    });
+
+    assert.deepEqual(migration.users[1],{
+      email: 'test2@example.com',
+      uid: "",
+      transferSub: '2',
+      alternateEmails: [],
+      db: {}
+    });
+
+    assert.deepEqual(migration.users[2],{
+      email: 'test3@example.com',
+      uid: '3',
+      transferSub: '3',
+      alternateEmails: [],
+      db: {}
+    });
+
+    assert.deepEqual(migration.users[3],{
+      email: 'test4@example.com',
+      uid: '',
+      transferSub: '4',
+      alternateEmails: ['test5@example.com', 'test6@example.com'],
+      db: {}
+    });
+  });
+
+  it('should generate access token correctly', async function() {
+    const token = await migration.generateAccessToken();
+    assert.calledOnce(axios.post);
+    assert.equal(token,'valid_access_token');
+  });
+
+  it('should print users correctly', function() {
+    const consoleTableStub = sandbox.stub(console, 'table');
+    migration.printUsers();
+    assert.calledWith(consoleTableStub, migration.users);
+  });
+
+  it('should call transferUser on each user correctly when transferUsers is called', async function() {
+    await migration.load();
+    migration.users.forEach(user => {
+      sandbox.stub(user, 'transferUser').resolves(true);
+    });
+
+    await migration.transferUsers();
+
+    migration.users.forEach(user => {
+      assert.calledOnce(user.transferUser);
+    });
+  });
+
+  it('should close db connection correctly when close is called', async function() {
+    migration.db = { close: sandbox.stub().resolves() };
+    await migration.close();
+    assert.calledOnce(migration.db.close);
+  });
+
+  it('should save results correctly', function() {
+    const writeFileSyncStub = sandbox.stub(fs, 'writeFileSync');
+
+    migration.users = [{
+      appleUserInfo: { email: 'apple1@example.com' },
+      accountRecord: { email: 'fxa1@example.com', uid: 'uid1' },
+      transferSub: 'sub1',
+      success: true
+    }, {
+      appleUserInfo: { email: 'apple2@example.com' },
+      accountRecord: { email: 'fxa2@example.com', uid: 'uid2' },
+      transferSub: 'sub2',
+      success: false,
+      err: { message: 'some error' }
+    }];
+
+    migration.saveResults();
+
+    const expectedOutput = 'sub1,uid1,fxa1@example.com,apple1@example.com,true,\nsub2,uid2,fxa2@example.com,apple2@example.com,false,some error';
+    assert.calledWith(writeFileSyncStub, 'valid.csv', expectedOutput);
+  });
+});
+
+describe('AppleUser', function() {
+  let sandbox, dbStub, user;
+  beforeEach(function() {
+    sandbox = sinon.createSandbox();
+    dbStub = {
+      account: sandbox.stub(),
+      deleteLinkedAccount: sandbox.stub().resolves(),
+      createLinkedAccount: sandbox.stub().resolves(),
+      createAccount: sandbox.stub().resolves(),
+      accountRecord: sandbox.stub().resolves(),
+    };
+    user = new AppleUser('pocket@example.com', 'transferSub', 'uid', ['altEmail@example.com'], dbStub);
+  });
+
+  afterEach(function() {
+    sandbox.restore();
+  });
+
+  it('should exchange identifiers correctly and update user', async function() {
+    const stub = sandbox.stub(axios, 'post').resolves({ data: { sub: 'sub', email: 'email@example.com', is_private_email: true } });
+    const data = await user.exchangeIdentifiers('accessToken');
+
+    assert.calledOnce(stub);
+    assert.deepEqual(data, { sub: 'sub', email: 'email@example.com', is_private_email: true });
+    assert.deepEqual(user.appleUserInfo, { sub: 'sub', email: 'email@example.com', is_private_email: true });
+  });
+
+  it('should link user from FxA uid', async function() {
+    const accountRecord = { uid: 'uid', email: 'email@example.com' };
+    dbStub.account.resolves(accountRecord);
+    user.appleUserInfo = {
+      sub: 'sub',
+      email: 'email@email.com',
+      is_private_email: false
+    };
+    await user.createUpdateFxAUser();
+
+    assert.calledOnceWithExactly(dbStub.account, user.uid);
+    assert.calledOnceWithExactly(dbStub.deleteLinkedAccount, 'uid', 2);
+    assert.calledOnceWithExactly(dbStub.createLinkedAccount, 'uid', 'sub', 2);
+    assert.isTrue(user.success);
+    assert.equal(user.accountRecord,accountRecord);
+  });
+
+  it('should link user from Pocket email that has FxA account', async function() {
+    dbStub.account.rejects({ 
+      errno: 102,
+    });
+
+    const accountRecord = { uid: 'uid1', email: 'pocket@example.com' };
+    dbStub.accountRecord.resolves(accountRecord);
     
-    validClient = await AuthClient.create(
-      config.publicUrl,
-      createRandomEmailAddr('valid@user.com'),
-      PASSWORD_VALID
-    );
+    user.uid = ''; // user does not have an account in FxA
+
+    user.appleUserInfo = {
+      sub: 'sub',
+      email: 'apple@example.com',
+      is_private_email: false
+    };
+
+    await user.createUpdateFxAUser();
+
+    assert.calledOnceWithExactly(dbStub.accountRecord, 'pocket@example.com');
+    assert.calledOnceWithExactly(dbStub.deleteLinkedAccount, 'uid1', 2);
+    assert.calledOnceWithExactly(dbStub.createLinkedAccount, 'uid1', 'sub', 2);
+    assert.isTrue(user.success);
+    assert.equal(user.accountRecord,accountRecord);
+  });
+
+  it('should create user from Apple email without FxA account', async function() {
+    dbStub.account.rejects({
+      errno: 102,
+    });
+    dbStub.accountRecord.rejects({
+      errno: 102,
+    });
+    user.uid = ''; // user does not have an account in FxA
     
-    let csvData = 'transfer_sub,uid,email,alternate_emails\n';
-    csvData = csvData + `${generateRandomValue()},${validClient.uid},${validClient.email}\n`;
-    filename = `./test/scripts/fixtures/${Math.random()}_pocket_user_with_uid.csv`;
-    fs.writeFileSync(filename, csvData);
+    const accountRecord = {
+      email: 'apple@example.com',
+      uid: 'uid2'
+    }
+    dbStub.createAccount.resolves(accountRecord);
+
+    user.appleUserInfo = {
+      sub: 'sub',
+      email: 'apple@example.com',
+      is_private_email: false
+    };
+
+    await user.createUpdateFxAUser();
+
+    assert.calledOnceWithMatch(dbStub.createAccount, { 
+      email: 'apple@example.com' 
+    });
     
-    const outfile = `./test/scripts/fixtures/${Math.random()}_stats.csv`;
-    await execAsync(
-      `node -r esbuild-register scripts/apple-transfer-users -i ${filename} -o ${outfile}`,
-      execOptions
-    );
+    assert.calledOnceWithExactly(dbStub.deleteLinkedAccount, 'uid2', 2);
+    assert.calledOnceWithExactly(dbStub.createLinkedAccount, 'uid2', 'sub', 2);
+    assert.isTrue(user.success);
+    assert.equal(user.accountRecord, accountRecord);
+  });
+  
+  it('should transfer user correctly', async function() {
+    sandbox.stub(user, 'exchangeIdentifiers').resolves();
+    sandbox.stub(user, 'createUpdateFxAUser').resolves();
+    await user.transferUser('accessToken');
 
-    // Verify the output file was created and its content are correct
-    const data = fs.readFileSync(outfile, 'utf8');
-    const usersStats = data.split('\n');
-
-    assert.equal(usersStats.length, 4);
-
-    // Verify the first line is the header
-    assert.include(
-      usersStats[0],
-      'email,exists,passwordMatch,mfaEnabled,keysChangedAt,profileChangedAt,hasSecondaryEmails,isPrimaryEmailVerified'
-    );
-
-    // Verify the user stats are correct
-    assert.include(usersStats[1], `${validClient.email},true,true`); // User exists and matches password
-    assert.include(usersStats[2], `${invalidClient.email},true,false`); // User exists and doesn't match password
-    assert.include(usersStats[3], 'invalid@email.com,false'); // User does not exist
+    sinon.assert.calledOnce(user.exchangeIdentifiers);
+    sinon.assert.calledOnce(user.createUpdateFxAUser);
   });
 });

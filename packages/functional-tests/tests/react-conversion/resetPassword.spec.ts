@@ -6,8 +6,16 @@ import { test, expect } from '../../lib/fixtures/standard';
 import { BaseTarget } from '../../lib/targets/base';
 import { EmailHeader, EmailType } from '../../lib/email';
 
-function getReactFeatureFlagUrl(target: BaseTarget, path: string) {
-  return `${target.contentServerUrl}${path}?showReactApp=true`;
+function getReactFeatureFlagUrl(
+  target: BaseTarget,
+  path: string,
+  params?: string
+) {
+  if (params) {
+    return `${target.contentServerUrl}${path}?showReactApp=true&${params}`;
+  } else {
+    return `${target.contentServerUrl}${path}?showReactApp=true`;
+  }
 }
 
 const NEW_PASSWORD = 'notYourAveragePassW0Rd';
@@ -28,7 +36,7 @@ test.describe('reset password', () => {
 
     await page.locator('input').fill(credentials.email);
     let waitForNavigation = page.waitForNavigation();
-    await page.locator('text="Begin reset"').click();
+    await page.getByRole('button', { name: 'Begin reset' }).click();
     await waitForNavigation;
 
     // Verify confirm password reset page elements
@@ -44,7 +52,7 @@ test.describe('reset password', () => {
         .isVisible()
     ).toBeTruthy();
 
-    // We need to append `&showReactApp=true` to reset link inorder to enroll in reset password experiment
+    // We need to append `&showReactApp=true` to reset link in order to enroll in reset password experiment
     let link = await target.email.waitForEmail(
       credentials.email,
       EmailType.recovery,
@@ -103,5 +111,126 @@ test.describe('reset password', () => {
 
     // Cleanup requires setting this value to correct password
     credentials.password = NEW_PASSWORD;
+  });
+
+  test('visit confirmation screen without initiating reset_password, user is redirected to /reset_password', async ({
+    target,
+    page,
+    pages: { resetPassword },
+  }) => {
+    await page.goto(getReactFeatureFlagUrl(target, '/confirm_reset_password'));
+
+    // Verify its redirected to react reset password page
+    await page.waitForSelector('#root');
+    expect(
+      await page.getByRole('button', { name: 'Begin reset' }).isEnabled()
+    ).toBeTruthy();
+  });
+
+  test('open /reset_password page from /signin', async ({
+    credentials,
+    pages: { login },
+  }) => {
+    await login.goto();
+    await login.setEmail(credentials.email);
+    await login.submit();
+    await login.clickForgotPassword();
+  });
+
+  test('enter an email with leading/trailing whitespace', async ({
+    credentials,
+    target,
+    page,
+    pages: { login, resetPassword },
+  }) => {
+    await page.goto(getReactFeatureFlagUrl(target, '/reset_password'));
+
+    // Verify react page is loaded
+    await page.waitForSelector('#root');
+
+    await page.locator('input').fill(credentials.email);
+    await page.getByRole('button', { name: 'Begin reset' }).click();
+    expect(
+      await page.locator('text="Reset email sent"').isEnabled()
+    ).toBeTruthy();
+
+    await page.goto(`${target.contentServerUrl}/reset_password`);
+    await page.locator('input').fill(credentials.email + ' ');
+    await page.getByRole('button', { name: 'Begin reset' }).click();
+    expect(
+      await page.locator('text="Reset email sent"').isEnabled()
+    ).toBeTruthy();
+  });
+
+  test('open confirm_reset_password page, click resend', async ({
+    credentials,
+    target,
+    page,
+    pages: { resetPassword },
+  }) => {
+    await page.goto(getReactFeatureFlagUrl(target, '/reset_password'));
+
+    // Verify react page is loaded
+    await page.waitForSelector('#root');
+
+    await page.getByRole('textbox', { name: 'Email' }).fill(credentials.email);
+    await page.getByRole('button', { name: 'Begin reset' }).click();
+    const resendButton = await page.getByRole('button', {
+      name: 'Not in inbox or spam folder? Resend',
+    });
+    expect(await resendButton.isEnabled()).toBeTruthy();
+    expect(await resendButton.isVisible()).toBeTruthy();
+    await resendButton.click();
+    expect(
+      await page
+        .getByText(
+          'Email resent. Add accounts@firefox.com to your contacts to ensure a smooth delivery.'
+        )
+        .isEnabled()
+    ).toBeTruthy();
+  });
+
+  test('open /reset_password page, enter unknown email, wait for error', async ({
+    target,
+    page,
+    pages: { login, resetPassword },
+  }) => {
+    await page.goto(getReactFeatureFlagUrl(target, '/reset_password'));
+
+    // Verify react page is loaded
+    await page.waitForSelector('#root');
+
+    await page
+      .getByRole('textbox', { name: 'Email' })
+      .fill('email@restmail.net');
+    await page.getByRole('button', { name: 'Begin reset' }).click();
+    expect(await page.getByText('Unknown account').isEnabled()).toBeTruthy();
+  });
+
+  test('browse directly to page with email on query params', async ({
+    credentials,
+    target,
+    page,
+    pages: { resetPassword },
+  }) => {
+    await page.goto(
+      getReactFeatureFlagUrl(
+        target,
+        '/reset_password',
+        `email=${credentials.email}`
+      )
+    );
+
+    // Verify react page is loaded
+    await page.waitForSelector('#root');
+
+    //The email shouldn't be pre-filled
+    const emailInput = await page.getByRole('textbox', { name: 'Email' });
+    expect(emailInput).toHaveValue('');
+    await emailInput.fill(credentials.email);
+    await page.getByRole('button', { name: 'Begin reset' }).click();
+    expect(
+      await page.getByRole('heading', { name: 'Reset email sent' }).isEnabled()
+    ).toBeTruthy();
   });
 });

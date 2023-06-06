@@ -73,7 +73,7 @@ describe('ConfirmResetPassword page', () => {
 
   it('sends a new email when clicking on resend button', async () => {
     renderWithAccount(account);
-    account.resendResetPassword = jest.fn().mockResolvedValue('');
+    account.resetPassword = jest.fn().mockResolvedValue('');
 
     const resendEmailButton = screen.getByRole('button', {
       name: 'Not in inbox or spam folder? Resend',
@@ -81,7 +81,7 @@ describe('ConfirmResetPassword page', () => {
 
     fireEvent.click(resendEmailButton);
 
-    await waitFor(() => expect(account.resendResetPassword).toHaveBeenCalled());
+    await waitFor(() => expect(account.resetPassword).toHaveBeenCalled());
     expect(logViewEvent).toHaveBeenCalledWith(
       'confirm-reset-password',
       'resend',

@@ -17,6 +17,7 @@ export enum LinkStatus {
 export enum MozServices {
   Default = 'account settings',
   FirefoxMonitor = 'Firefox Monitor',
+  Sync = 'sync', // temporary until we fix the sync/FF Sync discrepency
   FirefoxSync = 'Firefox Sync',
   MozillaVPN = 'Mozilla VPN',
   Pocket = 'Pocket',

@@ -168,7 +168,7 @@ const CompleteResetPassword = ({
         // how account password hashing works previously.
         const emailToUse = emailToHashWith || email;
 
-        await account.completeResetPassword(
+        const accountResetData = await account.completeResetPassword(
           token,
           code,
           emailToUse,
@@ -189,8 +189,22 @@ const CompleteResetPassword = ({
 
         let hardNavigate = false;
         switch (integration.type) {
+          // NOTE: SyncBasic check is temporary until we implement codes
+          // See https://docs.google.com/document/d/1K4AD69QgfOCZwFLp7rUcMOkOTslbLCh7jjSdR9zpAkk/edit#heading=h.kkt4eylho93t
           case IntegrationType.SyncDesktop:
-            notifyFirefoxOfLogin(account, sessionIsVerified);
+          case IntegrationType.SyncBasic:
+            notifyFirefoxOfLogin(
+              {
+                authAt: accountResetData.authAt,
+                email,
+                keyFetchToken: accountResetData.keyFetchToken,
+                sessionToken: accountResetData.sessionToken,
+                uid: accountResetData.uid,
+                unwrapBKey: accountResetData.unwrapBKey,
+                verified: accountResetData.verified,
+              },
+              sessionIsVerified
+            );
             break;
           case IntegrationType.OAuth:
             if (
@@ -240,7 +254,7 @@ const CompleteResetPassword = ({
         setErrorType(ErrorType['complete-reset']);
       }
     },
-    [account, alertSuccessAndNavigate, integration.type]
+    [account, alertSuccessAndNavigate, integration.type, location.search]
   );
 
   if (showLoadingSpinner) {

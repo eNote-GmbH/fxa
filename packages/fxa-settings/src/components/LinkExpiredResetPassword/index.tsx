@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useState } from 'react';
-import { useAccount } from '../../models';
+import { CreateRelier, useAccount } from '../../models';
 import { ResendStatus } from '../../lib/types';
 import { logViewEvent } from 'fxa-settings/src/lib/metrics';
 import { REACT_ENTRYPOINT } from 'fxa-settings/src/constants';
@@ -19,6 +19,7 @@ export const LinkExpiredResetPassword = ({
   viewName,
 }: LinkExpiredResetPasswordProps) => {
   const account = useAccount();
+  const { service } = CreateRelier();
 
   const [resendStatus, setResendStatus] = useState<ResendStatus>(
     ResendStatus['not sent']
@@ -26,7 +27,7 @@ export const LinkExpiredResetPassword = ({
 
   const resendResetPasswordLink = async () => {
     try {
-      await account.resendResetPassword(email);
+      await account.resetPassword(email, service);
       logViewEvent(viewName, 'resend', REACT_ENTRYPOINT);
       setResendStatus(ResendStatus['sent']);
     } catch (e) {

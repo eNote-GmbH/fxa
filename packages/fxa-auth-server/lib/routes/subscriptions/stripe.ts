@@ -392,7 +392,7 @@ export class StripeHandler {
     const { uid, email } = await handleAuth(this.db, request.auth, true);
     await this.customs.check(request, email, 'retryInvoice');
 
-    const { stripeCustomerId } = await getAccountCustomerByUid(uid);
+    const { stripeCustomerId } = (await getAccountCustomerByUid(uid)) || {};
     if (!stripeCustomerId) {
       throw error.unknownCustomer(uid);
     }
@@ -682,7 +682,7 @@ export class StripeHandler {
     const { uid, email } = await handleAuth(this.db, request.auth, true);
     await this.customs.check(request, email, 'createSetupIntent');
 
-    const { stripeCustomerId } = await getAccountCustomerByUid(uid);
+    const { stripeCustomerId } = (await getAccountCustomerByUid(uid)) || {};
     if (!stripeCustomerId) {
       throw error.unknownCustomer(uid);
     }

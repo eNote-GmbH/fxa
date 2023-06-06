@@ -55,6 +55,14 @@ export class RelierPage extends BaseLayout {
     return this.page.locator('button.sign-choose').click();
   }
 
+  async signInPromptNone() {
+    return this.page.locator('.ready .prompt-none').click();
+  }
+
+  async promptNoneError() {
+    return this.page.locator('.error').innerText();
+  }
+
   async clickSubscribe() {
     await this.page
       .getByRole('link', { name: 'Subscribe to Pro (USD)' })

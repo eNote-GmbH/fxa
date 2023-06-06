@@ -18,10 +18,7 @@ const axios = require('axios');
 const random = require('../../lib/crypto/random');
 const uuid = require('uuid');
 
-const log = require('../../lib/log')({});
 const config = require('../../config').config.getProperties();
-const Token = require('../../lib/tokens')(log, config);
-const AuthDB = require('../../lib/db')(config, log, Token);
 
 const GRANT_TYPE = 'client_credentials';
 const SCOPE = 'user.migration';
@@ -89,9 +86,9 @@ export class AppleUser {
   async createUpdateFxAUser() {
     const sub = this.appleUserInfo.sub; // The recipient team-scoped identifier for the user.
     const appleEmail = this.appleUserInfo.email; // The private email address specific to the recipient team. 
-    const isPrivateEmail = this.appleUserInfo.is_private_email; // Boolean if email is private
     
     // TODO, maybe we should mark this failure
+    // const isPrivateEmail = this.appleUserInfo.is_private_email; // Boolean if email is private
     // if (isPrivateEmail) {
     //   this.setFailure({ message: 'Apple email is private' });
     // }

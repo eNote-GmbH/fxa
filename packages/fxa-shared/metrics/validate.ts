@@ -183,7 +183,7 @@ export class MetricValidator {
   public hasInvalidL1TimingData(
     data: Pick<CheckedMetrics, 'navigationTiming'>
   ) {
-    // Check for magic numbers that indicate bad l1 navigation timing data.
+    // Check for magic numbers that indicate bad navigation timing data.
     return Object.values(data.navigationTiming || []).some(
       (x) => x === InvalidL1Val
     );

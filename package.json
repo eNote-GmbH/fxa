@@ -36,6 +36,7 @@
   "author": "Mozilla (https://mozilla.org/)",
   "license": "MPL-2.0",
   "dependencies": {
+    "@faker-js/faker": "^8.0.2",
     "diffparser": "^2.0.1",
     "husky": "^4.2.5",
     "knex": "^2.4.2",
@@ -84,9 +85,9 @@
   },
   "devDependencies": {
     "@nx/jest": "16.3.1",
-    "@nx/js": "^16.3.1",
+    "@nx/js": "16.3.1",
     "@nx/node": "^16.3.1",
-    "@nx/workspace": "^16.3.1",
+    "@nx/workspace": "16.3.1",
     "@types/jest": "^29.5.1",
     "@types/mysql": "^2",
     "@types/node": "^18.16.1",

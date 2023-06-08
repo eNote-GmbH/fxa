@@ -158,7 +158,11 @@ export const FlowRecoveryKeyConfirmPwd = ({
               <button
                 className="cta-primary cta-xl w-full mt-4"
                 type="submit"
-                disabled={!formState.isDirty || !!formState.errors.password}
+                disabled={
+                  !formState.isDirty ||
+                  !!formState.errors.password ||
+                  account.loading
+                }
               >
                 Create account recovery key
               </button>
@@ -169,7 +173,11 @@ export const FlowRecoveryKeyConfirmPwd = ({
               <button
                 className="cta-primary cta-xl w-full mt-4"
                 type="submit"
-                disabled={!formState.isDirty || !!formState.errors.password}
+                disabled={
+                  !formState.isDirty ||
+                  !!formState.errors.password ||
+                  account.loading
+                }
               >
                 Create new account recovery key
               </button>

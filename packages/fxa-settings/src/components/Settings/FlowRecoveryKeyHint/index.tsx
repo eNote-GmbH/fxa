@@ -194,6 +194,7 @@ export const FlowRecoveryKeyHint = ({
             <button
               className="cta-primary cta-xl w-full mt-6 mb-4"
               type="submit"
+              disabled={account.loading}
             >
               Finish
             </button>

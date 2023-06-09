@@ -128,6 +128,8 @@
     "@grpc/grpc-js": "~1.6.0",
     "@nestjs/cli/typescript": "^4.5.2",
     "@types/node": "^18.14.2",
+    "@types/react": "18.0.28",
+    "@types/react-dom": "18.0.11",
     "browserid-crypto": "https://github.com/mozilla-fxa/browserid-crypto.git#5979544d13eeb15a02d0b9a6a7a08a698d54d37d",
     "elliptic": ">=6.5.4",
     "eslint-plugin-import": "^2.25.2",

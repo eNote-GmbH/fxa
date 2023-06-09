@@ -39,7 +39,7 @@ const accountWithoutKey = {
 const accountWithKey = {
   ...MOCK_ACCOUNT,
   recoveryKey: true,
-  createRecoveryKey: jest.fn().mockResolvedValue(new Uint8Array(20)),
+  changeRecoveryKey: jest.fn().mockResolvedValue(new Uint8Array(20)),
   deleteRecoveryKey: jest.fn().mockResolvedValue(true),
 } as unknown as Account;
 

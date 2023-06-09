@@ -1192,6 +1192,47 @@ export class Account implements AccountData {
     return recoveryKey;
   }
 
+  // TODO FXA-7546/FXA-7669 - Update methods to only emit a "recovery key changed" email
+  // This method is temporary, to ensure password is checked before deleting the key
+  // and creating a new one.
+  async changeRecoveryKey(password: string) {
+    const reauth = await this.withLoadingStatus(
+      this.authClient.sessionReauth(
+        sessionToken()!,
+        this.primaryEmail.email,
+        password,
+        {
+          keys: true,
+          reason: 'recovery_key',
+        }
+      )
+    );
+    const keys = await this.withLoadingStatus(
+      this.authClient.accountKeys(reauth.keyFetchToken!, reauth.unwrapBKey!)
+    );
+    const { recoveryKey, recoveryKeyId, recoveryData } =
+      await generateRecoveryKey(this.uid, keys);
+    this.deleteRecoveryKey();
+    await this.withLoadingStatus(
+      this.authClient.createRecoveryKey(
+        sessionToken()!,
+        recoveryKeyId,
+        recoveryData,
+        true
+      )
+    );
+    const cache = this.apolloClient.cache;
+    cache.modify({
+      id: cache.identify({ __typename: 'Account' }),
+      fields: {
+        recoveryKey() {
+          return true;
+        },
+      },
+    });
+    return recoveryKey;
+  }
+
   async getRecoveryKeyHint() {
     const recoveryKeyHint = await this.authClient.getRecoveryKeyHint(
       sessionToken()!,

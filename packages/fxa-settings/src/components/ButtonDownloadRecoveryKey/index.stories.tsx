@@ -28,12 +28,14 @@ const accountWithLongEmail = {
   },
 } as unknown as Account;
 
-const storyWithContext = (account: Account) => {
+const storyWithContext = (account: Account, keyWithContext?: boolean) => {
   const story = () => (
     <AppContext.Provider value={mockAppContext({ account })}>
       <AppLayout>
         {' '}
-        <ButtonDownloadRecoveryKey {...{ recoveryKeyValue, viewName }} />
+        <ButtonDownloadRecoveryKey
+          {...{ recoveryKeyValue, viewName, keyWithContext }}
+        />
       </AppLayout>
     </AppContext.Provider>
   );
@@ -43,3 +45,5 @@ const storyWithContext = (account: Account) => {
 export const Default = storyWithContext(account);
 
 export const WithVeryLongEmail = storyWithContext(accountWithLongEmail);
+
+export const WithContext = storyWithContext(account, true);

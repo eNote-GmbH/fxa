@@ -11,14 +11,15 @@ interface ButtonDownloadRecoveryKeyProps {
   navigateForward?: () => void;
   recoveryKeyValue: string;
   viewName: string;
+  keyWithContext?: boolean;
 }
 
 export const ButtonDownloadRecoveryKey = ({
   navigateForward,
   recoveryKeyValue,
   viewName,
+  keyWithContext = false,
 }: ButtonDownloadRecoveryKeyProps) => {
-  // TODO: format by locale
   const { primaryEmail } = useAccount();
   const currentDate = new Date();
   const downloadDateInLocale = currentDate.toLocaleDateString(
@@ -62,8 +63,18 @@ export const ButtonDownloadRecoveryKey = ({
     { supportURL }
   );
 
-  const fileContent = new Blob(
+  // 'keyWithContext' is currently disabled by default due to an issue with encoding recognition on Android.
+  // Non-latin text (e.g., Hebrew) may be displayed as jibberish due to incorrect encoding detection.
+  // In addition, localized strings contain important directionality markers that are hidden on Mac
+  // but visible on many other devices. On Apple devices, these directionality markers get copied with the key,
+  // and the key is rejected as invalid during password reset.
+
+  // Not tested - could possibly force recognition of UTF-8 encoding by adding BOM at the beginning of the blob
+  const BOM = new Uint8Array([0xef, 0xbb, 0xbf]);
+
+  const keyWithContextFileContent = new Blob(
     [
+      BOM,
       fileHeading,
       '\r\n\r\n',
       fileInstructions,
@@ -80,6 +91,12 @@ export const ButtonDownloadRecoveryKey = ({
       type: 'text/plain',
     }
   );
+
+  // While investigation into encoding of localized text is ongoing,
+  // we have reverted to a text file containing only the key.
+  const keyOnlyFileContent = new Blob([recoveryKeyValue], {
+    type: 'text/plain',
+  });
 
   const getFilename = () => {
     const date = currentDate.toISOString().split('T')[0];
@@ -102,7 +119,9 @@ export const ButtonDownloadRecoveryKey = ({
     <FtlMsg id="recovery-key-download-button-v3" attrs={{ title: true }}>
       <a
         title="Download and continue"
-        href={URL.createObjectURL(fileContent)}
+        href={URL.createObjectURL(
+          keyWithContext ? keyWithContextFileContent : keyOnlyFileContent
+        )}
         download={getFilename()}
         data-testid="recovery-key-download"
         className="cta-primary cta-xl w-full"

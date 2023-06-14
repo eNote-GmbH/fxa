@@ -19457,7 +19457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"autoprefixer@npm:^10.4.7":
+"autoprefixer@npm:10.4.7, autoprefixer@npm:^10.4.7":
   version: 10.4.7
   resolution: "autoprefixer@npm:10.4.7"
   dependencies:
@@ -31093,6 +31093,7 @@ fsevents@~2.1.1:
     "@types/react-dom": ^17.0.9
     "@typescript-eslint/eslint-plugin": ^5.59.1
     "@typescript-eslint/parser": ^5.59.1
+    autoprefixer: 10.4.7
     babel-jest: ^29.4.1
     diffparser: ^2.0.1
     eslint: ^7.32.0
@@ -31119,13 +31120,14 @@ fsevents@~2.1.1:
     pm2: ^5.3.0
     postcss: ^8.4.14
     prettier: ^2.6.2
-    react: ^16.13.1
-    react-dom: ^16.13.1
+    react: 18.2.0
+    react-dom: 18.2.0
     replace-in-file: ^6.3.5
     semver: ^7.3.5
     stylelint: ^15.6.2
     stylelint-config-prettier: ^9.0.3
     stylelint-config-recommended-scss: ^12.0.0
+    tailwindcss: 3.3.1
     ts-jest: 29.1.0
     ts-node: ^10.9.1
     tslib: ^2.5.0
@@ -47474,6 +47476,18 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
+"react-dom@npm:18.2.0":
+  version: 18.2.0
+  resolution: "react-dom@npm:18.2.0"
+  dependencies:
+    loose-envify: ^1.1.0
+    scheduler: ^0.23.0
+  peerDependencies:
+    react: ^18.2.0
+  checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
+  languageName: node
+  linkType: hard
+
 "react-draggable@npm:^4.4.3":
   version: 4.4.3
   resolution: "react-draggable@npm:4.4.3"
@@ -47997,6 +48011,15 @@ fsevents@~2.1.1:
     object-assign: ^4.1.1
     prop-types: ^15.6.2
   checksum: 8484f3ecb13414526f2a7412190575fc134da785c02695eb92bb6028c930bfe1c238d7be2a125088fec663cc7cda0a3623373c46807cf2c281f49c34b79881ac
+  languageName: node
+  linkType: hard
+
+"react@npm:18.2.0":
+  version: 18.2.0
+  resolution: "react@npm:18.2.0"
+  dependencies:
+    loose-envify: ^1.1.0
+  checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
   languageName: node
   linkType: hard
 
@@ -49885,6 +49908,15 @@ resolve@^2.0.0-next.3:
     loose-envify: ^1.1.0
     object-assign: ^4.1.1
   checksum: c4b35cf967c8f0d3e65753252d0f260271f81a81e427241295c5a7b783abf4ea9e905f22f815ab66676f5313be0a25f47be582254db8f9241b259213e999b8fc
+  languageName: node
+  linkType: hard
+
+"scheduler@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "scheduler@npm:0.23.0"
+  dependencies:
+    loose-envify: ^1.1.0
+  checksum: d79192eeaa12abef860c195ea45d37cbf2bbf5f66e3c4dcd16f54a7da53b17788a70d109ee3d3dde1a0fd50e6a8fc171f4300356c5aee4fc0171de526bf35f8a
   languageName: node
   linkType: hard
 
@@ -52594,40 +52626,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:^1.0.1, tailwindcss@npm:^1.2.0":
-  version: 1.9.6
-  resolution: "tailwindcss@npm:1.9.6"
-  dependencies:
-    "@fullhuman/postcss-purgecss": ^2.1.2
-    autoprefixer: ^9.4.5
-    browserslist: ^4.12.0
-    bytes: ^3.0.0
-    chalk: ^3.0.0 || ^4.0.0
-    color: ^3.1.2
-    detective: ^5.2.0
-    fs-extra: ^8.0.0
-    html-tags: ^3.1.0
-    lodash: ^4.17.20
-    node-emoji: ^1.8.1
-    normalize.css: ^8.0.1
-    object-hash: ^2.0.3
-    postcss: ^7.0.11
-    postcss-functions: ^3.0.0
-    postcss-js: ^2.0.0
-    postcss-nested: ^4.1.1
-    postcss-selector-parser: ^6.0.0
-    postcss-value-parser: ^4.1.0
-    pretty-hrtime: ^1.0.3
-    reduce-css-calc: ^2.1.6
-    resolve: ^1.14.2
-  bin:
-    tailwind: lib/cli.js
-    tailwindcss: lib/cli.js
-  checksum: f5956c3c117e6c125dbb5081d863ffefd6dd734199d47424045945d70b90cb2c07b05066cac83884489fcfd55f55f4d4a66d2e2c1993842dc365c04b6a75b22e
-  languageName: node
-  linkType: hard
-
-"tailwindcss@npm:^3.3.1":
+"tailwindcss@npm:3.3.1, tailwindcss@npm:^3.3.1":
   version: 3.3.1
   resolution: "tailwindcss@npm:3.3.1"
   dependencies:
@@ -52661,6 +52660,39 @@ resolve@^2.0.0-next.3:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
   checksum: 966ba175486fb65ef3dd76aa8ec6929ff1d168531843ca7d5faf680b7097c36bf5f9ca385b563cdfdff935bb2bd37ac5998e877491407867503cc129d118bf93
+  languageName: node
+  linkType: hard
+
+"tailwindcss@npm:^1.0.1, tailwindcss@npm:^1.2.0":
+  version: 1.9.6
+  resolution: "tailwindcss@npm:1.9.6"
+  dependencies:
+    "@fullhuman/postcss-purgecss": ^2.1.2
+    autoprefixer: ^9.4.5
+    browserslist: ^4.12.0
+    bytes: ^3.0.0
+    chalk: ^3.0.0 || ^4.0.0
+    color: ^3.1.2
+    detective: ^5.2.0
+    fs-extra: ^8.0.0
+    html-tags: ^3.1.0
+    lodash: ^4.17.20
+    node-emoji: ^1.8.1
+    normalize.css: ^8.0.1
+    object-hash: ^2.0.3
+    postcss: ^7.0.11
+    postcss-functions: ^3.0.0
+    postcss-js: ^2.0.0
+    postcss-nested: ^4.1.1
+    postcss-selector-parser: ^6.0.0
+    postcss-value-parser: ^4.1.0
+    pretty-hrtime: ^1.0.3
+    reduce-css-calc: ^2.1.6
+    resolve: ^1.14.2
+  bin:
+    tailwind: lib/cli.js
+    tailwindcss: lib/cli.js
+  checksum: f5956c3c117e6c125dbb5081d863ffefd6dd734199d47424045945d70b90cb2c07b05066cac83884489fcfd55f55f4d4a66d2e2c1993842dc365c04b6a75b22e
   languageName: node
   linkType: hard
 

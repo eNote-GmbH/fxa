@@ -1,4 +1,4 @@
-import './global.css';
+import '../styles/tailwind.css';
 
 export const metadata = {
   title: 'Welcome to payments/next',

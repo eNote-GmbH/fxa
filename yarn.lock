@@ -8721,6 +8721,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nrwl/eslint-plugin-nx@npm:16.3.2":
+  version: 16.3.2
+  resolution: "@nrwl/eslint-plugin-nx@npm:16.3.2"
+  dependencies:
+    "@nx/eslint-plugin": 16.3.2
+  checksum: 4746345d54656096acb51415dc4bb14a4e04d3d717e2c70728bf821524a285ebe7f9caa71aa45acdfa3cb6becb494b0f2ce31211a68c95de3a6b0752310235b5
+  languageName: node
+  linkType: hard
+
 "@nrwl/jest@npm:16.3.1":
   version: 16.3.1
   resolution: "@nrwl/jest@npm:16.3.1"
@@ -8884,6 +8893,28 @@ __metadata:
   peerDependencies:
     nx: ">= 15 <= 17"
   checksum: 4062d383c814422565a436bdf676729e1cf787d43a3901c73d677a81d330f0019637c3116fe176f88e482dfc06fbc3784a1df27c4af20e6668514ee6733740b2
+  languageName: node
+  linkType: hard
+
+"@nx/eslint-plugin@npm:16.3.2, @nx/eslint-plugin@npm:^16.3.2":
+  version: 16.3.2
+  resolution: "@nx/eslint-plugin@npm:16.3.2"
+  dependencies:
+    "@nrwl/eslint-plugin-nx": 16.3.2
+    "@nx/devkit": 16.3.2
+    "@nx/js": 16.3.2
+    "@typescript-eslint/type-utils": ^5.58.0
+    "@typescript-eslint/utils": ^5.58.0
+    chalk: ^4.1.0
+    confusing-browser-globals: ^1.0.9
+    semver: 7.3.4
+  peerDependencies:
+    "@typescript-eslint/parser": ^5.58.0
+    eslint-config-prettier: ^8.1.0
+  peerDependenciesMeta:
+    eslint-config-prettier:
+      optional: true
+  checksum: cbac5a88e6999f85b907423aedcbefc68179fe34821e349ca392a3b795f87949e967b4c59082d2f4aab7261f7a4de5b9a954b1202bb2fe676077eee96eb826c1
   languageName: node
   linkType: hard
 
@@ -16099,25 +16130,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:18.0.11":
-  version: 18.0.11
-  resolution: "@types/react-dom@npm:18.0.11"
-  dependencies:
-    "@types/react": "*"
-  checksum: 579691e4d5ec09688087568037c35edf8cfb1ab3e07f6c60029280733ee7b5c06d66df6fcc90786702c93ac8cb13bc7ff16c79ddfc75d082938fbaa36e1cdbf4
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:<18.0.0":
-  version: 17.0.17
-  resolution: "@types/react-dom@npm:17.0.17"
-  dependencies:
-    "@types/react": ^17
-  checksum: 23caf98aa03e968811560f92a2c8f451694253ebe16b670929b24eaf0e7fa62ba549abe9db0ac028a9d8a9086acd6ab9c6c773f163fa21224845edbc00ba6232
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:>=16.9.0, @types/react-dom@npm:^17.0.9":
+"@types/react-dom@npm:^17.0.9":
   version: 17.0.9
   resolution: "@types/react-dom@npm:17.0.9"
   dependencies:
@@ -16126,21 +16139,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.0.0":
-  version: 18.2.5
-  resolution: "@types/react-dom@npm:18.2.5"
+"@types/react-helmet@npm:^6.1.6":
+  version: 6.1.6
+  resolution: "@types/react-helmet@npm:6.1.6"
   dependencies:
     "@types/react": "*"
-  checksum: c48209f8c60cb9054f3deee5365bc9fd6dadd8f901b67f1612a334057b2671518fc5145f14aca63ff276a926ccb5358308a6cf58ec700178f382bb3ebde96d91
-  languageName: node
-  linkType: hard
-
-"@types/react-helmet@npm:^6.1.2":
-  version: 6.1.2
-  resolution: "@types/react-helmet@npm:6.1.2"
-  dependencies:
-    "@types/react": "*"
-  checksum: ee66a7b950ba9f1013fd25de32ba6322bf5206fe5de56b9556a5151c76522b892b0cc5566cc8dfd0b54cb76fedb17ed21b6b2e6577849b791c168eaed5aad5f3
+  checksum: 81560c56bfe854b6a43aee31360862588ac875d1177b975da5ce049ac9aa2f7c98dcde65d4397bfaa04e468f40cf3ab2975a2ef966a69d64a60493422898698d
   languageName: node
   linkType: hard
 
@@ -16175,13 +16179,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-stripe-elements@npm:^6.0.5":
-  version: 6.0.5
-  resolution: "@types/react-stripe-elements@npm:6.0.5"
+"@types/react-stripe-elements@npm:^6.0.6":
+  version: 6.0.6
+  resolution: "@types/react-stripe-elements@npm:6.0.6"
   dependencies:
     "@types/react": "*"
     "@types/stripe-v3": "*"
-  checksum: 4fd8097e9c955f1d6e25f97283c5431c9bb74c44202770ad91aa68f2a1fcb45c4732bc5470da440d68527b5b34d2e1d9e21615e30cdb3391b9740bf5f6f9ba0c
+  checksum: c5b35e3b644b68a935d77038d0b0d7e702f6aec5e1618db1c24a2dc2b339f0f01fc81c80867e16be84c8b3f754b561b10848e44cd3e6ebe4e7c408d44b039101
   languageName: node
   linkType: hard
 
@@ -16221,7 +16225,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:>=16.9.0, @types/react@npm:^17.0.14":
+"@types/react@npm:^17.0.14":
   version: 17.0.14
   resolution: "@types/react@npm:17.0.14"
   dependencies:
@@ -16229,28 +16233,6 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: ca2eca8f33ddbcba46932efeb8affdd274ea5800ea38bf8bc8de205808d09de21ea1f3d6ab156573aca393b912f0d908826cc6ad92470a3f2b6c34e70d5f75db
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:18.0.28":
-  version: 18.0.28
-  resolution: "@types/react@npm:18.0.28"
-  dependencies:
-    "@types/prop-types": "*"
-    "@types/scheduler": "*"
-    csstype: ^3.0.2
-  checksum: e752df961105e5127652460504785897ca6e77259e0da8f233f694f9e8f451cde7fa0709d4456ade0ff600c8ce909cfe29f9b08b9c247fa9b734e126ec53edd7
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^17":
-  version: 17.0.45
-  resolution: "@types/react@npm:17.0.45"
-  dependencies:
-    "@types/prop-types": "*"
-    "@types/scheduler": "*"
-    csstype: ^3.0.2
-  checksum: 3cc13a02824c13f6fa4807a83abd065ac1d9943359e76bd995cc7cd2b4148c1176ebd54a30a9f4eb8a0f141ff359d712876f256c4fee707e4290607ef8410b3e
   languageName: node
   linkType: hard
 
@@ -16958,6 +16940,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/type-utils@npm:^5.58.0":
+  version: 5.59.11
+  resolution: "@typescript-eslint/type-utils@npm:5.59.11"
+  dependencies:
+    "@typescript-eslint/typescript-estree": 5.59.11
+    "@typescript-eslint/utils": 5.59.11
+    debug: ^4.3.4
+    tsutils: ^3.21.0
+  peerDependencies:
+    eslint: "*"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 3570ba21af35e7e0a916b606c1af311c00d20fe354a5837e0e937191b5e99ceb0076a5ba2924eaa028d4614e03981b20cfdd83a2be780c39e02be3b3bd365b63
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/types@npm:3.10.1":
   version: 3.10.1
   resolution: "@typescript-eslint/types@npm:3.10.1"
@@ -17174,6 +17173,24 @@ __metadata:
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 228318df02f2381f859af184cafa5de4146a2e1518a5062444bf9bd7d468e058f9bd93a3e46cc4683d9bd02159648f416e5c7c539901ca16142456cae3c1af5f
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/utils@npm:5.59.11":
+  version: 5.59.11
+  resolution: "@typescript-eslint/utils@npm:5.59.11"
+  dependencies:
+    "@eslint-community/eslint-utils": ^4.2.0
+    "@types/json-schema": ^7.0.9
+    "@types/semver": ^7.3.12
+    "@typescript-eslint/scope-manager": 5.59.11
+    "@typescript-eslint/types": 5.59.11
+    "@typescript-eslint/typescript-estree": 5.59.11
+    eslint-scope: ^5.1.1
+    semver: ^7.3.7
+  peerDependencies:
+    eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+  checksum: a61f3e761dbdc5d0bdb6c78bca7b2e628f7a1920192286d002219cc3acb516757613c2ec2a4adc416858ba1751ecbe2784457d6ebcec6bbb109cfc2ca210572b
   languageName: node
   linkType: hard
 
@@ -23706,7 +23723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"confusing-browser-globals@npm:^1.0.11":
+"confusing-browser-globals@npm:^1.0.11, confusing-browser-globals@npm:^1.0.9":
   version: 1.0.11
   resolution: "confusing-browser-globals@npm:1.0.11"
   checksum: 3afc635abd37e566477f610e7978b15753f0e84025c25d49236f1f14d480117185516bdd40d2a2167e6bed8048641a9854964b9c067e3dcdfa6b5d0ad3c3a5ef
@@ -30666,7 +30683,7 @@ fsevents@~2.1.1:
     "@types/react": ^17.0.14
     "@types/react-dom": ^17.0.9
     "@types/react-redux": ^7.1.18
-    "@types/react-stripe-elements": ^6.0.5
+    "@types/react-stripe-elements": ^6.0.6
     "@types/react-transition-group": ^4.4.2
     "@types/sinon": 10.0.1
     "@types/storybook__addon-actions": ^5.2.1
@@ -30821,7 +30838,7 @@ fsevents@~2.1.1:
     "@types/prettier": 2.3.0
     "@types/react": ^17.0.14
     "@types/react-dom": ^17.0.9
-    "@types/react-helmet": ^6.1.2
+    "@types/react-helmet": ^6.1.6
     "@types/react-transition-group": ^4.4.2
     "@types/rimraf": 3.0.0
     "@types/sinon": ^10
@@ -31062,6 +31079,7 @@ fsevents@~2.1.1:
   resolution: "fxa@workspace:."
   dependencies:
     "@faker-js/faker": ^8.0.2
+    "@nx/eslint-plugin": ^16.3.2
     "@nx/jest": 16.3.1
     "@nx/js": 16.3.2
     "@nx/next": ^16.3.2
@@ -31071,8 +31089,8 @@ fsevents@~2.1.1:
     "@testing-library/react": 14.0.0
     "@types/jest": ^29.5.1
     "@types/node": ^18.16.1
-    "@types/react": 18.0.28
-    "@types/react-dom": 18.0.11
+    "@types/react": ^17.0.14
+    "@types/react-dom": ^17.0.9
     "@typescript-eslint/eslint-plugin": ^5.59.1
     "@typescript-eslint/parser": ^5.59.1
     babel-jest: ^29.4.1
@@ -31101,8 +31119,8 @@ fsevents@~2.1.1:
     pm2: ^5.3.0
     postcss: ^8.4.14
     prettier: ^2.6.2
-    react: 18.2.0
-    react-dom: 18.2.0
+    react: ^16.13.1
+    react-dom: ^16.13.1
     replace-in-file: ^6.3.5
     semver: ^7.3.5
     stylelint: ^15.6.2
@@ -47456,18 +47474,6 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
-"react-dom@npm:18.2.0":
-  version: 18.2.0
-  resolution: "react-dom@npm:18.2.0"
-  dependencies:
-    loose-envify: ^1.1.0
-    scheduler: ^0.23.0
-  peerDependencies:
-    react: ^18.2.0
-  checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
-  languageName: node
-  linkType: hard
-
 "react-draggable@npm:^4.4.3":
   version: 4.4.3
   resolution: "react-draggable@npm:4.4.3"
@@ -47991,15 +47997,6 @@ fsevents@~2.1.1:
     object-assign: ^4.1.1
     prop-types: ^15.6.2
   checksum: 8484f3ecb13414526f2a7412190575fc134da785c02695eb92bb6028c930bfe1c238d7be2a125088fec663cc7cda0a3623373c46807cf2c281f49c34b79881ac
-  languageName: node
-  linkType: hard
-
-"react@npm:18.2.0":
-  version: 18.2.0
-  resolution: "react@npm:18.2.0"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
   languageName: node
   linkType: hard
 
@@ -49888,15 +49885,6 @@ resolve@^2.0.0-next.3:
     loose-envify: ^1.1.0
     object-assign: ^4.1.1
   checksum: c4b35cf967c8f0d3e65753252d0f260271f81a81e427241295c5a7b783abf4ea9e905f22f815ab66676f5313be0a25f47be582254db8f9241b259213e999b8fc
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.23.0":
-  version: 0.23.0
-  resolution: "scheduler@npm:0.23.0"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: d79192eeaa12abef860c195ea45d37cbf2bbf5f66e3c4dcd16f54a7da53b17788a70d109ee3d3dde1a0fd50e6a8fc171f4300356c5aee4fc0171de526bf35f8a
   languageName: node
   linkType: hard
 

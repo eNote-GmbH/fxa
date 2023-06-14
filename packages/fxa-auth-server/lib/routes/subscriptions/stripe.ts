@@ -416,51 +416,65 @@ export class StripeHandler {
   async previewInvoice(
     request: AuthRequest
   ): Promise<invoiceDTO.firstInvoicePreviewSchema> {
-    this.log.begin('subscriptions.previewInvoice', request);
-
-    const { promotionCode, priceId } = request.payload as Record<
-      string,
-      string
-    >;
-
-    let customer = undefined;
-    if (request.auth.credentials) {
-      const { uid, email } = await handleAuth(this.db, request.auth, true);
-      await this.customs.check(request, email, 'previewInvoice');
-      try {
-        customer = await this.stripeHelper.fetchCustomer(uid, ['tax']);
-      } catch (e: any) {
-        this.log.error('previewInvoice.fetchCustomer', { error: e, uid });
-      }
-    } else {
-      await this.customs.checkIpOnly(request, 'previewInvoice');
-    }
-
-    const taxAddress = this.buildTaxAddress(
-      request.app.clientAddress,
-      request.app.geo.location
-    );
-
     try {
-      const previewInvoice = await this.stripeHelper.previewInvoice({
-        customer: customer || undefined,
-        promotionCode,
-        priceId,
-        taxAddress,
-      });
+      this.log.begin('subscriptions.previewInvoice', request);
 
-      return stripeInvoiceToFirstInvoicePreviewDTO(previewInvoice);
-    } catch (err: any) {
-      if (err.type === 'StripeInvalidRequestError') {
-        throw error.invalidInvoicePreviewRequest(
-          err,
-          err.message,
-          priceId,
-          customer?.id
-        );
+      const { promotionCode, priceId } = request.payload as Record<
+        string,
+        string
+      >;
+
+      let customer = undefined;
+      if (request.auth.credentials) {
+        const { uid, email } = await handleAuth(this.db, request.auth, true);
+        await this.customs.check(request, email, 'previewInvoice');
+        try {
+          customer = await this.stripeHelper.fetchCustomer(uid, ['tax']);
+        } catch (e: any) {
+          this.log.error('previewInvoice.fetchCustomer', { error: e, uid });
+        }
       } else {
-        throw err;
+        await this.customs.checkIpOnly(request, 'previewInvoice');
       }
+
+      const taxAddress = this.buildTaxAddress(
+        request.app.clientAddress,
+        request.app.geo.location
+      );
+
+      try {
+        const previewInvoice = await this.stripeHelper.previewInvoice({
+          customer: customer || undefined,
+          promotionCode,
+          priceId,
+          taxAddress,
+        });
+
+        return stripeInvoiceToFirstInvoicePreviewDTO(previewInvoice);
+      } catch (err: any) {
+        if (err.type === 'StripeInvalidRequestError') {
+          throw error.invalidInvoicePreviewRequest(
+            err,
+            err.message,
+            priceId,
+            customer?.id
+          );
+        } else {
+          throw err;
+        }
+      }
+    } catch (err: any) {
+      //TODO - this is part of 7664, we can remove this one we uncover the underlying error
+      Sentry.withScope((scope) => {
+        scope.setContext('previewInvoice', {
+          error: err,
+          msg: err.message,
+        });
+        Sentry.captureMessage(`Invoice Preview Error.`, Sentry.Severity.Error);
+      });
+      this.log.error('subscriptions.previewInvoice', err);
+
+      throw err;
     }
   }
 

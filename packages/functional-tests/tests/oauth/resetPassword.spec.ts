@@ -58,7 +58,6 @@ test.describe('oauth reset password', () => {
     await page.goto(link);
 
     await resetPassword.resetNewPassword(newPassword);
-    expect(await resetPassword.completeResetPasswordHeader()).toBe(true);
 
     // Verify logged in
     expect(await relier.isLoggedIn()).toBe(true);

@@ -9,7 +9,7 @@ const Hoek = require('@hapi/hoek');
 const Sentry = require('@sentry/node');
 const { ExtraErrorData } = require('@sentry/integrations');
 const verror = require('verror');
-const { ERRNO } = require('./error');
+const error = require('./error');
 const {
   tagCriticalEvent,
   buildSentryConfig,
@@ -30,9 +30,9 @@ const URIENCODEDFILTERED = encodeURIComponent(FILTERED);
 
 // Maintain list of errors that should not be sent to Sentry
 const IGNORED_ERROR_NUMBERS = [
-  ERRNO.BOUNCE_HARD,
-  ERRNO.BOUNCE_SOFT,
-  ERRNO.BOUNCE_COMPLAINT,
+  error.ERRNO.BOUNCE_HARD,
+  error.ERRNO.BOUNCE_SOFT,
+  error.ERRNO.BOUNCE_COMPLAINT,
 ];
 
 /**
@@ -252,7 +252,7 @@ async function configureSentry(server, config, processName = 'key_server') {
      * They will escape sentry capture otherwise
      */
     server.ext('onPreResponse', (request, h) => {
-      const response = request.response;
+      let response = request.response;
       if (
         response.isBoom &&
         response.output.statusCode >= 500 &&
@@ -260,7 +260,7 @@ async function configureSentry(server, config, processName = 'key_server') {
       ) {
         reportValidationError(response.stack, response);
       }
-
+      response = error.translate(request, response);
       return response;
     });
   }

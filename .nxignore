@@ -1,0 +1,14 @@
+# prebuild
+
+# build
+./packages/fxa-content-server/node_modules/.cache/webpack
+./packages/fxa-content-server/node_modules/.cache/cache-loader
+./packages/fxa-settings/node_modules/.cache/terser-webpack-plugin
+./packages/fxa-settings/node_modules/.cache/.eslintcache
+./packages/fxa-settings/node_modules/.cache/babel-loader
+./packages/fxa-admin-panel/node_modules/.cache/.eslintcache
+./packages/fxa-admin-panel/node_modules/.cache/.eslintcache
+
+
+# build storybook
+./packages/fxa-payments-server/node_modules/.cache/

@@ -29,37 +29,34 @@
       "dependsOn": ["^prebuild"],
       "inputs": ["production", "^production"],
       "outputs": [
-        "{projectRoot}/locale",
-        "{projectRoot}/public/locales",
-        "{projectRoot}/public/legal-docs",
-        "{projectRoot}/vendor",
-        "{projectRoot}/var",
-        "{projectRoot}/config/*.json"
+        "{projectRoot}/build",
+        "{projectRoot}/dist",
+        "{projectRoot}/public",
+        "{workspaceRoot}/packages/fxa-auth-server/vendor/ejs.js",
+        "{workspaceRoot}/packages/fxa-content-server/app/styles/main.css",
+        "{workspaceRoot}/packages/fxa-content-server/server/config/local.json"
       ]
     },
     "build": {
       "dependsOn": ["^build", "prebuild"],
       "inputs": ["production", "^production"],
       "outputs": [
-        "{projectRoot}/.tmp",
-        "{projectRoot}/.tscompiled",
-        "{projectRoot}/app/i18n",
-        "{projectRoot}/app/i18n/styles/main.css",
-        "{projectRoot}/app/i18n/styles/tailwind.out.css",
         "{projectRoot}/build",
         "{projectRoot}/dist",
-        "{projectRoot}/locale",
-        "{projectRoot}/public/locales",
-        "{projectRoot}/public/legal-docs",
-        "{projectRoot}/styles",
-        "{projectRoot}/src/styles/tailwind.out.css",
-        "{projectRoot}/temp",
-        "{projectRoot}/var"
+        "{projectRoot}/public",
+        "{workspaceRoot}/packages/fxa-auth-server/vendor/ejs.js",
+        "{workspaceRoot}/packages/fxa-content-server/.tmp",
+        "{workspaceRoot}/packages/fxa-content-server/app/i18n",
+        "{workspaceRoot}/packages/fxa-auth-server/lib/senders/emails/css",
+        "{workspaceRoot}/packages/fxa-admin-panel/src/styles/tailwind.out.css",
+        "{workspaceRoot}/packages/fxa-content-server/server/config/local.json",
+        "{workspaceRoot}/packages/fxa-payments-server/tsconfig.tsbuildinfo"
       ]
     },
     "build-storybook": {
       "dependsOn": ["build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production"],
+      "outputs": ["{project-root}/storybook-static"]
     },
     "lint": {
       "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
@@ -75,41 +72,56 @@
       ]
     },
     "test-unit": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
     },
     "test-integration": {
-      "dependsOn": ["build", "build-l10n-test"]
+      "dependsOn": ["build", "build-l10n-test"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
     },
     "test-e2e": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
     },
     "start": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": []
     },
     "storybook": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": []
     },
     "restart": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": []
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/.vscode/**/*",
-      "!{projectRoot}/jest.config.[jt]s",
-      "!{projectRoot}/locale/**/*",
-      "!{projectRoot}/public/locales/*",
       "!{projectRoot}/tests/**/*",
       "!{projectRoot}/test/**/*",
+      "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/tsconfig.spec.json"
     ],
+    "test": ["sharedGlobals", "{projectRoot}/**/*.[jt]s?x"],
+    "lint": ["{projectRoot}/**/*.[jt]s?x"],
     "sharedGlobals": [
       "{workspaceRoot}/packages/db-migrations/**/?(*.)+(js|sql|json)"
     ]

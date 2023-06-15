@@ -20,9 +20,6 @@ const { configureSentry } = require('./sentry');
 const { swaggerOptions } = require('../docs/swagger/swagger-options');
 const { Account } = require('fxa-shared/db/models/auth');
 const { determineLocale } = require('fxa-shared/l10n/determineLocale');
-const {
-  reportValidationError,
-} = require('fxa-shared/sentry/report-validation-error');
 
 function trimLocale(header) {
   if (!header) {
@@ -40,15 +37,6 @@ function trimLocale(header) {
     str += `,${parts[i]}`;
   }
   return str.trim();
-}
-
-function logValidationError(response, log) {
-  if (response?.__proto__.name !== 'ValidationError') {
-    return;
-  }
-
-  log.error('server.ValidationError', response);
-  reportValidationError(response.stack, response);
 }
 
 function logEndpointErrors(response, log) {
@@ -314,13 +302,27 @@ async function create(log, error, config, routes, db, statsd) {
 
   server.ext('onPreResponse', (request, h) => {
     let response = request.response;
+    response.header('Timestamp', `${Math.floor(Date.now() / 1000)}`);
     if (response.isBoom) {
       logEndpointErrors(response, log);
-      logValidationError(response, log);
+
+      // Do not log errors that either aren't a validation error or have a status code below 500
+      // ValidationError that are 4xx status are request validation errors
+      if (
+        response?.__proto__.name === 'ValidationError' ||
+        response.output.statusCode >= 500
+      ) {
+        log.error('server.ValidationError', response);
+      }
+
       response = error.translate(request, response);
-      response.backtrace(request.app.traced);
+      if (config.env !== 'prod') {
+        response.backtrace(request.app.traced);
+      }
+
+      return h.continue;
     }
-    response.header('Timestamp', `${Math.floor(Date.now() / 1000)}`);
+
     return response;
   });
 
@@ -507,6 +509,5 @@ module.exports = {
   // Functions below exported for testing
   _configureSentry: configureSentry,
   _logEndpointErrors: logEndpointErrors,
-  _logValidationError: logValidationError,
   _trimLocale: trimLocale,
 };

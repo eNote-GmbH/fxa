@@ -246,6 +246,23 @@ async function configureSentry(server, config, processName = 'key_server') {
         reportSentryError(event.error, request);
       }
     });
+
+    /**
+     * This captures joi response validation errors
+     * They will escape sentry capture otherwise
+     */
+    server.ext('onPreResponse', (request, h) => {
+      const response = request.response;
+      if (
+        response.isBoom &&
+        response.output.statusCode >= 500 &&
+        response?.__proto__.name === 'ValidationError'
+      ) {
+        reportValidationError(response.stack, response);
+      }
+
+      return response;
+    });
   }
 }
 

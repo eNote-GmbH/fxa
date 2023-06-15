@@ -43,6 +43,7 @@ function trimLocale(header) {
 }
 
 function logValidationError(response, log) {
+  console.log('!!! log validation error', response);
   if (response?.__proto__.name !== 'ValidationError') {
     return;
   }

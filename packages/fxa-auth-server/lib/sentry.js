@@ -63,6 +63,7 @@ function filterObject(obj) {
  * @param {Sentry.Event} event
  */
 function filterSentryEvent(event, hint) {
+  console.log('!!! Filter Sentry Event', event);
   event = tagCriticalEvent(event);
 
   if (event.breadcrumbs) {
@@ -172,6 +173,7 @@ function reportSentryError(err, request) {
 
 async function configureSentry(server, config, processName = 'key_server') {
   if (config.sentry.dsn) {
+    console.log('!!! configuring sentry');
     const opts = buildSentryConfig(
       {
         ...config,
@@ -246,6 +248,19 @@ async function configureSentry(server, config, processName = 'key_server') {
         reportSentryError(event.error, request);
       }
     });
+
+    server.events.on('response', (request, event, tags) => {
+      if (event?.error) {
+        console.log(
+          '!!! preresponse error',
+          request.raw.url,
+          event?.error,
+          tags?.error
+        );
+      }
+    });
+  } else {
+    console.log('!!! skipping sentry configuration');
   }
 }
 

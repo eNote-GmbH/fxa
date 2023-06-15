@@ -67,5 +67,31 @@ module.exports = (log, config, redirectDomain) => {
         return h.redirect(config.contentServer.url + request.raw.req.url);
       },
     },
+    {
+      method: 'GET',
+      path: '/validation-check',
+      options: {
+        validate: {
+          query: {
+            test: isA.string().max(6).required(),
+            boom: isA.string().required(),
+          },
+        },
+        response: {
+          schema: {
+            data: isA.string().max(3).required(),
+          },
+        },
+      },
+      handler: async function (request, h) {
+        console.log('!!! validation-check');
+
+        if (request.query.boom === 'true') {
+          throw new Error('whoops');
+        }
+
+        return { data: request.query.test };
+      },
+    },
   ];
 };

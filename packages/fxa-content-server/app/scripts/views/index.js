@@ -32,13 +32,23 @@ const t = (msg) => msg;
 class IndexView extends FormView {
   template = Template;
 
-  partialTemplates = {
-    unsafeThirdPartyAuthHTML: ThirdPartyAuth,
-  };
+  // partialTemplates = {
+  //   unsafeThirdPartyAuthHTML: ThirdPartyAuth,
+  // };
 
   constructor(options) {
     super(options);
     this.config = options.config || {};
+  }
+
+  setInitialContext(context) {
+    context.set({
+      unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
+        isSignup: true,
+        showGoogleLogin: true,
+        showAppleLogin: true,
+      }),
+    });
   }
 
   get viewName() {

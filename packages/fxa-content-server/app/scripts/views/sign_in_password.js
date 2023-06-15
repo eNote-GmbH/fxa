@@ -17,6 +17,8 @@ import ServiceMixin from './mixins/service-mixin';
 import SignedInNotificationMixin from './mixins/signed-in-notification-mixin';
 import SignInMixin from './mixins/signin-mixin';
 import Template from 'templates/sign_in_password.mustache';
+import ThirdPartyAuthMixin from './mixins/third-party-auth-mixin';
+import ThirdPartyAuth from '../templates/partial/third-party-auth.mustache';
 import UserCardMixin from './mixins/user-card-mixin';
 import PocketMigrationMixin from './mixins/pocket-migration-mixin';
 
@@ -55,10 +57,36 @@ const SignInPasswordView = FormView.extend({
 
   setInitialContext(context) {
     const account = this.getAccount();
+    // TODO: account status call after implementation in FXA-7332 and retrieve if the
+    // user has a third party auth linked account and which providerId(s), and if no
+    // password is set (`verifierSetAt`). We will need an explicit call here in case
+    // a user directly navigates to /signin or they're redirected, e.g. when directly
+    // accessing settings
+    const linkedAccounts = [{ providerId: 1 }];
+    const hasNoPassword = true;
+
+    const hasLinkedAccount = linkedAccounts.length > 0;
+    let hasLinkedGoogleAccount = false;
+    let hasLinkedAppleAccount = false;
+
+    const hasLinkedAccountAndNoPassword = hasLinkedAccount && hasNoPassword;
+    linkedAccounts.forEach((linkedAccount) => {
+      if (linkedAccount.providerId === 1) {
+        hasLinkedGoogleAccount = true;
+      } else if (linkedAccount.providerId === 2) {
+        hasLinkedAppleAccount = true;
+      }
+    });
 
     context.set({
       email: account.get('email'),
       isPasswordNeeded: this.isPasswordNeededForAccount(account),
+      hasLinkedAccountAndNoPassword,
+      unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
+        isSignup: false,
+        showGoogleLogin: hasNoPassword && hasLinkedGoogleAccount,
+        showAppleLogin: hasNoPassword && hasLinkedAppleAccount,
+      }),
     });
   },
 
@@ -102,6 +130,7 @@ Cocktail.mixin(
   ServiceMixin,
   SignInMixin,
   SignedInNotificationMixin,
+  ThirdPartyAuthMixin,
   UserCardMixin,
   PocketMigrationMixin
 );

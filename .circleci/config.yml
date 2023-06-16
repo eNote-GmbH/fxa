@@ -558,10 +558,12 @@ jobs:
   # use.
   init:
     executor: build-executor
-    resource_class: small
+    resource_class: large
     steps:
       - git-checkout
       - provision
+      # Just for now see if we can cache it...
+      - build
       - cache-save-yarn
       - save-init-workspace
 
@@ -571,7 +573,8 @@ jobs:
     steps:
       - git-checkout
       - restore-workspace
-      - cache-restore-nx
+      # - cache-restore-nx
+      # should get nx cache hits
       - build
       - save-build-workspace
 
@@ -744,6 +747,9 @@ jobs:
     steps:
       - git-checkout
       - restore-workspace
+      - run:
+          name: Build
+          command: nx run-many -t build
       - run:
           name: Build and deploy Storybooks
           command: |

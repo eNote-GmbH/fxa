@@ -16,7 +16,16 @@
           "test",
           "test-unit",
           "test-integration",
-          "test-e2e"
+          "test-e2e",
+          "test-integration-auth-server-p1",
+          "test-integration-auth-server-p2",
+          "test-integration-frontend",
+          "test-integration-auth-scripts",
+          "test-integration-auth-oauth",
+          "test-integration-auth-remote",
+          "test-integration-auth-local",
+          "test-integration-api",
+          "test-integration-shared"
         ]
       }
     }
@@ -89,6 +98,78 @@
       ]
     },
     "test-e2e": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-auth-server-p1": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-auth-server-p2": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-frontend": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-auth-scripts": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-auth-oauth": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-auth-remote": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-auth-local": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-api": {
+      "dependsOn": ["build"],
+      "outputs": [
+        "{projectRoot}/coverage",
+        "{projectRoot}/.nyc_output",
+        "{projectRoot}/test-results.xml"
+      ]
+    },
+    "test-integration-shared": {
       "dependsOn": ["build"],
       "outputs": [
         "{projectRoot}/coverage",

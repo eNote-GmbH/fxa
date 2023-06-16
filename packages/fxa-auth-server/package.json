@@ -35,7 +35,7 @@
     "restart": "pm2 restart pm2.config.js",
     "test": "VERIFIER_VERSION=0 scripts/test-local.sh",
     "test-unit": "VERIFIER_VERSION=0 TEST_TYPE=unit scripts/test-ci.sh",
-    "test-integration": "yarn test-integration-auth-p1 && yarn test-integration-auth-p2",
+    "test-integration": "yarn test-integration-auth-server-p1 && yarn test-integration-auth-server-p2",
     "test-integration-auth-server-p1": "yarn test-integration-auth-local && yarn test-integration-auth-scripts",
     "test-integration-auth-server-p2": "yarn test-integration-auth-oauth && yarn test-integration-auth-remote",
     "test-integration-auth-local": "yarn gen-keys && MOCHA_FILE=artifacts/tests/fxa-auth-server/mocha-integration-local.xml mocha --require esbuild-register --recursive --timeout 5000 --exit --grep #integration test/local",

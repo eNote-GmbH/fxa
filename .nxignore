@@ -1,4 +1,4 @@
-# NX should only track changes in the packages directory!
+<!-- # NX should only track changes in the packages directory!
 _dev
 _scripts
 .circleci
@@ -177,4 +177,4 @@ packages/fxa-settings/test/
 
 Library
 .node
-process.yml
+process.yml -->

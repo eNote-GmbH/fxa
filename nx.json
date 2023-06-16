@@ -54,14 +54,8 @@
       "outputs": [
         "{projectRoot}/build",
         "{projectRoot}/dist",
-        "{projectRoot}/public",
-        "{workspaceRoot}/packages/fxa-auth-server/vendor/ejs.js",
-        "{workspaceRoot}/packages/fxa-content-server/.tmp",
-        "{workspaceRoot}/packages/fxa-content-server/app/i18n",
-        "{workspaceRoot}/packages/fxa-auth-server/lib/senders/emails/css",
-        "{workspaceRoot}/packages/fxa-admin-panel/src/styles/tailwind.out.css",
-        "{workspaceRoot}/packages/fxa-content-server/server/config/local.json",
-        "{workspaceRoot}/packages/fxa-payments-server/tsconfig.tsbuildinfo"
+        "{projectRoot}/public/locales",
+        "{projectRoot}/public/legal-docs"
       ]
     },
     "build-storybook": {
@@ -70,7 +64,7 @@
       "outputs": ["{project-root}/storybook-static"]
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "inputs": ["production", "^production"],
       "outputs": ["{projectRoot}/.eslintcache"]
     },
     "test": {
@@ -208,27 +202,11 @@
   },
   "namedInputs": {
     "default": [
-      "{projectRoot}/**/*",
-      "{workspaceRoot}/jest.preset.js",
-      "sharedGlobals"
+      "{projectRoot}/**/*.js",
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx"
     ],
-    "production": [
-      "default",
-      "!{workspaceRoot}/packages/version.json",
-      "!{projectRoot}/public/locales",
-      "!{projectRoot}/public/legal-docs",
-      "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/.vscode/**/*",
-      "!{projectRoot}/tests/**/*",
-      "!{projectRoot}/test/**/*",
-      "!{projectRoot}/jest.config.[jt]s",
-      "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/tsconfig.json"
-    ],
-    "test": ["sharedGlobals", "{projectRoot}/**/*.[jt]s?x"],
-    "lint": ["{projectRoot}/**/*.[jt]s?x"],
-    "sharedGlobals": []
+    "production": ["default"]
   },
   "cli": {
     "packageManager": "yarn"

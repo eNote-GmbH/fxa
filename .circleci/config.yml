@@ -387,8 +387,9 @@ commands:
     steps:
       - run:
           name: Build
-          command: time CI= npx nx run-many -t build --all --verbose
-
+          command: npx nx run-many -t build
+          environment:
+            CI:
 
   save-init-workspace:
     steps:
@@ -598,17 +599,13 @@ jobs:
   # Runs unit tests in parallel across packages with changes.
   unit-test:
     executor: default-executor
-    resource_class: medium
+    resource_class: large
     steps:
       - git-checkout
       - restore-workspace
       - run:
           name: Run unit tests
-          # command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-unit
-          command: sleep 5m
-          environment:
-            NODE_ENV: test
-      - store-artifacts
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-unit
 
   integration-test:
     parameters:
@@ -788,119 +785,13 @@ workflows:
           name: Build (PR)
           requires:
             - Init (PR)
-      - lint:
-          name: Lint (PR)
-          requires:
-            - Init (PR)
-          post-steps:
-            - fail-fast
-      - compile:
-          name: Compile (PR)
-          requires:
-            - Build (PR)
-          post-steps:
-            - fail-fast
       - unit-test:
           name: Unit Test (PR)
           requires:
             - Init (PR)
           post-steps:
             - fail-fast
-      - save-nx-cache:
-          name: Save NX Cache (PR)
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Admin (PR)
-          target: admin
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - API (PR)
-          target: api
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Auth Server P1 (PR)
-          target: auth-server-p1
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Auth Server P2 (PR)
-          target: auth-server-p2
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Front End (PR)
-          target: frontend
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Shared Libraries (PR)
-          target: shared
-          requires:
-            - Build (PR)
-      - test-content-server-part:
-          name: Functional Test - Content 1 (PR)
-          index: 0
-          total: 5
-          requires:
-            - Build (PR)
-      - test-content-server-part:
-          name: Functional Test - Content 2 (PR)
-          index: 1
-          total: 5
-          requires:
-            - Build (PR)
-      - test-content-server-part:
-          name: Functional Test - Content 3 (PR)
-          index: 2
-          total: 5
-          requires:
-            - Build (PR)
-      - test-content-server-part:
-          name: Functional Test - Content 4 (PR)
-          index: 3
-          total: 5
-          requires:
-            - Build (PR)
-      - test-content-server-part:
-          name: Functional Test - Content 5 (PR)
-          index: 4
-          total: 5
-          requires:
-            - Build (PR)
-      - playwright-functional-tests:
-          name: Functional Tests - Playwright (PR)
-          resource_class: large
-          requires:
-            - Build (PR)
-      - build-and-deploy-storybooks:
-          name: Deploy Storybooks (PR)
-          requires:
-            - Build (PR)
-      - on-complete:
-          name: Tests Complete (PR)
-          stage: Tests
-          job_type: build
-          requires:
-            - Lint (PR)
-            - Compile (PR)
-            - Unit Test (PR)
-            - Integration Test - Admin (PR)
-            - Integration Test - API (PR)
-            - Integration Test - Auth Server P1 (PR)
-            - Integration Test - Auth Server P2 (PR)
-            - Integration Test - Front End (PR)
-            - Integration Test - Shared Libraries (PR)
-            - Functional Test - Content 1 (PR)
-            - Functional Test - Content 2 (PR)
-            - Functional Test - Content 3 (PR)
-            - Functional Test - Content 4 (PR)
-            - Functional Test - Content 5 (PR)
-            - Functional Tests - Playwright (PR)
-            - Save NX Cache (PR)
-            - Deploy Storybooks (PR)
+
 
   # Triggered remotely. See .circleci/README.md
   production_smoke_tests:

@@ -32,7 +32,8 @@
   },
   "targetDefaults": {
     "compile": {
-      "dependsOn": ["^compile"]
+      "dependsOn": ["^compile"],
+      "inputs": ["production", "^production"]
     },
     "prebuild": {
       "dependsOn": ["^prebuild"],
@@ -73,7 +74,7 @@
       "outputs": ["{projectRoot}/.eslintcache"]
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "inputs": ["production", "^production"],
       "dependsOn": ["test-unit", "test-integration", "test-e2e"],
       "outputs": [
         "{projectRoot}/coverage",
@@ -83,6 +84,7 @@
     },
     "test-unit": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -91,6 +93,7 @@
     },
     "test-integration": {
       "dependsOn": ["build", "build-l10n-test"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -99,6 +102,7 @@
     },
     "test-e2e": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -107,6 +111,7 @@
     },
     "test-integration-auth-server-p1": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -115,6 +120,7 @@
     },
     "test-integration-auth-server-p2": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -123,6 +129,7 @@
     },
     "test-integration-frontend": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -131,6 +138,7 @@
     },
     "test-integration-auth-scripts": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -139,6 +147,7 @@
     },
     "test-integration-auth-oauth": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -147,6 +156,7 @@
     },
     "test-integration-auth-remote": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -155,6 +165,7 @@
     },
     "test-integration-auth-local": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -163,6 +174,7 @@
     },
     "test-integration-api": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -171,6 +183,7 @@
     },
     "test-integration-shared": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -179,19 +192,26 @@
     },
     "start": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": []
     },
     "storybook": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": []
     },
     "restart": {
       "dependsOn": ["build"],
+      "inputs": ["production", "^production"],
       "outputs": []
     }
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "{workspaceRoot}/jest.preset.js",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{workspaceRoot}/packages/version.json",

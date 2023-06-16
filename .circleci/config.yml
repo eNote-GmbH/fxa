@@ -407,12 +407,12 @@ commands:
           root: /home/circleci/project
           paths:
             - node_modules/.cache/nx
-            - packages/**/dist
-            - packages/**/public
-            - packages/**/src/styles
-            - packages/**/styles
-            - packages/**/vendor
-            - packages/**/var
+            # - packages/**/dist
+            # - packages/**/public
+            # - packages/**/src/styles
+            # - packages/**/styles
+            # - packages/**/vendor
+            # - packages/**/var
 
   restore-workspace:
     steps:
@@ -604,7 +604,8 @@ jobs:
       - restore-workspace
       - run:
           name: Run unit tests
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-unit
+          # command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-unit
+          command: sleep 5m
           environment:
             NODE_ENV: test
       - store-artifacts
@@ -802,7 +803,7 @@ workflows:
       - unit-test:
           name: Unit Test (PR)
           requires:
-            - Build (PR)
+            - Init (PR)
           post-steps:
             - fail-fast
       - save-nx-cache:

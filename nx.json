@@ -31,7 +31,8 @@
       "outputs": [
         "{projectRoot}/build",
         "{projectRoot}/dist",
-        "{projectRoot}/public",
+        "{projectRoot}/public/locales",
+        "{projectRoot}/public/legal-docs",
         "{workspaceRoot}/packages/fxa-auth-server/vendor/ejs.js",
         "{workspaceRoot}/packages/fxa-content-server/app/styles/main.css",
         "{workspaceRoot}/packages/fxa-content-server/server/config/local.json"
@@ -112,19 +113,21 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
+      "!{workspaceRoot}/packages/version.json",
+      "!{projectRoot}/public/locales",
+      "!{projectRoot}/public/legal-docs",
       "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/.vscode/**/*",
       "!{projectRoot}/tests/**/*",
       "!{projectRoot}/test/**/*",
       "!{projectRoot}/jest.config.[jt]s",
-      "!{projectRoot}/tsconfig.spec.json"
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/tsconfig.json"
     ],
     "test": ["sharedGlobals", "{projectRoot}/**/*.[jt]s?x"],
     "lint": ["{projectRoot}/**/*.[jt]s?x"],
-    "sharedGlobals": [
-      "{workspaceRoot}/packages/db-migrations/**/?(*.)+(js|sql|json)"
-    ]
+    "sharedGlobals": []
   },
   "cli": {
     "packageManager": "yarn"

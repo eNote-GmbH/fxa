@@ -387,7 +387,7 @@ commands:
     steps:
       - run:
           name: Build
-          command: npx nx run-many -t build
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
           environment:
             CI:
 
@@ -604,8 +604,11 @@ jobs:
       - git-checkout
       - restore-workspace
       - run:
+          name: Test build cache
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
+      - run:
           name: Run unit tests
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-unit
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit
 
   integration-test:
     parameters:

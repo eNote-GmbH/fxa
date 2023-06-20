@@ -607,6 +607,9 @@ jobs:
           name: Test build cache
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
       - run:
+          name: Test build cache 2
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
+      - run:
           name: Run unit tests
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit
 

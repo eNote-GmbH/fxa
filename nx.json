@@ -3,7 +3,7 @@
   "npmScope": "fxa",
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx/tasks-runners/default",
+      "runner": "nx-cloud",
       "options": {
         "cacheableOperations": [
           "build",
@@ -26,18 +26,29 @@
           "test-integration-auth-local",
           "test-integration-api",
           "test-integration-shared"
-        ]
+        ],
+        "accessToken": "ODI2MGMxMDYtZjI1OS00MWM4LTg4YjEtOTMzNmRlNzEwNzU4fHJlYWQtd3JpdGU="
       }
     }
   },
   "targetDefaults": {
     "compile": {
-      "dependsOn": ["^compile"],
-      "inputs": ["production", "^production"]
+      "dependsOn": [
+        "^compile"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
     },
     "prebuild": {
-      "dependsOn": ["^prebuild"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "^prebuild"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/build",
         "{projectRoot}/dist",
@@ -49,8 +60,14 @@
       ]
     },
     "build": {
-      "dependsOn": ["^build", "prebuild"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "^build",
+        "prebuild"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/build",
         "{projectRoot}/dist",
@@ -59,17 +76,36 @@
       ]
     },
     "build-storybook": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
-      "outputs": ["{project-root}/storybook-static"]
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{project-root}/storybook-static"
+      ]
     },
     "lint": {
-      "inputs": ["production", "^production"],
-      "outputs": ["{projectRoot}/.eslintcache"]
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{projectRoot}/.eslintcache"
+      ]
     },
     "test": {
-      "inputs": ["production", "^production"],
-      "dependsOn": ["test-unit", "test-integration", "test-e2e"],
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "dependsOn": [
+        "test-unit",
+        "test-integration",
+        "test-e2e"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -77,8 +113,13 @@
       ]
     },
     "test-unit": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -86,8 +127,14 @@
       ]
     },
     "test-integration": {
-      "dependsOn": ["build", "build-l10n-test"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build",
+        "build-l10n-test"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -95,8 +142,13 @@
       ]
     },
     "test-e2e": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -104,8 +156,13 @@
       ]
     },
     "test-integration-auth-server-p1": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -113,8 +170,13 @@
       ]
     },
     "test-integration-auth-server-p2": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -122,8 +184,13 @@
       ]
     },
     "test-integration-frontend": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -131,8 +198,13 @@
       ]
     },
     "test-integration-auth-scripts": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -140,8 +212,13 @@
       ]
     },
     "test-integration-auth-oauth": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -149,8 +226,13 @@
       ]
     },
     "test-integration-auth-remote": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -158,8 +240,13 @@
       ]
     },
     "test-integration-auth-local": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -167,8 +254,13 @@
       ]
     },
     "test-integration-api": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -176,8 +268,13 @@
       ]
     },
     "test-integration-shared": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": [
         "{projectRoot}/coverage",
         "{projectRoot}/.nyc_output",
@@ -185,18 +282,33 @@
       ]
     },
     "start": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": []
     },
     "storybook": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": []
     },
     "restart": {
-      "dependsOn": ["build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "outputs": []
     }
   },
@@ -206,7 +318,9 @@
       "{projectRoot}/**/*.ts",
       "{projectRoot}/**/*.tsx"
     ],
-    "production": ["default"]
+    "production": [
+      "default"
+    ]
   },
   "cli": {
     "packageManager": "yarn"

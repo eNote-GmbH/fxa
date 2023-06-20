@@ -333,7 +333,7 @@ commands:
     steps:
       - run:
           name: Linting
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=3 -t lint
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t lint
 
   compile:
     steps:
@@ -387,7 +387,7 @@ commands:
     steps:
       - run:
           name: Build
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build --parallel=1
           environment:
             CI:
             NODE_ENV: test
@@ -605,20 +605,8 @@ jobs:
       - git-checkout
       - restore-workspace
       - run:
-          name: Test build cache
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
-          environment:
-            NODE_ENV: test
-            CI:
-      - run:
-          name: Test build cache 2
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
-          environment:
-            NODE_ENV: test
-            CI:
-      - run:
           name: Run unit tests
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit --parallel=1
           environment:
             NODE_ENV: test
             CI:
@@ -639,7 +627,7 @@ jobs:
       - run:
           name: Run API Integration Tests
           command: |
-            npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-integration-<< parameters.target >>
+            npx nx affected --base=main --head=$CIRCLE_SHA1 --parallel=1 -t test-integration-<< parameters.target >> --parallel=1
           environment:
             NODE_ENV: test
       - store-artifacts

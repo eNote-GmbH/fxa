@@ -390,6 +390,7 @@ commands:
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
           environment:
             CI:
+            NODE_ENV: test
 
   save-init-workspace:
     steps:
@@ -606,12 +607,21 @@ jobs:
       - run:
           name: Test build cache
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
+          environment:
+            NODE_ENV: test
+            CI:
       - run:
           name: Test build cache 2
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t build
+          environment:
+            NODE_ENV: test
+            CI:
       - run:
           name: Run unit tests
           command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit
+          environment:
+            NODE_ENV: test
+            CI:
 
   integration-test:
     parameters:

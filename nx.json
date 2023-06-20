@@ -54,6 +54,7 @@
         "{projectRoot}/dist",
         "{projectRoot}/public/locales",
         "{projectRoot}/public/legal-docs",
+        "{workspaceRoot}/packages/fxa-profile-server/var/public",
         "{workspaceRoot}/packages/fxa-auth-server/vendor/ejs.js",
         "{workspaceRoot}/packages/fxa-content-server/app/styles/main.css",
         "{workspaceRoot}/packages/fxa-content-server/server/config/local.json"

@@ -392,6 +392,15 @@ commands:
             CI:
             NODE_ENV: test
 
+  unit-test:
+    steps:
+      - run:
+          name: Run unit tests
+          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit --parallel=1
+          environment:
+            CI:
+            NODE_ENV: test
+
   save-init-workspace:
     steps:
       - persist_to_workspace:
@@ -402,6 +411,14 @@ commands:
             - packages/**/node_modules
             - packages/version.json
 
+  save-workspace:
+    steps:
+      - persist_to_workspace:
+          name: Save Build Workspace
+          root: /home/circleci/project
+          paths:
+            - ./
+
   save-build-workspace:
     steps:
       - persist_to_workspace:
@@ -409,13 +426,6 @@ commands:
           root: /home/circleci/project
           paths:
             - node_modules/.cache/nx
-            # - packages/**/dist
-            # - packages/**/public
-            # - packages/**/src/styles
-            # - packages/**/styles
-            # - packages/**/vendor
-            # - packages/**/var
-
   restore-workspace:
     steps:
       - attach_workspace:
@@ -564,10 +574,9 @@ jobs:
     steps:
       - git-checkout
       - provision
-      # Just for now see if we can cache it...
       - build
       - cache-save-yarn
-      - save-init-workspace
+      - save-workspace
 
   build:
     executor: default-executor
@@ -575,10 +584,8 @@ jobs:
     steps:
       - git-checkout
       - restore-workspace
-      # - cache-restore-nx
       # should get nx cache hits
       - build
-      - save-build-workspace
 
   # Runs linter on packages that have changes.
   lint:
@@ -602,14 +609,8 @@ jobs:
     executor: default-executor
     resource_class: large
     steps:
-      - git-checkout
       - restore-workspace
-      - run:
-          name: Run unit tests
-          command: npx nx affected --base=main --head=$CIRCLE_SHA1 -t test-unit --parallel=1
-          environment:
-            NODE_ENV: test
-            CI:
+      - unit-test
 
   integration-test:
     parameters:
@@ -631,13 +632,6 @@ jobs:
           environment:
             NODE_ENV: test
       - store-artifacts
-
-  save-nx-cache:
-    executor: default-executor
-    resource_class: small
-    steps:
-      - restore-workspace
-      - cache-save-nx
 
   # Runs a subset of content server's tests. These tests take longer to run,
   # so they are split into parts.

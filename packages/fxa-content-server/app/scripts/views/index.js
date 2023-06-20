@@ -32,10 +32,6 @@ const t = (msg) => msg;
 class IndexView extends FormView {
   template = Template;
 
-  // partialTemplates = {
-  //   unsafeThirdPartyAuthHTML: ThirdPartyAuth,
-  // };
-
   constructor(options) {
     super(options);
     this.config = options.config || {};

@@ -53,23 +53,24 @@ const SignInPasswordView = FormView.extend({
     if (account && account.get('metricsEnabled') === false) {
       GleanMetrics.setEnabled(false);
     }
+
+    // We need an explicit call here in case a user directly navigates to
+    // /signin or they're redirected, e.g. when directly accessing settings
+    if (account) {
+      return account.checkAccountStatus();
+    }
   },
 
   setInitialContext(context) {
     const account = this.getAccount();
-    // TODO: account status call after implementation in FXA-7332 and retrieve if the
-    // user has a third party auth linked account and which providerId(s), and if no
-    // password is set (`verifierSetAt`). We will need an explicit call here in case
-    // a user directly navigates to /signin or they're redirected, e.g. when directly
-    // accessing settings
-    const linkedAccounts = [{ providerId: 1 }];
-    const hasNoPassword = true;
+    const linkedAccounts = account.get('linkedAccounts');
+    const hasPassword = account.get('hasPassword');
 
     const hasLinkedAccount = linkedAccounts.length > 0;
     let hasLinkedGoogleAccount = false;
     let hasLinkedAppleAccount = false;
 
-    const hasLinkedAccountAndNoPassword = hasLinkedAccount && hasNoPassword;
+    const hasLinkedAccountAndNoPassword = hasLinkedAccount && !hasPassword;
     linkedAccounts.forEach((linkedAccount) => {
       if (linkedAccount.providerId === 1) {
         hasLinkedGoogleAccount = true;
@@ -84,8 +85,8 @@ const SignInPasswordView = FormView.extend({
       hasLinkedAccountAndNoPassword,
       unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
         isSignup: false,
-        showGoogleLogin: hasNoPassword && hasLinkedGoogleAccount,
-        showAppleLogin: hasNoPassword && hasLinkedAppleAccount,
+        showGoogleLogin: !hasPassword && hasLinkedGoogleAccount,
+        showAppleLogin: !hasPassword && hasLinkedAppleAccount,
       }),
     });
   },

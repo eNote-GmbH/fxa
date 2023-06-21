@@ -449,6 +449,7 @@ export class Account extends BaseAuthModel {
     }
     account.emails = await Email.findByUid(account.uid);
     account.primaryEmail = account.emails?.find((email) => email.isPrimary);
+    account.linkedAccounts = await LinkedAccount.findByUid(account.uid);
     return account;
   }
 

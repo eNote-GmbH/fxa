@@ -1172,12 +1172,9 @@ export class AccountHandler {
 
     try {
       if (thirdPartyAuthStatus) {
-        // *** TODO: fixme, account record doesn't contain these values ***//
-
         const account = await this.db.accountRecord(email);
         // account must exist or unknown account error is thrown
         result.exists = true;
-        console.log('result account yo', account);
         result.hasLinkedAccount = account.linkedAccounts.length > 0;
         result.hasPassword = account.verifierSetAt > 0;
       } else {

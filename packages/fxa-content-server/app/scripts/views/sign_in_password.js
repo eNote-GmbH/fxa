@@ -61,7 +61,7 @@ const SignInPasswordView = FormView.extend({
     // endpoint and we can't always use the account/status GET call here
     // since we don't always have the uid.
     if (
-      (account && account.get('linkedAccounts') === undefined) ||
+      (account && account.get('hasLinkedAccount') === undefined) ||
       account.get('hasPassword') === undefined
     ) {
       return account.checkAccountStatus();
@@ -70,30 +70,15 @@ const SignInPasswordView = FormView.extend({
 
   setInitialContext(context) {
     const account = this.getAccount();
-    const linkedAccounts = account.get('linkedAccounts');
+    const hasLinkedAccount = account.get('hasLinkedAccount');
     const hasPassword = account.get('hasPassword');
-
-    const hasLinkedAccount = linkedAccounts.length > 0;
-    let hasLinkedGoogleAccount = false;
-    let hasLinkedAppleAccount = false;
-
-    const hasLinkedAccountAndNoPassword = hasLinkedAccount && !hasPassword;
-    linkedAccounts.forEach((linkedAccount) => {
-      if (linkedAccount.providerId === 1) {
-        hasLinkedGoogleAccount = true;
-      } else if (linkedAccount.providerId === 2) {
-        hasLinkedAppleAccount = true;
-      }
-    });
 
     context.set({
       email: account.get('email'),
       isPasswordNeeded: this.isPasswordNeededForAccount(account),
-      hasLinkedAccountAndNoPassword,
+      hasLinkedAccountAndNoPassword: hasLinkedAccount && !hasPassword,
       unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
         isSignup: false,
-        showGoogleLogin: !hasPassword && hasLinkedGoogleAccount,
-        showAppleLogin: !hasPassword && hasLinkedAppleAccount,
       }),
     });
   },

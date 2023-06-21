@@ -41,8 +41,6 @@ class IndexView extends FormView {
     context.set({
       unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
         isSignup: true,
-        showGoogleLogin: true,
-        showAppleLogin: true,
       }),
     });
   }
@@ -241,7 +239,7 @@ class IndexView extends FormView {
     // that accounts can be merged.
     return this.invokeBrokerMethod('beforeSignIn', account)
       .then(() => this.user.checkAccountStatus(account))
-      .then(({ exists, hasPassword, linkedAccounts }) => {
+      .then(({ exists, hasPassword, hasLinkedAccount }) => {
         const nextEndpoint = exists ? 'signin' : 'signup';
         if (exists) {
           // If the account exists, use the stored account
@@ -252,7 +250,7 @@ class IndexView extends FormView {
           // ensure its values are set.
           account.set('email', email);
           account.set('hasPassword', hasPassword);
-          account.set('linkedAccounts', linkedAccounts);
+          account.set('hasLinkedAccount', hasLinkedAccount);
           this.navigate(nextEndpoint, { account });
         } else {
           // The email address does not belong to a current user. Validate its

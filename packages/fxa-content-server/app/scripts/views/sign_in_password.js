@@ -61,8 +61,9 @@ const SignInPasswordView = FormView.extend({
     // endpoint and we can't always use the account/status GET call here
     // since we don't always have the uid.
     if (
-      (account && account.get('hasLinkedAccount') === undefined) ||
-      account.get('hasPassword') === undefined
+      account &&
+      (account.get('hasLinkedAccount') === undefined ||
+        account.get('hasPassword') === undefined)
     ) {
       return account.checkAccountStatus();
     }

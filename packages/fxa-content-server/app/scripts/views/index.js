@@ -240,8 +240,8 @@ class IndexView extends FormView {
     // before checking whether the email exists, check
     // that accounts can be merged.
     return this.invokeBrokerMethod('beforeSignIn', account)
-      .then(() => this.user.checkAccountEmailExists(account))
-      .then((exists) => {
+      .then(() => this.user.checkAccountStatus(account))
+      .then(({ exists, hasPassword, linkedAccounts }) => {
         const nextEndpoint = exists ? 'signin' : 'signup';
         if (exists) {
           // If the account exists, use the stored account
@@ -249,8 +249,10 @@ class IndexView extends FormView {
           // the next page.
           account = this.user.getAccountByEmail(email);
           // the returned account could be the default,
-          // ensure its email is set.
+          // ensure its values are set.
           account.set('email', email);
+          account.set('hasPassword', hasPassword);
+          account.set('linkedAccounts', linkedAccounts);
           this.navigate(nextEndpoint, { account });
         } else {
           // The email address does not belong to a current user. Validate its

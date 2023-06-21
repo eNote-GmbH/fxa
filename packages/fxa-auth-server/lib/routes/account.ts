@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
+  LinkedAccount,
   deleteAllPayPalBAs,
   getAllPayPalBAByUid,
 } from 'fxa-shared/db/models/auth';
@@ -1148,6 +1149,8 @@ export class AccountHandler {
   async accountStatusCheck(request: AuthRequest) {
     const email = (request.payload as any).email;
     const checkDomain = !!(request.payload as any).checkDomain;
+    const thirdPartyAuthStatus = !!(request.payload as any)
+      .thirdPartyAuthStatus;
     let invalidDomain = false;
 
     if (checkDomain) {
@@ -1156,14 +1159,33 @@ export class AccountHandler {
 
     await this.customs.check(request, email, 'accountStatusCheck');
 
-    const result: { exists: boolean; invalidDomain?: boolean } = {
+    const result: {
+      exists: boolean;
+      invalidDomain?: boolean;
+      linkedAccounts?: LinkedAccount[];
+      hasPassword?: boolean;
+    } = {
       exists: false,
       invalidDomain: undefined,
+      linkedAccounts: undefined,
+      hasPassword: undefined,
     };
 
     try {
-      const exist = await this.db.accountExists(email);
-      result.exists = exist;
+      if (!thirdPartyAuthStatus) {
+        const exist = await this.db.accountExists(email);
+        result.exists = exist;
+      } else {
+        // account must exist or unknown account error is thrown
+
+        // *** TODO: fixme, account record doesn't contain these values ***//
+
+        const account = await this.db.accountRecord(email);
+        result.exists = true;
+        console.log('result account yo', account);
+        result.linkedAccounts = account.linkedAccounts;
+        result.hasPassword = account.verifierSetAt > 0;
+      }
 
       if (checkDomain) {
         result.invalidDomain = invalidDomain;
@@ -1895,12 +1917,15 @@ export const accountRoutes = (
         validate: {
           payload: isA.object({
             email: validators.email().required(),
+            thirdPartyAuthStatus: isA.boolean().optional(),
             checkDomain: isA.optional(),
           }),
         },
         response: {
           schema: isA.object({
             exists: isA.boolean().required(),
+            linkedAccounts: isA.array().items(isA.object()).optional(),
+            hasPassword: isA.boolean().optional(),
             invalidDomain: isA.boolean().optional(),
           }),
         },

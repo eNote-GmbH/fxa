@@ -218,18 +218,15 @@ FxaClientWrapper.prototype = {
    * }>}
    */
   checkAccountStatus: withClient((client, email) => {
-    return client.accountStatusByEmail(email).then(function (status) {
-      // TODO: update endpoint in FXA-7332 and retrieve if the user has a
-      // third party auth linked account and which providerId(s), and if no
-      // password is set (`verifierSetAt`). Prolly update this to `return status`
-      const linkedAccounts = [{ providerId: 1 }];
-      const hasPassword = false;
-      return {
-        exists: status.exists,
-        linkedAccounts,
-        hasPassword,
-      };
-    });
+    return client
+      .accountStatusByEmail(email, { thirdPartyAuthStatus: true })
+      .then(function ({ exists, linkedAccounts, hasPassword }) {
+        return {
+          exists,
+          linkedAccounts,
+          hasPassword,
+        };
+      });
   }),
 
   /**

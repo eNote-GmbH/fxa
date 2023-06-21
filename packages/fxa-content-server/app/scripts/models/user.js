@@ -714,6 +714,23 @@ var User = Backbone.Model.extend({
   },
 
   /**
+   * Check whether an Account's `email` is registered. Removes the account
+   * from storage if account no longer exists on the server.
+   *
+   * @param {Object} account - account to check
+   * @returns {Promise} resolves to `true` if an account exists, `false` otw.
+   */
+  checkAccountStatus(account) {
+    return account.checkAccountStatus().then((result) => {
+      console.log('result from user checkAcountStatus', result);
+      if (!result.exists) {
+        this.removeAccount(account);
+      }
+      return result;
+    });
+  },
+
+  /**
    * Reject the unblockCode for the given account. This invalidates
    * the unblock code and logs the signin attempt as suspicious.
    *

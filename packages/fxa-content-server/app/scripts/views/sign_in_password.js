@@ -55,8 +55,15 @@ const SignInPasswordView = FormView.extend({
     }
 
     // We need an explicit call here in case a user directly navigates to
-    // /signin or they're redirected, e.g. when directly accessing settings
-    if (account) {
+    // /signin or they're redirected, e.g. when directly accessing settings.
+    // However, we don't want to call this if the previous screen already
+    // checked the status due to rate limiting on the account/status POST
+    // endpoint and we can't always use the account/status GET call here
+    // since we don't always have the uid.
+    if (
+      (account && account.get('linkedAccounts') === undefined) ||
+      account.get('hasPassword') === undefined
+    ) {
       return account.checkAccountStatus();
     }
   },

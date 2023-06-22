@@ -380,7 +380,7 @@ export class LoginPage extends BaseLayout {
 
   async waitForCWTSHeader() {
     await this.page.waitForSelector(selectors.CWTS_HEADER, {
-      timeout: 100,
+      timeout: 2000,
     });
   }
 

@@ -15,7 +15,18 @@ import { FilteredSetupIntent } from '../lib/apiClient';
 import { Customer, Plan, Profile } from '../store/types';
 
 const invoice: LatestInvoiceItems = {
-  line_items: [],
+  line_items: [
+    {
+      id: '123doneProMonthly',
+      name: 'Pro level',
+      currency: 'USD',
+      amount: 735,
+      period: {
+        start: Date.now() / 1000 - 86400 * 31,
+        end: Date.now() / 1000 + 86400 * 31,
+      },
+    },
+  ],
   subtotal: 735,
   subtotal_excluding_tax: null,
   total: 735,

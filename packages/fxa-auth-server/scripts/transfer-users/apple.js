@@ -11,6 +11,7 @@ const program = require('commander');
 
 const axios = require('axios');
 const random = require('../../lib/crypto/random');
+const Log = require('../../lib/log')
 const uuid = require('uuid');
 
 const GRANT_TYPE = 'client_credentials';
@@ -20,7 +21,7 @@ const USER_MIGRATION_ENDPOINT = 'https://appleid.apple.com/auth/usermigrationinf
 const APPLE_PROVIDER = 'apple';
 
 export class AppleUser {
-  constructor(email, transferSub, uid, alternateEmails, db, writeStream, config, mock) {
+  constructor(email, transferSub, uid, alternateEmails, db, writeStream, config, mock, log) {
     this.email = email;
     this.transferSub = transferSub;
     this.uid = uid;
@@ -29,6 +30,7 @@ export class AppleUser {
     this.writeStream = writeStream;
     this.config = config;
     this.mock = mock;
+    this.log = log;
   }
 
   // Exchanges the Apple `transfer_sub` for the user's profile information and
@@ -209,18 +211,17 @@ export class AppleUser {
     const success = this.success;
     const err = (this.err && this.err.message) || '';
 
-/*    this.log.notifyAttachedServices(
-      'subscription:update', {},
+    this.log.notifyAttachedServices(
+      'appleUserMigration', {},
       {
         uid,
-        // This number needs to be in seconds.
-        eventCreatedAt: eventCreatedAt ?? Math.floor(Date.now() / 1000),
-        isActive: true,
-        productCapabilities: capabilities,
+        appleEmail,
+        fxaEmail,
+        transferSub,
+        success,
+        err,
       },
-    );*/
-    
-    
+    );
     const line = `${transferSub},${uid},${fxaEmail},${appleEmail},${success},${err}`;
     this.writeStream.write(line + '\n');
   }
@@ -241,6 +242,16 @@ export class ApplePocketFxAMigration {
     });
     this.writeStream.on('error', (err) => {
       console.error(`There was an error writing the file: ${err}`);
+    });
+
+    const statsd = {
+      increment: () => {},
+      timing: () => {},
+      close: () => {},
+    };
+    this.log = Log({
+      ...config.log,
+      statsd,
     });
   }
 
@@ -271,7 +282,7 @@ export class ApplePocketFxAMigration {
           // Splits on `:` since they are not allowed in emails
           alternateEmails = tokens[3].replaceAll('"', '').split(':');
         }
-        return new AppleUser(email, transferSub, uid, alternateEmails, this.db, this.writeStream, this.config, this.mock);
+        return new AppleUser(email, transferSub, uid, alternateEmails, this.db, this.writeStream, this.config, this.mock, this.log);
       }).filter((user) => user);
     } catch (err) {
       console.error('No such file or directory');

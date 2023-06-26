@@ -263,7 +263,7 @@ describe('QueueworkerService', () => {
       ]);
     });
     
-    it.only('handles apple migration event', async () => {
+    it('handles apple migration event', async () => {
       const msg = updateStubMessage(appleMigrationMessage);
       await (service as any).handleMessage(msg);
       

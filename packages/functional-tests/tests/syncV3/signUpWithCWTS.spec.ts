@@ -2,41 +2,35 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test } from '../../lib/fixtures/standard';
+import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
 import uaStrings from '../../lib/ua-strings';
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
 
 const password = 'passwordzxcv';
 let email;
-//let syncBrowserPages;
+let syncBrowserPages;
 
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('Sync v3 sign up and CWTS', () => {
-  test.beforeEach(async ({ target, pages: { login } }) => {
+  test.beforeEach(async ({ target }) => {
     test.slow();
+    syncBrowserPages = await newPagesForSync(target);
+    const { login } = syncBrowserPages;
     email = login.createEmail('sync{id}');
-    //syncBrowserPages = await newPagesForSync(target);
-    await login.clearCache();
   });
 
-  // test.afterEach(async () => {
-  //   await syncBrowserPages.browser?.close();
-  // });
+  test.afterEach(async () => {
+    await syncBrowserPages.browser?.close();
+  });
 
-  // test.only('verify with signup code and CWTS', async ({ target }) => {
-  //   const { page, login, signinTokenCode } =
-  //     syncBrowserPages;
-
-  test.only('verify with signup code and CWTS', async ({
-    target,
-    pages: { login, page, signinTokenCode },
-  }) => {
+  test('verify with signup code and CWTS', async ({ target }) => {
+    const { login, page, signinTokenCode, connectAnotherDevice } =
+      syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
     });
-    //const customEventDetail = [
-    const customEventDetail = createCustomEventDetail(
+    const eventDetailStatus = createCustomEventDetail(
       FirefoxCommand.FxAStatus,
       {
         signedInUser: null,
@@ -47,20 +41,180 @@ test.describe('Sync v3 sign up and CWTS', () => {
         },
       }
     );
+    const eventDetailLinkAccount = createCustomEventDetail(
+      FirefoxCommand.LinkAccount,
+      {
+        ok: true,
+      }
+    );
     await page.goto(
       `${
         target.contentServerUrl
-      }?context=fx_desktop_v3&service=sync&action=email/?${query.toString()}`
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
     );
-    await login.respondToWebChannelMessage(customEventDetail);
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.respondToWebChannelMessage(eventDetailLinkAccount);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
     await login.setEmail(email);
     await signinTokenCode.clickSubmitButton();
     await login.setPassword(password);
     await login.confirmPassword(password);
     await login.setAge('21');
-    await signinTokenCode.clickSubmitButton();
 
-    // the CWTS form is on the same signup page
-    await login.waitForCWTSHeader();
+    // The CWTS form is on the same signup page
+    expect(await login.isCWTSHeader()).toBe(true);
+    expect(await login.isCWTSEngineBookmarks()).toBe(true);
+    expect(await login.isCWTSEngineHistory()).toBe(true);
+    expect(await login.isCWTSEnginePassword()).toBe(true);
+    expect(await login.isCWTSEngineTabs()).toBe(true);
+    expect(await login.isCWTSEnginePrefs()).toBe(true);
+    expect(await login.isCWTSEngineAddresses()).toBe(false);
+
+    // Uncheck the passwords and history engines
+    await login.uncheckCWTSEngineHistory();
+    await login.uncheckCWTSEnginePasswords();
+    await signinTokenCode.clickSubmitButton();
+    await login.checkWebChannelMessage(FirefoxCommand.LinkAccount);
+    await login.fillOutSignUpCode(email);
+    expect(await connectAnotherDevice.fxaConnected.isVisible()).toBeTruthy();
+  });
+
+  test('verify at CWTS', async ({ target }) => {
+    const { login, page, signinTokenCode, connectAnotherDevice } =
+      syncBrowserPages;
+    const query = new URLSearchParams({
+      forceUA: uaStrings['desktop_firefox_71'],
+    });
+    const eventDetailStatus = createCustomEventDetail(
+      FirefoxCommand.FxAStatus,
+      {
+        signedInUser: null,
+        capabilities: {
+          multiService: false,
+        },
+      }
+    );
+    await page.goto(
+      `${
+        target.contentServerUrl
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+    );
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
+    await login.setEmail(email);
+    await signinTokenCode.clickSubmitButton();
+    await login.setPassword(password);
+    await login.confirmPassword(password);
+    await login.setAge('21');
+
+    // The CWTS form is on the same signup page
+    expect(await login.isCWTSHeader()).toBe(true);
+    expect(await login.isCWTSEngineAddresses()).toBe(false);
+    expect(await login.isDoNotSync()).toBe(false);
+    await login.checkWebChannelMessage(FirefoxCommand.LinkAccount);
+    await login.noSuchWebChannelMessage(FirefoxCommand.Login);
+    await signinTokenCode.clickSubmitButton();
+    await login.fillOutSignUpCode(email);
+    await login.checkWebChannelMessage(FirefoxCommand.Login);
+    expect(await connectAnotherDevice.fxaConnected.isVisible()).toBeTruthy();
+  });
+
+  test('engines not supported', async ({ target }) => {
+    const { login, page, signinTokenCode } = syncBrowserPages;
+    const query = new URLSearchParams({
+      forceUA: uaStrings['desktop_firefox_58'],
+    });
+    const eventDetailStatus = createCustomEventDetail(
+      FirefoxCommand.FxAStatus,
+      {
+        signedInUser: null,
+      }
+    );
+    await page.goto(
+      `${
+        target.contentServerUrl
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+    );
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
+    await login.setEmail(email);
+    await signinTokenCode.clickSubmitButton();
+    await login.setPassword(password);
+    await login.confirmPassword(password);
+    await login.setAge('21');
+
+    // The CWTS form is on the same signup page
+    expect(await login.isCWTSHeader()).toBe(true);
+    expect(await login.isCWTSEngineAddresses()).toBe(false);
+  });
+
+  test('neither `creditcards` nor `addresses` supported', async ({
+    target,
+  }) => {
+    const { login, page, signinTokenCode } = syncBrowserPages;
+    const query = new URLSearchParams({
+      forceUA: uaStrings['desktop_firefox_58'],
+    });
+    const eventDetailStatus = createCustomEventDetail(
+      FirefoxCommand.FxAStatus,
+      {
+        signedInUser: null,
+        capabilities: {
+          choose_what_to_sync: true,
+          engines: [],
+        },
+      }
+    );
+    await page.goto(
+      `${
+        target.contentServerUrl
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+    );
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
+    await login.setEmail(email);
+    await signinTokenCode.clickSubmitButton();
+    await login.setPassword(password);
+    await login.confirmPassword(password);
+    await login.setAge('21');
+
+    // The CWTS form is on the same signup page
+    expect(await login.isCWTSHeader()).toBe(true);
+    expect(await login.isCWTSEngineAddresses()).toBe(false);
+    expect(await login.isCWTSEngineCreditCards()).toBe(false);
+  });
+
+  test('`creditcards` and `addresses` supported', async ({ target }) => {
+    const { login, page, signinTokenCode } = syncBrowserPages;
+    const query = new URLSearchParams({
+      forceUA: uaStrings['desktop_firefox_58'],
+    });
+    const eventDetailStatus = createCustomEventDetail(
+      FirefoxCommand.FxAStatus,
+      {
+        signedInUser: null,
+        capabilities: {
+          choose_what_to_sync: true,
+          engines: ['creditcards', 'addresses'],
+        },
+      }
+    );
+    await page.goto(
+      `${
+        target.contentServerUrl
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+    );
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
+    await login.setEmail(email);
+    await signinTokenCode.clickSubmitButton();
+    await login.setPassword(password);
+    await login.confirmPassword(password);
+    await login.setAge('21');
+
+    // The CWTS form is on the same signup page
+    expect(await login.isCWTSHeader()).toBe(true);
+    expect(await login.isCWTSEngineAddresses()).toBe(true);
+    expect(await login.isCWTSEngineCreditCards()).toBe(true);
   });
 });

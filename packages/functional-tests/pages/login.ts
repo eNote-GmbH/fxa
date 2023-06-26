@@ -53,6 +53,13 @@ export const selectors = {
   CWTS_HEADER: 'text="Choose what to sync"',
   CWTS_ENGINE_BOOKMARKS: '#sync-engine-bookmarks',
   CWTS_ENGINE_HISTORY: '#sync-engine-history',
+  CWTS_ENGINE_PASSWORDS: '#sync-engine-passwords',
+  CWTS_ENGINE_ADDONS: '#sync-engine-addons',
+  CWTS_ENGINE_TABS: '#sync-engine-tabs',
+  CWTS_ENGINE_PREFS: '#sync-engine-prefs',
+  CWTS_ENGINE_CREDITCARDS: '#sync-engine-creditcards',
+  CWTS_ENGINE_ADDRESSES: '#sync-engine-addresses',
+  DO_NOT_SYNC: '#do-not-sync-device',
 };
 
 type FirstSignUpOptions = {
@@ -384,15 +391,87 @@ export class LoginPage extends BaseLayout {
     });
   }
 
+  async isCWTSHeader() {
+    return this.page.locator(selectors.CWTS_HEADER).isVisible();
+  }
+
+  async isCWTSEngineCreditCards() {
+    return this.page.locator(selectors.CWTS_ENGINE_CREDITCARDS).isVisible();
+  }
+
+  async isCWTSEngineBookmarks() {
+    return this.page.locator(selectors.CWTS_ENGINE_BOOKMARKS).isVisible();
+  }
+
+  async isCWTSEngineHistory() {
+    return this.page.locator(selectors.CWTS_ENGINE_HISTORY).isVisible();
+  }
+
+  async isCWTSEnginePassword() {
+    return this.page.locator(selectors.CWTS_ENGINE_PASSWORDS).isVisible();
+  }
+
+  async isCWTSEngineAddons() {
+    return this.page.locator(selectors.CWTS_ENGINE_ADDONS).isVisible();
+  }
+
+  async isCWTSEnginePrefs() {
+    return this.page.locator(selectors.CWTS_ENGINE_PREFS).isVisible();
+  }
+
+  async isCWTSEngineTabs() {
+    return this.page.locator(selectors.CWTS_ENGINE_TABS).isVisible();
+  }
+
+  async isCWTSEngineAddresses() {
+    return this.page.locator(selectors.CWTS_ENGINE_ADDRESSES).isVisible();
+  }
+
+  async isDoNotSync() {
+    return this.page.locator(selectors.DO_NOT_SYNC).isVisible();
+  }
+
   async waitForCWTSEngineBookmarks() {
     await this.page.waitForSelector(selectors.CWTS_ENGINE_BOOKMARKS, {
-      timeout: 100,
+      timeout: 1000,
     });
   }
 
   async waitForCWTSEngineHistory() {
     await this.page.waitForSelector(selectors.CWTS_ENGINE_HISTORY, {
-      timeout: 100,
+      timeout: 1000,
+    });
+  }
+
+  async uncheckCWTSEngineHistory() {
+    await this.page.locator(selectors.CWTS_ENGINE_HISTORY).click();
+  }
+
+  async waitForCWTSEnginePasswords() {
+    await this.page.waitForSelector(selectors.CWTS_ENGINE_PASSWORDS, {
+      timeout: 1000,
+    });
+  }
+
+  async uncheckCWTSEnginePasswords() {
+    await this.page.locator(selectors.CWTS_ENGINE_PASSWORDS).click();
+  }
+
+  async waitForCWTSEngineAddons() {
+    await this.page.waitForSelector(selectors.CWTS_ENGINE_ADDONS, {
+      timeout: 1000,
+    });
+  }
+
+  async waitForCWTSEnginePrefs() {
+    await this.page.waitForSelector(selectors.CWTS_ENGINE_PREFS, {
+      timeout: 1000,
+    });
+  }
+
+  async waitForCWTSEngineTabs() {
+    await this.page.waitForSelector(selectors.CWTS_ENGINE_TABS, {
+      timeout: 1000,
     });
   }
 

@@ -1937,6 +1937,10 @@ export class StripeHelper extends StripeHelperBase {
             plan: newPlanId,
           },
         ],
+        proration_behavior: this.config.subscriptions.stripeInvoiceImmediately
+          .enabled
+          ? 'always_invoice'
+          : 'create_prorations',
         metadata: updatedMetadata,
       }
     );

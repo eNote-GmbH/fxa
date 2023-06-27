@@ -82,6 +82,9 @@ export type StripeHelperConfig = {
     productConfigsFirestore: {
       enabled: boolean;
     };
+    stripeInvoiceImmediately: {
+      enabled: boolean;
+    };
   };
   authFirestore: {
     prefix: string;
@@ -474,7 +477,7 @@ export abstract class StripeHelper {
    */
   async expandResource<T>(
     resource: string | T,
-    resourceType: typeof VALID_RESOURCE_TYPES[number],
+    resourceType: (typeof VALID_RESOURCE_TYPES)[number],
     statusFilter?: Stripe.Subscription.Status[]
   ): Promise<T> {
     if (typeof resource !== 'string') {

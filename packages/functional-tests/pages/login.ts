@@ -386,8 +386,10 @@ export class LoginPage extends BaseLayout {
     return this.page.locator(selectors.SUBMIT).click();
   }
 
-  async isCWTSEngineHeader() {
-    return this.page.locator(selectors.CWTS_ENGINE_HEADER).isVisible();
+  async waitForCWTSEngineHeader() {
+    await this.page.waitForSelector(selectors.CWTS_ENGINE_HEADER, {
+      timeout: 2000,
+    });
   }
 
   async isCWTSPageHeader() {

@@ -63,7 +63,7 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await login.setAge('21');
 
     // The CWTS form is on the same signup page
-    expect(await login.isCWTSEngineHeader()).toBe(true);
+    await login.waitForCWTSEngineHeader();
     expect(await login.isCWTSEngineBookmarks()).toBe(true);
     expect(await login.isCWTSEngineHistory()).toBe(true);
     expect(await login.isCWTSEnginePassword()).toBe(true);

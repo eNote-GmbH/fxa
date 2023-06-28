@@ -14,6 +14,7 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('Sync v3 sign up and CWTS', () => {
   test.beforeEach(async ({ target }) => {
+    //Sync tests run a little slower and flake
     test.slow();
     syncBrowserPages = await newPagesForSync(target);
     const { login } = syncBrowserPages;
@@ -62,7 +63,7 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await login.setAge('21');
 
     // The CWTS form is on the same signup page
-    expect(await login.isCWTSHeader()).toBe(true);
+    expect(await login.isCWTSEngineHeader()).toBe(true);
     expect(await login.isCWTSEngineBookmarks()).toBe(true);
     expect(await login.isCWTSEngineHistory()).toBe(true);
     expect(await login.isCWTSEnginePassword()).toBe(true);
@@ -83,7 +84,7 @@ test.describe('Sync v3 sign up and CWTS', () => {
     const { login, page, signinTokenCode, connectAnotherDevice } =
       syncBrowserPages;
     const query = new URLSearchParams({
-      forceUA: uaStrings['desktop_firefox_71'],
+      forceUA: uaStrings['desktop_firefox_58'],
     });
     const eventDetailStatus = createCustomEventDetail(
       FirefoxCommand.FxAStatus,
@@ -97,7 +98,10 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await page.goto(
       `${
         target.contentServerUrl
-      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`,
+      {
+        waitUntil: 'load',
+      }
     );
     await login.respondToWebChannelMessage(eventDetailStatus);
     await login.checkWebChannelMessage('fxaccounts:fxa_status');
@@ -106,11 +110,13 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await login.setPassword(password);
     await login.confirmPassword(password);
     await login.setAge('21');
+    await login.submit();
 
-    // The CWTS form is on the same signup page
-    expect(await login.isCWTSHeader()).toBe(true);
+    // Verify the CWTS page and the checkboxes
+    expect(await login.isCWTSPageHeader()).toBe(true);
     expect(await login.isCWTSEngineAddresses()).toBe(false);
     expect(await login.isDoNotSync()).toBe(false);
+    expect(await login.isCWTSEngineCreditCards()).toBe(false);
     await login.checkWebChannelMessage(FirefoxCommand.LinkAccount);
     await login.noSuchWebChannelMessage(FirefoxCommand.Login);
     await signinTokenCode.clickSubmitButton();
@@ -142,10 +148,12 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await login.setPassword(password);
     await login.confirmPassword(password);
     await login.setAge('21');
+    await login.submit();
 
-    // The CWTS form is on the same signup page
-    expect(await login.isCWTSHeader()).toBe(true);
+    // Verify the CWTS page and the checkboxes
+    expect(await login.isCWTSPageHeader()).toBe(true);
     expect(await login.isCWTSEngineAddresses()).toBe(false);
+    expect(await login.isCWTSEngineCreditCards()).toBe(false);
   });
 
   test('neither `creditcards` nor `addresses` supported', async ({
@@ -158,11 +166,10 @@ test.describe('Sync v3 sign up and CWTS', () => {
     const eventDetailStatus = createCustomEventDetail(
       FirefoxCommand.FxAStatus,
       {
-        signedInUser: null,
         capabilities: {
-          choose_what_to_sync: true,
           engines: [],
         },
+        signedInUser: null,
       }
     );
     await page.goto(
@@ -177,9 +184,10 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await login.setPassword(password);
     await login.confirmPassword(password);
     await login.setAge('21');
+    await login.submit();
 
-    // The CWTS form is on the same signup page
-    expect(await login.isCWTSHeader()).toBe(true);
+    // Verify the CWTS page and the checkboxes
+    expect(await login.isCWTSPageHeader()).toBe(true);
     expect(await login.isCWTSEngineAddresses()).toBe(false);
     expect(await login.isCWTSEngineCreditCards()).toBe(false);
   });
@@ -192,11 +200,10 @@ test.describe('Sync v3 sign up and CWTS', () => {
     const eventDetailStatus = createCustomEventDetail(
       FirefoxCommand.FxAStatus,
       {
-        signedInUser: null,
         capabilities: {
-          choose_what_to_sync: true,
           engines: ['creditcards', 'addresses'],
         },
+        signedInUser: null,
       }
     );
     await page.goto(
@@ -211,9 +218,10 @@ test.describe('Sync v3 sign up and CWTS', () => {
     await login.setPassword(password);
     await login.confirmPassword(password);
     await login.setAge('21');
+    await login.submit();
 
-    // The CWTS form is on the same signup page
-    expect(await login.isCWTSHeader()).toBe(true);
+    // Verify the CWTS page and the checkboxes
+    expect(await login.isCWTSPageHeader()).toBe(true);
     expect(await login.isCWTSEngineAddresses()).toBe(true);
     expect(await login.isCWTSEngineCreditCards()).toBe(true);
   });

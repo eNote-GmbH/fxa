@@ -50,7 +50,7 @@ export const selectors = {
   NOT_EMAIL_MET: '#password-same-as-email.password-strength-met',
   NOT_EMAIL_FAIL: '#password-same-as-email.password-strength-fail',
   PERMISSION_ACCEPT: '#accept',
-  CWTS_HEADER: 'text="Choose what to sync"',
+  CWTS_ENGINE_HEADER: 'text="Choose what to sync"',
   CWTS_ENGINE_BOOKMARKS: '#sync-engine-bookmarks',
   CWTS_ENGINE_HISTORY: '#sync-engine-history',
   CWTS_ENGINE_PASSWORDS: '#sync-engine-passwords',
@@ -60,6 +60,7 @@ export const selectors = {
   CWTS_ENGINE_CREDITCARDS: '#sync-engine-creditcards',
   CWTS_ENGINE_ADDRESSES: '#sync-engine-addresses',
   DO_NOT_SYNC: '#do-not-sync-device',
+  CWTS_PAGE_HEADER: '#fxa-choose-what-to-sync-header',
 };
 
 type FirstSignUpOptions = {
@@ -385,14 +386,12 @@ export class LoginPage extends BaseLayout {
     return this.page.locator(selectors.SUBMIT).click();
   }
 
-  async waitForCWTSHeader() {
-    await this.page.waitForSelector(selectors.CWTS_HEADER, {
-      timeout: 2000,
-    });
+  async isCWTSEngineHeader() {
+    return this.page.locator(selectors.CWTS_ENGINE_HEADER).isVisible();
   }
 
-  async isCWTSHeader() {
-    return this.page.locator(selectors.CWTS_HEADER).isVisible();
+  async isCWTSPageHeader() {
+    return this.page.locator(selectors.CWTS_PAGE_HEADER).isVisible();
   }
 
   async isCWTSEngineCreditCards() {
@@ -431,48 +430,12 @@ export class LoginPage extends BaseLayout {
     return this.page.locator(selectors.DO_NOT_SYNC).isVisible();
   }
 
-  async waitForCWTSEngineBookmarks() {
-    await this.page.waitForSelector(selectors.CWTS_ENGINE_BOOKMARKS, {
-      timeout: 1000,
-    });
-  }
-
-  async waitForCWTSEngineHistory() {
-    await this.page.waitForSelector(selectors.CWTS_ENGINE_HISTORY, {
-      timeout: 1000,
-    });
-  }
-
   async uncheckCWTSEngineHistory() {
     await this.page.locator(selectors.CWTS_ENGINE_HISTORY).click();
   }
 
-  async waitForCWTSEnginePasswords() {
-    await this.page.waitForSelector(selectors.CWTS_ENGINE_PASSWORDS, {
-      timeout: 1000,
-    });
-  }
-
   async uncheckCWTSEnginePasswords() {
     await this.page.locator(selectors.CWTS_ENGINE_PASSWORDS).click();
-  }
-
-  async waitForCWTSEngineAddons() {
-    await this.page.waitForSelector(selectors.CWTS_ENGINE_ADDONS, {
-      timeout: 1000,
-    });
-  }
-
-  async waitForCWTSEnginePrefs() {
-    await this.page.waitForSelector(selectors.CWTS_ENGINE_PREFS, {
-      timeout: 1000,
-    });
-  }
-
-  async waitForCWTSEngineTabs() {
-    await this.page.waitForSelector(selectors.CWTS_ENGINE_TABS, {
-      timeout: 1000,
-    });
   }
 
   async isSyncConnectedHeader() {

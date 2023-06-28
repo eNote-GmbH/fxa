@@ -34,9 +34,9 @@ test.describe('oauth webchannel', () => {
     await login.submit();
 
     // the CWTS form is on the same signup page
-    await login.waitForCWTSHeader();
-    await login.waitForCWTSEngineBookmarks();
-    await login.waitForCWTSEngineHistory();
+    expect(await login.isCWTSEngineHeader()).toBe(true);
+    expect(await login.isCWTSEngineBookmarks()).toBe(true);
+    expect(await login.isCWTSEngineHistory()).toBe(true);
 
     await login.fillOutFirstSignUp(email, PASSWORD, {
       enterEmail: false,

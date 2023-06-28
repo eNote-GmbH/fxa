@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect } from '../../lib/fixtures/standard';
+import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
+
 import uaStrings from '../../lib/ua-strings';
 
 const password = 'passwordzxcv';
-//let email;
-//let syncBrowserPages;
+let syncBrowserPages;
 let browserSignedInEmail;
 let browserSignedInAccount;
 
@@ -23,12 +23,11 @@ const ensureUsers = async (page, target, login) => {
       lang: 'en',
       preVerified: 'true',
     });
-    // await page.goto(target.contentServerUrl);
-    // await login.fillOutFirstSignUp(browserSignedInEmail, password, { verify: true });
     (_browserSignedInAccount) => {
       browserSignedInAccount = _browserSignedInAccount;
       browserSignedInAccount.email = browserSignedInEmail;
       browserSignedInAccount.verified = true;
+      login.clearCache();
     };
   }
   // Ensure otherAccount
@@ -38,8 +37,6 @@ const ensureUsers = async (page, target, login) => {
       lang: 'en',
       preVerified: 'true',
     });
-    // await page.goto(target.contentServerUrl);
-    // await login.fillOutFirstSignUp(otherEmail, password, { verify: true });
     (_otherAccount) => {
       otherAccount = _otherAccount;
       otherAccount.email = otherEmail;
@@ -51,71 +48,22 @@ const ensureUsers = async (page, target, login) => {
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('Firefox desktop user info handshake', () => {
-  test.beforeEach(async ({ target, pages: { login, page } }) => {
+  test.beforeEach(async ({ target, page }) => {
     test.slow();
-    //syncBrowserPages = await newPagesForSync(target);
-    //const { login } = syncBrowserPages;
-    //email = login.createEmail('sync{id}');
+    syncBrowserPages = await newPagesForSync(target);
+    const { login } = syncBrowserPages;
     await login.clearCache();
     await ensureUsers(page, target, login);
   });
 
-  //  test.afterEach(async () => {
-  //    await syncBrowserPages.browser?.close();
-  //  });
-
-  // test('Sync - user signed into browser, no user signed in locally', async ({
-  //   target,
-  //   pages: { login, page, signinTokenCode, connectAnotherDevice },
-  // }) => {
-  //   const query = new URLSearchParams({
-  //     forceUA: uaStrings['desktop_firefox_71'],
-  //   });
-  //   const eventDetailStatus = createCustomEventDetail(
-  //     FirefoxCommand.FxAStatus,
-  //     {
-  //       signedInUser: browserSignedInAccount,
-  //     },
-  //   );
-  //   await page.goto(
-  //     `${
-  //       target.contentServerUrl
-  //     }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
-  //   );
-  //   await login.respondToWebChannelMessage(eventDetailStatus);
-  //   await login.checkWebChannelMessage('fxaccounts:fxa_status');
-  //   expect(await login.getPrefilledEmail()).toContain(browserSignedInEmail);
-  // });
-
-  // test('Non-Sync - user signed into browser, no user signed in locally', async ({
-  //   target,
-  //   pages: { login, page, signinTokenCode, connectAnotherDevice },
-  // }) => {
-  //   const query = new URLSearchParams({
-  //     forceUA: uaStrings['desktop_firefox_71'],
-  //   });
-  //   const eventDetailStatus = createCustomEventDetail(
-  //     FirefoxCommand.FxAStatus,
-  //     {
-  //       signedInUser: browserSignedInAccount,
-  //     },
-  //   );
-  //   await page.goto(
-  //     `${
-  //       target.contentServerUrl
-  //     }?/automatedBrowser=true&${query.toString()}`
-  //   );
-  //   await login.respondToWebChannelMessage(eventDetailStatus);
-  //   await login.checkWebChannelMessage('fxaccounts:fxa_status');
-  //   expect(await login.getPrefilledEmail()).toContain(browserSignedInEmail);
-  //   await login.clickSignIn();
-  //   expect(await login.loginHeader()).toBe(true);
-  // });
+  test.afterEach(async () => {
+    await syncBrowserPages.browser?.close();
+  });
 
   test('Non-Sync - user signed into browser, user signed in locally', async ({
     target,
-    pages: { login, page },
   }) => {
+    const { login, page } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
     });
@@ -147,7 +95,6 @@ test.describe('Firefox desktop user info handshake', () => {
     await login.respondToWebChannelMessage(eventDetailStatusSignIn);
     await login.checkWebChannelMessage('fxaccounts:fxa_status');
 
-    // browser's view of the world takes precedence, it signed in last
     expect(await login.getPrefilledEmail()).toContain(otherEmail);
     await login.clickSignIn();
     expect(await login.loginHeader()).toBe(true);
@@ -155,15 +102,15 @@ test.describe('Firefox desktop user info handshake', () => {
 
   test('Sync - no user signed into browser, no user signed in locally', async ({
     target,
-    pages: { login, page, signinTokenCode, connectAnotherDevice },
   }) => {
+    const { login, page } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
     });
     await page.goto(
       `${
         target.contentServerUrl
-      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+      }?context=fx_desktop_v3&service=sync&${query.toString()}`
     );
     expect(await login.isEmailHeader()).toBe(true);
     expect(await login.getEmailInput()).toContain('');
@@ -171,8 +118,8 @@ test.describe('Firefox desktop user info handshake', () => {
 
   test('Sync - no user signed into browser, user signed in locally', async ({
     target,
-    pages: { login, page },
   }) => {
+    const { login, page } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
     });
@@ -191,8 +138,8 @@ test.describe('Firefox desktop user info handshake', () => {
 
   test('Non-Sync - no user signed into browser, no user signed in locally', async ({
     target,
-    pages: { login, page },
   }) => {
+    const { login, page } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
     });
@@ -212,8 +159,8 @@ test.describe('Firefox desktop user info handshake', () => {
 
   test('Sync force_auth page - user signed into browser is different to requested user', async ({
     target,
-    pages: { login, page },
   }) => {
+    const { login, page } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
       email: otherEmail,
@@ -236,8 +183,8 @@ test.describe('Firefox desktop user info handshake', () => {
 
   test('Non-Sync force_auth page - user signed into browser is different to requested user', async ({
     target,
-    pages: { login, page },
   }) => {
+    const { login, page } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
       email: otherEmail,
@@ -258,10 +205,59 @@ test.describe('Firefox desktop user info handshake', () => {
     expect(await login.getPrefilledEmail()).toContain(otherEmail);
   });
 
+  test('Sync - user signed into browser, no user signed in locally', async ({
+    target,
+  }) => {
+    const { login, page } = syncBrowserPages;
+    const query = new URLSearchParams({
+      forceUA: uaStrings['desktop_firefox_71'],
+      email: browserSignedInEmail,
+    });
+    const eventDetailStatus = createCustomEventDetail(
+      FirefoxCommand.FxAStatus,
+      {
+        signedInUser: browserSignedInEmail,
+      }
+    );
+    await page.goto(
+      `${
+        target.contentServerUrl
+      }?context=fx_desktop_v3&service=sync&automatedBrowser=true&${query.toString()}`
+    );
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
+    expect(await login.getPrefilledEmail()).toContain(browserSignedInEmail);
+  });
+
+  test('Non-Sync - user signed into browser, no user signed in locally', async ({
+    target,
+  }) => {
+    const { login, page } = syncBrowserPages;
+    const query = new URLSearchParams({
+      forceUA: uaStrings['desktop_firefox_71'],
+      email: browserSignedInEmail,
+    });
+    const eventDetailStatus = createCustomEventDetail(
+      FirefoxCommand.FxAStatus,
+      {
+        signedInUser: browserSignedInEmail,
+      }
+    );
+    await page.goto(
+      `${target.contentServerUrl}?/automatedBrowser=true&${query.toString()}`
+    );
+    await login.respondToWebChannelMessage(eventDetailStatus);
+    await login.checkWebChannelMessage('fxaccounts:fxa_status');
+    expect(await login.getPrefilledEmail()).toContain(browserSignedInEmail);
+    await login.setPassword(password);
+    await login.clickSubmit();
+    expect(await login.loginHeader()).toBe(true);
+  });
+
   test('Non-Sync settings page - no user signed into browser, user signed in locally', async ({
     target,
-    pages: { login, page, settings },
   }) => {
+    const { login, page, settings } = syncBrowserPages;
     const query = new URLSearchParams({
       forceUA: uaStrings['desktop_firefox_71'],
     });

@@ -3,6 +3,11 @@
 export interface Config {
   env: string;
   featureFlags: { [key: string]: any };
+  googleAnalytics: {
+    measurementId: string;
+    supportedProductIds: string;
+    testMode: boolean;
+  };
   lang: string;
   legalDocLinks: {
     privacyNotice: string;
@@ -51,6 +56,11 @@ export function defaultConfig(): Config {
   return {
     env: 'development',
     featureFlags: {},
+    googleAnalytics: {
+      measurementId: '',
+      supportedProductIds: '',
+      testMode: false,
+    },
     lang: '',
     legalDocLinks: {
       privacyNotice: '',

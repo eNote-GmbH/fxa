@@ -40,6 +40,12 @@ module.exports = function (config) {
 
   const EXTRA_IMG_SRC = config.get('csp.extraImgSrc');
 
+  // CSP directives required for GA
+  // https://developers.google.com/tag-platform/tag-manager/csp#google_analytics_4_google_analytics
+  const GA_SCRIPT_SRC = 'https://*.googletagmanager.com';
+  const GA_IMG_SRC = 'https://*.google-analytics.com https://*.googletagmanager.com';
+  const GA_CONNECT_SRC = 'https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com';
+
   //
   // Double quoted values
   //
@@ -67,6 +73,7 @@ module.exports = function (config) {
         PROFILE_SERVER,
         SENTRY_SERVER,
         STRIPE_API_URL,
+        GA_CONNECT_SRC
       ],
       defaultSrc: [SELF],
       fontSrc: addCdnRuleIfRequired([SELF]),
@@ -86,6 +93,7 @@ module.exports = function (config) {
         PROFILE_SERVER,
         PROFILE_IMAGES_SERVER,
         ACCOUNTS_STATIC_CDN,
+        GA_IMG_SRC,
         ...EXTRA_IMG_SRC,
       ]),
       mediaSrc: [NONE],
@@ -95,6 +103,7 @@ module.exports = function (config) {
         SELF,
         STRIPE_SCRIPT_URL,
         PAYPAL_SCRIPT_URL,
+        GA_SCRIPT_SRC
       ]),
       styleSrc: addCdnRuleIfRequired([SELF, UNSAFE_INLINE]),
     },

@@ -8,9 +8,15 @@ import React, {
 import { connect } from 'react-redux';
 import { Localized, useLocalization } from '@fluent/react';
 import classNames from 'classnames';
+import ReactGA from 'react-ga4';
 
 import { AppContext } from '../../lib/AppContext';
-import { useMatchMedia, useNonce, usePaypalButtonSetup } from '../../lib/hooks';
+import {
+  useMatchMedia,
+  useNonce,
+  usePaypalButtonSetup,
+  useReactGA4Setup,
+} from '../../lib/hooks';
 import { getSelectedPlan } from '../../lib/plan';
 import { State as ValidatorState } from '../../lib/validator';
 
@@ -134,9 +140,16 @@ export const Checkout = ({
   }, [fetchCheckoutRouteResources]);
 
   usePaypalButtonSetup(config, setPaypalScriptLoaded, paypalButtonBase);
-  
-  const redirectUrl = encodeURIComponent(window.location.href.replace('/checkout/', '/products/'));
-  const signInQueryParams = { ...queryParams, signin: 'yes', redirect_to: redirectUrl };
+  useReactGA4Setup(config, productId);
+
+  const redirectUrl = encodeURIComponent(
+    window.location.href.replace('/checkout/', '/products/')
+  );
+  const signInQueryParams = {
+    ...queryParams,
+    signin: 'yes',
+    redirect_to: redirectUrl,
+  };
   const signInQueryParamString = Object.entries(signInQueryParams)
     .map(([k, v]) => `${k}=${v}`)
     .join('&');
@@ -316,6 +329,9 @@ export const Checkout = ({
       setSubscriptionError({ code: 'fxa_fetch_profile_customer_error' });
     }
   }
+
+  // Testing event
+  ReactGA.event('sign_up');
 
   if (profile && customer) {
     return (

@@ -5938,7 +5938,6 @@ describe('#integration - StripeHelper', () => {
             productIdNew,
             updateType:
               SUBSCRIPTION_UPDATE_TYPES[isUpgrade ? 'UPGRADE' : 'DOWNGRADE'],
-            invoiceTotalNewInCents: mockInvoice.total,
             productIdOld,
             productNameOld,
             productIconURLOld,
@@ -5946,7 +5945,15 @@ describe('#integration - StripeHelper', () => {
               event.data.previous_attributes.plan.interval,
             paymentAmountOldCurrency:
               event.data.previous_attributes.plan.currency,
-            paymentAmountOldInCents: event.data.previous_attributes.plan.amount,
+            paymentAmountOldInCents: upcomingInvoice
+              ? upcomingInvoice.total
+              : mockInvoice.invoiceTotalOldInCents,
+            paymentAmountNewCurrency: upcomingInvoice
+              ? upcomingInvoice.currency
+              : mockInvoice.currency,
+            paymentAmountNewInCents: upcomingInvoice
+              ? upcomingInvoice.total
+              : mockInvoice.total,
             paymentProratedCurrency: upcomingInvoice
               ? upcomingInvoice.currency
               : mockInvoice.currency,
@@ -5960,11 +5967,26 @@ describe('#integration - StripeHelper', () => {
 
       it(
         'extracts expected details for a subscription upgrade',
-        commonTest(true)
+        commonTest(
+          true,
+          {
+            currency: 'usd',
+            total: 1234,
+          },
+          0
+        )
       );
+
       it(
         'extracts expected details for a subscription downgrade',
-        commonTest(false)
+        commonTest(
+          false,
+          {
+            currency: 'usd',
+            total: 1234,
+          },
+          0
+        )
       );
 
       it('checks productPaymentCycleOld returns a value if it is not included in the old plan', async () => {
@@ -6045,6 +6067,7 @@ describe('#integration - StripeHelper', () => {
           false,
           {
             currency: 'usd',
+            total: 1234,
             lines: {
               data: [
                 { type: 'invoiceitem', amount: -500 },
@@ -6052,7 +6075,7 @@ describe('#integration - StripeHelper', () => {
               ],
             },
           },
-          2000
+          0
         )
       );
     });

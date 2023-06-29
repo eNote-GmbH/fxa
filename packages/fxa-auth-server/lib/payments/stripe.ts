@@ -2734,7 +2734,7 @@ export class StripeHelper extends StripeHelperBase {
     };
   }
 
-  stripePlanToPaymentCycle(plan: Stripe.Plan) {
+  async stripePlanToPaymentCycle(plan: Stripe.Plan) {
     if (plan.interval_count === 1) {
       return plan.interval;
     }
@@ -2829,20 +2829,20 @@ export class StripeHelper extends StripeHelperBase {
     } = productNewMetadata;
     const planConfig = await this.maybeGetPlanConfig(planIdNew);
 
-    const productPaymentCycleNew = this.stripePlanToPaymentCycle(planNew);
+    const productPaymentCycleNew = await this.stripePlanToPaymentCycle(planNew);
 
     // During upgrades it's possible that an invoice isn't created when the
     // subscription is updated. Instead there will be pending invoice items
     // which will be added to next invoice once its generated.
     // For more info see https://stripe.com/docs/api/subscriptions/update
-    let upcomingInvoiceWithInvoiceitem: Stripe.UpcomingInvoice | undefined;
+    let upcomingInvoiceWithInvoiceItem: Stripe.UpcomingInvoice | undefined;
     try {
       const upcomingInvoice = await this.stripe.invoices.retrieveUpcoming({
         customer: customer.id,
         subscription: subscription.id,
       });
       // Only use upcomingInvoice if there are `invoiceitems`
-      upcomingInvoiceWithInvoiceitem = upcomingInvoice?.lines.data.some(
+      upcomingInvoiceWithInvoiceItem = upcomingInvoice?.lines.data.some(
         (line) => line.type === 'invoiceitem'
       )
         ? upcomingInvoice
@@ -2852,7 +2852,7 @@ export class StripeHelper extends StripeHelperBase {
         error.type === 'StripeInvalidRequestError' &&
         error.code === 'invoice_upcoming_none'
       ) {
-        upcomingInvoiceWithInvoiceitem = undefined;
+        upcomingInvoiceWithInvoiceItem = undefined;
       } else {
         throw error;
       }
@@ -2889,7 +2889,7 @@ export class StripeHelper extends StripeHelperBase {
         subscription,
         baseDetails,
         invoice,
-        upcomingInvoiceWithInvoiceitem
+        upcomingInvoiceWithInvoiceItem
       );
     } else if (cancelAtPeriodEndOld && !cancelAtPeriodEndNew && !planOld) {
       return this.extractSubscriptionUpdateReactivationDetailsForEmail(
@@ -2901,7 +2901,7 @@ export class StripeHelper extends StripeHelperBase {
         subscription,
         baseDetails,
         invoice,
-        upcomingInvoiceWithInvoiceitem,
+        upcomingInvoiceWithInvoiceItem,
         productOrderNew,
         planOld
       );
@@ -2919,7 +2919,7 @@ export class StripeHelper extends StripeHelperBase {
     subscription: Stripe.Subscription,
     baseDetails: any,
     invoice: Stripe.Invoice,
-    upcomingInvoiceWithInvoiceitem: Stripe.UpcomingInvoice | undefined
+    upcomingInvoiceWithInvoiceItem: Stripe.UpcomingInvoice | undefined
   ) {
     const { current_period_end: serviceLastActiveDate } = subscription;
 
@@ -2938,7 +2938,7 @@ export class StripeHelper extends StripeHelperBase {
       total: invoiceTotalInCents,
       currency: invoiceTotalCurrency,
       created: invoiceDate,
-    } = upcomingInvoiceWithInvoiceitem || invoice;
+    } = upcomingInvoiceWithInvoiceItem || invoice;
 
     return {
       updateType: SUBSCRIPTION_UPDATE_TYPES.CANCELLATION,
@@ -2952,7 +2952,7 @@ export class StripeHelper extends StripeHelperBase {
       invoiceTotalInCents,
       invoiceTotalCurrency,
       serviceLastActiveDate: new Date(serviceLastActiveDate * 1000),
-      showOutstandingBalance: !!upcomingInvoiceWithInvoiceitem,
+      showOutstandingBalance: !!upcomingInvoiceWithInvoiceItem,
       productMetadata,
       planConfig,
     };
@@ -3076,7 +3076,7 @@ export class StripeHelper extends StripeHelperBase {
     subscription: Stripe.Subscription,
     baseDetails: any,
     invoice: Stripe.Invoice,
-    upcomingInvoiceWithInvoiceitem: Stripe.UpcomingInvoice | undefined,
+    upcomingInvoiceWithInvoiceItem: Stripe.UpcomingInvoice | undefined,
     productOrderNew: string,
     planOld: Stripe.Plan
   ) {
@@ -3085,29 +3085,14 @@ export class StripeHelper extends StripeHelperBase {
       number: invoiceNumber,
       currency: paymentProratedCurrency,
       total: invoiceTotalNewInCents,
+      amount_due: invoiceAmountDue,
     } = invoice;
 
-    // Using stripes default proration behaviour
-    // (https://stripe.com/docs/billing/subscriptions/upgrade-downgrade#immediate-payment)
-    // an invoice is only created at time of upgrade, if the billing period changes.
-    // In the case that the billing period is the same, we sum the pending invoiceItems
-    // retrieved in upcomingInvoiceWithInvoiceitem.
-    // The actual recuring charge, for the next billing cycle, shows up as a type = 'subscription'
-    // line item.
-    const onetimePaymentAmount = upcomingInvoiceWithInvoiceitem
-      ? upcomingInvoiceWithInvoiceitem.lines.data.reduce(
-          (acc, line) =>
-            line.type === 'invoiceitem' ? acc + line.amount : acc,
-          0
-        )
-      : invoice.amount_due;
+    const { invoiceTotalOldInCents: invoiceTotalOldInCents } = baseDetails;
 
     // https://github.com/mozilla/subhub/blob/e224feddcdcbafaf0f3cd7d52691d29d94157de5/src/hub/vendor/customer.py#L643
     const abbrevProductOld = await this.expandAbbrevProductForPlan(planOld);
-    const {
-      amount: paymentAmountOldInCents,
-      currency: paymentAmountOldCurrency,
-    } = planOld;
+    const { currency: paymentAmountOldCurrency } = planOld;
     const { product_id: productIdOld, product_name: productNameOld } =
       abbrevProductOld;
     const {
@@ -3120,7 +3105,40 @@ export class StripeHelper extends StripeHelperBase {
         ? SUBSCRIPTION_UPDATE_TYPES.UPGRADE
         : SUBSCRIPTION_UPDATE_TYPES.DOWNGRADE;
 
-    const productPaymentCycleOld = this.stripePlanToPaymentCycle(planOld);
+    const productPaymentCycleOld = await this.stripePlanToPaymentCycle(planOld);
+
+    const sameBillingCycle =
+      productPaymentCycleOld === baseDetails.productPaymentCycleNew;
+
+    // get next invoice details
+    const nextInvoice = await this.previewInvoiceBySubscriptionId({
+      subscriptionId: subscription.id,
+    });
+
+    const { total: nextInvoiceTotal, currency: nextInvoiceCurrency } =
+      nextInvoice;
+
+    // if same cycle, return next invoice lines total + tax
+    // else return invoice total
+    const nextInvoiceLines = nextInvoice.lines.data[1];
+    const newTotalInCents =
+      sameBillingCycle &&
+      nextInvoiceLines &&
+      nextInvoiceLines.tax_amounts !== undefined
+        ? nextInvoiceLines.amount + nextInvoiceLines.tax_amounts[0].amount
+        : nextInvoice.total;
+
+    // calculated proration
+    const onetimePaymentAmount = sameBillingCycle
+      ? nextInvoiceTotal - newTotalInCents
+      : invoiceAmountDue;
+
+    // calculated old total
+    // if same billing cycle, get new invoiceTotal
+    // else get old (current) invoiceTotal
+    const oldTotalInCents = sameBillingCycle
+      ? invoiceTotalNewInCents
+      : invoiceTotalOldInCents;
 
     return {
       ...baseDetails,
@@ -3129,11 +3147,12 @@ export class StripeHelper extends StripeHelperBase {
       productNameOld,
       productIconURLOld,
       productPaymentCycleOld,
-      paymentAmountOldInCents,
+      paymentAmountOldInCents: oldTotalInCents,
       paymentAmountOldCurrency,
+      paymentAmountNewInCents: nextInvoiceTotal,
+      paymentAmountNewCurrency: nextInvoiceCurrency,
       invoiceNumber,
       invoiceId,
-      invoiceTotalNewInCents,
       paymentProratedInCents: onetimePaymentAmount,
       paymentProratedCurrency,
     };

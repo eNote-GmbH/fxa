@@ -105,6 +105,11 @@ export type firstInvoicePreviewSchema = {
   };
 };
 
+export type proratedInvoicePreviewSchema = firstInvoicePreviewSchema & {
+  one_time_charges: number;
+  prorated_amount: number;
+};
+
 /**
  * Defines an interface for the subsequent invoice preview response
  * from the auth-server.

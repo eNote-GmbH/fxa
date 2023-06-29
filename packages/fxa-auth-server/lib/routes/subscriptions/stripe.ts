@@ -32,6 +32,7 @@ import { StripeHelper } from '../../payments/stripe';
 import {
   stripeInvoiceToFirstInvoicePreviewDTO,
   stripeInvoicesToSubsequentInvoicePreviewsDTO,
+  stripeInvoiceToProratedInvoicePreviewDTO,
 } from '../../payments/stripe-formatter';
 import { AuthLogger, AuthRequest, TaxAddress } from '../../types';
 import { sendFinishSetupEmailForStubAccount } from '../subscriptions/account';
@@ -428,7 +429,10 @@ export class StripeHandler {
       const { uid, email } = await handleAuth(this.db, request.auth, true);
       await this.customs.check(request, email, 'previewInvoice');
       try {
-        customer = await this.stripeHelper.fetchCustomer(uid, ['tax']);
+        customer = await this.stripeHelper.fetchCustomer(uid, [
+          'subscriptions',
+          'tax',
+        ]);
       } catch (e: any) {
         this.log.error('previewInvoice.fetchCustomer', { error: e, uid });
       }
@@ -449,7 +453,12 @@ export class StripeHandler {
         taxAddress,
       });
 
-      return stripeInvoiceToFirstInvoicePreviewDTO(previewInvoice);
+      const isUpgrade = !!customer?.subscriptions?.data.length;
+      if (isUpgrade && this.config.subscriptions.stripeInvoiceImmediately) {
+        return stripeInvoiceToProratedInvoicePreviewDTO(previewInvoice);
+      } else {
+        return stripeInvoiceToFirstInvoicePreviewDTO(previewInvoice);
+      }
     } catch (err: any) {
       //TODO - this is part of FXA-7664, we can remove this one we uncover the underlying error
       Sentry.withScope((scope) => {

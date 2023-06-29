@@ -664,24 +664,32 @@ export class StripeHelper extends StripeHelperBase {
           }
         : undefined;
 
+    const requestObject = {
+      customer: customer?.id,
+      automatic_tax: {
+        enabled: automaticTax,
+      },
+      customer_details: {
+        tax_exempt: 'none', // Param required when shipping address not present
+        shipping,
+      },
+      subscription_items: [{ price: priceId }],
+      expand: ['total_tax_amounts.tax_rate'],
+      ...params,
+    };
+
+    const isUpgrade = !!customer?.subscriptions?.data.length;
+    if (isUpgrade && this.config.subscriptions.stripeInvoiceImmediately) {
+      requestObject.subscription_proration_date = Math.floor(Date.now() / 1000);
+      requestObject.subscription_items[0].id =
+        customer?.subscriptions?.data[0].items.data[0].id;
+      requestObject.subscription = customer?.subscriptions?.data[0].id;
+    }
+
     try {
-      return await this.stripe.invoices.retrieveUpcoming({
-        customer: customer?.id,
-        automatic_tax: {
-          enabled: automaticTax,
-        },
-        customer_details: {
-          tax_exempt: 'none', // Param required when shipping address not present
-          shipping,
-        },
-        subscription_items: [
-          {
-            price: priceId,
-          },
-        ],
-        expand: ['total_tax_amounts.tax_rate'],
-        ...params,
-      });
+      return await this.stripe.invoices.retrieveUpcoming(
+        requestObject as Stripe.InvoiceRetrieveUpcomingParams
+      );
     } catch (e: any) {
       this.log.warn('stripe.previewInvoice.automatic_tax', {
         postalCode: taxAddress?.postalCode,

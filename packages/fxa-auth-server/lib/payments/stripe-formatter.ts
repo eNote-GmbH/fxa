@@ -51,6 +51,13 @@ export function stripeInvoiceToFirstInvoicePreviewDTO(
   return invoicePreview;
 }
 
+export function stripeInvoiceToProratedInvoicePreviewDTO(
+  invoice: Stripe.UpcomingInvoice
+) {
+  const invoicePreview = stripeInvoiceToFirstInvoicePreviewDTO(invoice);
+  return invoicePreview;
+}
+
 /**
  * Formats an array of Stripe Invoice to the SubsequentInvoicePreview DTO format.
  */

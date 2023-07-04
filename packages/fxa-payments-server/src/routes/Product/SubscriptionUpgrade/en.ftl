@@ -10,3 +10,11 @@ sub-change-submit = Confirm change
 sub-update-current-plan-label = Current plan
 sub-update-new-plan-label = New plan
 sub-update-total-label = New total
+sub-update-one-time-charges = One time charges (due today)
+sub-update-prorated-total = <strong>Upgrade</strong> (Prorated to end of period)
+
+# Subscription plan change interval
+sub-update-interval-daily = Daily
+sub-update-interval-weekly = Weekly
+sub-update-interval-monthly = Monthly
+sub-update-interval-yearly = Yearly

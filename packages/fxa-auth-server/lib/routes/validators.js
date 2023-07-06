@@ -527,6 +527,14 @@ module.exports.subscriptionProductMetadataBaseValidator = isA
     successActionButtonURL: isA.string().uri().required(),
     appStoreLink: isA.string().uri().optional(),
     playStoreLink: isA.string().uri().optional(),
+    newsletterSlug: isA
+      .string()
+      .optional()
+      .valid('security-privacy-news', 'hubs', 'mdnplus'),
+    newsletterString: isA
+      .string()
+      .optional()
+      .valid('mozilla', 'snp', 'hubs', 'mdnplus'),
     productSet: isA.string().required(),
     productOrder: isA.number().optional(),
     'product:termsOfServiceDownloadURL': isA
@@ -868,7 +876,9 @@ module.exports.newsletters = isA
         'test-pilot',
         'mozilla-and-you',
         'security-privacy-news',
-        'mozilla-accounts'
+        'mozilla-accounts',
+        'hubs',
+        'mdnplus'
       )
   )
   .default([])

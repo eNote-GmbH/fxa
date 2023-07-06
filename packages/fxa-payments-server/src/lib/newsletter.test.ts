@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { ProductMetadata } from 'fxa-shared/subscriptions/types';
 import { apiSignupForNewsletter } from './apiClient';
 import {
   FXA_NEWSLETTER_SIGNUP_ERROR,
@@ -23,9 +24,23 @@ beforeEach(() => {
 
 describe('lib/newsletter', () => {
   describe('handleNewsletterSignup', () => {
-    it('resolves to undefined on success', async () => {
-      await handleNewsletterSignup();
+    it('resolves to undefined on success with default newsletter slug', async () => {
       await expect(handleNewsletterSignup()).resolves.toBe(undefined);
+      expect(apiSignupForNewsletter).toHaveBeenCalledWith({
+        newsletters: ['mozilla-accounts'],
+      });
+    });
+
+    it('resolves to undefined on success with newsletter slug defined in product metadata', async () => {
+      const productMetadata = {
+        newsletterSlug: 'security-privacy-news',
+      } as ProductMetadata;
+      await expect(handleNewsletterSignup(productMetadata)).resolves.toBe(
+        undefined
+      );
+      expect(apiSignupForNewsletter).toHaveBeenCalledWith({
+        newsletters: ['mozilla-accounts', 'security-privacy-news'],
+      });
     });
 
     it('throws an error on failure', async () => {

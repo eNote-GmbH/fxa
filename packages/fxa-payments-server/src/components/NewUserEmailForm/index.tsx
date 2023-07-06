@@ -15,6 +15,28 @@ import * as Amplitude from '../../lib/amplitude';
 import { useCallbackOnce } from '../../lib/hooks';
 import { apiFetchAccountStatus } from '../../lib/apiClient';
 import { CheckoutType } from 'fxa-shared/subscriptions/types';
+import { metadataFromPlan } from 'fxa-shared/subscriptions/metadata';
+
+const CHECKOUT_TYPE = CheckoutType.WITHOUT_ACCOUNT;
+const DEFAULT_NEWSLETTER_STRING = 'new-user-subscribe-product-updates-mozilla';
+
+/**
+ * The newsletter string ID is a configurable field. This function returns the correct
+ * fallback text for the different string ID options.
+ */
+function getNewsletterStringFallbackText(newsletterStringId?: string) {
+  switch (newsletterStringId) {
+    case 'new-user-subscribe-product-updates-snp':
+      return `I’d like to receive security & privacy news and updates from Mozilla`;
+    case 'new-user-subscribe-product-updates-hubs':
+      return 'I’d like to receive product news and updates from Mozilla Hubs and Mozilla';
+    case 'new-user-subscribe-product-updates-mdnplus':
+      return 'I’d like to receive product news and updates from MDN Plus and Mozilla';
+    case DEFAULT_NEWSLETTER_STRING:
+    default:
+      return 'I’d like to receive product news and updates from Mozilla';
+  }
+}
 
 export type NewUserEmailFormProps = {
   getString?: (id: string) => string;
@@ -51,14 +73,17 @@ export const NewUserEmailForm = ({
   });
 
   const [emailInputState, setEmailInputState] = useState<string>();
-
-  const checkoutType = CheckoutType.WITHOUT_ACCOUNT;
+  const newsletterStringId = metadataFromPlan(selectedPlan).newsletterString
+    ? `new-user-subscribe-product-updates-${
+        metadataFromPlan(selectedPlan).newsletterString
+      }`
+    : DEFAULT_NEWSLETTER_STRING;
 
   const onFormMounted = useCallback(
     () =>
       Amplitude.createAccountMounted({
         ...selectedPlan,
-        checkoutType: checkoutType,
+        checkoutType: CHECKOUT_TYPE,
       }),
     [selectedPlan]
   );
@@ -70,7 +95,7 @@ export const NewUserEmailForm = ({
     () =>
       Amplitude.createAccountEngaged({
         ...selectedPlan,
-        checkoutType: checkoutType,
+        checkoutType: CHECKOUT_TYPE,
       }),
     [selectedPlan]
   );
@@ -82,7 +107,7 @@ export const NewUserEmailForm = ({
     selectedPlan.other = 'click-signnin';
     Amplitude.createAccountSignIn({
       ...selectedPlan,
-      checkoutType: checkoutType,
+      checkoutType: CHECKOUT_TYPE,
     });
   };
 
@@ -170,13 +195,13 @@ export const NewUserEmailForm = ({
         />
       </Localized>
 
-      <Localized id="new-user-subscribe-product-updates">
+      <Localized id={newsletterStringId}>
         <Checkbox
           data-testid="new-user-subscribe-product-updates"
           name="new-user-subscribe-product-updates"
           onClick={onToggleNewsletterCheckbox}
         >
-          I'd like to receive product updates from Firefox
+          {getNewsletterStringFallbackText(newsletterStringId)}
         </Checkbox>
       </Localized>
 

@@ -15,6 +15,12 @@ export const subscriptionProductMetadataBaseValidator = Joi.object({
   successActionButtonURL: Joi.string().uri().required(),
   appStoreLink: Joi.string().uri().optional(),
   playStoreLink: Joi.string().uri().optional(),
+  newsletterSlug: Joi.string()
+    .optional()
+    .valid('security-privacy-news', 'hubs', 'mdnplus'),
+  newsletterString: Joi.string()
+    .optional()
+    .valid('mozilla', 'snp', 'hubs', 'mdnplus'),
   productSet: Joi.string().required(),
   productOrder: Joi.number().optional(),
   'product:termsOfServiceDownloadURL': Joi.string()

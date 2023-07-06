@@ -126,7 +126,7 @@ export class PurchaseManager {
 
       if (purchaseRecordDoc.exists) {
         // STEP 3a. We have this purchase cached in Firestore. Update our cache with the newly received response from the App Store Server API
-        await purchaseRecordDoc.ref.update(firestoreObject);
+        await purchaseRecordDoc.ref.set(firestoreObject);
 
         // STEP 4a. Merge other fields of our purchase record in Firestore (such as userId) with our SubscriptionPurchase object and return to caller.
         mergePurchaseWithFirestorePurchaseRecord(

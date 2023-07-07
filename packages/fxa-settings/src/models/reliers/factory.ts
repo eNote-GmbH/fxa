@@ -48,16 +48,12 @@ export function CreateRelierFactory() {
 
   const delegates = CreateRelierDelegates();
   const flags = CreateRelierFlags();
-  const relierFactory = new RelierFactory({
+
+  return new RelierFactory({
     window,
     delegates,
     data: urlQueryData,
     channelData: urlHashData,
     flags,
   });
-  return relierFactory;
-}
-
-export function CreateRelier() {
-  return CreateRelierFactory().getRelier();
 }

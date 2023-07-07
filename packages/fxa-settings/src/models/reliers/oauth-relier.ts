@@ -10,7 +10,13 @@ import {
   ModelValidation as V,
 } from '../../lib/model-data';
 import { OAuthError } from '../../lib/oauth';
-import { BaseRelier, RelierAccount, RelierData } from './base-relier';
+import {
+  BaseRelier,
+  RelierAccount,
+  RelierClientInfo,
+  RelierData,
+} from './base-relier';
+import { createResumeToken, parseResumeToken } from './resume-obj';
 
 export enum OAuthPrompt {
   CONSENT = 'consent',
@@ -131,7 +137,7 @@ export class OAuthRelier extends BaseRelier implements OAuthRelierData {
   @bind([V.isString])
   prompt: string | undefined;
 
-  @bind([V.isUrl], T.snakeCase)
+  @bind([V.isUrl])
   redirectTo: string | undefined;
 
   @bind([V.isUrl], T.snakeCase)
@@ -152,6 +158,21 @@ export class OAuthRelier extends BaseRelier implements OAuthRelierData {
   @bind([V.isString])
   loginHint: string | undefined;
 
+  @bind([V.isString], T.snakeCase)
+  flowId: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  flowBeginTime: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  deviceId: string | undefined;
+
+  @bind([V.isString], 'gid')
+  providerUid: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  error: string | undefined;
+
   constructor(
     protected readonly modelData: ModelDataStore,
     public readonly opts = {
@@ -166,7 +187,70 @@ export class OAuthRelier extends BaseRelier implements OAuthRelierData {
     super(modelData);
   }
 
-  isOAuth(): boolean {
+  pickResumeTokenInfo() {
+    return {
+      ...super.pickResumeTokenInfo(),
+      deviceId: this.deviceId,
+      flowId: this.flowId,
+      flowBegin: this.flowBeginTime,
+      scope: this.scope,
+      state: this.state,
+    };
+  }
+
+  getResumeToken() {
+    return createResumeToken(this.pickResumeTokenInfo());
+  }
+
+  setResumeToken(token: string) {
+    super.setResumeToken(token);
+    const obj = parseResumeToken(token);
+    if (obj.deviceId) {
+      this.deviceId = obj.deviceId;
+    }
+    if (obj.flowId) {
+      this.flowId = obj.flowId;
+    }
+    if (obj.flowBegin) {
+      this.flowBeginTime = obj.flowBegin;
+    }
+    if (obj.scope) {
+      this.scope = obj.scope;
+    }
+    if (obj.state) {
+      this.state = obj.state;
+    }
+  }
+
+  getRedirectUri() {
+    return this.redirectUri;
+  }
+
+  getService() {
+    return this.service || this.clientId;
+  }
+
+  async getServiceName() {
+    // If the clientId and the service are the same, prefer the clientInfo
+    if (this.service && this.clientId === this.service) {
+      const clientInfo = await this.clientInfo;
+      if (clientInfo?.serviceName) {
+        return clientInfo.serviceName;
+      }
+    }
+
+    return super.getServiceName();
+  }
+
+  async getClientInfo(): Promise<RelierClientInfo | undefined> {
+    if (this.clientInfo) {
+      const info = await this.clientInfo;
+      return info;
+    }
+    return undefined;
+  }
+
+  isOAuth() {
     return true;
   }
 

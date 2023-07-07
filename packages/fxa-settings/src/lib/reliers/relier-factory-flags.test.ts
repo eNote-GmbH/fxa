@@ -124,21 +124,24 @@ describe('lib/reliers/relier-factory-flags', function () {
   });
 
   it('getOAuthResumeObj', () => {
-    queryData.set('service', 'foo');
     const obj1 = relierFlags.getOAuthResumeObj();
-    storageData.set('oauth', { ...obj1, extra: 'bar' });
+
+    storageData.set('oauth', {
+      client_id: '123',
+      scope: 'profile',
+      state: 'blob123',
+    });
     const obj2 = relierFlags.getOAuthResumeObj();
 
     expect(obj1).toEqual({
-      // Is this correct? It's the way the ported code functioned.
-      client_id: 'foo',
-      service: 'foo',
+      client_id: undefined,
+      scope: undefined,
+      state: undefined,
     });
     expect(obj2).toEqual({
-      // Is this correct? It's the way the ported code functioned.
-      client_id: 'foo',
-      service: 'foo',
-      extra: 'bar',
+      client_id: '123',
+      scope: 'profile',
+      state: 'blob123',
     });
   });
 });

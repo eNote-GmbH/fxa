@@ -36,15 +36,18 @@ export class DefaultRelierFlags implements RelierFlags {
   }
 
   isOAuth() {
+    const clientId = this.searchParam('client_id');
+    const isOAuthVerificationSameBrowser =
+      this._isOAuthVerificationSameBrowser();
+    const isOAuthVerificationDifferentBrowser =
+      this._isOAuthVerificationDifferentBrowser();
+    const isOAuthPath = /oauth/.test(this.pathname);
+
     return (
-      !!(
-        this.searchParam('client_id') ||
-        // verification
-        this._isOAuthVerificationSameBrowser()
-      ) ||
-      !!this._isOAuthVerificationDifferentBrowser() ||
-      // any URL with 'oauth' in the path.
-      /oauth/.test(this.pathname)
+      !!clientId ||
+      isOAuthVerificationSameBrowser ||
+      isOAuthVerificationDifferentBrowser ||
+      isOAuthPath
     );
   }
 
@@ -75,15 +78,22 @@ export class DefaultRelierFlags implements RelierFlags {
     return !!this.searchParam('code');
   }
 
-  getOAuthResumeObj(): Record<string, unknown> {
-    let resumeObj = this.storageData.get('oauth');
-    if (resumeObj == null || typeof resumeObj !== 'object') {
-      resumeObj = {
-        client_id: this.searchParam('service'), //eslint-disable-line camelcase
-        service: this.searchParam('service'),
+  getOAuthResumeObj() {
+    const resumeObj: any = this.storageData.get('oauth');
+    if (resumeObj != null && typeof resumeObj == 'object') {
+      // Give result some definition
+      return {
+        client_id: resumeObj.client_id,
+        scope: resumeObj.scope,
+        state: resumeObj.state,
       };
     }
-    return Object.assign({}, resumeObj);
+
+    return {
+      client_id: undefined,
+      scope: undefined,
+      state: undefined,
+    };
   }
 
   private _isOAuthVerificationSameBrowser() {

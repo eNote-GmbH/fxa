@@ -83,7 +83,7 @@ describe('lib/reliers/relier-factory', () => {
     return relier as T;
   }
 
-  function mockSearchParams(overrides: Record<string, string>) {
+  async function mockSearchParams(overrides: Record<string, string>) {
     const newSearch = new URLSearchParams(overrides).toString();
 
     const location = {
@@ -92,6 +92,8 @@ describe('lib/reliers/relier-factory', () => {
     };
 
     sandbox.replaceGetter(window, 'location', () => location);
+
+    await urlQueryData.refresh();
   }
 
   /** Prime the initial state */
@@ -146,7 +148,18 @@ describe('lib/reliers/relier-factory', () => {
       expect(relier.isOAuth()).toBeFalsy();
       expect(await relier.isSync()).toBeFalsy();
       expect(relier.wantsKeys()).toBeFalsy();
-      expect(relier.pickResumeTokenInfo()).toEqual({});
+      expect(relier.pickResumeTokenInfo()).toEqual({
+        entrypoint: null,
+        entrypointExperiment: null,
+        entrypointVariation: null,
+        resetPasswordConfirm: null,
+        style: null,
+        utmCampaign: null,
+        utmContent: null,
+        utmMedium: null,
+        utmSource: null,
+        utmTerm: null,
+      });
       expect(relier.isTrusted()).toBeTruthy();
     });
 
@@ -183,12 +196,23 @@ describe('lib/reliers/relier-factory', () => {
       expect(relier.isOAuth()).toBeFalsy();
       expect(await relier.isSync()).toBeTruthy();
       expect(relier.wantsKeys()).toBeTruthy();
-      expect(relier.pickResumeTokenInfo()).toEqual({});
+      expect(relier.pickResumeTokenInfo()).toEqual({
+        entrypoint: null,
+        entrypointExperiment: null,
+        entrypointVariation: null,
+        resetPasswordConfirm: null,
+        style: null,
+        utmCampaign: null,
+        utmContent: null,
+        utmMedium: null,
+        utmSource: null,
+        utmTerm: null,
+      });
       expect(relier.isTrusted()).toBeTruthy();
     });
 
-    it('populates model from the search parameters', () => {
-      mockSearchParams({
+    it('populates model from the search parameters', async () => {
+      await mockSearchParams({
         action: ACTION,
         context: CONTEXT,
         country: COUNTRY,
@@ -220,7 +244,23 @@ describe('lib/reliers/relier-factory', () => {
       expect(relier.isOAuth()).toBeTruthy();
       expect(await relier.isSync()).toBeFalsy();
       expect(relier.wantsKeys()).toBeFalsy();
-      expect(relier.pickResumeTokenInfo()).toEqual({});
+      expect(relier.pickResumeTokenInfo()).toEqual({
+        deviceId: null,
+        entrypoint: null,
+        entrypointExperiment: null,
+        entrypointVariation: null,
+        flowBegin: null,
+        flowId: null,
+        resetPasswordConfirm: null,
+        scope: null,
+        state: null,
+        style: null,
+        utmCampaign: null,
+        utmContent: null,
+        utmMedium: null,
+        utmSource: null,
+        utmTerm: null,
+      });
       expect(relier.isTrusted()).toBeFalsy();
     });
     // TODO: Port remaining tests from content-server
@@ -230,7 +270,7 @@ describe('lib/reliers/relier-factory', () => {
     let relier: PairingSupplicantRelier;
 
     beforeAll(async () => {
-      mockSearchParams({
+      await mockSearchParams({
         redirect_uri: 'foo',
       });
       relier = await setup<PairingSupplicantRelier>(
@@ -245,7 +285,23 @@ describe('lib/reliers/relier-factory', () => {
       expect(relier.isOAuth()).toBeTruthy();
       expect(await relier.isSync()).toBeFalsy();
       expect(relier.wantsKeys()).toBeFalsy();
-      expect(relier.pickResumeTokenInfo()).toEqual({});
+      expect(relier.pickResumeTokenInfo()).toEqual({
+        deviceId: null,
+        entrypoint: null,
+        entrypointExperiment: null,
+        entrypointVariation: null,
+        flowBegin: null,
+        flowId: null,
+        resetPasswordConfirm: null,
+        scope: null,
+        state: null,
+        style: null,
+        utmCampaign: null,
+        utmContent: null,
+        utmMedium: null,
+        utmSource: null,
+        utmTerm: null,
+      });
       expect(relier.isTrusted()).toBeFalsy();
     });
   });
@@ -262,14 +318,30 @@ describe('lib/reliers/relier-factory', () => {
     });
 
     it('has correct state', async () => {
-      mockSearchParams({
+      await mockSearchParams({
         redirect_uri: 'foo',
       });
       expect(relier.name).toEqual('pairing-authority');
       expect(relier.isOAuth()).toBeTruthy();
       expect(await relier.isSync()).toBeFalsy();
       expect(relier.wantsKeys()).toBeFalsy();
-      expect(relier.pickResumeTokenInfo()).toEqual({});
+      expect(relier.pickResumeTokenInfo()).toEqual({
+        deviceId: null,
+        entrypoint: null,
+        entrypointExperiment: null,
+        entrypointVariation: null,
+        flowBegin: null,
+        flowId: null,
+        resetPasswordConfirm: null,
+        scope: null,
+        state: null,
+        style: null,
+        utmCampaign: null,
+        utmContent: null,
+        utmMedium: null,
+        utmSource: null,
+        utmTerm: null,
+      });
       expect(relier.isTrusted()).toBeFalsy();
     });
   });

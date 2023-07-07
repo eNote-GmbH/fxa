@@ -1013,6 +1013,9 @@ module.exports = function (log, config, bounces) {
       query.emailToHashWith = message.emailToHashWith;
     }
 
+    // Uncomment for easy react app testing!
+    // query.showReactApp = true;
+
     const links = this._generateLinks(
       this.passwordResetUrl,
       message,
@@ -2999,6 +3002,7 @@ module.exports = function (log, config, bounces) {
       email: email,
       reset_password_confirm: false,
       email_to_hash_with: emailToHashWith,
+      showReactApp: true,
     };
 
     return this._generateUTMLink(

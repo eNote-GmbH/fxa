@@ -36,13 +36,18 @@ import { useNotifier, useAccount } from '../../../models/hooks';
 import { LinkStatus } from '../../../lib/types';
 import {
   CreateAccountRecoveryKeyInfo,
-  CreateRelier,
+  useRelier,
   CreateVerificationInfo,
-  CreateIntegration,
+  useIntegration,
   IntegrationType,
+  OAuthIntegration,
 } from '../../../models';
 import { notifyFirefoxOfLogin } from '../../../lib/channels/helpers';
-import { isOriginalTab } from '../../../lib/storage-utils';
+import {
+  clearOAuthData,
+  clearOriginalTab,
+  isOriginalTab,
+} from '../../../lib/storage-utils';
 
 // This page is based on complete_reset_password but has been separated to align with the routes.
 
@@ -86,8 +91,8 @@ const AccountRecoveryResetPassword = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const integration = CreateIntegration();
-  const relier = CreateRelier();
+  const relier = useRelier();
+  const integration = useIntegration();
   const verificationInfo = CreateVerificationInfo();
   const accountRecoveryKeyInfo = CreateAccountRecoveryKeyInfo();
 
@@ -130,6 +135,8 @@ const AccountRecoveryResetPassword = ({
   // TODO: implement persistVerificationData,
   // _finishPasswordResetDifferentBrowser + finishPasswordResetSameBrowser
   // + check afterResetPasswordConfirmationPoll (maybe this was done with `useInterval`?)
+
+  // NOTE: This was previously part of the persistVerificationData. Let's keep these operations atomic in the new version though.
 
   return (
     <AppLayout>
@@ -266,6 +273,7 @@ const AccountRecoveryResetPassword = ({
       notifier.onAccountSignIn(account);
 
       relier.resetPasswordConfirm = true;
+
       logViewEvent(viewName, 'verification.success');
 
       switch (integration.type) {
@@ -287,15 +295,25 @@ const AccountRecoveryResetPassword = ({
           );
           break;
         case IntegrationType.OAuth:
-          if (
-            sessionIsVerified &&
-            // a user can only redirect back to the relier from the original tab
-            // to avoid two tabs redirecting.
-            isOriginalTab()
-          ) {
-            // TODO: this.finishOAuthSignInFlow(account)) in FXA-6518 and possibly
-            // remove the !OAuth check from the React experiment in router.js
-            return;
+          if (sessionIsVerified) {
+            const oauthIntegration = integration as OAuthIntegration;
+            const { redirect } = await oauthIntegration.handlePasswordReset(
+              relier.uid || account.uid,
+              accountResetData.sessionToken,
+              accountResetData.keyFetchToken,
+              accountResetData.unwrapBKey
+            );
+
+            // Clear session / local storage states
+            clearOAuthData();
+
+            // If the user is on a single tab throughout this process, just redirect them
+            // back to the relying party. Otherwise, show them a success message
+            if (isOriginalTab()) {
+              clearOriginalTab();
+              window.location.href = redirect;
+              return;
+            }
           }
           break;
         case IntegrationType.Web:

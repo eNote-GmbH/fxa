@@ -10,6 +10,7 @@ import {
   ModelValidation as V,
 } from '../../lib/model-data';
 import { MozServices } from '../../lib/types';
+import { createResumeToken, parseResumeToken } from './resume-obj';
 
 export interface RelierSubscriptionInfo {
   subscriptionProductId: string;
@@ -54,7 +55,8 @@ export interface ResumeTokenInfo {
 }
 
 export interface Relier extends RelierData {
-  getServiceName(): MozServices;
+  getServiceName(): Promise<string>;
+  getClientInfo(): Promise<RelierClientInfo | undefined>;
   isOAuth(): boolean;
   isSync(): Promise<boolean>;
   shouldOfferToSync(view: string): boolean;
@@ -63,6 +65,10 @@ export interface Relier extends RelierData {
   pickResumeTokenInfo(): ResumeTokenInfo;
   isTrusted(): boolean;
   validate(): void;
+  getResumeToken(): string;
+  setResumeToken(token: string): void;
+  getService(): string | undefined;
+  getRedirectUri(): string | undefined;
 }
 
 export interface RelierAccount {
@@ -139,11 +145,27 @@ export class BaseRelier extends ModelDataProvider implements Relier {
   isOAuth(): boolean {
     return false;
   }
+
   async isSync(): Promise<boolean> {
     return false;
   }
 
-  getServiceName(): MozServices {
+  async getClientInfo(): Promise<RelierClientInfo | undefined> {
+    return undefined;
+  }
+
+  async getServiceName(): Promise<string> {
+    // If the service is not defined, then check the client info
+    if (!!this.service) {
+      if (this.clientInfo) {
+        const clientInfo = await this.clientInfo;
+        if (clientInfo?.serviceName) {
+          return clientInfo.serviceName;
+        }
+      }
+    }
+
+    // Fallback to defacto service names
     switch (this.service) {
       case MozServices.FirefoxSync:
       case 'sync':
@@ -162,6 +184,7 @@ export class BaseRelier extends ModelDataProvider implements Relier {
         return MozServices.Default;
     }
   }
+
   shouldOfferToSync(view: string): boolean {
     return false;
   }
@@ -172,9 +195,69 @@ export class BaseRelier extends ModelDataProvider implements Relier {
     return false;
   }
   pickResumeTokenInfo() {
-    return {};
+    return {
+      entrypoint: this.entrypoint,
+      entrypointExperiment: this.entrypointExperiment,
+      entrypointVariation: this.entrypointVariation,
+      resetPasswordConfirm: this.resetPasswordConfirm,
+      style: this.style,
+      utmCampaign: this.utmCampaign,
+      utmContent: this.utmContent,
+      utmMedium: this.utmMedium,
+      utmSource: this.utmSource,
+      utmTerm: this.utmTerm,
+    };
   }
-  isTrusted(): boolean {
+
+  getResumeToken() {
+    const token = this.pickResumeTokenInfo();
+    return createResumeToken(token);
+  }
+
+  setResumeToken(token: string) {
+    const obj = parseResumeToken(token);
+
+    if (obj.entrypoint) {
+      this.entrypoint = obj.entrypoint;
+    }
+    if (obj.entrypointExperiment) {
+      this.entrypointExperiment = obj.entrypointExperiment;
+    }
+    if (obj.entrypointVariation) {
+      this.entrypointVariation = obj.entrypointVariation;
+    }
+    if (obj.resetPasswordConfirm) {
+      this.resetPasswordConfirm = obj.resetPasswordConfirm;
+    }
+    if (obj.style) {
+      this.style = obj.style;
+    }
+    if (obj.utmCampaign) {
+      this.utmCampaign = obj.utmCampaign;
+    }
+    if (obj.utmContent) {
+      this.utmContent = obj.utmContent;
+    }
+    if (obj.utmMedium) {
+      this.utmMedium = obj.utmMedium;
+    }
+    if (obj.utmSource) {
+      this.utmSource = obj.utmSource;
+    }
+    if (obj.utmTerm) {
+      this.utmTerm = obj.utmTerm;
+    }
+  }
+
+  getRedirectUri(): string | undefined {
+    return undefined;
+  }
+
+  getService() {
+    return this.service;
+  }
+
+  isTrusted() {
     return true;
   }
 

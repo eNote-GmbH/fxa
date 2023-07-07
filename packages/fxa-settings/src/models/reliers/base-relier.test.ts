@@ -33,7 +33,18 @@ describe('BaseRelier Model', function () {
 
   describe('pickResumeTokenInfo', function () {
     it('returns an empty object by default', function () {
-      expect(model.pickResumeTokenInfo()).toEqual({});
+      expect(model.pickResumeTokenInfo()).toEqual({
+        entrypoint: null,
+        entrypointExperiment: null,
+        entrypointVariation: null,
+        resetPasswordConfirm: null,
+        style: null,
+        utmCampaign: null,
+        utmContent: null,
+        utmMedium: null,
+        utmSource: null,
+        utmTerm: null,
+      });
     });
   });
 

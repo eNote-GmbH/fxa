@@ -45,6 +45,9 @@ const settingsConfig = {
     gql: {
       url: config.get('settings_gql_url'),
     },
+    oauth: {
+      url: config.get('fxaccount_url'),
+    },
     auth: {
       url: config.get('fxaccount_url'),
     },

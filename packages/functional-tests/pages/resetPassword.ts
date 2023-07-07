@@ -15,6 +15,7 @@ export const selectors = {
 };
 
 export class ResetPasswordPage extends BaseLayout {
+  public react = false;
   readonly path = '';
 
   getEmailValue() {
@@ -22,6 +23,13 @@ export class ResetPasswordPage extends BaseLayout {
   }
 
   async resetPasswordHeader() {
+    if (this.react) {
+      const header = this.page.getByText(/Reset password/);
+      const isVisible = await header.isVisible();
+      const headerClass = await header.getAttribute('class');
+      return isVisible && headerClass === 'card-header';
+    }
+
     const resetPass = this.page.locator(selectors.RESET_PASSWORD_HEADER);
     await resetPass.waitFor();
     return resetPass.isVisible();
@@ -52,6 +60,13 @@ export class ResetPasswordPage extends BaseLayout {
   }
 
   async resetNewPassword(password: string) {
+    if (this.react) {
+      await this.page.getByTitle('New password').fill(password);
+      await this.page.getByTitle('Re-enter password').fill(password);
+      await this.page.locator(selectors.SUBMIT).click();
+      return;
+    }
+
     await this.page.locator(selectors.PASSWORD).fill(password);
     await this.page.locator(selectors.VPASSWORD).fill(password);
     await this.page.locator(selectors.SUBMIT).click();

@@ -50,7 +50,9 @@ const accountWithPasswordError = {
 const accountWithThrottledError = {
   ...MOCK_ACCOUNT,
   createRecoveryKey: () => {
-    throw AuthUiErrors.THROTTLED;
+    const error = { ...AuthUiErrors.THROTTLED };
+    (error as any).retryAfterLocalized = '15 mintues';
+    throw error;
   },
   deleteRecoveryKey: jest.fn().mockResolvedValue(true),
 } as unknown as Account;

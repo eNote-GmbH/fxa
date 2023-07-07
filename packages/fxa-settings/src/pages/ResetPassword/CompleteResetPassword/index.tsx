@@ -7,9 +7,12 @@ import { Link, useLocation, useNavigate } from '@reach/router';
 import { useForm } from 'react-hook-form';
 import { logPageViewEvent } from '../../../lib/metrics';
 import {
-  CreateIntegration,
+  useIntegration,
   IntegrationType,
+  OAuthIntegration,
   useAccount,
+  OAuthRelier,
+  useRelier,
 } from '../../../models';
 import WarningMessage from '../../../components/WarningMessage';
 import LinkRememberPassword from '../../../components/LinkRememberPassword';
@@ -19,12 +22,16 @@ import CardHeader from '../../../components/CardHeader';
 import AppLayout from '../../../components/AppLayout';
 import Banner, { BannerType } from '../../../components/Banner';
 import { FtlMsg, hardNavigateToContentServer } from 'fxa-react/lib/utils';
-import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 import { LinkStatus } from '../../../lib/types';
 import { CompleteResetPasswordLink } from '../../../models/reset-password/verification';
 import useNavigateWithoutRerender from '../../../lib/hooks/useNavigateWithoutRerender';
 import { notifyFirefoxOfLogin } from '../../../lib/channels/helpers';
-import { isOriginalTab } from '../../../lib/storage-utils';
+import {
+  clearOAuthData,
+  clearOriginalTab,
+  isOriginalTab,
+} from '../../../lib/storage-utils';
+import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 
 // The equivalent complete_reset_password mustache file included account_recovery_reset_password
 // For React, we have opted to separate these into two pages to align with the routes.
@@ -82,7 +89,8 @@ const CompleteResetPassword = ({
   const location = useLocation() as ReturnType<typeof useLocation> & {
     state: LocationState;
   };
-  const integration = CreateIntegration();
+  const integration = useIntegration();
+  const relier = useRelier();
 
   const { handleSubmit, register, getValues, errors, formState, trigger } =
     useForm<FormData>({
@@ -152,11 +160,15 @@ const CompleteResetPassword = ({
     params.email,
     params.token,
     setLinkStatus,
+    setShowLoadingSpinner,
   ]);
 
   const alertSuccessAndNavigate = useCallback(() => {
     setErrorType(ErrorType.none);
-    navigateWithoutRerender('/reset_password_verified', { replace: true });
+    navigateWithoutRerender(
+      `/reset_password_verified${window.location.search}`,
+      { replace: true }
+    );
   }, [navigateWithoutRerender]);
 
   const onSubmit = useCallback(
@@ -214,28 +226,34 @@ const CompleteResetPassword = ({
             );
             break;
           case IntegrationType.OAuth:
-            if (
-              sessionIsVerified &&
-              // only allow this redirect if 2FA is not enabled, otherwise users must enter
-              // their TOTP code first
-              !hasTotp &&
-              // a user can only redirect back to the relier from the original tab
-              // to avoid two tabs redirecting.
-              isOriginalTab()
-            ) {
-              // TODO: this.finishOAuthSignInFlow(account)) in FXA-6518 and possibly
-              // remove the !OAuth check from the React experiment in router.js
-              return;
-            } else if (!isOriginalTab()) {
-              // allows a navigation to a "complete" screen or TOTP screen if it is setup
-              // TODO: check if relier has state
-              if (hasTotp) {
-                // finishing OAuth flow occurs on this page after entering TOTP
-                // TODO: probably need to pass some params
-                hardNavigateToContentServer(
-                  `/signin_totp_code${location.search}`
-                );
-                hardNavigate = true;
+            // allows a navigation to a "complete" screen or TOTP screen if it is setup
+            // TODO: check if relier has state
+            if (hasTotp) {
+              // finishing OAuth flow occurs on this page after entering TOTP
+              // TODO: probably need to pass some params
+              hardNavigateToContentServer(
+                `/signin_totp_code${location.search}`
+              );
+              hardNavigate = true;
+            } else if (sessionIsVerified) {
+              const oauthIntegration = integration as OAuthIntegration;
+              const { redirect } = await oauthIntegration.handlePasswordReset(
+                relier.uid || account.uid,
+                accountResetData.sessionToken,
+                accountResetData.keyFetchToken,
+                accountResetData.unwrapBKey
+              );
+
+              // Clear local / session storage
+              clearOAuthData();
+
+              // If the user is on the same tab throughout the process, then
+              // just send them back to the relying party. Otherwise log them in
+              // behind the scenes and show a success message.
+              if (isOriginalTab()) {
+                clearOriginalTab();
+                window.location.href = redirect;
+                return;
               }
             }
             break;
@@ -261,7 +279,7 @@ const CompleteResetPassword = ({
         setErrorType(ErrorType['complete-reset']);
       }
     },
-    [account, alertSuccessAndNavigate, integration.type, location.search]
+    [account, integration, location.search, relier.uid, alertSuccessAndNavigate]
   );
 
   const renderCompleteResetPasswordErrorBanner = () => {

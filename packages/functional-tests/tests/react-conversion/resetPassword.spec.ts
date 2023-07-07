@@ -3,12 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { test, expect } from '../../lib/fixtures/standard';
-import { BaseTarget } from '../../lib/targets/base';
 import { EmailHeader, EmailType } from '../../lib/email';
-
-function getReactFeatureFlagUrl(target: BaseTarget, path: string) {
-  return `${target.contentServerUrl}${path}?showReactApp=true`;
-}
+import { getReactFeatureFlagUrl } from './util';
 
 const NEW_PASSWORD = 'notYourAveragePassW0Rd';
 

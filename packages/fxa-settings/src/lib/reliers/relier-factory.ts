@@ -11,7 +11,7 @@ import {
   PairingSupplicantRelier,
   Relier,
   RelierSubscriptionInfo,
-  ResumeObj,
+  parseResumeToken,
 } from '../../models/reliers';
 import { Constants } from '../constants';
 import {
@@ -70,6 +70,8 @@ export class RelierFactory {
   public readonly flags: RelierFlags;
   protected readonly delegates: RelierDelegates;
 
+  // private relier: Relier | undefined;
+
   constructor(opts: {
     window: ReachRouterWindow;
     delegates: RelierDelegates;
@@ -91,6 +93,7 @@ export class RelierFactory {
    * @returns A relier implementation.
    */
   getRelier() {
+    // if (true || this.relier == null) {
     const data = this.data;
     const channelData = this.channelData;
     const flags = this.flags;
@@ -109,14 +112,14 @@ export class RelierFactory {
       relier = this.creteDefaultRelier(data);
     }
 
-    // Run final validation. This will ensure that the all fields decorated with an @bind are in the
-    // the correct state.
+    // this.relier = relier;
+    return relier;
+    // }
 
     // Commenting this out so that pages will stop erroring out when we don't have sufficient query params.
     // This might be a TODO to restore this once we have all the data we need in the React app.
-    // relier?.validate();
-
-    return relier;
+    // await relier?.validate();
+    // return this.relier;
   }
 
   private createPairingAuthorityRelier(data: ModelDataStore) {
@@ -182,38 +185,94 @@ export class RelierFactory {
       }
       relier.clientId = clientId;
     } else if (flags.isOAuthVerificationFlow()) {
-      const data = flags.getOAuthResumeObj();
+      // Restore any state encoded by the resume token found in the URL as query parameter.
+      const resume = this.data.get('resume');
+      if (resume != null && typeof resume === 'string') {
+        const token = parseResumeToken(resume);
 
-      const resumeInfo = new ResumeObj(new GenericData(data));
+        if (token.entrypoint) {
+          relier.entrypoint = token.entrypoint;
+        }
+        if (token.entrypointExperiment) {
+          relier.entrypointExperiment = token.entrypoint;
+        }
+        if (token.resetPasswordConfirm) {
+          relier.resetPasswordConfirm = token.resetPasswordConfirm;
+        }
+        if (token.style) {
+          relier.style = token.style;
+        }
+        if (token.utmCampaign) {
+          relier.utmCampaign = token.utmCampaign;
+        }
+        if (token.utmContent) {
+          relier.utmContent = token.utmContent;
+        }
+        if (token.utmMedium) {
+          relier.utmMedium = token.utmMedium;
+        }
+        if (token.utmSource) {
+          relier.utmSource = token.utmSource;
+        }
+        if (token.utmTerm) {
+          relier.utmTerm = token.utmTerm;
+        }
+        if (token.deviceId) {
+          relier.deviceId = token.deviceId;
+        }
+        if (token.flowBegin) {
+          relier.flowBeginTime = token.flowBegin;
+        }
+        if (token.flowId) {
+          relier.flowId = token.flowId;
+        }
+        if (token.scope) {
+          relier.scope = token.scope;
+        }
+        if (token.state) {
+          relier.state = token.state;
+        }
+      }
 
-      relier.accessType = resumeInfo.accessType;
-      relier.acrValues = resumeInfo.acrValues;
-      relier.action = resumeInfo.action;
-      relier.clientId = resumeInfo.clientId;
-      relier.codeChallenge = resumeInfo.codeChallenge;
-      relier.codeChallengeMethod = resumeInfo.codeChallengeMethod;
-      relier.prompt = resumeInfo.prompt;
-      relier.redirectUri = resumeInfo.redirectUri;
-      relier.scope = resumeInfo.scope;
-      relier.service = resumeInfo.service;
-      relier.state = resumeInfo.state;
+      // Check for local 'oauth' state, which is found in local session storage. Only set these
+      // values as fallbacks. The URL should always be the source of truth when available.
+      const oauthData = flags.getOAuthResumeObj();
+      if (!relier.clientId && oauthData?.client_id) {
+        relier.clientId = oauthData.client_id;
+      }
+      if (!relier.scope && oauthData?.scope) {
+        relier.scope = oauthData.scope;
+      }
+      if (!relier.scope && oauthData?.state) {
+        relier.state = oauthData.state;
+      }
     } else {
       // Sign inflow
       // params listed in:
       // https://mozilla.github.io/ecosystem-platform/api#tag/OAuth-Server-API-Overview
-      if (!relier.email && relier.loginHint) {
-        relier.email = relier.loginHint;
-      }
-
-      // OAuth reliers are not allowed to specify a service. `service`
-      // is used in the verification flow, it'll be set to the `client_id`.
-      if (relier.service && relier.service.length > 0) {
-        throw new OAuthError('service');
-      }
+      // if (!relier.email && relier.loginHint) {
+      //   relier.email = relier.loginHint;
+      // }
+      // TODO: Double check this assumption. It appears that a service param may get inadvertently passed in. I am not sure that
+      //       passing this data in actually hurts anything...
+      //
+      // // OAuth reliers are not allowed to specify a service. `service`
+      // // is used in the verification flow, it'll be set to the `client_id`.
+      // if (relier.service && relier.service.length > 0) {
+      //   throw new OAuthError('service');
+      // }
     }
 
-    if (relier.service == null) {
-      relier.service = relier.clientId;
+    // Edge case and hack!
+    // Emails might only contain a service query parameter but not a client_id. Which often is
+    // the client id. If this is the case, have the clientId fallback to to this service value.
+    // Also note an actual service name will be fetched later during the 'initClientInfo' stage.
+    if (
+      !relier.clientId &&
+      relier.service &&
+      /[a-z0-9]{16}/.test(relier.service)
+    ) {
+      relier.clientId = relier.service;
     }
   }
 

@@ -2,14 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import AuthClient from 'fxa-auth-client/lib/client';
 import { Constants } from '../../lib/constants';
 import { IntegrationFlags } from '../../lib/integrations/interfaces/integration-flags';
+import { OAuthRelier } from '../reliers';
 
 import {
   BaseIntegration,
   IntegrationFeatures,
   IntegrationType,
 } from './base-integration';
+import { OAuthRedirectIntegration } from './oauth-redirect-integration';
 
 interface OAuthIntegrationFeatures extends IntegrationFeatures {
   webChannelSupport: boolean;
@@ -23,15 +26,44 @@ export type SearchParam = IntegrationFlags['searchParam'];
 
 export class OAuthIntegration extends BaseIntegration<OAuthIntegrationFeatures> {
   constructor(
-    searchParam: SearchParam,
+    public relier: OAuthRelier,
+    public authClient: AuthClient,
     type: OAuthIntegrationTypes = IntegrationType.OAuth
   ) {
     super(type);
     this.setFeatures({
       handleSignedInNotification: false,
       reuseExistingSession: true,
-      webChannelSupport:
-        searchParam('context') === Constants.OAUTH_WEBCHANNEL_CONTEXT,
+      webChannelSupport: relier.context === Constants.OAUTH_WEBCHANNEL_CONTEXT,
     });
+  }
+
+  /**
+   * Handles a passord reset event
+   * @param relier - An OAuth Relier
+   * @param authClient - A FxA Auth Client
+   * @param accountUid - The current account's uid.
+   * @param sessionToken - The session token provided by the password reset
+   * @param keyFetchToken - The keyFetchToken provided by the password reset
+   * @param unwrapBKey - Used to unwrap the account keys
+   * @returns
+   */
+  public async handlePasswordReset(
+    accountUid: string,
+    sessionToken: string,
+    keyFetchToken: string,
+    unwrapKB: string
+  ) {
+    const integration = new OAuthRedirectIntegration(
+      this.relier,
+      this.authClient
+    );
+
+    return await integration.handlePasswordReset(
+      accountUid,
+      sessionToken,
+      keyFetchToken,
+      unwrapKB
+    );
   }
 }

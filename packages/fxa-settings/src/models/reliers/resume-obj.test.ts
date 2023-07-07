@@ -2,21 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ModelDataStore, GenericData } from '../../lib/model-data';
-import { ResumeObj } from './resume-obj';
+import { createResumeToken, parseResumeToken } from './resume-obj';
 
 describe('models/reliers/resume-obj', function () {
-  let data: ModelDataStore;
-  let model: ResumeObj;
+  it('creates and parses', () => {
+    const token = createResumeToken({ email: '123' });
+    const obj = parseResumeToken(token);
 
-  beforeEach(function () {
-    data = new GenericData({});
-    model = new ResumeObj(data);
+    expect(token).toBeDefined();
+    expect(token.length).toBeGreaterThan(0);
+    expect(obj).toBeDefined();
+    expect(obj.email).toEqual('123');
   });
-
-  it('exists', () => {
-    expect(model).toBeDefined();
-  });
-
-  // TODO: Model Test Coverage
 });

@@ -24,7 +24,7 @@ export const MOCK_ACCOUNT: AccountData =
 
 export function createHistoryWithQuery(path: string, queryParams?: string) {
   const history = createHistory(createMemorySource(path));
-  if (queryParams) {
+  if (queryParams != null) {
     history.location.search = queryParams;
   }
   return history;
@@ -36,10 +36,18 @@ export function createAppContext(history: History) {
     windowWrapper,
     urlQueryData: new UrlQueryData(windowWrapper),
     urlHashData: new UrlHashData(windowWrapper),
-    oauthClient: {},
+    oauthClient: {
+      async getClientInfo(_id) {
+        return {
+          name: 'test',
+        };
+      },
+      async destroyToken(_token) {},
+    },
     authClient: {},
     storageData: {},
   } as AppContextValue;
+
   return appCtx;
 }
 
@@ -48,6 +56,9 @@ export function produceComponent(
   { route = '/', history = createHistory(createMemorySource(route)) } = {},
   appCtx?: AppContextValue
 ) {
+  // Note that reliers and integrations are application instances. Reset them
+  // to ensure a clean slate between storybook renders.
+
   if (appCtx) {
     return (
       <AppContext.Provider value={appCtx}>
@@ -55,6 +66,7 @@ export function produceComponent(
       </AppContext.Provider>
     );
   }
+
   return <LocationProvider {...{ history }}>{ui}</LocationProvider>;
 }
 

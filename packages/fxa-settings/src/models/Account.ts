@@ -357,6 +357,10 @@ export class Account implements AccountData {
     return this.data.primaryEmail;
   }
 
+  get email() {
+    return this.data.primaryEmail.email;
+  }
+
   get subscriptions() {
     return this.data.subscriptions;
   }
@@ -541,7 +545,9 @@ export class Account implements AccountData {
 
   async resetPassword(
     email: string,
-    service?: string
+    service?: string,
+    resume?: string,
+    redirectTo?: string
   ): Promise<PasswordForgotSendCodePayload> {
     try {
       const result = await this.apolloClient.mutate({
@@ -557,12 +563,9 @@ export class Account implements AccountData {
         variables: {
           input: {
             email,
-            // Only include the `service` option if the service is Sync.
-            // This becomes a query param (service=sync) on the email link.
-            // We need to modify this in FXA-7657 to send the `client_id` param
-            // when we work on the OAuth flow.
-            ...(service &&
-              service === MozServices.FirefoxSync && { service: 'sync' }),
+            ...(service && { service }),
+            ...(resume && { resume }),
+            ...(redirectTo && { redirectTo }),
           },
         },
       });

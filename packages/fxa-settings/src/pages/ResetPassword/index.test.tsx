@@ -13,7 +13,7 @@ import ResetPassword, { viewName } from '.';
 import { REACT_ENTRYPOINT } from '../../constants';
 
 import { MOCK_ACCOUNT, mockAppContext } from '../../models/mocks';
-import { Account } from '../../models';
+import { Account, createResumeToken } from '../../models';
 import { AuthUiErrorNos } from '../../lib/auth-errors/auth-errors';
 import { typeByLabelText } from '../../lib/test-utils';
 import {
@@ -21,7 +21,7 @@ import {
   createHistoryWithQuery,
   renderWithRouter,
 } from '../../models/mocks';
-import { MozServices } from '../../lib/types';
+import { serialize } from 'v8';
 
 const mockLogViewEvent = jest.fn();
 const mockLogPageViewEvent = jest.fn();
@@ -34,6 +34,34 @@ jest.mock('../../lib/metrics', () => ({
     logPageViewEventOnce: mockLogPageViewEvent,
   })),
 }));
+
+// let mockIsSync = false;
+// let mockResumeToken = 'abcd123';
+// let mockServiceName = 'account settings';
+// let mockRedirectUri = 'http://localhost:8080/123Done';
+// jest.mock('../../models/hooks', () => {
+//   return {
+//     __esModule: true,
+//     ...jest.requireActual('../../models/hooks.ts'),
+//     useRelier: () => ({
+//       isSync() {
+//         return false;
+//       },
+//       getService() {
+//         return mockIsSync;
+//       },
+//       getServiceName() {
+//         return mockServiceName;
+//       },
+//       getResumeToken() {
+//         return mockResumeToken;
+//       },
+//       getRedirectUri() {
+//         return mockRedirectUri;
+//       },
+//     }),
+//   };
+// });
 
 const mockNavigate = jest.fn();
 jest.mock('@reach/router', () => ({
@@ -70,10 +98,6 @@ const render = (ui: any, queryParams = '', account?: Account) => {
   );
 };
 
-function renderWithAccount(account: Account) {
-  render(<ResetPassword />, '', account);
-}
-
 describe('PageResetPassword', () => {
   // TODO: enable l10n tests when they've been updated to handle embedded tags in ftl strings
   // TODO: in FXA-6461
@@ -82,11 +106,11 @@ describe('PageResetPassword', () => {
   //   bundle = await getFtlBundle('settings');
   // });
 
-  it('renders as expected when no props are provided', () => {
+  it('renders as expected when no props are provided', async () => {
     render(<ResetPassword />);
     // testAllL10n(screen, bundle);
 
-    const headingEl = screen.getByRole('heading', { level: 1 });
+    const headingEl = await screen.findByRole('heading', { level: 1 });
     expect(headingEl).toHaveTextContent(
       'Reset password to continue to account settings'
     );
@@ -103,9 +127,9 @@ describe('PageResetPassword', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a custom service name in the header when it is provided', () => {
+  it('renders a custom service name in the header when it is provided', async () => {
     render(<ResetPassword />, 'service=sync');
-    const headingEl = screen.getByRole('heading', { level: 1 });
+    const headingEl = await screen.findByRole('heading', { level: 1 });
     expect(headingEl).toHaveTextContent(
       `Reset password to continue to Firefox Sync`
     );
@@ -124,8 +148,9 @@ describe('PageResetPassword', () => {
     expect(screen.queryByLabelText('Email')).not.toBeInTheDocument();
   });
 
-  it('emits a metrics event on render', () => {
+  it('emits a metrics event on render', async () => {
     render(<ResetPassword />);
+    await screen.findByText('Reset password');
     expect(usePageViewEvent).toHaveBeenCalledWith(viewName, REACT_ENTRYPOINT);
   });
 
@@ -136,21 +161,28 @@ describe('PageResetPassword', () => {
       }),
     } as unknown as Account;
 
-    renderWithAccount(account);
+    render(
+      <ResetPassword />,
+      'client_id=123&service=123Done&resume=123abc&redirect_uri=foo',
+      account
+    );
+
+    const resetPasswordInput = await screen.findByTestId(
+      'reset-password-input-field'
+    );
 
     await act(async () => {
-      fireEvent.input(screen.getByTestId('reset-password-input-field'), {
+      fireEvent.input(resetPasswordInput, {
         target: { value: MOCK_ACCOUNT.primaryEmail.email },
       });
-    });
-
-    await act(async () => {
       fireEvent.click(screen.getByText('Begin reset'));
     });
 
     expect(account.resetPassword).toHaveBeenCalledWith(
       MOCK_ACCOUNT.primaryEmail.email,
-      MozServices.Default
+      '123Done',
+      expect.stringMatching(/^(?=(.{4})*$)[A-Za-z0-9+/]*={0,2}$/), // NOTE: Base64 encoded check
+      'foo'
     );
 
     expect(mockNavigate).toHaveBeenCalledWith(
@@ -173,10 +205,11 @@ describe('PageResetPassword', () => {
     } as unknown as Account;
 
     it('with an empty email', async () => {
-      renderWithAccount(account);
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Begin reset' }));
-      });
+      render(<ResetPassword />, '', account);
+
+      const button = await screen.findByRole('button', { name: 'Begin reset' });
+      fireEvent.click(button);
+
       await screen.findByText('Email required');
       expect(account.resetPassword).not.toHaveBeenCalled();
 
@@ -186,11 +219,12 @@ describe('PageResetPassword', () => {
     });
 
     it('with an invalid email', async () => {
-      renderWithAccount(account);
+      render(<ResetPassword />, '', account);
       await typeByLabelText('Email')('foxy@gmail.');
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Begin reset' }));
-      });
+
+      const button = await screen.findByRole('button', { name: 'Begin reset' });
+      fireEvent.click(button, { name: 'Begin reset' });
+
       await screen.findByText('Valid email required');
       expect(account.resetPassword).not.toHaveBeenCalled();
 
@@ -208,15 +242,14 @@ describe('PageResetPassword', () => {
       resetPassword: jest.fn().mockRejectedValue(gqlError),
     } as unknown as Account;
 
-    renderWithAccount(account);
+    render(<ResetPassword />, '', account);
 
     fireEvent.input(screen.getByTestId('reset-password-input-field'), {
       target: { value: MOCK_ACCOUNT.primaryEmail.email },
     });
 
     fireEvent.click(screen.getByRole('button'));
-
-    await waitFor(() => screen.findByText('Unknown account'));
+    await screen.findByText('Unknown account');
   });
 
   it('displays an error when rate limiting kicks in', async () => {
@@ -230,24 +263,28 @@ describe('PageResetPassword', () => {
       retryAfter: 500,
       retryAfterLocalized: 'in 15 minutes',
     }; // Throttled error
+
     const account = {
       resetPassword: jest
         .fn()
         .mockRejectedValue(gqlThrottledErrorWithRetryAfter),
     } as unknown as Account;
 
-    renderWithAccount(account);
+    render(<ResetPassword />, '', account);
 
-    fireEvent.input(screen.getByTestId('reset-password-input-field'), {
+    const input = await screen.findByTestId('reset-password-input-field');
+    fireEvent.input(input, {
       target: { value: MOCK_ACCOUNT.primaryEmail.email },
     });
 
-    fireEvent.click(screen.getByText('Begin reset'));
+    const resetButton = await screen.findByText('Begin reset');
 
-    await waitFor(() =>
-      screen.findByText(
-        'You’ve tried too many times. Please try again in 15 minutes.'
-      )
+    await act(async () => {
+      resetButton.click();
+    });
+
+    await screen.findByText(
+      'You’ve tried too many times. Please try again in 15 minutes.'
     );
   });
 
@@ -257,7 +294,7 @@ describe('PageResetPassword', () => {
       resetPassword: jest.fn().mockRejectedValue(unexpectedError),
     } as unknown as Account;
 
-    renderWithAccount(account);
+    render(<ResetPassword />, '', account);
 
     fireEvent.input(screen.getByTestId('reset-password-input-field'), {
       target: { value: MOCK_ACCOUNT.primaryEmail.email },

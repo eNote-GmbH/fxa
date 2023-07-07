@@ -489,9 +489,9 @@ Router = Router.extend({
         // reset PW, since there is a lot of logic we must port over for that to function
         // correctly. However, the relier for simple routes doesn't matter since the simple
         // routes don't contain any oauth logic.
-        if (routeGroup !== 'simpleRoutes' && this.relier.isOAuth()) {
-          return false;
-        }
+        // if (routeGroup !== 'simpleRoutes' && this.relier.isOAuth()) {
+        //   return false;
+        // }
 
         return (
           this.reactRouteGroups[routeGroup].featureFlagOn &&

@@ -352,7 +352,7 @@ export class LoginPage extends BaseLayout {
 
   async submit(waitForNav = true) {
     if (waitForNav) {
-      const waitForNavigation = this.page.waitForNavigation();
+      const waitForNavigation = this.page.waitForEvent('framenavigated');
       await this.page.locator(selectors.SUBMIT).click();
       return waitForNavigation;
     }

@@ -171,8 +171,15 @@ describe('views/sign_in_password', () => {
   });
 
   describe('validateAndSubmit', () => {
+    let loginSubmitEvenStub;
+
     beforeEach(() => {
       sinon.stub(view, 'signIn').callsFake(() => Promise.resolve());
+      loginSubmitEvenStub = sinon.stub(GleanMetrics.login, 'submit');
+    });
+
+    afterEach(() => {
+      loginSubmitEvenStub.restore();
     });
 
     describe('password valid', () => {
@@ -182,6 +189,7 @@ describe('views/sign_in_password', () => {
         return Promise.resolve(view.validateAndSubmit()).then(() => {
           assert.isTrue(view.signIn.calledOnce);
           assert.isTrue(view.signIn.calledWith(account, 'password'));
+          sinon.assert.calledOnce(loginSubmitEvenStub);
         });
       });
     });

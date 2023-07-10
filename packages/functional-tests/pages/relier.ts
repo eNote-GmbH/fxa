@@ -60,7 +60,7 @@ export class RelierPage extends BaseLayout {
   }
 
   async promptNoneError() {
-    const error = await this.page.locator('.error');
+    const error = this.page.locator('.error');
     return error.innerText();
   }
 

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import Account from 'models/account';
+import AuthErrors from 'lib/auth-errors';
 import { assert } from 'chai';
 import Backbone from 'backbone';
 import Broker from 'models/auth_brokers/base';
@@ -193,6 +194,31 @@ describe('views/sign_in_password', () => {
         view.useDifferentAccount();
 
         assert.isTrue(view.navigate.calledOnceWith('/', { account }));
+      });
+    });
+  });
+
+  describe('onSignInError', () => {
+    let loginSubmitErrorStub;
+
+    beforeEach(() => {
+      sinon
+        .stub(view, 'signIn')
+        .callsFake(() => Promise.reject(AuthErrors.ERRORS.INCORRECT_PASSWORD));
+      loginSubmitErrorStub = sinon.stub(GleanMetrics.login, 'error');
+    });
+
+    afterEach(() => {
+      loginSubmitErrorStub.restore();
+    });
+
+    describe('metrics', () => {
+      it('submits a login_submit_frontend_error Glean ping', () => {
+        view.$('#password').val('password');
+
+        return Promise.resolve(view.validateAndSubmit()).then(() => {
+          sinon.assert.calledOnce(loginSubmitErrorStub);
+        });
       });
     });
   });

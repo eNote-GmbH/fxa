@@ -97,14 +97,11 @@ export class AppleUser {
 
   async createUpdateFxAUser() {
     const sub = this.appleUserInfo.sub; // The recipient team-scoped identifier for the user.
-    const appleEmail = this.appleUserInfo.email; // The private email address specific to the recipient team. 
     
-    // TODO, maybe we should mark this failure
-    // const isPrivateEmail = this.appleUserInfo.is_private_email; // Boolean if email is private
-    // if (isPrivateEmail) {
-    //   this.setFailure({ message: 'Apple email is private' });
-    // }
-
+    const pocketEmail = this.email;
+    const isPrivateEmail = this.appleUserInfo.is_private_email; // Boolean if email is private
+    const privateEmail = this.appleUserInfo.email;
+    
     // 1. Check if user exists in FxA via the uid value from Pocket. We should expect
     // the uid to be valid, but if it isn't error out.
     try {
@@ -134,11 +131,12 @@ export class AppleUser {
     
     // FxA tries to find an email match in the following order:
     // 1. Primary email from Pocket
-    // 2. Apple email from `transfer_sub`
-    // 3. Alternate emails from Pocket
-    this.alternateEmails.unshift(appleEmail);
-    if (appleEmail !== this.email) {
-      this.alternateEmails.unshift(this.email);
+    // 2. Alternate emails from Pocket
+    // 3. Apple private email from `transfer_sub`
+    this.alternateEmails.unshift(pocketEmail);
+    
+    if (isPrivateEmail) {
+      this.alternateEmails.push(privateEmail);
     }
 
     if (this.alternateEmails) {
@@ -168,8 +166,8 @@ export class AppleUser {
     // link the Apple account to the FxA account.
     try {
       if (this.mock) {
-        console.log(`Mock: No user found, creating new user with email: ${appleEmail}`);
-        this.setSuccess({uid: uuid.v4({}, Buffer.alloc(16)).toString('hex'), email: appleEmail});
+        console.log(`Mock: No user found, creating new user with email: ${pocketEmail}`);
+        this.setSuccess({uid: uuid.v4({}, Buffer.alloc(16)).toString('hex'), email: pocketEmail});
         return;
       }
       
@@ -179,7 +177,7 @@ export class AppleUser {
       accountRecord = await this.db.createAccount({
         uid: uuid.v4({}, Buffer.alloc(16)).toString('hex'),
         createdAt: Date.now(),
-        email: appleEmail,
+        email: pocketEmail,
         emailCode,
         emailVerified: true,
         kA,

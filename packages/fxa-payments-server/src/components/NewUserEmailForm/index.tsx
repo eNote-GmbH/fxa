@@ -10,7 +10,6 @@ import {
   useValidatorState,
   MiddlewareReducer as ValidatorMiddlewareReducer,
 } from '../../lib/validator';
-import './index.scss';
 import * as Amplitude from '../../lib/amplitude';
 import { useCallbackOnce } from '../../lib/hooks';
 import { apiFetchAccountStatus } from '../../lib/apiClient';
@@ -181,10 +180,12 @@ export const NewUserEmailForm = ({
       </Localized>
 
       <div
-        className="flex justify-center items-center mb-14"
+        className="flex justify-center items-center mb-14 gap-5"
         data-testid="assurance-copy"
       >
-        <img src={shieldIcon} alt="shield" />
+        <span className="-mx-2">
+          <img src={shieldIcon} alt="shield" />
+        </span>
         <Localized id="new-user-subscribe-product-assurance">
           <p className="mb-0">
             We only use your email to create your account. We will never sell it

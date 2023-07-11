@@ -1,11 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-export { AccountCustomers } from './lib/account-customers';
 export { Account } from './lib/account';
+export { AccountCustomers } from './lib/account-customers';
+export { Cart } from './lib/cart';
 export { Device } from './lib/device';
-export { EmailBounce } from './lib/email-bounce';
 export { Email } from './lib/email';
+export { EmailBounce } from './lib/email-bounce';
 export { EmailType } from './lib/email-type';
 export { LinkedAccount } from './lib/linked-account';
 export { MetaData } from './lib/metadata';

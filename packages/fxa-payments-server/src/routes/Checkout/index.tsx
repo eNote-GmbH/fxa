@@ -72,6 +72,8 @@ import { useParams } from 'react-router-dom';
 import { CheckoutType } from 'fxa-shared/subscriptions/types';
 import { metadataFromPlan } from 'fxa-shared/subscriptions/metadata';
 
+import ReactGA from 'react-ga4';
+
 const PaypalButton = React.lazy(() => import('../../components/PayPalButton'));
 
 const NewsletterErrorAlertBar = () => {
@@ -172,6 +174,7 @@ export const Checkout = ({
       ...selectedPlan,
       checkoutType: CheckoutType.WITHOUT_ACCOUNT,
     });
+    ReactGA.event();
   }, [selectedPlan]);
 
   // clear any error rendered with `ErrorMessage` on form change

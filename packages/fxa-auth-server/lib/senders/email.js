@@ -348,7 +348,7 @@ module.exports = function (log, config, bounces) {
     timeZone,
     acceptLanguage
   ) {
-    return constructLocalTimeString(timeZone, acceptLanguage);
+    return constructLocalTimeString(timeZone, determineLocale(acceptLanguage));
   };
 
   Mailer.prototype._constructLocalDateString = function (
@@ -580,10 +580,13 @@ module.exports = function (log, config, bounces) {
       {},
       templateName
     );
+    console.log('message.timeZone *', message.timeZone);
+    console.log('message.acceptLanguage *', message.acceptLanguage);
     const [time, date] = this._constructLocalTimeString(
       message.timeZone,
       message.acceptLanguage
     );
+    console.log('date returned', date);
 
     const headers = {
       'X-Verify-Short-Code': code,

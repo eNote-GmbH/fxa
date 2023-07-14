@@ -28,8 +28,19 @@ describe('AppController (e2e)', () => {
       .send({
         operationName: null,
         variables: {},
-        query: '{account{uid}}',
+        query: 'query GetUid {\n  account {\n    uid\n  }\n}\n',
       })
       .expect(200);
+  });
+
+  it('/graphql (GET) - with invalid query', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        operationName: null,
+        variables: {},
+        query: 'query GetUid { }',
+      })
+      .expect(403);
   });
 });

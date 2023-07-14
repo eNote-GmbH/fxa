@@ -41,4 +41,16 @@ describe('#integration - AppController (e2e)', () => {
       })
       .expect(200);
   });
+
+  it('/graphql (GET) - with invalid query', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        operationName: null,
+        variables: {},
+        query:
+          '{accountByEmail(email:"test@test.com", autoCompleted:true){uid}}',
+      })
+      .expect(403);
+  });
 });

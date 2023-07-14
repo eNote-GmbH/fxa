@@ -238,6 +238,7 @@ commands:
             ./.circleci/base-install.sh
             ./.circleci/create-lists.sh
             ./_scripts/create-version-json.sh
+            yarn gql:whitelist
       - store_artifacts:
           path: ./packages/version.json
       - store_artifacts:

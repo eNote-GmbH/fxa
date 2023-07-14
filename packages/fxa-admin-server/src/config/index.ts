@@ -13,6 +13,23 @@ convict.addFormats(require('convict-format-with-moment'));
 convict.addFormats(require('convict-format-with-validator'));
 
 const conf = convict({
+  gql: {
+    whitelist: {
+      doc: 'A list of json files holding sactioned gql queries',
+      env: 'GQL_WHITELIST',
+      default: [
+        'src/config/gql/whitelist/fxa-admin-panel.json',
+        'src/config/gql/whitelist/gql-layground.json',
+      ],
+      format: Array,
+    },
+    enabled: {
+      doc: 'Toggles whether or not gql queries are checked against the whitelist.',
+      env: 'GQL_WHITELIST_ENABLED',
+      default: true,
+      format: Boolean,
+    },
+  },
   authHeader: {
     default: USER_EMAIL_HEADER,
     doc: 'Authentication header that should be logged for the user',
@@ -560,5 +577,5 @@ conf.loadFile(existingConfigFiles);
 conf.validate();
 const Config = conf;
 
-export type AppConfig = ReturnType<typeof Config['getProperties']>;
+export type AppConfig = ReturnType<(typeof Config)['getProperties']>;
 export default Config;

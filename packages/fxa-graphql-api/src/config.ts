@@ -17,6 +17,23 @@ export interface RedisConfig {
 }
 
 const conf = convict({
+  gql: {
+    whitelist: {
+      doc: 'A list of json files holding sanctioned gql queries',
+      env: 'GQL_WHITELIST',
+      default: [
+        'src/config/gql/whitelist/fxa-settings.json',
+        'src/config/gql/whitelist/gql-playground.json',
+      ],
+      format: Array,
+    },
+    enabled: {
+      doc: 'Toggles whether or not gql queries are checked against the whitelist',
+      env: 'GQL_WHITELIST_ENABLED',
+      default: true,
+      format: Boolean,
+    },
+  },
   authServer: {
     url: {
       doc: 'URL of fxa-auth-server',
@@ -224,5 +241,5 @@ conf.loadFile(files);
 conf.validate({ allowed: 'strict' });
 const Config = conf;
 
-export type AppConfig = ReturnType<typeof Config['getProperties']>;
+export type AppConfig = ReturnType<(typeof Config)['getProperties']>;
 export default Config;

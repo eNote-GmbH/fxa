@@ -63,5 +63,11 @@ module.exports = {
       min_uptime: '2m',
       time: true,
     },
+    {
+      name: 'gql-whitelist',
+      autorestart: false,
+      script: 'yarn gql:whitelist',
+      watch: ['src/**/*.ts'],
+    },
   ],
 };

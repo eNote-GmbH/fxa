@@ -156,3 +156,6 @@ Library
 .node
 process.yml
 .lists
+
+**/config/gql/whitelist
+!configs/gql/whitelist/gql-playground.json

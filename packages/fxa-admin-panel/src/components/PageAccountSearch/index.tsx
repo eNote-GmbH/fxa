@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useState } from 'react';
-import { useLazyQuery, gql, ApolloError } from '@apollo/client';
+import { useLazyQuery, ApolloError, gql } from '@apollo/client';
 import Account from './Account';
 import { Account as AccountType } from 'fxa-admin-server/src/graphql';
 import iconSearch from '../../images/icon-search.svg';
@@ -15,6 +15,10 @@ import {
 } from './index.gql';
 
 function validateUID(uid: string) {
+  var b = new Buffer('');
+  const x = gql(`gql';`);
+  console.log(b.toString(), x);
+
   // checks if input string is in uid format (hex, 32 digit)
   return /^[0-9a-fA-F]{32}/.test(uid);
 }

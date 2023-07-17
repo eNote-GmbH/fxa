@@ -9,10 +9,11 @@ module.exports = function (grunt) {
     // in a later ticket - will require coordination with l10n to resolve
     // conflicting IDs for identical terms.
     'src/branding.ftl',
-    // Adding shared branding file to allow for gradual adoption of shared
-    // branding terms. There are currently no conflicting IDs between the
-    // two branding.ftl files.
+    'src/**/*.ftl',
+  ];
+  const testPaths = [
     '../fxa-shared/l10n/branding.ftl',
+    '../fxa-react/components/**/*.ftl',
     'src/**/*.ftl',
   ];
 
@@ -29,7 +30,7 @@ module.exports = function (grunt) {
       // FTL updates on our side that haven't landed yet on the l10n side. We want to test
       // against _our_ latest, and not necessarily the l10n repo's latest.
       'ftl-test': {
-        src: srcPaths,
+        src: testPaths,
         dest: 'test/payments.ftl',
       },
     },

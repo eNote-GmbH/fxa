@@ -25,8 +25,8 @@ export const PageRecentActivity = (_: RouteComponentProps) => {
   return (
     <FlowContainer
       title={ftlMsgResolver.getMsg(
-        'recent-activity-title',
-        'Recent Account Activity'
+        'recent-activity-title-v2',
+        'Recent account activity'
       )}
     >
       <ol className="mt-5 relative border-l border-gray-100">

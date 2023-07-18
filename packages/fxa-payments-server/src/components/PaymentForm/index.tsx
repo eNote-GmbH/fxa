@@ -49,6 +49,7 @@ import {
 import { PaymentProviderDetails } from '../PaymentProviderDetails';
 import { PaymentConsentCheckbox } from '../PaymentConsentCheckbox';
 import { apiInvoicePreview } from '../../lib/apiClient';
+import { GAEvent, GAPurchaseType, ReactGALog } from '../../lib/reactga-event';
 import LoadingSpinner, {
   SpinnerType,
 } from 'fxa-react/components/LoadingSpinner';
@@ -100,6 +101,7 @@ export type BasePaymentFormProps = {
   promotionCode?: string;
   invoicePreview?: FirstInvoicePreview;
   disabled?: boolean;
+  discount?: number;
 } & WithLocalizationProps;
 
 export const PaymentForm = ({
@@ -122,6 +124,7 @@ export const PaymentForm = ({
   promotionCode,
   invoicePreview,
   disabled = false,
+  discount,
 }: BasePaymentFormProps) => {
   const isStripeCustomer = isExistingStripeCustomer(customer);
 
@@ -218,6 +221,12 @@ export const PaymentForm = ({
       if (!stripe || !elements || !allowSubmit) {
         return;
       }
+      ReactGALog.eventTracker({
+        eventName: GAEvent.PURCHASE_SUBMIT,
+        plan,
+        purchaseType: GAPurchaseType.NEW,
+        discount,
+      });
       setLastSubmitNonce(submitNonce);
       const { name } = validator.getValues();
       const card = elements.getElement(CardElement);
@@ -239,8 +248,10 @@ export const PaymentForm = ({
       stripe,
       submitNonce,
       allowSubmit,
+      discount,
       elements,
       isStripeCustomer,
+      plan,
       promotionCode,
     ]
   );

@@ -18,7 +18,7 @@ event:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
     expires: never
     data_sensitivity:
-      - web_activity
+      - interaction
 
   reason:
     description: additional context-dependent (on event.name) info, e.g. the cause of an error
@@ -105,7 +105,7 @@ session:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
     expires: never
     data_sensitivity:
-      - web_activity
+      - interaction
 
   device_type:
     type: string
@@ -137,7 +137,7 @@ session:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
     expires: never
     data_sensitivity:
-      - web_activity
+      - interaction
 
 utm:
   campaign:

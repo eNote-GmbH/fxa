@@ -207,8 +207,8 @@ export function SecurityEvent({
 
   const l10nName = getSecurityEventNameL10n(name);
   return (
-    <li className="mt-5 ml-4" data-testid={l10nName.ftlId}>
-      <div className="absolute w-3 h-3 bg-green-600 rounded-full mt-1.5 -left-1.5 border border-green-700"></div>
+    <li className="mt-5 ms-4" data-testid={l10nName.ftlId}>
+      <div className="absolute w-3 h-3 bg-green-600 rounded-full mt-1.5 -start-1.5 border border-green-700"></div>
       <div className="text-grey-900 text-sm mobileLandscape:mt-3">
         <FtlMsg
           id="recent-activity-created-at"

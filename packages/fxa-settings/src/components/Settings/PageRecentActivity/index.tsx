@@ -29,7 +29,7 @@ export const PageRecentActivity = (_: RouteComponentProps) => {
         'Recent account activity'
       )}
     >
-      <ol className="mt-5 relative border-l border-gray-100">
+      <ol className="mt-5 relative border-s border-gray-100">
         {!!securityEvents &&
           securityEvents.map((securityEvent) => (
             <SecurityEventSection

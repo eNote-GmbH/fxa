@@ -228,7 +228,7 @@ utm:
 
   term:
     description: |
-      This metric is similar to the UTM source above; it is used in the Firefox
+      This metric is similar to the `utm.source`; it is used in the Firefox
       browser.  For example, if the user started from about:welcome, then the value
       could be 'aboutwelcome-default-screen'.  The value has a max length of 128
       characters with the alphanumeric characters, _ (underscore), forward slash (/),

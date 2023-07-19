@@ -356,9 +356,8 @@ export class LoginPage extends BaseLayout {
       await this.page.locator(selectors.SUBMIT).click();
       return waitForNavigation;
     }
-    // `waitForNavigation` is deprecated because it's "hard to make it work reliably",
-    // see https://github.com/microsoft/playwright/issues/20853. It's causing at least
-    // one set of test failures so give an option to opt-out here.
+    //using waitForNav just as parameters as
+    //waitForNavigation() has been deprecated
     await this.page.locator(selectors.SUBMIT).click();
   }
 

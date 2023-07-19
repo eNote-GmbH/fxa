@@ -28,7 +28,7 @@ import PageRecoveryKeyCreate from './PageRecoveryKeyCreate';
 
 export const Settings = ({
   showRecoveryKeyV2,
-}: { showRecoveryKeyV2: boolean } & RouteComponentProps) => {
+}: { showRecoveryKeyV2?: boolean } & RouteComponentProps) => {
   const config = useConfig();
   const { metricsEnabled, hasPassword } = useAccount();
 

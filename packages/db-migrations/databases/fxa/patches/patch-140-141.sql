@@ -1,3 +1,24 @@
+SET NAMES utf8mb4 COLLATE utf8mb4_bin;
+
+-- Make sure there are meta data settings for PrunedUntil and LastPrunedAt
+INSERT IGNORE INTO dbMetadata (name, value) VALUES ('prunedUntil', '0');
+
+-- We might have gotten ourselves into a state where data was set to an empty string. If so,
+-- start it over from zero.
+UPDATE dbMetadata SET value = '0' WHERE name = 'prunedUntil' AND value = '';
+
+-- Update prune to limit total number of sessionTokens examined,
+-- and avoid producing the above empty-string bug.
+--   maxTokenAge - Any token older than this value will be pruned. A value of 0 denotes that pruning is disabled.
+--   maxCodeAge  - Any code that was created before now - maxCodeAge will be pruned. A value of 0 denotes pruning is disabled.
+--   pruneInterval - The amount of time that must elapse since the previous prune attempt. This guards against inadvertently
+--                   running a large number of delete operations in succession.
+--   unblockCodesDeleted - Number of unblock codes deleted
+--   signInCodesDeleted - Number of sign in codes deleted
+--   accountResetTokensDeleted - Number of acount reset tokens deleted
+--   passwordForgotTokensDeleted - Number of password forgot tokens deleted
+--   passwordChangeTokensDeleted - Number of password change tokens deleted
+--   sessionTokensDeleted - Number of session tokens deleted deleted
 CREATE PROCEDURE `prune_10` (
   IN `curTime` BIGINT UNSIGNED,
   IN `maxTokenAge` BIGINT UNSIGNED,
@@ -112,5 +133,3 @@ BEGIN
     SELECT RELEASE_LOCK('fxa-auth-server.prune-lock');
 
   END IF;
-
-END;

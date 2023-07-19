@@ -26,7 +26,9 @@ import PageAvatar from './PageAvatar';
 import PageRecentActivity from './PageRecentActivity';
 import PageRecoveryKeyCreate from './PageRecoveryKeyCreate';
 
-export const Settings = (props: RouteComponentProps) => {
+export const Settings = ({
+  isInRecoveryKeyExperiment,
+}: { isInRecoveryKeyExperiment?: boolean } & RouteComponentProps) => {
   const config = useConfig();
   // TODO Remove in FXA-7419
   const { showRecoveryKeyV2 } = config;
@@ -62,12 +64,12 @@ export const Settings = (props: RouteComponentProps) => {
       <Head />
       <Router basepath={HomePath}>
         <ScrollToTop default>
-          <PageSettings path="/" />
+          <PageSettings path="/" {...{ isInRecoveryKeyExperiment }} />
           <PageDisplayName path="/display_name" />
           <PageAvatar path="/avatar" />
           {hasPassword ? (
             // TODO remove feature flag condition in FXA-7419 and only keep PageRecoveryKeyCreate
-            showRecoveryKeyV2 ? (
+            isInRecoveryKeyExperiment && showRecoveryKeyV2 ? (
               <PageRecoveryKeyCreate path="/account_recovery" />
             ) : (
               // TODO Remove in FXA-7419

@@ -36,7 +36,11 @@ const PwdDate = ({ passwordCreated }: { passwordCreated: number }) => {
   );
 };
 
-export const Security = () => {
+export const Security = ({
+  isInRecoveryKeyExperiment,
+}: {
+  isInRecoveryKeyExperiment?: boolean;
+}) => {
   const { passwordCreated, hasPassword } = useAccount();
   const { l10n } = useLocalization();
   const localizedNotSet = l10n.getString('security-not-set', null, 'Not Set');
@@ -81,7 +85,7 @@ export const Security = () => {
         </Localized>
         <hr className="unit-row-hr" />
 
-        <UnitRowRecoveryKey />
+        <UnitRowRecoveryKey {...{ isInRecoveryKeyExperiment }} />
         <hr className="unit-row-hr" />
         <UnitRowTwoStepAuth />
 

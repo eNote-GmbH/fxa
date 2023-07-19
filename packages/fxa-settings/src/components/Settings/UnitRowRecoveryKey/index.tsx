@@ -18,11 +18,15 @@ import { ButtonIconReload, ButtonIconTrash } from '../ButtonIcon';
 import { HomePath } from '../../../constants';
 import { FtlMsg } from 'fxa-react/lib/utils';
 
-export const UnitRowRecoveryKey = () => {
+export const UnitRowRecoveryKey = ({
+  isInRecoveryKeyExperiment,
+}: {
+  isInRecoveryKeyExperiment?: boolean;
+}) => {
   const account = useAccount();
   const config = useConfig();
   // TODO Remove feature flag in FXA-7419
-  const { showRecoveryKeyV2 } = config;
+  const newRecoveryKey = config.showRecoveryKeyV2 && isInRecoveryKeyExperiment;
   const recoveryKey = account.recoveryKey;
   const alertBar = useAlertBar();
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
@@ -80,7 +84,7 @@ export const UnitRowRecoveryKey = () => {
       }
       // TODO Remove condition in FXA-7419 and only keep v2
       route={
-        showRecoveryKeyV2
+        newRecoveryKey
           ? `${HomePath}/account_recovery`
           : recoveryKey
           ? undefined
@@ -88,11 +92,11 @@ export const UnitRowRecoveryKey = () => {
       }
       // Remove this attribute when v1 phased out in FXA-7419
       revealModal={
-        showRecoveryKeyV2 ? undefined : recoveryKey ? revealModal : undefined
+        newRecoveryKey ? undefined : recoveryKey ? revealModal : undefined
       }
       // TODO Remove condition in FXA-7419 and only keep v2
       ctaText={
-        showRecoveryKeyV2
+        newRecoveryKey
           ? recoveryKey
             ? ftlMsgResolver.getMsg('rk-action-change-button', 'Change')
             : ftlMsgResolver.getMsg('rk-action-create', 'Create')
@@ -108,7 +112,7 @@ export const UnitRowRecoveryKey = () => {
       alertBarRevealed
       headerContent={
         // TODO Remove condition in FXA-7419 and only keep v2
-        showRecoveryKeyV2 ? (
+        newRecoveryKey ? (
           recoveryKey && (
             <ButtonIconTrash
               title={localizedDeleteRKIconButton}
@@ -129,7 +133,7 @@ export const UnitRowRecoveryKey = () => {
       // if there is a recovery key for the account, show the trash icon
       actionContent={
         // TODO Remove condition in FXA-7419 and only keep v2
-        showRecoveryKeyV2 ? (
+        newRecoveryKey ? (
           recoveryKey && (
             <ButtonIconTrash
               title={localizedDeleteRKIconButton}

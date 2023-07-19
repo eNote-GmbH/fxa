@@ -16,7 +16,9 @@ import { DeleteAccountPath } from 'fxa-settings/src/constants';
 import { Localized } from '@fluent/react';
 import DataCollection from '../DataCollection';
 
-export const PageSettings = (_: RouteComponentProps) => {
+export const PageSettings = ({
+  isInRecoveryKeyExperiment,
+}: { isInRecoveryKeyExperiment?: boolean } & RouteComponentProps) => {
   const { uid } = useAccount();
 
   Metrics.setProperties({
@@ -32,7 +34,7 @@ export const PageSettings = (_: RouteComponentProps) => {
       </div>
       <div className="flex-7 max-w-full">
         <Profile />
-        <Security />
+        <Security {...{ isInRecoveryKeyExperiment }} />
         <ConnectedServices />
         <LinkedAccounts />
         <DataCollection />

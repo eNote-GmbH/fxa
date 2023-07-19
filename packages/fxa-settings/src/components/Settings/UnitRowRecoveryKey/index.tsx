@@ -4,12 +4,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useBooleanState } from 'fxa-react/lib/hooks';
-import {
-  useAccount,
-  useAlertBar,
-  useConfig,
-  useFtlMsgResolver,
-} from '../../../models';
+import { useAccount, useAlertBar, useFtlMsgResolver } from '../../../models';
 import { logViewEvent } from '../../../lib/metrics';
 import Modal from '../Modal';
 import UnitRow from '../UnitRow';
@@ -19,14 +14,12 @@ import { HomePath } from '../../../constants';
 import { FtlMsg } from 'fxa-react/lib/utils';
 
 export const UnitRowRecoveryKey = ({
-  isInRecoveryKeyExperiment,
+  showRecoveryKeyV2,
 }: {
-  isInRecoveryKeyExperiment?: boolean;
+  showRecoveryKeyV2?: boolean;
 }) => {
   const account = useAccount();
-  const config = useConfig();
-  // TODO Remove feature flag in FXA-7419
-  const newRecoveryKey = config.showRecoveryKeyV2 && isInRecoveryKeyExperiment;
+
   const recoveryKey = account.recoveryKey;
   const alertBar = useAlertBar();
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
@@ -84,7 +77,7 @@ export const UnitRowRecoveryKey = ({
       }
       // TODO Remove condition in FXA-7419 and only keep v2
       route={
-        newRecoveryKey
+        showRecoveryKeyV2
           ? `${HomePath}/account_recovery`
           : recoveryKey
           ? undefined
@@ -92,11 +85,11 @@ export const UnitRowRecoveryKey = ({
       }
       // Remove this attribute when v1 phased out in FXA-7419
       revealModal={
-        newRecoveryKey ? undefined : recoveryKey ? revealModal : undefined
+        showRecoveryKeyV2 ? undefined : recoveryKey ? revealModal : undefined
       }
       // TODO Remove condition in FXA-7419 and only keep v2
       ctaText={
-        newRecoveryKey
+        showRecoveryKeyV2
           ? recoveryKey
             ? ftlMsgResolver.getMsg('rk-action-change-button', 'Change')
             : ftlMsgResolver.getMsg('rk-action-create', 'Create')
@@ -112,7 +105,7 @@ export const UnitRowRecoveryKey = ({
       alertBarRevealed
       headerContent={
         // TODO Remove condition in FXA-7419 and only keep v2
-        newRecoveryKey ? (
+        showRecoveryKeyV2 ? (
           recoveryKey && (
             <ButtonIconTrash
               title={localizedDeleteRKIconButton}
@@ -133,7 +126,7 @@ export const UnitRowRecoveryKey = ({
       // if there is a recovery key for the account, show the trash icon
       actionContent={
         // TODO Remove condition in FXA-7419 and only keep v2
-        newRecoveryKey ? (
+        showRecoveryKeyV2 ? (
           recoveryKey && (
             <ButtonIconTrash
               title={localizedDeleteRKIconButton}

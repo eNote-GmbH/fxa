@@ -26,7 +26,6 @@ const MANUAL_EXPERIMENTS = {
   qrCodeCad: BaseExperiment,
   pushLogin: BaseExperiment,
   pocketMigration: BaseExperiment,
-  newRecoveryKeyUI: BaseExperiment,
 };
 
 const ALL_EXPERIMENTS = _.extend({}, STARTUP_EXPERIMENTS, MANUAL_EXPERIMENTS);

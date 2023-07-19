@@ -63,6 +63,11 @@ export const App = ({
 
   const { metricsEnabled } = account;
 
+  // TODO Remove feature flag and experiment logic in FXA-7419
+  const showRecoveryKeyV2 = !!(
+    config.showRecoveryKeyV2 && isInRecoveryKeyExperiment === 'true'
+  );
+
   useEffect(() => {
     Metrics.init(metricsEnabled || !isSignedIn, flowQueryParams);
     if (metricsEnabled) {
@@ -227,7 +232,7 @@ export const App = ({
               <ThirdPartyAuthCallback path="/post_verify/third_party_auth/callback/*" />
             </>
           )}
-          <Settings path="/settings/*" {...{ isInRecoveryKeyExperiment }} />
+          <Settings path="/settings/*" {...{ showRecoveryKeyV2 }} />
         </ScrollToTop>
       </Router>
     </>

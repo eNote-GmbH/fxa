@@ -403,7 +403,7 @@ Router = Router.extend({
         isSampledUser,
         service,
         uniqueUserId,
-        isInRecoveryKeyExperiment,
+        ...(isInRecoveryKeyExperiment && { isInRecoveryKeyExperiment }),
       })}`;
       this.navigateAway(settingsLink);
     },

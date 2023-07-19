@@ -16,6 +16,7 @@ event:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -32,7 +33,7 @@ event:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
       - https://mozilla-hub.atlassian.net/browse/FXA-7271
     data_reviews:
-      - TBD
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -103,6 +104,7 @@ session:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -135,6 +137,7 @@ session:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -158,6 +161,7 @@ utm:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -180,6 +184,7 @@ utm:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -201,6 +206,7 @@ utm:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -222,6 +228,7 @@ utm:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction
@@ -244,6 +251,7 @@ utm:
       - https://mozilla-hub.atlassian.net/browse/FXA-7265
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1830504
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=1844121
     expires: never
     data_sensitivity:
       - interaction

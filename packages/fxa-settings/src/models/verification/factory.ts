@@ -4,7 +4,7 @@
 
 import { useContext } from 'react';
 import { VerificationInfo } from './verification-info';
-import { AppContext } from '../AppContext';
+import { AppContext } from '../contexts/AppContext';
 import { AccountRecoveryKeyInfo } from './account-recovery-key-info';
 
 export function CreateVerificationInfo() {

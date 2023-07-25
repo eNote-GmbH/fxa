@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { useContext } from 'react';
-import { AppContext } from '../AppContext';
+import { AppContext } from '../contexts/AppContext';
 import { IntegrationFactory } from '../../lib/integrations/integration-factory';
 import { DefaultIntegrationFlags } from '../../lib/integrations/integration-factory-flags';
 import { useAuthClient, useRelier } from '../hooks';

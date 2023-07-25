@@ -5,16 +5,16 @@
 import { ApolloClient, gql } from '@apollo/client';
 import AuthClient from 'fxa-auth-client/browser';
 import React from 'react';
-import config, { Config, readConfigMeta, getDefault } from '../lib/config';
-import { StorageData, UrlHashData, UrlQueryData } from '../lib/model-data';
-import firefox, { FirefoxCommand } from '../lib/channels/firefox';
-import { createApolloClient } from '../lib/gql';
-import { OAuthClient } from '../lib/oauth/oauth-client';
-import { Account, GET_PROFILE_INFO } from './Account';
-import { AlertBarInfo } from './AlertBarInfo';
-import { Session } from './Session';
-import { LocationStateData } from '../lib/model-data/data-stores/location-state-data';
-import { ReachRouterWindow } from '../lib/window';
+import config, { Config, readConfigMeta, getDefault } from '../../lib/config';
+import { StorageData, UrlHashData, UrlQueryData } from '../../lib/model-data';
+import firefox, { FirefoxCommand } from '../../lib/channels/firefox';
+import { createApolloClient } from '../../lib/gql';
+import { OAuthClient } from '../../lib/oauth/oauth-client';
+import { Account, GET_PROFILE_INFO } from '../Account';
+import { AlertBarInfo } from '../AlertBarInfo';
+import { Session } from '../Session';
+import { LocationStateData } from '../../lib/model-data/data-stores/location-state-data';
+import { ReachRouterWindow } from '../../lib/window';
 
 export const GET_INITIAL_STATE = gql`
   query GetInitialState {

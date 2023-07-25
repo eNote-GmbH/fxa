@@ -4,7 +4,11 @@
 
 import React from 'react';
 import { AccountData, ProfileInfo, Session } from '.';
-import { AppContext, AppContextValue, defaultAppContext } from './AppContext';
+import {
+  AppContext,
+  AppContextValue,
+  defaultAppContext,
+} from './contexts/AppContext';
 import {
   renderWithLocalizationProvider,
   withLocalizationProvider,

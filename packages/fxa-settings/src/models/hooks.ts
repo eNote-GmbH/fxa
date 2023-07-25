@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { useContext, useRef, useEffect, useMemo } from 'react';
-import { AppContext, GET_INITIAL_STATE } from './AppContext';
+import { AppContext, GET_INITIAL_STATE } from './contexts/AppContext';
 import { GET_SESSION_VERIFIED, Session } from './Session';
 import { clearSignedInAccountUid } from '../lib/cache';
 import { gql, useQuery } from '@apollo/client';

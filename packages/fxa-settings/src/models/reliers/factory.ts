@@ -4,7 +4,7 @@
 
 import { useContext } from 'react';
 import { DefaultRelierFlags, RelierFactory } from '../../lib/reliers';
-import { AppContext } from '../AppContext';
+import { AppContext } from '../contexts/AppContext';
 
 export function CreateRelierDelegates() {
   const { oauthClient, authClient, windowWrapper } = useContext(AppContext);

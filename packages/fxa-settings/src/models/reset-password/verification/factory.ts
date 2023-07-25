@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { useContext } from 'react';
-import { AppContext } from '../../AppContext';
+import { AppContext } from '../../contexts/AppContext';
 import { CompleteResetPasswordLink } from './complete-reset-password-link';
 
 export function CreateCompleteResetPasswordLink() {

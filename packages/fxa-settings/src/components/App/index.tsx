@@ -6,7 +6,13 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, Router } from '@reach/router';
 import { ScrollToTop } from '../Settings/ScrollToTop';
 import { currentAccount, sessionToken } from '../../lib/cache';
-import { useInitialState, useAccount, useConfig } from '../../models';
+import {
+  useInitialState,
+  useAccount,
+  useConfig,
+  useIntegration,
+  useInitialSettingsState,
+} from '../../models';
 import * as Metrics from '../../lib/metrics';
 import Storage from '../../lib/storage';
 
@@ -46,6 +52,10 @@ import { CreateCompleteResetPasswordLink } from '../../models/reset-password/ver
 import ThirdPartyAuthCallback from '../../pages/PostVerify/ThirdPartyAuthCallback';
 import { searchParams } from '../../lib/utilities';
 import { gql } from '@apollo/client';
+import {
+  SettingsContext,
+  initializeSettingsContext,
+} from '../../models/contexts/SettingsContext';
 
 interface FlowQueryParams {
   broker?: string;
@@ -60,7 +70,7 @@ interface FlowQueryParams {
 
 // if sessionToken exists, run...
 export const INITIAL_METRICS_QUERY = gql`
-  query GetInitialState {
+  query GetInitialMetricsState {
     account {
       recoveryKey
       metricsEnabled
@@ -84,7 +94,6 @@ interface QueryParams extends FlowQueryParams {
 }
 
 export const App = (_: RouteComponentProps) => {
-  console.log('sessiontoken', sessionToken());
   const flowQueryParams = searchParams(window.location.search) as QueryParams;
   const { isInRecoveryKeyExperiment } = flowQueryParams;
 
@@ -141,7 +150,7 @@ export const App = (_: RouteComponentProps) => {
   return (
     <>
       <Router basepath={'/'}>
-        <NonSettingsRoutes path="/" />
+        <AuthAndSetUpRoutes path="/" />
         <SettingsRoutes path="/settings/*" {...{ showRecoveryKeyV2 }} />
       </Router>
     </>
@@ -153,16 +162,27 @@ const SettingsRoutes = ({
 }: {
   showRecoveryKeyV2?: boolean;
 } & RouteComponentProps) => {
+  const { loading, error } = useInitialSettingsState();
+  const account = useAccount();
+  console.log('account', account);
+  const settingsContext = initializeSettingsContext();
+
   return (
-    <ScrollToTop default>
-      <Settings path="/settings/*" {...{ showRecoveryKeyV2 }} />
-    </ScrollToTop>
+    <SettingsContext.Provider value={settingsContext}>
+      <ScrollToTop default>
+        <Settings path="/settings/*" {...{ showRecoveryKeyV2 }} />
+      </ScrollToTop>
+    </SettingsContext.Provider>
   );
 };
 
-const NonSettingsRoutes = (_: RouteComponentProps) => {
+const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   const sessionTokenId = sessionToken();
   // const localAccount = currentAccount();
+
+  const { relier, integration } = useIntegration();
+  console.log('relier', relier);
+  console.log('integration', integration);
 
   return (
     <>

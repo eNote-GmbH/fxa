@@ -147,12 +147,10 @@ export const App = (_: RouteComponentProps) => {
   // }, [metricsEnabled, config.sentry, config.version, loading, isSignedIn]);
 
   return (
-    <>
-      <Router basepath={'/'}>
-        <AuthAndSetUpRoutes path="/" />
-        <SettingsRoutes path="/settings/*" {...{ showRecoveryKeyV2 }} />
-      </Router>
-    </>
+    <Router basepath="/">
+      <AuthAndSetUpRoutes path="/*" />
+      <SettingsRoutes path="/settings/*" {...{ showRecoveryKeyV2 }} />
+    </Router>
   );
 };
 
@@ -184,7 +182,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   console.log('integrationAndRelier', integrationAndRelier);
 
   return (
-    <>
+    <Router>
       <CannotCreateAccount path="/cannot_create_account/*" />
       <Clear path="/clear/*" />
       <CookiesDisabled path="/cookies_disabled/*" />
@@ -195,7 +193,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <LegalPrivacy path="/legal/privacy/*" />
       <LegalPrivacy path="/:locale/legal/privacy/*" />
 
-      <ResetPassword path="/reset_password/*" {...{ integrationAndRelier }} />
+      <ResetPassword path="reset_password" {...{ integrationAndRelier }} />
       <ConfirmResetPassword
         path="/confirm_reset_password/*"
         {...{ integrationAndRelier }}
@@ -242,7 +240,10 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
         )}
       </LinkValidator>
 
-      <AccountRecoveryResetPassword path="/account_recovery_reset_password/*" />
+      <AccountRecoveryResetPassword
+        path="/account_recovery_reset_password/*"
+        {...{ integrationAndRelier }}
+      />
 
       <SigninReported path="/signin_reported/*" />
       {/* <SigninBounced
@@ -293,7 +294,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <ConfirmSignupCode path="/confirm_signup_code/*" />
 
       <ThirdPartyAuthCallback path="/post_verify/third_party_auth/callback/*" />
-    </>
+    </Router>
   );
 };
 

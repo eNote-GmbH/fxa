@@ -54,7 +54,6 @@ const ResetPassword = ({
   integrationAndRelier,
 }: ResetPasswordProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
-
   const [errorText, setErrorText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [hasFocused, setHasFocused] = useState<boolean>(false);

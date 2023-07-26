@@ -7,7 +7,6 @@ import { RouteComponentProps, Router } from '@reach/router';
 import { ScrollToTop } from '../Settings/ScrollToTop';
 import { currentAccount, sessionToken } from '../../lib/cache';
 import {
-  useInitialState,
   useAccount,
   useConfig,
   useIntegration,
@@ -180,9 +179,9 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   const sessionTokenId = sessionToken();
   // const localAccount = currentAccount();
 
-  const { relier, integration } = useIntegration();
-  console.log('relier', relier);
-  console.log('integration', integration);
+  // temporary until the relier + integration is combined
+  const integrationAndRelier = useIntegration();
+  console.log('integrationAndRelier', integrationAndRelier);
 
   return (
     <>
@@ -196,8 +195,11 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <LegalPrivacy path="/legal/privacy/*" />
       <LegalPrivacy path="/:locale/legal/privacy/*" />
 
-      <ResetPassword path="/reset_password/*" />
-      <ConfirmResetPassword path="/confirm_reset_password/*" />
+      <ResetPassword path="/reset_password/*" {...{ integrationAndRelier }} />
+      <ConfirmResetPassword
+        path="/confirm_reset_password/*"
+        {...{ integrationAndRelier }}
+      />
 
       <WebChannelExample path="/web_channel_example/*" />
 
@@ -208,12 +210,14 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
         getParamsFromModel={() => {
           return CreateCompleteResetPasswordLink();
         }}
+        {...{ integrationAndRelier }}
       >
         {({ setLinkStatus, params }) => (
           <CompleteResetPassword
             {...{
               setLinkStatus,
               params,
+              integrationAndRelier,
             }}
           />
         )}
@@ -226,6 +230,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
         getParamsFromModel={() => {
           return CreateCompleteResetPasswordLink();
         }}
+        {...{ integrationAndRelier }}
       >
         {({ setLinkStatus, params }) => (
           <AccountRecoveryConfirmKey
@@ -251,30 +256,37 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <PageWithLoggedInStatusState
         Page={ResetPasswordConfirmed}
         path="/reset_password_verified/*"
+        {...{ integrationAndRelier }}
       />
       <PageWithLoggedInStatusState
         Page={ResetPasswordWithRecoveryKeyVerified}
         path="/reset_password_with_recovery_key_verified/*"
+        {...{ integrationAndRelier }}
       />
       <PageWithLoggedInStatusState
         Page={PrimaryEmailVerified}
         path="/primary_email_verified/*"
+        {...{ integrationAndRelier }}
       />
       <PageWithLoggedInStatusState
         Page={SignupConfirmed}
         path="/signup_verified/*"
+        {...{ integrationAndRelier }}
       />
       <PageWithLoggedInStatusState
         Page={SignupConfirmed}
         path="/signup_confirmed/*"
+        {...{ integrationAndRelier }}
       />
       <PageWithLoggedInStatusState
         Page={SigninConfirmed}
         path="/signin_verified/*"
+        {...{ integrationAndRelier }}
       />
       <PageWithLoggedInStatusState
         Page={SigninConfirmed}
         path="/signin_confirmed/*"
+        {...{ integrationAndRelier }}
       />
 
       <Confirm path="/confirm/*" {...{ sessionTokenId }} />

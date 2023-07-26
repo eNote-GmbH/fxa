@@ -9,10 +9,11 @@ import { logViewEvent } from '../../../lib/metrics';
 import Ready from '../../../components/Ready';
 import { REACT_ENTRYPOINT } from '../../../constants';
 import AppLayout from '../../../components/AppLayout';
-import { useRelier, useFtlMsgResolver } from '../../../models';
+import { Integration, Relier, useFtlMsgResolver } from '../../../models';
 
 export type ResetPasswordWithRecoveryKeyVerifiedProps = {
   isSignedIn: boolean;
+  integrationAndRelier: { relier: Relier; integration: Integration };
 };
 
 export const viewName = 'reset-password-with-recovery-key-verified';
@@ -24,9 +25,10 @@ export const viewName = 'reset-password-with-recovery-key-verified';
 
 const ResetPasswordWithRecoveryKeyVerified = ({
   isSignedIn,
+  integrationAndRelier,
 }: ResetPasswordWithRecoveryKeyVerifiedProps & RouteComponentProps) => {
   const navigate = useNavigate();
-  const relier = useRelier();
+  const relier = integrationAndRelier.relier;
 
   const ftlMsgResolver = useFtlMsgResolver();
 

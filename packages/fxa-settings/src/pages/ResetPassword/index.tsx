@@ -14,11 +14,11 @@ import {
 import { usePageViewEvent, useMetrics } from '../../lib/metrics';
 import { MozServices } from '../../lib/types';
 import {
-  OAuthRelier,
+  Relier,
+  Integration,
   isOAuthRelier,
   useAccount,
   useFtlMsgResolver,
-  useRelier,
 } from '../../models';
 
 import { FtlMsg } from 'fxa-react/lib/utils';
@@ -40,6 +40,7 @@ export type ResetPasswordProps = {
   prefillEmail?: string;
   forceAuth?: boolean;
   serviceName?: MozServices;
+  integrationAndRelier: { relier: Relier; integration: Integration };
 };
 
 type FormData = {
@@ -50,6 +51,7 @@ type FormData = {
 const ResetPassword = ({
   prefillEmail,
   forceAuth,
+  integrationAndRelier,
 }: ResetPasswordProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
@@ -57,7 +59,7 @@ const ResetPassword = ({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [hasFocused, setHasFocused] = useState<boolean>(false);
   const account = useAccount();
-  const relier = useRelier();
+  const relier = integrationAndRelier.relier;
   const navigate = useNavigate();
   const ftlMsgResolver = useFtlMsgResolver();
 

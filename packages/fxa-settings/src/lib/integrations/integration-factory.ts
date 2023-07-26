@@ -37,7 +37,7 @@ export class IntegrationFactory {
    * Produces an integration object given the current data store's state.
    * @returns An integration implementation.
    */
-  getIntegration() {
+  getIntegration(): Integration {
     const flags = this.flags;
     const relier = this.relier;
 

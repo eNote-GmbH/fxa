@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useState } from 'react';
-import { useAccount, useRelier } from '../../models';
+import { Integration, Relier, useAccount } from '../../models';
 import { ResendStatus } from '../../lib/types';
 import { logViewEvent } from 'fxa-settings/src/lib/metrics';
 import { REACT_ENTRYPOINT } from 'fxa-settings/src/constants';
@@ -12,15 +12,17 @@ import { LinkExpired } from '../LinkExpired';
 type LinkExpiredResetPasswordProps = {
   email: string;
   viewName: string;
+  integrationAndRelier: { relier: Relier; integration: Integration };
 };
 
 export const LinkExpiredResetPassword = ({
   email,
   viewName,
+  integrationAndRelier,
 }: LinkExpiredResetPasswordProps) => {
   // TODO in FXA-7630 add metrics event and associated tests for users hitting the LinkExpired page
   const account = useAccount();
-  const relier = useRelier();
+  const relier = integrationAndRelier.relier;
 
   const [resendStatus, setResendStatus] = useState<ResendStatus>(
     ResendStatus['not sent']

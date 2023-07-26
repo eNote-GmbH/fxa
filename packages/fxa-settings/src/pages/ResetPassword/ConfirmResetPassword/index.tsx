@@ -7,7 +7,7 @@ import { RouteComponentProps, useLocation, useNavigate } from '@reach/router';
 import { POLLING_INTERVAL_MS, REACT_ENTRYPOINT } from '../../../constants';
 import { usePageViewEvent, logViewEvent } from '../../../lib/metrics';
 import { ResendStatus } from '../../../lib/types';
-import { useAccount, useInterval, useRelier } from '../../../models';
+import { Integration, Relier, useAccount, useInterval } from '../../../models';
 import AppLayout from '../../../components/AppLayout';
 import ConfirmWithLink, {
   ConfirmWithLinkPageStrings,
@@ -23,9 +23,13 @@ export type ConfirmResetPasswordLocationState = {
   passwordForgotToken: string;
 };
 
-const ConfirmResetPassword = (_: RouteComponentProps) => {
+const ConfirmResetPassword = ({
+  integrationAndRelier,
+}: {
+  integrationAndRelier: { relier: Relier; integration: Integration };
+} & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
-  const relier = useRelier();
+  const relier = integrationAndRelier.relier;
 
   const navigate = useNavigate();
   let { state } = useLocation();

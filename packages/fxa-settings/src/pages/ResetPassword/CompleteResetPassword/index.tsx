@@ -7,12 +7,12 @@ import { Link, useLocation, useNavigate } from '@reach/router';
 import { useForm } from 'react-hook-form';
 import { logPageViewEvent } from '../../../lib/metrics';
 import {
-  useIntegration,
   IntegrationType,
   useAccount,
-  useRelier,
   isOAuthIntegration,
   useAuthClient,
+  Relier,
+  Integration,
 } from '../../../models';
 import WarningMessage from '../../../components/WarningMessage';
 import LinkRememberPassword from '../../../components/LinkRememberPassword';
@@ -78,9 +78,11 @@ export type CompleteResetPasswordParams = {
 const CompleteResetPassword = ({
   params,
   setLinkStatus,
+  integrationAndRelier,
 }: {
   params: CompleteResetPasswordLink;
   setLinkStatus: React.Dispatch<React.SetStateAction<LinkStatus>>;
+  integrationAndRelier: { relier: Relier; integration: Integration };
 }) => {
   const [errorType, setErrorType] = useState(ErrorType.none);
   /* Show a loading spinner until all checks complete. Without this, users with a
@@ -93,8 +95,8 @@ const CompleteResetPassword = ({
   const location = useLocation() as ReturnType<typeof useLocation> & {
     state: LocationState;
   };
-  const integration = useIntegration();
-  const relier = useRelier();
+  const integration = integrationAndRelier.integration;
+  const relier = integrationAndRelier.relier;
   const authClient = useAuthClient();
 
   const { handleSubmit, register, getValues, errors, formState, trigger } =

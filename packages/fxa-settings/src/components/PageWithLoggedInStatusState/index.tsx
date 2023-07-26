@@ -3,32 +3,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useState, useEffect } from 'react';
-import { useRelier, useInitialState } from '../../models';
+import { Relier, Integration } from '../../models';
 import { RouteComponentProps } from '@reach/router';
+import { sessionToken } from '../../lib/cache';
 
+// TODO: revisit this component. Don't think we need it.
 export const PageWithLoggedInStatusState = (
   props: any &
     RouteComponentProps & {
       Page: React.ElementType;
+      integrationAndRelier: { relier: Relier; integration: Integration };
     }
 ) => {
-  const { Page } = props;
-  const { loading, error } = useInitialState();
+  const { Page, integrationAndRelier } = props;
 
-  const [isSignedIn, setIsSignedIn] = useState<boolean>();
   const [isSync, setIsSync] = useState<boolean>();
   const [serviceName, setServiceName] = useState<string>();
-  const relier = useRelier();
+  const relier = integrationAndRelier.relier;
 
   // TODO: Get the broker `continue` action once https://mozilla-hub.atlassian.net/browse/FXA-6989 is merged
   let continueHandler: Function | undefined;
 
   useEffect(() => {
-    if (!loading && error?.message.includes('Invalid token')) {
-      setIsSignedIn(false);
-    } else if (!loading && !error) {
-      setIsSignedIn(true);
-    }
     try {
       if (relier.service === 'sync') {
         setIsSync(true);
@@ -39,9 +35,18 @@ export const PageWithLoggedInStatusState = (
     } catch {
       setIsSync(false);
     }
-  }, [error, loading, relier, setIsSync, isSync]);
+  }, [relier, setIsSync, isSync]);
 
-  return <Page {...{ isSignedIn, isSync, serviceName, continueHandler }} />;
+  return (
+    <Page
+      {...{
+        isSignedIn: !!sessionToken(),
+        isSync,
+        serviceName,
+        continueHandler,
+      }}
+    />
+  );
 };
 
 export default PageWithLoggedInStatusState;

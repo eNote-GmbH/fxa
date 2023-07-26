@@ -25,11 +25,7 @@ import LinkRememberPassword from '../../../components/LinkRememberPassword';
 import { LinkExpiredResetPassword } from '../../../components/LinkExpiredResetPassword';
 import { REACT_ENTRYPOINT } from '../../../constants';
 import { AuthUiErrors } from '../../../lib/auth-errors/auth-errors';
-import {
-  ModelValidationErrors,
-  GenericData,
-  UrlQueryData,
-} from '../../../lib/model-data';
+import { ModelValidationErrors } from '../../../lib/model-data';
 import {
   logErrorEvent,
   logViewEvent,
@@ -40,11 +36,12 @@ import { useNotifier, useAccount, useAuthClient } from '../../../models/hooks';
 import { LinkStatus } from '../../../lib/types';
 import {
   CreateAccountRecoveryKeyInfo,
-  useRelier,
   CreateVerificationInfo,
   useIntegration,
   IntegrationType,
   OAuthIntegration,
+  Relier,
+  Integration,
 } from '../../../models';
 import { notifyFirefoxOfLogin } from '../../../lib/channels/helpers';
 import {
@@ -64,11 +61,7 @@ import {
 export const viewName = 'account-recovery-reset-password';
 
 export type AccountRecoveryResetPasswordProps = {
-  overrides?: {
-    navigate?: NavigateFn;
-    locationData?: GenericData;
-    urlQueryData?: UrlQueryData;
-  };
+  integrationAndRelier: { relier: Relier; integration: Integration };
 } & RouteComponentProps;
 
 type FormData = {
@@ -86,7 +79,7 @@ enum BannerState {
 }
 
 const AccountRecoveryResetPassword = ({
-  overrides,
+  integrationAndRelier,
 }: AccountRecoveryResetPasswordProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
@@ -95,9 +88,9 @@ const AccountRecoveryResetPassword = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const relier = useRelier();
+  const relier = integrationAndRelier.relier;
+  const integration = integrationAndRelier.integration;
   const authClient = useAuthClient();
-  const integration = useIntegration();
   const verificationInfo = CreateVerificationInfo();
   const accountRecoveryKeyInfo = CreateAccountRecoveryKeyInfo();
 
@@ -134,7 +127,12 @@ const AccountRecoveryResetPassword = ({
   }
 
   if (linkStatus === 'expired') {
-    return <LinkExpiredResetPassword email={state.email} {...{ viewName }} />;
+    return (
+      <LinkExpiredResetPassword
+        email={state.email}
+        {...{ viewName, integrationAndRelier }}
+      />
+    );
   }
 
   // TODO: implement persistVerificationData,

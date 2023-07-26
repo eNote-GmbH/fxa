@@ -206,6 +206,11 @@ export default {
         this.logFlowEvent(`${provider}.signin-complete`);
 
         this.metrics.flush();
+        
+        // Sync service requires a password to be set before it can be used.
+        if (this.relier.isSync()) {
+          return this.navigate('/post_verify/third_party_auth/set_password', { provider });
+        }
 
         return this.signIn(updatedAccount);
       })

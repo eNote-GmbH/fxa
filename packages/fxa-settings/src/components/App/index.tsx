@@ -33,7 +33,6 @@ import LegalPrivacy from '../../pages/Legal/Privacy';
 
 import PrimaryEmailVerified from '../../pages/Signup/PrimaryEmailVerified';
 
-import CompleteResetPassword from '../../pages/ResetPassword/CompleteResetPassword';
 import ResetPasswordConfirmed from '../../pages/ResetPassword/ResetPasswordConfirmed';
 import AccountRecoveryConfirmKey from '../../pages/ResetPassword/AccountRecoveryConfirmKey';
 
@@ -43,7 +42,6 @@ import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
 import ConfirmSignupCode from '../../pages/Signup/ConfirmSignupCode';
 import SigninReported from '../../pages/Signin/SigninReported';
 // import SigninBounced from '../../pages/Signin/SigninBounced';
-import AccountRecoveryResetPassword from '../../pages/ResetPassword/AccountRecoveryResetPassword';
 import LinkValidator from '../LinkValidator';
 import { LinkType } from 'fxa-settings/src/lib/types';
 import Confirm from 'fxa-settings/src/pages/Signup/Confirm';
@@ -56,7 +54,6 @@ import {
   SettingsContext,
   initializeSettingsContext,
 } from '../../models/contexts/SettingsContext';
-import ResetPasswordContainer from '../../pages/ResetPassword/container';
 import CompleteResetPasswordContainer from '../../pages/ResetPassword/CompleteResetPassword/container';
 import AccountRecoveryResetPasswordContainer from '../../pages/ResetPassword/AccountRecoveryResetPassword/container';
 
@@ -71,7 +68,8 @@ interface FlowQueryParams {
   uniqueUserId?: string;
 }
 
-// if sessionToken exists, run...
+// TODO: check against `session/status` and if valid, run this.
+// Or check against what's returned for invalid token error.
 export const INITIAL_METRICS_QUERY = gql`
   query GetInitialMetricsState {
     account {
@@ -163,6 +161,7 @@ const SettingsRoutes = ({
 }: {
   showRecoveryKeyV2?: boolean;
 } & RouteComponentProps) => {
+  // TODO some checks here
   const { loading, error } = useInitialSettingsState();
   const account = useAccount();
   const settingsContext = initializeSettingsContext();

@@ -35,7 +35,7 @@ import {
   isOriginalTab,
 } from '../../../lib/storage-utils';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { FinishOAuthResetPasswordHandler } from '../hooks';
+import { FinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 
 // The equivalent complete_reset_password mustache file included account_recovery_reset_password
 // For React, we have opted to separate these into two pages to align with the routes.
@@ -84,7 +84,7 @@ const CompleteResetPassword = ({
   params: CompleteResetPasswordLink;
   setLinkStatus: React.Dispatch<React.SetStateAction<LinkStatus>>;
   integrationAndRelier: { relier: Relier; integration: Integration };
-  finishOAuthFlowHandler: FinishOAuthResetPasswordHandler;
+  finishOAuthFlowHandler: FinishOAuthFlowHandler;
 }) => {
   const [errorType, setErrorType] = useState(ErrorType.none);
   /* Show a loading spinner until all checks complete. Without this, users with a

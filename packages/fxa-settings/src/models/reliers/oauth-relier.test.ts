@@ -25,5 +25,25 @@ describe('models/reliers/oauth-relier', function () {
     expect(model).toBeDefined();
   });
 
+  it('gets normalized scopes', () => {
+    data = new GenericData({
+      scope: 'profile+https://identity.mozilla.com/account/subscriptions',
+    });
+    oauthData = new GenericData({});
+    model = new OAuthRelier(data, oauthData, {
+      scopedKeysEnabled: true,
+      scopedKeysValidation: {},
+      isPromptNoneEnabled: true,
+      isPromptNoneEnabledClientIds: [],
+    });
+
+    expect(model.scope).toEqual(
+      'profile+https://identity.mozilla.com/account/subscriptions'
+    );
+    expect(model.getNormalizedScope()).toEqual(
+      'profile https://identity.mozilla.com/account/subscriptions'
+    );
+  });
+
   // TODO: OAuth Relier Model Test Coverage
 });

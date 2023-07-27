@@ -94,7 +94,7 @@ export class OAuthRedirectIntegration {
       const clientKeyData = await this.callbacks.getOAuthScopedKeyData(
         sessionToken,
         this.relier.clientId,
-        this.relier.scope
+        this.relier.getNormalizedScope()
       );
 
       if (clientKeyData && Object.keys(clientKeyData).length > 0) {
@@ -127,7 +127,7 @@ export class OAuthRedirectIntegration {
       acr_values: this.relier.acrValues,
       code_challenge: this.relier.codeChallenge,
       code_challenge_method: this.relier.codeChallengeMethod,
-      scope: this.relier.scope,
+      scope: this.relier.getNormalizedScope(),
     };
     if (keysJwe) {
       opts.keys_jwe = keysJwe;

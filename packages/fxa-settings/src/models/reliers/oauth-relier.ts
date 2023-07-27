@@ -196,6 +196,13 @@ export class OAuthRelier extends BaseRelier implements OAuthRelierData, Relier {
     return this.service || this.clientId;
   }
 
+  getNormalizedScope() {
+    // TODO: See implementation details in _normalizeScopesAndPermissions in content-server.
+    //       At some point logic on scope expansion will be necessary. The following line will
+    //       at least ensure the string is in the proper format.
+    return Array.from(scopeStrToArray(this.scope || '')).join(' ');
+  }
+
   restoreOAuthState() {
     const oauth = this.storageData.get('oauth') as any;
 

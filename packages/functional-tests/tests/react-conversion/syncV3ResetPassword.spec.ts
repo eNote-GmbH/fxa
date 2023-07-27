@@ -52,7 +52,6 @@ test.describe('Firefox Desktop Sync v3 reset password react', () => {
     await page.goto(link);
 
     await resetPasswordReact.submitNewPassword('Newpassword@');
-    await page.pause();
     await page.waitForURL(/reset_password_verified/);
 
     await resetPasswordReact.resetPwdConfirmedHeadingVisible();

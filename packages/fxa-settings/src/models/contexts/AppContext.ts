@@ -10,9 +10,9 @@ import { createApolloClient } from '../../lib/gql';
 import { Account } from '../Account';
 import { Session } from '../Session';
 
-// When our newly Reactified pages are using the container component
-// pattern, we will move `account`, `apolloClient`, and `session` off of
-// AppContext and onto SettingsContext instead.
+// `apolloClient`, `account`, and (likely) `session` are temporarily on
+// AppContext until we refactor to use the container component approach.
+// Once refactored, these should move these to SettingsContext instead.
 export interface AppContextValue {
   authClient?: AuthClient;
   apolloClient?: ApolloClient<object>;

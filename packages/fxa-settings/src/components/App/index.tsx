@@ -11,6 +11,7 @@ import {
   useConfig,
   useIntegration,
   useInitialSettingsState,
+  useAuthClient,
 } from '../../models';
 import * as Metrics from '../../lib/metrics';
 import Storage from '../../lib/storage';
@@ -55,6 +56,9 @@ import {
   SettingsContext,
   initializeSettingsContext,
 } from '../../models/contexts/SettingsContext';
+import ResetPasswordContainer from '../../pages/ResetPassword/container';
+import CompleteResetPasswordContainer from '../../pages/ResetPassword/CompleteResetPassword/container';
+import AccountRecoveryResetPasswordContainer from '../../pages/ResetPassword/AccountRecoveryResetPassword/container';
 
 interface FlowQueryParams {
   broker?: string;
@@ -161,7 +165,6 @@ const SettingsRoutes = ({
 } & RouteComponentProps) => {
   const { loading, error } = useInitialSettingsState();
   const account = useAccount();
-  console.log('account', account);
   const settingsContext = initializeSettingsContext();
 
   return (
@@ -183,6 +186,8 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
 
   return (
     <Router>
+      <WebChannelExample path="/web_channel_example/*" />
+
       <CannotCreateAccount path="/cannot_create_account/*" />
       <Clear path="/clear/*" />
       <CookiesDisabled path="/cookies_disabled/*" />
@@ -193,33 +198,15 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <LegalPrivacy path="/legal/privacy/*" />
       <LegalPrivacy path="/:locale/legal/privacy/*" />
 
-      <ResetPassword path="reset_password" {...{ integrationAndRelier }} />
+      <ResetPassword path="/reset_password/*" {...{ integrationAndRelier }} />
       <ConfirmResetPassword
         path="/confirm_reset_password/*"
         {...{ integrationAndRelier }}
       />
-
-      <WebChannelExample path="/web_channel_example/*" />
-
-      <LinkValidator
+      <CompleteResetPasswordContainer
         path="/complete_reset_password/*"
-        linkType={LinkType['reset-password']}
-        viewName="complete-reset-password"
-        getParamsFromModel={() => {
-          return CreateCompleteResetPasswordLink();
-        }}
         {...{ integrationAndRelier }}
-      >
-        {({ setLinkStatus, params }) => (
-          <CompleteResetPassword
-            {...{
-              setLinkStatus,
-              params,
-              integrationAndRelier,
-            }}
-          />
-        )}
-      </LinkValidator>
+      />
 
       <LinkValidator
         path="/account_recovery_confirm_key/*"
@@ -240,7 +227,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
         )}
       </LinkValidator>
 
-      <AccountRecoveryResetPassword
+      <AccountRecoveryResetPasswordContainer
         path="/account_recovery_reset_password/*"
         {...{ integrationAndRelier }}
       />

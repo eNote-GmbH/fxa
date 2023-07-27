@@ -49,6 +49,7 @@ import {
   clearOriginalTab,
   isOriginalTab,
 } from '../../../lib/storage-utils';
+import { FinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 
 // This page is based on complete_reset_password but has been separated to align with the routes.
 
@@ -62,6 +63,7 @@ export const viewName = 'account-recovery-reset-password';
 
 export type AccountRecoveryResetPasswordProps = {
   integrationAndRelier: { relier: Relier; integration: Integration };
+  finishOAuthFlowHandler: FinishOAuthFlowHandler;
 } & RouteComponentProps;
 
 type FormData = {
@@ -80,6 +82,7 @@ enum BannerState {
 
 const AccountRecoveryResetPassword = ({
   integrationAndRelier,
+  finishOAuthFlowHandler,
 }: AccountRecoveryResetPasswordProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
@@ -90,7 +93,6 @@ const AccountRecoveryResetPassword = ({
 
   const relier = integrationAndRelier.relier;
   const integration = integrationAndRelier.integration;
-  const authClient = useAuthClient();
   const verificationInfo = CreateVerificationInfo();
   const accountRecoveryKeyInfo = CreateAccountRecoveryKeyInfo();
 
@@ -299,13 +301,11 @@ const AccountRecoveryResetPassword = ({
           break;
         case IntegrationType.OAuth:
           if (sessionIsVerified) {
-            const oauthIntegration = integration as OAuthIntegration;
-            const { redirect } = await oauthIntegration.handlePasswordReset(
+            const { redirect } = await finishOAuthFlowHandler(
               relier.uid || account.uid,
               accountResetData.sessionToken,
               accountResetData.keyFetchToken,
-              accountResetData.unwrapBKey,
-              authClient
+              accountResetData.unwrapBKey
             );
 
             // Clear session / local storage states

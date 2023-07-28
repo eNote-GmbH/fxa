@@ -3,14 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
-  BaseIntegration,
-  BrowserIntegration,
   ClientInfo,
   OAuthIntegration,
   PairingAuthorityIntegration,
   PairingSupplicantIntegration,
   Integration,
   RelierSubscriptionInfo,
+  SyncBasicIntegration,
+  SyncDesktopIntegration,
+  WebIntegration,
 } from '../../models/integrations';
 import { Constants } from '../constants';
 import {
@@ -26,7 +27,6 @@ import { IntegrationFlags } from '../reliers/interfaces';
 import { Delegates } from '../reliers/interfaces/relier-delegates';
 import { DefaultIntegrationFlags } from '../reliers/relier-factory-flags';
 import config from '../config';
-import { WebIntegration } from '../../models';
 
 /**
  * Checks a redirect value.
@@ -111,7 +111,6 @@ export class IntegrationFactory {
     } else if (flags.isOAuth()) {
       return this.createOAuthIntegration(data, storageData);
     } else if (flags.isV3DesktopContext()) {
-      // rename to createSyncIntegration?
       return this.createSyncDesktopIntegration(data);
       // return this.createBrowserIntegration(data);
     } else if (flags.isSyncService()) {
@@ -154,11 +153,11 @@ export class IntegrationFactory {
     storageData: ModelDataStore
   ) {
     // Resolve configuration settings for oauth relier
-    const relier = new OAuthRelier(data, storageData, config.oauth);
-    this.initIntegration(relier);
-    this.initOAuthRelier(relier, this.flags);
-    this.initClientInfo(relier);
-    return relier;
+    const integration = new OAuthIntegration(data, storageData, config.oauth);
+    this.initIntegration(integration);
+    this.initOAuthRelier(integration, this.flags);
+    this.initClientInfo(integration);
+    return integration;
   }
 
   private createDefaultIntegration(data: ModelDataStore) {
@@ -167,8 +166,14 @@ export class IntegrationFactory {
     return integration;
   }
 
-  private createBrowserIntegration(data: ModelDataStore) {
-    const integration = new BrowserRelier(data);
+  private createSyncBasicIntegration(data: ModelDataStore) {
+    const integration = new SyncBasicIntegration(data);
+    this.initIntegration(integration);
+    return integration;
+  }
+
+  private createSyncDesktopIntegration(data: ModelDataStore) {
+    const integration = new SyncDesktopIntegration(data);
     this.initIntegration(integration);
     return integration;
   }

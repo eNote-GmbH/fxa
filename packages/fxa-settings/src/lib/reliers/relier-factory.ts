@@ -26,6 +26,7 @@ import { IntegrationFlags } from './interfaces';
 import { Delegates } from './interfaces/relier-delegates';
 import { DefaultIntegrationFlags } from './relier-factory-flags';
 import config from '../config';
+import { WebIntegration } from '../../models';
 
 /**
  * Checks a redirect value.
@@ -109,9 +110,12 @@ export class IntegrationFactory {
       return this.createPairingSupplicationIntegration(data, storageData);
     } else if (flags.isOAuth()) {
       return this.createOAuthIntegration(data, storageData);
-    } else if (flags.isSyncService() || flags.isV3DesktopContext()) {
+    } else if (flags.isV3DesktopContext()) {
       // rename to createSyncIntegration?
-      return this.createBrowserIntegration(data);
+      return this.createSyncDesktopIntegration(data);
+      // return this.createBrowserIntegration(data);
+    } else if (flags.isSyncService()) {
+      return this.createSyncBasicIntegration(data);
     } else {
       // Web integration
       return this.createDefaultIntegration(data);
@@ -158,7 +162,7 @@ export class IntegrationFactory {
   }
 
   private createDefaultIntegration(data: ModelDataStore) {
-    const integration = new BaseIntegration(data);
+    const integration = new WebIntegration(data);
     this.initIntegration(integration);
     return integration;
   }
@@ -172,12 +176,12 @@ export class IntegrationFactory {
   /**
    * Initializes a base relier state
    **/
-  initIntegration(integration: BaseRelier) {
+  initIntegration(integration: Integration) {
     // Important!
     // FxDesktop declares both `entryPoint` (capital P) and
     // `entrypoint` (lowcase p). Normalize to `entrypoint`.
-    const entryPoint = integration.getModelData().get('entryPoint');
-    const entrypoint = integration.getModelData().get('entrypoint');
+    const entryPoint = integration.data.getModelData().get('entryPoint');
+    const entrypoint = integration.data.getModelData().get('entrypoint');
     if (
       entryPoint != null &&
       entrypoint != null &&
@@ -224,7 +228,7 @@ export class IntegrationFactory {
   }
 
   initClientInfo(integration: OAuthIntegration) {
-    integration.clientInfo = this.createClientInfo(relier.clientId);
+    integration.clientInfo = this.createClientInfo(integration.data.clientId);
   }
 
   initSubscriptionInfo(integration: Integration) {

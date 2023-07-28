@@ -8,6 +8,7 @@ import {
   KeyTransforms as T,
   ModelDataProvider,
   ModelValidation as V,
+  ModelDataStore,
 } from '../../lib/model-data';
 import { MozServices } from '../../lib/types';
 
@@ -70,27 +71,27 @@ export interface RelierClientInfo {
 /**
  * A convenience interface for easy mocking / testing. Use this type in components.
  */
-export interface RelierData {
-  name: string;
-  context: string | undefined;
-  email: string | undefined;
-  entrypoint: string | undefined;
-  entrypointExperiment: string | undefined;
-  entrypointVariation: string | undefined;
-  resetPasswordConfirm: boolean | undefined;
-  setting: string | undefined;
-  service: string | undefined;
-  style: string | undefined;
-  uid: string | undefined;
-  utmCampaign: string | undefined;
-  utmContent: string | undefined;
-  utmMedium: string | undefined;
-  utmSource: string | undefined;
-  utmTerm: string | undefined;
+// export interface RelierData {
+//   name: string;
+//   context: string | undefined;
+//   email: string | undefined;
+//   entrypoint: string | undefined;
+//   entrypointExperiment: string | undefined;
+//   entrypointVariation: string | undefined;
+//   resetPasswordConfirm: boolean | undefined;
+//   setting: string | undefined;
+//   service: string | undefined;
+//   style: string | undefined;
+//   uid: string | undefined;
+//   utmCampaign: string | undefined;
+//   utmContent: string | undefined;
+//   utmMedium: string | undefined;
+//   utmSource: string | undefined;
+//   utmTerm: string | undefined;
 
-  clientInfo: Promise<RelierClientInfo> | undefined;
-  subscriptionInfo: Promise<RelierSubscriptionInfo> | undefined;
-}
+//   clientInfo: Promise<RelierClientInfo> | undefined;
+//   subscriptionInfo: Promise<RelierSubscriptionInfo> | undefined;
+// }
 
 export interface ResumeTokenInfo {
   // TBD
@@ -127,15 +128,15 @@ export abstract class Integration<
 > {
   type: IntegrationType;
   public features: T = {} as T;
-  // public data: IntegrationQueryParams;
+  public data: IntegrationQueryParams;
   /** Lazy loaded client info. */
   clientInfo: Promise<RelierClientInfo> | undefined;
   /** Lazy loaded subscription info. */
   subscriptionInfo: Promise<RelierSubscriptionInfo> | undefined;
 
-  constructor(type: IntegrationType) {
+  constructor(type: IntegrationType, data: ModelDataStore) {
     this.type = type;
-    // this.data = new IntegrationQueryParams();
+    this.data = new IntegrationQueryParams(data);
   }
 
   protected setFeatures(features: Partial<T>) {
@@ -217,8 +218,8 @@ export abstract class Integration<
 export class BaseIntegration<
   T extends IntegrationFeatures = IntegrationFeatures
 > extends Integration<T> {
-  constructor(type: IntegrationType) {
-    super(type);
+  constructor(type: IntegrationType, data: ModelDataStore) {
+    super(type, data);
     this.setFeatures({
       allowUidChange: false,
       fxaStatus: false,

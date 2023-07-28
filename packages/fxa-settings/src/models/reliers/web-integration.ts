@@ -2,11 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { BaseIntegration, IntegrationType } from './base-integration';
+import { ModelDataStore } from '../../lib/model-data';
+import { BaseIntegration, IntegrationType } from './base-relier';
 
 export class WebIntegration extends BaseIntegration {
-  constructor() {
-    super(IntegrationType.Web);
+  constructor(data: ModelDataStore) {
+    super(IntegrationType.Web, data);
     this.setFeatures({
       reuseExistingSession: true,
       fxaStatus: this.isFxaStatusSupported(),

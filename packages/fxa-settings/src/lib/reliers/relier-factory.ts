@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
-  BaseRelier,
-  BrowserRelier,
+  BaseIntegration,
+  BrowserIntegration,
   ClientInfo,
-  OAuthRelier,
-  PairingAuthorityRelier,
-  PairingSupplicantRelier,
-  Relier,
+  OAuthIntegration,
+  PairingAuthorityIntegration,
+  PairingSupplicantIntegration,
+  Integration,
   RelierSubscriptionInfo,
 } from '../../models/reliers';
 import { Constants } from '../constants';
@@ -22,9 +22,9 @@ import {
 } from '../model-data';
 import { OAuthError } from '../oauth';
 import { ReachRouterWindow } from '../window';
-import { RelierFlags } from './interfaces';
-import { RelierDelegates } from './interfaces/relier-delegates';
-import { DefaultRelierFlags } from './relier-factory-flags';
+import { IntegrationFlags } from './interfaces';
+import { Delegates } from './interfaces/relier-delegates';
+import { DefaultIntegrationFlags } from './relier-factory-flags';
 import config from '../config';
 
 /**
@@ -62,22 +62,22 @@ export function isCorrectRedirect(
 }
 
 /**
- * Produces Reliers
+ * Produces Integrations
  */
-export class RelierFactory {
+export class IntegrationFactory {
   protected readonly data: ModelDataStore;
   protected readonly channelData: ModelDataStore;
   protected readonly storageData: ModelDataStore;
-  public readonly flags: RelierFlags;
-  protected readonly delegates: RelierDelegates;
+  protected readonly delegates: Delegates;
+  public readonly flags: IntegrationFlags;
 
   constructor(opts: {
     window: ReachRouterWindow;
-    delegates: RelierDelegates;
+    delegates: Delegates;
     data?: ModelDataStore;
     channelData?: ModelDataStore;
     storageData?: ModelDataStore;
-    flags?: RelierFlags;
+    flags?: IntegrationFlags;
   }) {
     const { window } = opts;
     this.data = opts.data || new UrlQueryData(window);
@@ -85,15 +85,18 @@ export class RelierFactory {
     this.storageData = opts.storageData || new StorageData(window);
     this.flags =
       opts.flags ||
-      new DefaultRelierFlags(new UrlQueryData(window), new StorageData(window));
+      new DefaultIntegrationFlags(
+        new UrlQueryData(window),
+        new StorageData(window)
+      );
     this.delegates = opts.delegates;
   }
 
   /**
-   * Produces a relier given the current data store's state.
-   * @returns A relier implementation.
+   * Produces an integration object given the current data store's state.
+   * @returns An integration implementation.
    */
-  getRelier(): Relier {
+  getIntegration(): Integration {
     const data = this.data;
     const channelData = this.channelData;
     const storageData = this.storageData;
@@ -101,87 +104,99 @@ export class RelierFactory {
 
     // Keep trying until something sticks
     if (flags.isDevicePairingAsAuthority()) {
-      return this.createPairingAuthorityRelier(channelData, storageData);
+      return this.createPairingAuthorityIntegration(channelData, storageData);
     } else if (flags.isDevicePairingAsSupplicant()) {
-      return this.createParingSupplicationRelier(data, storageData);
+      return this.createPairingSupplicationIntegration(data, storageData);
     } else if (flags.isOAuth()) {
-      return this.createOAuthRelier(data, storageData);
+      return this.createOAuthIntegration(data, storageData);
     } else if (flags.isSyncService() || flags.isV3DesktopContext()) {
-      return this.createBrowserRelier(data);
+      // rename to createSyncIntegration?
+      return this.createBrowserIntegration(data);
     } else {
-      return this.creteDefaultRelier(data);
+      // Web integration
+      return this.createDefaultIntegration(data);
     }
   }
 
-  private createPairingAuthorityRelier(
+  private createPairingAuthorityIntegration(
     data: ModelDataStore,
     storageData: ModelDataStore
   ) {
-    const relier = new PairingAuthorityRelier(data, storageData, config.oauth);
-    this.initRelier(relier);
-    return relier;
+    const integration = new PairingAuthorityIntegration(
+      data,
+      storageData,
+      config.oauth
+    );
+    this.initIntegration(integration);
+    return integration;
   }
 
-  private createParingSupplicationRelier(
+  private createPairingSupplicationIntegration(
     data: ModelDataStore,
     storageData: ModelDataStore
   ) {
-    const relier = new PairingSupplicantRelier(data, storageData, config.oauth);
-    this.initRelier(relier);
-    this.initClientInfo(relier);
-
-    return relier;
+    const integration = new PairingSupplicantIntegration(
+      data,
+      storageData,
+      config.oauth
+    );
+    this.initIntegration(integration);
+    this.initClientInfo(integration);
+    return integration;
   }
 
-  private createOAuthRelier(data: ModelDataStore, storageData: ModelDataStore) {
+  private createOAuthIntegration(
+    data: ModelDataStore,
+    storageData: ModelDataStore
+  ) {
     // Resolve configuration settings for oauth relier
     const relier = new OAuthRelier(data, storageData, config.oauth);
-    this.initRelier(relier);
+    this.initIntegration(relier);
     this.initOAuthRelier(relier, this.flags);
     this.initClientInfo(relier);
     return relier;
   }
 
-  private creteDefaultRelier(data: ModelDataStore) {
-    const relier = new BaseRelier(data);
-    this.initRelier(relier);
-    return relier;
+  private createDefaultIntegration(data: ModelDataStore) {
+    const integration = new BaseIntegration(data);
+    this.initIntegration(integration);
+    return integration;
   }
 
-  private createBrowserRelier(data: ModelDataStore) {
-    const relier = new BrowserRelier(data);
-    this.initRelier(relier);
-    return relier;
+  private createBrowserIntegration(data: ModelDataStore) {
+    const integration = new BrowserRelier(data);
+    this.initIntegration(integration);
+    return integration;
   }
 
   /**
    * Initializes a base relier state
    **/
-  initRelier(relier: BaseRelier) {
+  initIntegration(integration: BaseRelier) {
     // Important!
     // FxDesktop declares both `entryPoint` (capital P) and
     // `entrypoint` (lowcase p). Normalize to `entrypoint`.
-    const entryPoint = relier.getModelData().get('entryPoint');
-    const entrypoint = relier.getModelData().get('entrypoint');
+    const entryPoint = integration.getModelData().get('entryPoint');
+    const entrypoint = integration.getModelData().get('entrypoint');
     if (
       entryPoint != null &&
       entrypoint != null &&
       typeof entryPoint === 'string'
     ) {
-      relier.entrypoint = entryPoint;
+      integration.data.entrypoint = entryPoint;
     }
   }
 
   /**
    * Initializes the OAuth relier state
    */
-  initOAuthRelier(relier: OAuthRelier, flags: RelierFlags) {
+  initOAuthRelier(integration: OAuthIntegration, flags: IntegrationFlags) {
     const { status, clientId } = flags.isOAuthSuccessFlow();
     if (status) {
       if (!clientId) {
         throw new OAuthError('INVALID_PARAMETER');
       }
-      relier.clientId = clientId;
+      integration.data.clientId = clientId;
     } else if (flags.isOAuthVerificationFlow()) {
       // The presence of the 'resume' query parameter indicates we are resuming a previous flow,
       // which usually means the user is opening a link from an email. We aren't relying on this
@@ -199,7 +214,7 @@ export class RelierFactory {
         // If the state isn't present, we can still proceed with the user flow, but we will not be able to
         // redirect the user back to the relying parties site, becuase without the knowing the relying party's
         // oauth 'state', the redirect would be rejected.
-        relier.restoreOAuthState();
+        integration.restoreOAuthState();
       }
     } else {
       // Sign inflow
@@ -208,14 +223,14 @@ export class RelierFactory {
     }
   }
 
-  initClientInfo(relier: OAuthRelier) {
-    relier.clientInfo = this.createClientInfo(relier.clientId);
+  initClientInfo(integration: OAuthIntegration) {
+    integration.clientInfo = this.createClientInfo(relier.clientId);
   }
 
-  initSubscriptionInfo(relier: Relier) {
+  initSubscriptionInfo(integration: Integration) {
     // Do not wait on this. Components can do so with useEffect if needed. However,
     // not all
-    relier.subscriptionInfo = this.createRelierSubscriptionInfo();
+    integration.subscriptionInfo = this.createRelierSubscriptionInfo();
   }
 
   private async createClientInfo(clientId: string | undefined) {

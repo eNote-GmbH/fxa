@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { DefaultRelierFlags, RelierFlags } from '../reliers';
+// import { DefaultRelierFlags, RelierFlags } from '../reliers';
 
-// TODO: Using Relier flags is temporary, we will combine them in FXA-7308
-export class DefaultIntegrationFlags
-  extends DefaultRelierFlags
-  implements RelierFlags {}
+// // TODO: Using Relier flags is temporary, we will combine them in FXA-7308
+// export class DefaultIntegrationFlags
+//   extends DefaultRelierFlags
+//   implements RelierFlags {}

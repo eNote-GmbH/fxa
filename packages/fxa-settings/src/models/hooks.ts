@@ -14,8 +14,7 @@ import { gql, useQuery } from '@apollo/client';
 import { useLocalization } from '@fluent/react';
 import { FtlMsgResolver } from 'fxa-react/lib/utils';
 import config, { getDefault } from '../lib/config';
-import { IntegrationFactory } from '../lib/integrations/integration-factory';
-import { DefaultRelierFlags, RelierFactory } from '../lib/reliers';
+import { DefaultIntegrationFlags, IntegrationFactory } from '../lib/reliers';
 import { ReachRouterWindow } from '../lib/window';
 import {
   LocationStateData,
@@ -67,6 +66,7 @@ export function useIntegration() {
     // const locationStateData = new LocationStateData(windowWrapper);
     const oauthClient = new OAuthClient(config.servers.oauth.url);
 
+    // TODO: we shouldn't do this here, move to shared hook
     const delegates = {
       getClientInfo: (id: string) => oauthClient.getClientInfo(id),
       getProductInfo: (id: string) => authClient.getProductInfo(id),
@@ -75,28 +75,16 @@ export function useIntegration() {
         return re.exec(window.location.pathname)?.[1] || '';
       },
     };
-    const flags = new DefaultRelierFlags(urlQueryData, storageData);
-    const relierFactory = new RelierFactory({
+    const flags = new DefaultIntegrationFlags(urlQueryData, storageData);
+    const integrationFactory = new IntegrationFactory({
+      flags,
       window: windowWrapper,
       delegates,
       data: urlQueryData,
       channelData: urlHashData,
       storageData,
-      flags,
     });
-    const relier = relierFactory.getRelier();
-
-    const integrationFactory = new IntegrationFactory(
-      flags,
-      relier,
-      authClient,
-      windowWrapper,
-      urlQueryData
-    );
-    const integration = integrationFactory.getIntegration();
-
-    // temporarily return relier + integration until they're combined
-    return { relier, integration };
+    return integrationFactory.getIntegration();
   }, [authClient]);
 }
 
@@ -181,6 +169,7 @@ export function useNotifier() {
   };
 }
 
+// TODO: use apollo-client provided polling, FXA-6991
 /**
  * Hook to run a function on an interval.
  * @param callback - function to call

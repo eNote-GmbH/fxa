@@ -4,6 +4,7 @@
 
 import AuthClient from 'fxa-auth-client/lib/client';
 import {
+  Integration,
   OAuthIntegration,
   OAuthRelier,
   PairingAuthorityIntegration,

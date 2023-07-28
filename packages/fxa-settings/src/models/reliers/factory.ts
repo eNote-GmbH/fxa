@@ -6,56 +6,56 @@ import { useContext } from 'react';
 import { DefaultRelierFlags, RelierFactory } from '../../lib/reliers';
 import { AppContext } from '../contexts/AppContext';
 
-export function CreateRelierDelegates() {
-  const { oauthClient, authClient, windowWrapper } = useContext(AppContext);
+// export function CreateRelierDelegates() {
+//   const { oauthClient, authClient, windowWrapper } = useContext(AppContext);
 
-  if (!oauthClient || !authClient || !windowWrapper) {
-    throw new Error('Are you forgetting an AppContext.Provider?');
-  }
+//   if (!oauthClient || !authClient || !windowWrapper) {
+//     throw new Error('Are you forgetting an AppContext.Provider?');
+//   }
 
-  const delegates = {
-    getClientInfo: (id: string) => oauthClient.getClientInfo(id),
-    getProductInfo: (id: string) => authClient.getProductInfo(id),
-    getProductIdFromRoute: () => {
-      const re = new RegExp('/subscriptions/products/(.*)');
-      return re.exec(windowWrapper.location.pathname)?.[1] || '';
-    },
-  };
+//   const delegates = {
+//     getClientInfo: (id: string) => oauthClient.getClientInfo(id),
+//     getProductInfo: (id: string) => authClient.getProductInfo(id),
+//     getProductIdFromRoute: () => {
+//       const re = new RegExp('/subscriptions/products/(.*)');
+//       return re.exec(windowWrapper.location.pathname)?.[1] || '';
+//     },
+//   };
 
-  return delegates;
-}
+//   return delegates;
+// }
 
-export function CreateRelierFlags() {
-  const { urlQueryData, storageData } = useContext(AppContext);
+// export function CreateRelierFlags() {
+//   const { urlQueryData, storageData } = useContext(AppContext);
 
-  if (!urlQueryData || !storageData) {
-    throw new Error('Are you forgetting an AppContext.Provider?');
-  }
+//   if (!urlQueryData || !storageData) {
+//     throw new Error('Are you forgetting an AppContext.Provider?');
+//   }
 
-  return new DefaultRelierFlags(urlQueryData, storageData);
-}
+//   return new DefaultRelierFlags(urlQueryData, storageData);
+// }
 
-export function CreateRelierFactory() {
-  const {
-    windowWrapper: window,
-    urlQueryData,
-    urlHashData,
-    storageData,
-  } = useContext(AppContext);
+// export function CreateRelierFactory() {
+//   const {
+//     windowWrapper: window,
+//     urlQueryData,
+//     urlHashData,
+//     storageData,
+//   } = useContext(AppContext);
 
-  if (!window || !urlHashData || !urlQueryData) {
-    throw new Error('Are you forgetting an AppContext.Provider?');
-  }
+//   if (!window || !urlHashData || !urlQueryData) {
+//     throw new Error('Are you forgetting an AppContext.Provider?');
+//   }
 
-  const delegates = CreateRelierDelegates();
-  const flags = CreateRelierFlags();
+//   const delegates = CreateRelierDelegates();
+//   const flags = CreateRelierFlags();
 
-  return new RelierFactory({
-    window,
-    delegates,
-    data: urlQueryData,
-    channelData: urlHashData,
-    storageData,
-    flags,
-  });
-}
+//   return new RelierFactory({
+//     window,
+//     delegates,
+//     data: urlQueryData,
+//     channelData: urlHashData,
+//     storageData,
+//     flags,
+//   });
+// }

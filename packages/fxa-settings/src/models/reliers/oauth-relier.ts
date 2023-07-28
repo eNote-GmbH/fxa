@@ -15,7 +15,7 @@ import {
   Relier,
   RelierAccount,
   RelierClientInfo,
-  RelierData,
+  RelierUrlData,
 } from './base-relier';
 
 export enum OAuthPrompt {
@@ -88,7 +88,7 @@ export interface OAuthRelierData
   extends OAuthVerificationInfoData,
     OAuthSignUpSignInData,
     OAuthClientInfoData,
-    RelierData {}
+    RelierUrlData {}
 
 export type OAuthRelierOptions = {
   scopedKeysEnabled: boolean;

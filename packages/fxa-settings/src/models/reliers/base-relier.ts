@@ -11,6 +11,49 @@ import {
 } from '../../lib/model-data';
 import { MozServices } from '../../lib/types';
 
+export enum IntegrationType {
+  OAuth = 'OAuth',
+  PairingAuthority = 'PairingAuthority', // TODO
+  PairingSupplicant = 'PairingSupplicant', // TODO
+  SyncBasic = 'SyncBasic',
+  SyncDesktop = 'SyncDesktop',
+  Web = 'Web', // default
+}
+
+/* TODO, do we care about this feature (capability in content-server)?
+ * -isOpenWebmailButtonVisible: we have a webmail link showing only in desktop v3
+ *  on the confirm reset PW page and confirm page. We have this comment: "we do not
+ * show [this] in mobile context because it performs worse".
+ */
+export interface IntegrationFeatures {
+  /**
+   * If the provided UID no longer exists on the auth server, can the
+   * user sign up/in with the same email address but a different uid?
+   */
+  allowUidChange: boolean;
+  /**
+   * Should the user agent be queried for FxA data?
+   */
+  fxaStatus: boolean;
+  /**
+   * Should the view handle signed-in notifications from other tabs?
+   */
+  handleSignedInNotification: boolean;
+  /**
+   * If the user has an existing sessionToken, can we safely re-use it on
+   * subsequent signin attempts rather than generating a new token each time?
+   */
+  reuseExistingSession: boolean;
+  /**
+   * Does this environment support pairing?
+   */
+  supportsPairing: boolean;
+  /**
+   * Does this environment support the Sync Optional flow?
+   */
+  syncOptional: boolean;
+}
+
 export interface RelierSubscriptionInfo {
   subscriptionProductId: string;
   subscriptionProductName: string;
@@ -53,19 +96,19 @@ export interface ResumeTokenInfo {
   // TBD
 }
 
-export interface Relier extends RelierData {
-  getServiceName(): Promise<string>;
-  getClientInfo(): Promise<RelierClientInfo | undefined>;
-  isOAuth(): boolean;
-  isSync(): Promise<boolean>;
-  shouldOfferToSync(view: string): boolean;
-  wantsKeys(): boolean;
-  wantsTwoStepAuthentication(): boolean;
-  isTrusted(): boolean;
-  validate(): void;
-  getService(): string | undefined;
-  getRedirectUri(): string | undefined;
-}
+// export interface Relier extends RelierUrlData {
+//   getServiceName(): Promise<string>;
+//   getClientInfo(): Promise<RelierClientInfo | undefined>;
+//   isOAuth(): boolean;
+//   isSync(): Promise<boolean>;
+//   shouldOfferToSync(view: string): boolean;
+//   wantsKeys(): boolean;
+//   wantsTwoStepAuthentication(): boolean;
+//   isTrusted(): boolean;
+//   validate(): void;
+//   getService(): string | undefined;
+//   getRedirectUri(): string | undefined;
+// }
 
 export interface RelierAccount {
   uid: string;
@@ -79,20 +122,115 @@ export interface RelierAccount {
   isDefault(): unknown;
 }
 
-/**
- * Create a relier class that can be bound to a data store
- */
-export class BaseRelier extends ModelDataProvider implements Relier {
-  get name() {
-    return 'base';
-  }
-
+export abstract class Integration<
+  T extends IntegrationFeatures = IntegrationFeatures
+> {
+  type: IntegrationType;
+  public features: T = {} as T;
+  // public data: IntegrationQueryParams;
   /** Lazy loaded client info. */
   clientInfo: Promise<RelierClientInfo> | undefined;
-
   /** Lazy loaded subscription info. */
   subscriptionInfo: Promise<RelierSubscriptionInfo> | undefined;
 
+  constructor(type: IntegrationType) {
+    this.type = type;
+    // this.data = new IntegrationQueryParams();
+  }
+
+  protected setFeatures(features: Partial<T>) {
+    this.features = { ...this.features, ...features } as T;
+  }
+
+  // TODO: do we need this/isSync?
+  isOAuth(): boolean {
+    return false;
+  }
+
+  async isSync(): Promise<boolean> {
+    return false;
+  }
+
+  async getClientInfo(): Promise<RelierClientInfo | undefined> {
+    return undefined;
+  }
+
+  async getServiceName(): Promise<string> {
+    // If the service is not defined, then check the client info
+    if (!!this.data.service) {
+      if (this.clientInfo) {
+        const clientInfo = await this.clientInfo;
+        if (clientInfo?.serviceName) {
+          return clientInfo.serviceName;
+        }
+      }
+    }
+
+    // Fallback to defacto service names
+    switch (this.data.service) {
+      case MozServices.FirefoxSync:
+      case 'sync':
+        return MozServices.FirefoxSync;
+
+      case MozServices.FirefoxMonitor:
+        return MozServices.FirefoxMonitor;
+
+      case MozServices.MozillaVPN:
+        return MozServices.MozillaVPN;
+
+      case MozServices.Pocket:
+        return MozServices.Pocket;
+
+      default:
+        return MozServices.Default;
+    }
+  }
+
+  shouldOfferToSync(view: string): boolean {
+    return false;
+  }
+  wantsKeys(): boolean {
+    return false;
+  }
+  wantsTwoStepAuthentication(): boolean {
+    return false;
+  }
+
+  getRedirectUri(): string | undefined {
+    return undefined;
+  }
+
+  getService() {
+    return this.data.service;
+  }
+
+  isTrusted() {
+    return true;
+  }
+
+  // TODO: This seems like feature envy... Move logic elsewhere.
+  // accountNeedsPermissions(account:RelierAccount): boolean {
+  //   return false;
+  // }
+}
+
+export class BaseIntegration<
+  T extends IntegrationFeatures = IntegrationFeatures
+> extends Integration<T> {
+  constructor(type: IntegrationType) {
+    super(type);
+    this.setFeatures({
+      allowUidChange: false,
+      fxaStatus: false,
+      handleSignedInNotification: true,
+      reuseExistingSession: false,
+      supportsPairing: false,
+      syncOptional: false,
+    } as T);
+  }
+}
+
+export class IntegrationQueryParams extends ModelDataProvider {
   @bind([V.isString])
   context: string | undefined;
 
@@ -137,74 +275,135 @@ export class BaseRelier extends ModelDataProvider implements Relier {
 
   @bind([V.isString], T.snakeCase)
   utmTerm: string | undefined;
-
-  isOAuth(): boolean {
-    return false;
-  }
-
-  async isSync(): Promise<boolean> {
-    return false;
-  }
-
-  async getClientInfo(): Promise<RelierClientInfo | undefined> {
-    return undefined;
-  }
-
-  async getServiceName(): Promise<string> {
-    // If the service is not defined, then check the client info
-    if (!!this.service) {
-      if (this.clientInfo) {
-        const clientInfo = await this.clientInfo;
-        if (clientInfo?.serviceName) {
-          return clientInfo.serviceName;
-        }
-      }
-    }
-
-    // Fallback to defacto service names
-    switch (this.service) {
-      case MozServices.FirefoxSync:
-      case 'sync':
-        return MozServices.FirefoxSync;
-
-      case MozServices.FirefoxMonitor:
-        return MozServices.FirefoxMonitor;
-
-      case MozServices.MozillaVPN:
-        return MozServices.MozillaVPN;
-
-      case MozServices.Pocket:
-        return MozServices.Pocket;
-
-      default:
-        return MozServices.Default;
-    }
-  }
-
-  shouldOfferToSync(view: string): boolean {
-    return false;
-  }
-  wantsKeys(): boolean {
-    return false;
-  }
-  wantsTwoStepAuthentication(): boolean {
-    return false;
-  }
-
-  getRedirectUri(): string | undefined {
-    return undefined;
-  }
-
-  getService() {
-    return this.service;
-  }
-
-  isTrusted() {
-    return true;
-  }
-
-  // TODO: This seems like feature envy... Move logic elsewhere.
-  // accountNeedsPermissions(account:RelierAccount): boolean {
-  //   return false;
-  // }
 }
+
+/**
+ * Create a relier class that can be bound to a data store
+ */
+// export class BaseRelier extends ModelDataProvider implements Relier {
+//   get name() {
+//     return 'base';
+//   }
+
+//   /** Lazy loaded client info. */
+//   clientInfo: Promise<RelierClientInfo> | undefined;
+
+//   /** Lazy loaded subscription info. */
+//   subscriptionInfo: Promise<RelierSubscriptionInfo> | undefined;
+
+//   @bind([V.isString])
+//   context: string | undefined;
+
+//   @bind([V.isString])
+//   email: string | undefined;
+
+//   @bind([V.isString])
+//   entrypoint: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   entrypointExperiment: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   entrypointVariation: string | undefined;
+
+//   @bind([V.isBoolean], T.snakeCase)
+//   resetPasswordConfirm: boolean | undefined;
+
+//   @bind([V.isString])
+//   setting: string | undefined;
+
+//   @bind([V.isString])
+//   service: string | undefined;
+
+//   @bind([V.isString])
+//   style: string | undefined;
+
+//   @bind([V.isString])
+//   uid: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   utmCampaign: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   utmContent: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   utmMedium: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   utmSource: string | undefined;
+
+//   @bind([V.isString], T.snakeCase)
+//   utmTerm: string | undefined;
+
+// // TODO: do we need this/isSync?
+// isOAuth(): boolean {
+//   return false;
+// }
+
+// async isSync(): Promise<boolean> {
+//   return false;
+// }
+
+// async getClientInfo(): Promise<RelierClientInfo | undefined> {
+//   return undefined;
+// }
+
+// async getServiceName(): Promise<string> {
+//   // If the service is not defined, then check the client info
+//   if (!!this.service) {
+//     if (this.clientInfo) {
+//       const clientInfo = await this.clientInfo;
+//       if (clientInfo?.serviceName) {
+//         return clientInfo.serviceName;
+//       }
+//     }
+//   }
+
+//   // Fallback to defacto service names
+//   switch (this.service) {
+//     case MozServices.FirefoxSync:
+//     case 'sync':
+//       return MozServices.FirefoxSync;
+
+//     case MozServices.FirefoxMonitor:
+//       return MozServices.FirefoxMonitor;
+
+//     case MozServices.MozillaVPN:
+//       return MozServices.MozillaVPN;
+
+//     case MozServices.Pocket:
+//       return MozServices.Pocket;
+
+//     default:
+//       return MozServices.Default;
+//   }
+// }
+
+// shouldOfferToSync(view: string): boolean {
+//   return false;
+// }
+// wantsKeys(): boolean {
+//   return false;
+// }
+// wantsTwoStepAuthentication(): boolean {
+//   return false;
+// }
+
+// getRedirectUri(): string | undefined {
+//   return undefined;
+// }
+
+// getService() {
+//   return this.service;
+// }
+
+// isTrusted() {
+//   return true;
+// }
+
+// // TODO: This seems like feature envy... Move logic elsewhere.
+// // accountNeedsPermissions(account:RelierAccount): boolean {
+// //   return false;
+// // }
+// }

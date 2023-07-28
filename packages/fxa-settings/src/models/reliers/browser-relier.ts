@@ -51,7 +51,7 @@ export class BrowserRelier extends BaseRelier implements BrowserRelierData {
   }
 
   shouldOfferToSync(view: string) {
-    return this.service !== 'sync' && view !== 'force-auth';
+    return this.data.service !== 'sync' && view !== 'force-auth';
   }
 
   wantsKeys() {

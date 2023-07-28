@@ -4,7 +4,7 @@
 
 import { Constants } from '../constants';
 import { ModelDataStore, UrlQueryData } from '../model-data';
-import { RelierFlags } from './interfaces';
+import { IntegrationFlags } from './interfaces';
 
 const DEVICE_PAIRING_SUPPLICANT_PATHNAME_REGEXP = /^\/pair\/supp/;
 
@@ -14,7 +14,7 @@ const DEVICE_PAIRING_SUPPLICANT_PATHNAME_REGEXP = /^\/pair\/supp/;
  *
  * Note: this logic was ported from fxa-content-server app-start.js.
  */
-export class DefaultRelierFlags implements RelierFlags {
+export class DefaultIntegrationFlags implements IntegrationFlags {
   protected get pathname() {
     return this.urlQueryData.pathName;
   }
@@ -51,6 +51,7 @@ export class DefaultRelierFlags implements RelierFlags {
     );
   }
 
+  // TODO remove in favor of isServiceSync
   isSyncService() {
     return this._isService(Constants.SYNC_SERVICE);
   }

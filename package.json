@@ -24,7 +24,8 @@
     "l10n:prime": "_scripts/l10n/prime.sh",
     "l10n:bundle": "_scripts/l10n/bundle.sh",
     "legal:clone": "_scripts/clone-legal-docs.sh",
-    "gql:allowlist": "nx run-many -t extract-gql && nx run-many -t copy-gql"
+    "gql:allowlist": "nx run-many -t extract-gql && nx run-many -t copy-gql",
+    "prepare": "husky install"
   },
   "homepage": "https://github.com/mozilla/fxa",
   "bugs": {
@@ -99,9 +100,16 @@
     "@nx/next": "16.6.0",
     "@nx/node": "16.6.0",
     "@nx/react": "16.6.0",
+    "@nx/storybook": "16.6.0",
     "@nx/workspace": "16.6.0",
-    "@storybook/html-webpack5": "^7.0.23",
-    "@storybook/react-webpack5": "^7.0.23",
+    "@storybook/addon-a11y": "^7.2.0",
+    "@storybook/addon-essentials": "7.2.0",
+    "@storybook/addon-styling": "^1.3.5",
+    "@storybook/core-common": "^7.2.0",
+    "@storybook/core-server": "7.2.0",
+    "@storybook/html-webpack5": "^7.2.0",
+    "@storybook/nextjs": "7.2.0",
+    "@storybook/react-webpack5": "^7.2.0",
     "@testing-library/react": "^14.0.0",
     "@types/jest": "^29.5.1",
     "@types/mysql": "^2",
@@ -122,6 +130,7 @@
     "eslint-plugin-jsx-a11y": "6.7.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "4.6.0",
+    "husky": "^8.0.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
     "jest-environment-node": "^29.4.1",
@@ -131,7 +140,7 @@
     "nx": "16.6.0",
     "nx-cloud": "16.2.0",
     "persistgraphql": "^0.3.11",
-    "postcss": "^8.4.26",
+    "postcss": "^8.4.27",
     "react-test-renderer": "^18.2.0",
     "stylelint": "^15.10.1",
     "stylelint-config-prettier": "^9.0.3",
@@ -173,5 +182,5 @@
     "underscore": ">=1.13.2",
     "url-parse": "^1.5.8"
   },
-  "packageManager": "yarn@3.3.0"
+  "packageManager": "yarn@3.6.1"
 }

@@ -18,12 +18,17 @@ import {
   ModelDataProvider,
 } from '../../lib/model-data';
 import { Constants } from '../../lib/constants';
-import { OAuthPrompt } from '../reliers/oauth-relier';
 import { OAuthError } from '../../lib/oauth';
 import { IntegrationFlags } from '../../lib/reliers';
 
 interface OAuthIntegrationFeatures extends IntegrationFeatures {
   webChannelSupport: boolean;
+}
+
+export enum OAuthPrompt {
+  CONSENT = 'consent',
+  NONE = 'none',
+  LOGIN = 'login',
 }
 
 type OAuthIntegrationTypes =
@@ -33,11 +38,11 @@ type OAuthIntegrationTypes =
 
 export type SearchParam = IntegrationFlags['searchParam'];
 
-// export function isOAuthIntegration(
-//   integration: Integration
-// ): integration is OAuthIntegration {
-//   return (integration as OAuthIntegration).type === IntegrationType.OAuth;
-// }
+export function isOAuthIntegration(
+  integration: Integration
+): integration is OAuthIntegration {
+  return (integration as OAuthIntegration).type === IntegrationType.OAuth;
+}
 
 // TODO: probably move this somewhere else
 export class OAuthIntegrationData extends ModelDataProvider {

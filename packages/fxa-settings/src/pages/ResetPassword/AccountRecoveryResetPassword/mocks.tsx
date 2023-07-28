@@ -17,7 +17,7 @@ import { DefaultRelierFlags, RelierFactory } from '../../../lib/reliers';
 import AuthClient from 'fxa-auth-client/browser';
 import { OAuthClient } from '../../../lib/oauth';
 import { LocationStateData } from '../../../lib/model-data/data-stores/location-state-data';
-import { IntegrationFactory } from '../../../lib/integrations/integration-factory';
+import { IntegrationFactory } from '../../../lib/integrations2/integration-factory';
 
 const fxDesktopV3ContextParam = { context: 'fx_desktop_v3' };
 

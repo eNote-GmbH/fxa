@@ -3,24 +3,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { RouteComponentProps } from '@reach/router';
-import { Integration, Relier, useAuthClient } from '../../../models';
+import { Integration, useAuthClient } from '../../../models';
 import { useFinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 import AccountRecoveryResetPassword from '.';
 
 const AccountRecoveryResetPasswordContainer = ({
-  integrationAndRelier,
+  integration,
 }: {
-  integrationAndRelier: { relier: Relier; integration: Integration };
+  integration: Integration;
 } & RouteComponentProps) => {
   const authClient = useAuthClient();
   const finishOAuthFlowHandler = useFinishOAuthFlowHandler(
     authClient,
-    integrationAndRelier
+    integration
   );
 
   return (
     <AccountRecoveryResetPassword
-      {...{ integrationAndRelier, finishOAuthFlowHandler }}
+      {...{ integration, finishOAuthFlowHandler }}
     />
   );
 };

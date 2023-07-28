@@ -4,7 +4,7 @@
 
 import AuthClient from 'fxa-auth-client/browser';
 import { useCallback } from 'react';
-import { Integration, Relier } from '../../models';
+import { Integration } from '../../models';
 import { createEncryptedBundle } from '../crypto/scoped-keys';
 
 // TODO: should this live in lib/oauth/hooks or lib/hooks? Separate dir per hook?
@@ -19,25 +19,25 @@ import { createEncryptedBundle } from '../crypto/scoped-keys';
  */
 async function constructKeysJwe(
   authClient: AuthClient,
-  integrationAndRelier: { relier: Relier; integration: Integration },
+  integration: Integration,
   accountUid: string,
   sessionToken: string,
   keyFetchToken: string,
   kB: string
 ) {
   if (
-    integrationAndRelier.relier.wantsKeys() &&
-    integrationAndRelier.relier.scope &&
-    integrationAndRelier.relier.keysJwk &&
-    integrationAndRelier.relier.clientId &&
+    integration.wantsKeys() &&
+    integration.data.scope &&
+    integration.data.keysJwk &&
+    integration.data.clientId &&
     sessionToken &&
     kB &&
     keyFetchToken
   ) {
     const clientKeyData = await authClient.getOAuthScopedKeyData(
       sessionToken,
-      integrationAndRelier.relier.clientId,
-      integrationAndRelier.relier.scope
+      integration.data.clientId,
+      integration.data.scope
     );
 
     if (clientKeyData && Object.keys(clientKeyData).length > 0) {
@@ -45,7 +45,7 @@ async function constructKeysJwe(
         kB,
         accountUid,
         clientKeyData,
-        integrationAndRelier.relier.keysJwk
+        integration.data.keysJwk
       );
       return keys;
     }
@@ -60,27 +60,27 @@ async function constructKeysJwe(
  */
 async function constructOAuthCode(
   authClient: AuthClient,
-  integrationAndRelier: { relier: Relier; integration: Integration },
+  integration: Integration,
   sessionToken: string,
   keysJwe: any
 ) {
   const opts: any = {
-    acr_values: integrationAndRelier.relier.acrValues,
-    code_challenge: integrationAndRelier.relier.codeChallenge,
-    code_challenge_method: integrationAndRelier.relier.codeChallengeMethod,
-    scope: integrationAndRelier.relier.scope,
+    acr_values: integration.data.acrValues,
+    code_challenge: integration.data.codeChallenge,
+    code_challenge_method: integration.data.codeChallengeMethod,
+    scope: integration.data.scope,
   };
   if (keysJwe) {
     opts.keys_jwe = keysJwe;
   }
-  if (integrationAndRelier.relier.accessType === 'offline') {
-    opts.access_type = integrationAndRelier.relier.accessType;
+  if (integration.data.accessType === 'offline') {
+    opts.access_type = integration.data.accessType;
   }
 
   const result = await authClient.createOAuthCode(
     sessionToken,
-    integrationAndRelier.relier.clientId,
-    integrationAndRelier.relier.state,
+    integration.data.clientId,
+    integration.data.state,
     opts
   );
 
@@ -132,19 +132,19 @@ export type FinishOAuthFlowHandler = (
  */
 export function useFinishOAuthFlowHandler(
   authClient: AuthClient,
-  integrationAndRelier: { relier: Relier; integration: Integration }
+  integration: Integration
 ): FinishOAuthFlowHandler {
   // TODO: error handling, probably return [handler, error]
 
   // Ensure a redirect was provided. With out this info, we can't relay the oauth code
   // and state!
-  // if (!integrationAndRelier.relier.redirectTo) {
+  // if (!integration.relier.redirectTo) {
   //   throw new OAuthErrorInvalidRedirectUri();
   // }
-  // if (!integrationAndRelier.relier.clientId) {
+  // if (!integration.relier.clientId) {
   //   throw new OAuthErrorInvalidRelierClientId();
   // }
-  // if (!integrationAndRelier.relier.state) {
+  // if (!integration.relier.state) {
   //   throw new OAuthErrorInvalidRelierState();
   // }
   return useCallback(
@@ -152,7 +152,7 @@ export function useFinishOAuthFlowHandler(
       const { kB } = await authClient.accountKeys(keyFetchToken, unwrapKB);
       const keys = await constructKeysJwe(
         authClient,
-        integrationAndRelier,
+        integration,
         accountUid,
         sessionToken,
         keyFetchToken,
@@ -160,18 +160,18 @@ export function useFinishOAuthFlowHandler(
       );
       const code = await constructOAuthCode(
         authClient,
-        integrationAndRelier,
+        integration,
         sessionToken,
         keys
       );
       const redirectUrl = constructOAuthRedirectUrl(
         code,
-        integrationAndRelier.relier.redirectTo
+        integration.data.redirectTo
       );
       return {
         redirect: redirectUrl.href,
       };
     },
-    [authClient, integrationAndRelier]
+    [authClient, integration]
   );
 }

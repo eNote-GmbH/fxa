@@ -180,8 +180,8 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   // const localAccount = currentAccount();
 
   // temporary until the relier + integration is combined
-  const integrationAndRelier = useIntegration();
-  console.log('integrationAndRelier', integrationAndRelier);
+  const integration = useIntegration();
+  console.log('integration', integration);
 
   return (
     <Router>
@@ -197,14 +197,14 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <LegalPrivacy path="/legal/privacy/*" />
       <LegalPrivacy path="/:locale/legal/privacy/*" />
 
-      <ResetPassword path="/reset_password/*" {...{ integrationAndRelier }} />
+      <ResetPassword path="/reset_password/*" {...{ integration }} />
       <ConfirmResetPassword
         path="/confirm_reset_password/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <CompleteResetPasswordContainer
         path="/complete_reset_password/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
 
       <LinkValidator
@@ -214,7 +214,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
         getParamsFromModel={() => {
           return CreateCompleteResetPasswordLink();
         }}
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       >
         {({ setLinkStatus, params }) => (
           <AccountRecoveryConfirmKey
@@ -228,7 +228,7 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
 
       <AccountRecoveryResetPasswordContainer
         path="/account_recovery_reset_password/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
 
       <SigninReported path="/signin_reported/*" />
@@ -243,37 +243,37 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       <PageWithLoggedInStatusState
         Page={ResetPasswordConfirmed}
         path="/reset_password_verified/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <PageWithLoggedInStatusState
         Page={ResetPasswordWithRecoveryKeyVerified}
         path="/reset_password_with_recovery_key_verified/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <PageWithLoggedInStatusState
         Page={PrimaryEmailVerified}
         path="/primary_email_verified/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <PageWithLoggedInStatusState
         Page={SignupConfirmed}
         path="/signup_verified/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <PageWithLoggedInStatusState
         Page={SignupConfirmed}
         path="/signup_confirmed/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <PageWithLoggedInStatusState
         Page={SigninConfirmed}
         path="/signin_verified/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
       <PageWithLoggedInStatusState
         Page={SigninConfirmed}
         path="/signin_confirmed/*"
-        {...{ integrationAndRelier }}
+        {...{ integration }}
       />
 
       <Confirm path="/confirm/*" {...{ sessionTokenId }} />

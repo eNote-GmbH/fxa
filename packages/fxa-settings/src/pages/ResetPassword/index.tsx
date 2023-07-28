@@ -14,9 +14,8 @@ import {
 import { usePageViewEvent, useMetrics } from '../../lib/metrics';
 import { MozServices } from '../../lib/types';
 import {
-  Relier,
   Integration,
-  isOAuthRelier,
+  isOAuthIntegration,
   useAccount,
   useFtlMsgResolver,
 } from '../../models';
@@ -40,7 +39,7 @@ export type ResetPasswordProps = {
   prefillEmail?: string;
   forceAuth?: boolean;
   serviceName?: MozServices;
-  integrationAndRelier: { relier: Relier; integration: Integration };
+  integration: Integration;
 };
 
 type FormData = {
@@ -51,14 +50,13 @@ type FormData = {
 const ResetPassword = ({
   prefillEmail,
   forceAuth,
-  integrationAndRelier,
+  integration,
 }: ResetPasswordProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
   const [errorText, setErrorText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [hasFocused, setHasFocused] = useState<boolean>(false);
   const account = useAccount();
-  const relier = integrationAndRelier.relier;
   const navigate = useNavigate();
   const ftlMsgResolver = useFtlMsgResolver();
 
@@ -68,10 +66,10 @@ const ResetPassword = ({
   const [serviceName, setServiceName] = useState<string>(MozServices.Default);
   useEffect(() => {
     (async () => {
-      const name = await relier.getServiceName();
+      const name = await integration.getServiceName();
       setServiceName(name);
     })();
-  }, [relier]);
+  }, [integration]);
 
   const { control, getValues, handleSubmit, register } = useForm<FormData>({
     mode: 'onTouched',
@@ -119,12 +117,12 @@ const ResetPassword = ({
         clearError();
 
         // This will save the scope and oauth state for later
-        if (isOAuthRelier(relier)) {
-          relier.saveOAuthState();
+        if (isOAuthIntegration(integration)) {
+          integration.saveOAuthState();
           const result = await account.resetPassword(
             email,
-            relier.getService(),
-            relier.getRedirectUri()
+            integration.getService(),
+            integration.getRedirectUri()
           );
           navigateToConfirmPwReset({
             passwordForgotToken: result.passwordForgotToken,
@@ -168,7 +166,7 @@ const ResetPassword = ({
         setErrorMessage(localizedError);
       }
     },
-    [account, clearError, ftlMsgResolver, navigateToConfirmPwReset, relier]
+    [account, clearError, ftlMsgResolver, navigateToConfirmPwReset, integration]
   );
 
   const onSubmit = useCallback(async () => {

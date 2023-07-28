@@ -78,12 +78,12 @@ export type CompleteResetPasswordParams = {
 const CompleteResetPassword = ({
   params,
   setLinkStatus,
-  integrationAndRelier,
+  integration,
   finishOAuthFlowHandler,
 }: {
   params: CompleteResetPasswordLink;
   setLinkStatus: React.Dispatch<React.SetStateAction<LinkStatus>>;
-  integrationAndRelier: { relier: Relier; integration: Integration };
+  integration: Integration;
   finishOAuthFlowHandler: FinishOAuthFlowHandler;
 }) => {
   const [errorType, setErrorType] = useState(ErrorType.none);
@@ -97,8 +97,6 @@ const CompleteResetPassword = ({
   const location = useLocation() as ReturnType<typeof useLocation> & {
     state: LocationState;
   };
-  const integration = integrationAndRelier.integration;
-  const relier = integrationAndRelier.relier;
 
   const { handleSubmit, register, getValues, errors, formState, trigger } =
     useForm<FormData>({
@@ -246,7 +244,7 @@ const CompleteResetPassword = ({
             } else if (sessionIsVerified && isOAuthIntegration(integration)) {
               // todo add type guard
               const { redirect } = await finishOAuthFlowHandler(
-                relier.uid || account.uid,
+                integration.data.uid || account.uid,
                 accountResetData.sessionToken,
                 accountResetData.keyFetchToken,
                 accountResetData.unwrapBKey
@@ -287,7 +285,13 @@ const CompleteResetPassword = ({
         setErrorType(ErrorType['complete-reset']);
       }
     },
-    [account, integration, location.search, relier.uid, alertSuccessAndNavigate]
+    [
+      account,
+      integration,
+      location.search,
+      alertSuccessAndNavigate,
+      finishOAuthFlowHandler,
+    ]
   );
 
   const renderCompleteResetPasswordErrorBanner = () => {

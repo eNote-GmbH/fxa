@@ -3,39 +3,38 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useState, useEffect } from 'react';
-import { Relier, Integration } from '../../models';
+import { Integration } from '../../models';
 import { RouteComponentProps } from '@reach/router';
 import { sessionToken } from '../../lib/cache';
 
-// TODO: revisit this component. Don't think we need it.
+// TODO: revisit this component, do we need it?
 export const PageWithLoggedInStatusState = (
   props: any &
     RouteComponentProps & {
       Page: React.ElementType;
-      integrationAndRelier: { relier: Relier; integration: Integration };
+      integration: Integration;
     }
 ) => {
-  const { Page, integrationAndRelier } = props;
+  const { Page, integration } = props;
 
   const [isSync, setIsSync] = useState<boolean>();
   const [serviceName, setServiceName] = useState<string>();
-  const relier = integrationAndRelier.relier;
 
   // TODO: Get the broker `continue` action once https://mozilla-hub.atlassian.net/browse/FXA-6989 is merged
   let continueHandler: Function | undefined;
 
   useEffect(() => {
     try {
-      if (relier.service === 'sync') {
+      if (integration.isSync()) {
         setIsSync(true);
       } else {
         setIsSync(false);
       }
-      setServiceName(relier.service);
+      setServiceName(integration.data.service);
     } catch {
       setIsSync(false);
     }
-  }, [relier, setIsSync, isSync]);
+  }, [integration, setIsSync, isSync]);
 
   return (
     <Page

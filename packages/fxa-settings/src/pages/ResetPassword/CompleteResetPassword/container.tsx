@@ -4,21 +4,21 @@
 
 import { RouteComponentProps } from '@reach/router';
 import CompleteResetPassword from '.';
-import { Integration, Relier, useAuthClient } from '../../../models';
+import { Integration, useAuthClient } from '../../../models';
 import LinkValidator from '../../../components/LinkValidator';
 import { LinkType } from '../../../lib/types';
 import { CreateCompleteResetPasswordLink } from '../../../models/reset-password/verification/factory';
 import { useFinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 
 const CompleteResetPasswordContainer = ({
-  integrationAndRelier,
+  integration,
 }: {
-  integrationAndRelier: { relier: Relier; integration: Integration };
+  integration: Integration;
 } & RouteComponentProps) => {
   const authClient = useAuthClient();
   const finishOAuthFlowHandler = useFinishOAuthFlowHandler(
     authClient,
-    integrationAndRelier
+    integration
   );
 
   // TODO: possibly rethink LinkValidator approach as it's a lot of layers with
@@ -33,14 +33,14 @@ const CompleteResetPasswordContainer = ({
       getParamsFromModel={() => {
         return CreateCompleteResetPasswordLink();
       }}
-      {...{ integrationAndRelier }}
+      {...{ integration }}
     >
       {({ setLinkStatus, params }) => (
         <CompleteResetPassword
           {...{
             setLinkStatus,
             params,
-            integrationAndRelier,
+            integration,
             finishOAuthFlowHandler,
           }}
         />

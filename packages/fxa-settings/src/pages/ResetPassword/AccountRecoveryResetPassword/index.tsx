@@ -3,12 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useEffect, useState } from 'react';
-import {
-  NavigateFn,
-  RouteComponentProps,
-  useLocation,
-  useNavigate,
-} from '@reach/router';
+import { RouteComponentProps, useLocation, useNavigate } from '@reach/router';
 import {
   FtlMsg,
   hardNavigate,
@@ -32,15 +27,12 @@ import {
   setUserPreference,
   usePageViewEvent,
 } from '../../../lib/metrics';
-import { useNotifier, useAccount, useAuthClient } from '../../../models/hooks';
+import { useNotifier, useAccount } from '../../../models/hooks';
 import { LinkStatus } from '../../../lib/types';
 import {
   CreateAccountRecoveryKeyInfo,
   CreateVerificationInfo,
-  useIntegration,
   IntegrationType,
-  OAuthIntegration,
-  Relier,
   Integration,
 } from '../../../models';
 import { notifyFirefoxOfLogin } from '../../../lib/channels/helpers';
@@ -62,7 +54,7 @@ import { FinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 export const viewName = 'account-recovery-reset-password';
 
 export type AccountRecoveryResetPasswordProps = {
-  integrationAndRelier: { relier: Relier; integration: Integration };
+  integration: Integration;
   finishOAuthFlowHandler: FinishOAuthFlowHandler;
 } & RouteComponentProps;
 
@@ -81,7 +73,7 @@ enum BannerState {
 }
 
 const AccountRecoveryResetPassword = ({
-  integrationAndRelier,
+  integration,
   finishOAuthFlowHandler,
 }: AccountRecoveryResetPasswordProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
@@ -91,8 +83,6 @@ const AccountRecoveryResetPassword = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const relier = integrationAndRelier.relier;
-  const integration = integrationAndRelier.integration;
   const verificationInfo = CreateVerificationInfo();
   const accountRecoveryKeyInfo = CreateAccountRecoveryKeyInfo();
 
@@ -132,7 +122,7 @@ const AccountRecoveryResetPassword = ({
     return (
       <LinkExpiredResetPassword
         email={state.email}
-        {...{ viewName, integrationAndRelier }}
+        {...{ viewName, integration }}
       />
     );
   }
@@ -277,7 +267,7 @@ const AccountRecoveryResetPassword = ({
       // FOLLOW-UP: Functionality not yet available. FXA-7045
       notifier.onAccountSignIn(account);
 
-      relier.resetPasswordConfirm = true;
+      integration.data.resetPasswordConfirm = true;
 
       logViewEvent(viewName, 'verification.success');
 
@@ -302,7 +292,7 @@ const AccountRecoveryResetPassword = ({
         case IntegrationType.OAuth:
           if (sessionIsVerified) {
             const { redirect } = await finishOAuthFlowHandler(
-              relier.uid || account.uid,
+              integration.data.uid || account.uid,
               accountResetData.sessionToken,
               accountResetData.keyFetchToken,
               accountResetData.unwrapBKey

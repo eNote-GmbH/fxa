@@ -4,7 +4,7 @@
 
 import { Constants } from '../../lib/constants';
 import { bind, ModelValidation as V } from '../../lib/model-data';
-import { BaseRelier } from './base-relier';
+import { BaseRelier } from '../integrations/base-integration';
 
 export interface BrowserRelierData {
   country: string | undefined;

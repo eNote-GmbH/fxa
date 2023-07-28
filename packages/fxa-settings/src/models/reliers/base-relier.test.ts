@@ -4,7 +4,7 @@
 
 import { UrlQueryData } from '../../lib/model-data';
 import { ReachRouterWindow } from '../../lib/window';
-import { BaseRelier } from './base-relier';
+import { BaseRelier } from '../integrations/base-integration';
 
 describe('BaseRelier Model', function () {
   const window = new ReachRouterWindow();

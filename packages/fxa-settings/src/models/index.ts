@@ -8,6 +8,6 @@ export * from './Account';
 export * from './Session';
 export * from './hooks';
 export * from './verification';
-export * from './reliers';
 export * from './integrations';
+export * from './integrations2';
 export * from './Legal';

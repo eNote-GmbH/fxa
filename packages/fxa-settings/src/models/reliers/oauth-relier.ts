@@ -8,6 +8,7 @@ import {
   bind,
   KeyTransforms as T,
   ModelValidation as V,
+  ModelDataProvider,
 } from '../../lib/model-data';
 import { OAuthError } from '../../lib/oauth';
 import {
@@ -16,7 +17,7 @@ import {
   RelierAccount,
   RelierClientInfo,
   RelierUrlData,
-} from './base-relier';
+} from '../integrations/base-integration';
 
 export enum OAuthPrompt {
   CONSENT = 'consent',
@@ -110,6 +111,68 @@ export function isOAuthRelier(
   relier: Relier | OAuthRelier
 ): relier is OAuthRelier {
   return (relier as OAuthRelier).restoreOAuthState !== undefined;
+}
+
+export class OAuthIntegrationData extends ModelDataProvider {
+  @bind([V.isString], T.snakeCase)
+  clientId: string | undefined;
+
+  @bind([V.isString])
+  imageUri: string | undefined;
+
+  @bind([V.isBoolean])
+  trusted: boolean | undefined;
+
+  @bind([V.isAccessType], T.snakeCase)
+  accessType: string | undefined;
+
+  @bind([V.isString])
+  acrValues: string | undefined;
+
+  @bind([V.isAction])
+  action: string | undefined;
+
+  @bind([V.isCodeChallenge], T.snakeCase)
+  codeChallenge: string | undefined;
+
+  @bind([V.isCodeChallengeMethod])
+  codeChallengeMethod: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  keysJwk: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  idTokenHint: string | undefined;
+
+  @bind([V.isGreaterThanZero], T.snakeCase)
+  maxAge: number | undefined;
+
+  @bind([V.isString])
+  permissions: string | undefined;
+
+  @bind([V.isString])
+  prompt: string | undefined;
+
+  @bind([V.isUrl])
+  redirectTo: string | undefined;
+
+  @bind([V.isUrl], T.snakeCase)
+  redirectUrl: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  redirectUri: string | undefined;
+
+  @bind([V.isString], T.snakeCase)
+  returnOnError: boolean | undefined;
+
+  @bind([V.isString])
+  scope: string | undefined;
+
+  @bind([V.isString])
+  state: string | undefined;
+
+  @bind([V.isString])
+  loginHint: string | undefined;
 }
 
 /**

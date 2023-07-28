@@ -3,5 +3,5 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 export * from './interfaces';
-export * from './relier-factory';
+export * from '../integrations/integration-factory';
 export * from './relier-factory-flags';

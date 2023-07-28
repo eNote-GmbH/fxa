@@ -10,10 +10,10 @@ import {
   PairingAuthorityRelier,
   PairingSupplicantRelier,
   Relier,
-} from '../../models/reliers';
+} from '../../models/integrations';
 import { StorageData, UrlHashData, UrlQueryData } from '../model-data';
 import { RelierDelegates } from './interfaces';
-import { RelierFactory } from './relier-factory';
+import { RelierFactory } from '../integrations/integration-factory';
 import { DefaultRelierFlags } from './relier-factory-flags';
 import { ReachRouterWindow } from '../window';
 

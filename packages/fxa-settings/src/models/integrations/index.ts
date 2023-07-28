@@ -3,10 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 export * from './base-integration';
-export * from './factory';
-export * from './oauth-integration';
-export * from './pairing-authority-integration';
-export * from './pairing-supplicant-integration';
-export * from './sync-basic-integration';
-export * from './sync-desktop-integration';
-export * from '../reliers/web-integration';
+export * from '../reliers/browser-relier';
+export * from '../reliers/channel-info';
+export * from '../reliers/client-info';
+export * from '../reliers/oauth-relier';
+export * from '../reliers/pairing-authority-relier';
+export * from '../reliers/pairing-supplicant-relier';
+export * from '../reliers/signin-signup-info';
+export * from '../reliers/supplicant-info';

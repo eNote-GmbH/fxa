@@ -5,9 +5,6 @@
 /**
  * Creation flags interface, controls the type of relier that is ultimately produced.
  */
-
-// TODO: Extending integration flags for reliers is temporary, we will
-// combine integrations + reliers in FXA-7308
 export interface IntegrationFlags {
   isDevicePairingAsAuthority(): boolean;
   isDevicePairingAsSupplicant(): boolean;

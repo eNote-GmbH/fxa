@@ -23,9 +23,8 @@ import {
 } from '../model-data';
 import { OAuthError } from '../oauth';
 import { ReachRouterWindow } from '../window';
-import { IntegrationFlags } from '../reliers/interfaces';
-import { Delegates } from '../reliers/interfaces/relier-delegates';
-import { DefaultIntegrationFlags } from '../reliers/relier-factory-flags';
+import { IntegrationFlags, IntegrationDelegates } from './interfaces';
+import { DefaultIntegrationFlags } from './integration-factory-flags';
 import config from '../config';
 
 /**
@@ -69,12 +68,12 @@ export class IntegrationFactory {
   protected readonly data: ModelDataStore;
   protected readonly channelData: ModelDataStore;
   protected readonly storageData: ModelDataStore;
-  protected readonly delegates: Delegates;
+  protected readonly delegates: IntegrationDelegates;
   public readonly flags: IntegrationFlags;
 
   constructor(opts: {
     window: ReachRouterWindow;
-    delegates: Delegates;
+    delegates: IntegrationDelegates;
     data?: ModelDataStore;
     channelData?: ModelDataStore;
     storageData?: ModelDataStore;

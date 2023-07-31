@@ -5,12 +5,12 @@
 import { createSandbox, SinonSandbox } from 'sinon';
 import { Constants } from '../constants';
 import { StorageData, UrlQueryData } from '../model-data';
-import { DefaultRelierFlags } from './relier-factory-flags';
+import { DefaultIntegrationFlags } from './integration-factory-flags';
 import { ReachRouterWindow } from '../window';
 
 describe('lib/reliers/relier-factory-flags', function () {
   const window = new ReachRouterWindow();
-  let relierFlags: DefaultRelierFlags;
+  let relierFlags: DefaultIntegrationFlags;
   let queryData: UrlQueryData;
   let storageData: StorageData;
   let sandbox: SinonSandbox;
@@ -23,7 +23,7 @@ describe('lib/reliers/relier-factory-flags', function () {
     sandbox.restore();
     queryData = new UrlQueryData(window);
     storageData = new StorageData(window);
-    relierFlags = new DefaultRelierFlags(queryData, storageData);
+    relierFlags = new DefaultIntegrationFlags(queryData, storageData);
   });
 
   it('isDevicePairingAsAuthority', () => {

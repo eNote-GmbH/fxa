@@ -12,9 +12,9 @@ import {
   Relier,
 } from '../../models/integrations';
 import { StorageData, UrlHashData, UrlQueryData } from '../model-data';
-import { RelierDelegates } from './interfaces';
-import { RelierFactory } from '../integrations/integration-factory';
-import { DefaultRelierFlags } from './relier-factory-flags';
+import { IntegrationDelegates } from '../integrations/interfaces';
+import { IntegrationFactory } from '../integrations/integration-factory';
+import { DefaultIntegrationFlags } from './integration-factory-flags';
 import { ReachRouterWindow } from '../window';
 
 type RelierFlagOverrides = {
@@ -32,14 +32,14 @@ type FactoryCallCounts = {
   initClientInfo?: number;
 };
 
-describe('lib/reliers/relier-factory', () => {
+describe('lib/integrations/integration-factory', () => {
   const window = new ReachRouterWindow();
   let sandbox: sinon.SinonSandbox;
-  let flags: DefaultRelierFlags;
+  let flags: DefaultIntegrationFlags;
   let urlQueryData: UrlQueryData;
   let urlHashData: UrlHashData;
   let storageData: StorageData;
-  let delegates: RelierDelegates;
+  let delegates: IntegrationDelegates;
 
   /**
    * Initial setup for factory tests. Checks that factory methods were invoked and factory produced correct relier type.
@@ -66,7 +66,7 @@ describe('lib/reliers/relier-factory', () => {
       .returns(!!flagOverrides.isV3DesktopContext);
 
     // Create a factory with current state
-    const factory = new RelierFactory({
+    const factory = new IntegrationFactory({
       window,
       data: urlQueryData,
       channelData: urlHashData,
@@ -109,7 +109,7 @@ describe('lib/reliers/relier-factory', () => {
 
     // Flags hold all the logic that controls the state which drives the type of relier
     // instance being created by the factory
-    flags = new DefaultRelierFlags(urlQueryData, storageData);
+    flags = new DefaultIntegrationFlags(urlQueryData, storageData);
 
     // Delegates are used by the factory as callbacks to get external data.
     // This stops the factory from becoming concerned with out to fetch external

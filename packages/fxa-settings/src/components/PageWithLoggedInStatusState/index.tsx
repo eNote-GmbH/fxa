@@ -3,11 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useState, useEffect } from 'react';
-import { Integration } from '../../models';
+import { Integration, useInitialSettingsState } from '../../models';
 import { RouteComponentProps } from '@reach/router';
-import { sessionToken } from '../../lib/cache';
 
 // TODO: revisit this component in FXA-8098, do we need it?
+// We should at least see if we want to check for `isSync()` instead
+// and stop overfetching here with useInitialSettingsState
 export const PageWithLoggedInStatusState = (
   props: any &
     RouteComponentProps & {
@@ -16,7 +17,9 @@ export const PageWithLoggedInStatusState = (
     }
 ) => {
   const { Page, integration } = props;
+  const { loading, error } = useInitialSettingsState();
 
+  const [isSignedIn, setIsSignedIn] = useState<boolean>();
   const [isSync, setIsSync] = useState<boolean>();
   const [serviceName, setServiceName] = useState<string>();
 
@@ -24,8 +27,13 @@ export const PageWithLoggedInStatusState = (
   let continueHandler: Function | undefined;
 
   useEffect(() => {
+    if (!loading && error?.message.includes('Invalid token')) {
+      setIsSignedIn(false);
+    } else if (!loading && !error) {
+      setIsSignedIn(true);
+    }
     try {
-      if (integration.isSync()) {
+      if (integration.data.service === 'sync') {
         setIsSync(true);
       } else {
         setIsSync(false);
@@ -34,12 +42,12 @@ export const PageWithLoggedInStatusState = (
     } catch {
       setIsSync(false);
     }
-  }, [integration, setIsSync, isSync]);
+  }, [error, loading, integration, setIsSync, isSync]);
 
   return (
     <Page
       {...{
-        isSignedIn: !!sessionToken(),
+        isSignedIn,
         isSync,
         serviceName,
         continueHandler,

@@ -160,7 +160,6 @@ const SettingsRoutes = ({
 } & RouteComponentProps) => {
   // TODO: FXA-8098
   // const { loading, error } = useInitialSettingsState();
-  // const account = useAccount();
   const settingsContext = initializeSettingsContext();
 
   return (
@@ -175,9 +174,7 @@ const SettingsRoutes = ({
 const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   const sessionTokenId = sessionToken();
   const localAccount = currentAccount();
-
   const integration = useIntegration();
-  console.log('integration', integration);
 
   return (
     <Router>

@@ -13,8 +13,8 @@ import Banner, { BannerType } from '../Banner';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 import { REACT_ENTRYPOINT } from '../../constants';
 import { fetchLegalMd, LegalDocFile } from '../../lib/file-utils-legal';
-import { searchParams } from '../../lib/utilities';
 import { AppContext } from '../../models';
+import { searchParams } from '../../lib/utilities';
 
 export type FetchLegalDoc = (
   locale: string,

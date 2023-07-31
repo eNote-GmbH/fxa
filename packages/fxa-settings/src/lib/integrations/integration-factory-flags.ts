@@ -4,7 +4,7 @@
 
 import { Constants } from '../constants';
 import { ModelDataStore, UrlQueryData } from '../model-data';
-import { IntegrationFlags } from './interfaces';
+import { IntegrationFlags } from '../integrations/interfaces';
 
 const DEVICE_PAIRING_SUPPLICANT_PATHNAME_REGEXP = /^\/pair\/supp/;
 

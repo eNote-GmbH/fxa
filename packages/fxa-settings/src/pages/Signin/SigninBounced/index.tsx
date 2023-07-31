@@ -15,8 +15,7 @@ import CardHeader from '../../../components/CardHeader';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 
 export type SigninBouncedProps = {
-  email?: string;
-  emailLookupComplete: boolean;
+  currentEmail?: string;
   onBackButtonClick?: (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
@@ -26,8 +25,7 @@ export type SigninBouncedProps = {
 export const viewName = 'signin-bounced';
 
 const SigninBounced = ({
-  email,
-  emailLookupComplete,
+  currentEmail,
   canGoBack,
   onBackButtonClick,
 }: SigninBouncedProps & RouteComponentProps) => {
@@ -45,10 +43,10 @@ const SigninBounced = ({
   };
 
   useEffect(() => {
-    if (emailLookupComplete && !email) {
+    if (!currentEmail) {
       hardNavigateToContentServer('/signin');
     }
-  }, [email, emailLookupComplete /*, navigate*/]);
+  }, [currentEmail]);
 
   const createAccountHandler = () => {
     logViewEvent(viewName, 'link.create-account', REACT_ENTRYPOINT);

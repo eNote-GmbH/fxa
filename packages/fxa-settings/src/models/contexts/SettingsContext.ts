@@ -10,7 +10,7 @@ import { createApolloClient } from '../../lib/gql';
 import { Account, GET_PROFILE_INFO } from '../Account';
 import { AlertBarInfo } from '../AlertBarInfo';
 
-export const GET_INITIAL_SETTINGS_STATE = gql`
+export const INITIAL_SETTINGS_QUERY = gql`
   query GetInitialSettingsState {
     account {
       uid

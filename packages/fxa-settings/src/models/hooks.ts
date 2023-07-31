@@ -5,7 +5,7 @@
 import { useContext, useRef, useEffect, useMemo } from 'react';
 import { AppContext } from './contexts/AppContext';
 import {
-  GET_INITIAL_SETTINGS_STATE,
+  INITIAL_SETTINGS_QUERY,
   SettingsContext,
 } from './contexts/SettingsContext';
 import { GET_SESSION_VERIFIED, Session } from './Session';
@@ -66,7 +66,7 @@ export function useIntegration() {
     // const locationStateData = new LocationStateData(windowWrapper);
     const oauthClient = new OAuthClient(config.servers.oauth.url);
 
-    // TODO: we shouldn't do this here, move to shared hook
+    // TODO: we shouldn't do this here, move to shared hook or read from config. FXA-6836
     const delegates = {
       getClientInfo: (id: string) => oauthClient.getClientInfo(id),
       getProductInfo: (id: string) => authClient.getProductInfo(id),
@@ -144,7 +144,7 @@ export function useInitialSettingsState() {
   if (!apolloClient) {
     throw new Error('Are you forgetting an AppContext.Provider?');
   }
-  return useQuery(GET_INITIAL_SETTINGS_STATE, { client: apolloClient });
+  return useQuery(INITIAL_SETTINGS_QUERY, { client: apolloClient });
 }
 
 export function useAlertBar() {

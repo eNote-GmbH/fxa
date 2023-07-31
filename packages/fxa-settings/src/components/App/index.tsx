@@ -41,7 +41,7 @@ import SigninConfirmed from '../../pages/Signin/SigninConfirmed';
 import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
 import ConfirmSignupCode from '../../pages/Signup/ConfirmSignupCode';
 import SigninReported from '../../pages/Signin/SigninReported';
-// import SigninBounced from '../../pages/Signin/SigninBounced';
+import SigninBounced from '../../pages/Signin/SigninBounced';
 import LinkValidator from '../LinkValidator';
 import { LinkType } from 'fxa-settings/src/lib/types';
 import Confirm from 'fxa-settings/src/pages/Signup/Confirm';
@@ -49,7 +49,6 @@ import WebChannelExample from '../../pages/WebChannelExample';
 import { CreateCompleteResetPasswordLink } from '../../models/reset-password/verification/factory';
 import ThirdPartyAuthCallback from '../../pages/PostVerify/ThirdPartyAuthCallback';
 import { searchParams } from '../../lib/utilities';
-import { gql } from '@apollo/client';
 import {
   SettingsContext,
   initializeSettingsContext,
@@ -68,27 +67,25 @@ interface FlowQueryParams {
   uniqueUserId?: string;
 }
 
-// TODO: check against `session/status` and if valid, run this.
-// Or check against what's returned for invalid token error.
-export const INITIAL_METRICS_QUERY = gql`
-  query GetInitialMetricsState {
-    account {
-      recoveryKey
-      metricsEnabled
-      emails {
-        email
-        isPrimary
-        verified
-      }
-      totp {
-        exists
-        verified
-      }
-    }
-  }
-`;
+// TODO: FXA-8098
+// export const INITIAL_METRICS_QUERY = gql`
+//   query GetInitialMetricsState {
+//     account {
+//       recoveryKey
+//       metricsEnabled
+//       emails {
+//         email
+//         isPrimary
+//         verified
+//       }
+//       totp {
+//         exists
+//         verified
+//       }
+//     }
+//   }
+// `;
 
-// temporary until we can safely direct all users to all routes currently in content-server
 interface QueryParams extends FlowQueryParams {
   showReactApp?: string;
   isInRecoveryKeyExperiment?: string;
@@ -98,55 +95,55 @@ export const App = (_: RouteComponentProps) => {
   const flowQueryParams = searchParams(window.location.search) as QueryParams;
   const { isInRecoveryKeyExperiment } = flowQueryParams;
 
-  // const [isSignedIn, setIsSignedIn] = useState<boolean>();
-  // const { loading, error } = useInitialState();
-  // const account = useAccount();
-
   const config = useConfig();
 
-  // const { metricsEnabled } = account;
+  // TODO: stop overfetching / improve this, FXA-8098
+  const [isSignedIn, setIsSignedIn] = useState<boolean>();
+  const { loading, error } = useInitialSettingsState();
+  const account = useAccount();
+  const { metricsEnabled } = account;
 
   // TODO Remove feature flag and experiment logic in FXA-7419
   const showRecoveryKeyV2 = !!(
     config.showRecoveryKeyV2 && isInRecoveryKeyExperiment === 'true'
   );
 
-  // useEffect(() => {
-  //   Metrics.init(metricsEnabled || !isSignedIn, flowQueryParams);
-  //   if (metricsEnabled) {
-  //     Metrics.initUserPreferences(account);
-  //   }
-  // }, [account, metricsEnabled, isSignedIn, flowQueryParams]);
+  useEffect(() => {
+    Metrics.init(metricsEnabled || !isSignedIn, flowQueryParams);
+    if (metricsEnabled) {
+      Metrics.initUserPreferences(account);
+    }
+  }, [account, metricsEnabled, isSignedIn, flowQueryParams]);
 
-  // useEffect(() => {
-  //   if (!loading && error?.message.includes('Invalid token')) {
-  //     setIsSignedIn(false);
-  //   } else if (!loading && !error) {
-  //     setIsSignedIn(true);
-  //   }
-  // }, [error, loading]);
+  useEffect(() => {
+    if (!loading && error?.message.includes('Invalid token')) {
+      setIsSignedIn(false);
+    } else if (!loading && !error) {
+      setIsSignedIn(true);
+    }
+  }, [error, loading]);
 
-  // useEffect(() => {
-  //   if (!loading) {
-  //     // Previously, when Sentry was just loaded in Settings, we only enabled
-  //     // Sentry once we know the user's metrics preferences (and of course,
-  //     // only when the user was logged in, since all users in Settings are.)
-  //     // Now we enable Sentry for logged out users, and for logged in users
-  //     // who opt to have metrics enabled.
-  //     // A bit of chicken and egg but it could be possible that we miss some
-  //     // errors while the page is loading and user is being fetched.
-  //     if (metricsEnabled || !isSignedIn) {
-  //       sentryMetrics.configure({
-  //         release: config.version,
-  //         sentry: {
-  //           ...config.sentry,
-  //         },
-  //       });
-  //     } else {
-  //       sentryMetrics.disable();
-  //     }
-  //   }
-  // }, [metricsEnabled, config.sentry, config.version, loading, isSignedIn]);
+  useEffect(() => {
+    if (!loading) {
+      // Previously, when Sentry was just loaded in Settings, we only enabled
+      // Sentry once we know the user's metrics preferences (and of course,
+      // only when the user was logged in, since all users in Settings are.)
+      // Now we enable Sentry for logged out users, and for logged in users
+      // who opt to have metrics enabled.
+      // A bit of chicken and egg but it could be possible that we miss some
+      // errors while the page is loading and user is being fetched.
+      if (metricsEnabled || !isSignedIn) {
+        sentryMetrics.configure({
+          release: config.version,
+          sentry: {
+            ...config.sentry,
+          },
+        });
+      } else {
+        sentryMetrics.disable();
+      }
+    }
+  }, [metricsEnabled, config.sentry, config.version, loading, isSignedIn]);
 
   return (
     <Router basepath="/">
@@ -161,9 +158,9 @@ const SettingsRoutes = ({
 }: {
   showRecoveryKeyV2?: boolean;
 } & RouteComponentProps) => {
-  // TODO some checks here
-  const { loading, error } = useInitialSettingsState();
-  const account = useAccount();
+  // TODO: FXA-8098
+  // const { loading, error } = useInitialSettingsState();
+  // const account = useAccount();
   const settingsContext = initializeSettingsContext();
 
   return (
@@ -177,7 +174,7 @@ const SettingsRoutes = ({
 
 const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   const sessionTokenId = sessionToken();
-  // const localAccount = currentAccount();
+  const localAccount = currentAccount();
 
   // temporary until the relier + integration is combined
   const integration = useIntegration();
@@ -232,10 +229,10 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
       />
 
       <SigninReported path="/signin_reported/*" />
-      {/* <SigninBounced
-        {...{ localAccount }}
+      <SigninBounced
+        currentEmail={localAccount?.email}
         path="/signin_bounced/*"
-      /> */}
+      />
       {/* Pages using the Ready view need to be accessible to logged out viewers,
        * but need to be able to check if the user is logged in or logged out,
        * so they are wrapped in this component.

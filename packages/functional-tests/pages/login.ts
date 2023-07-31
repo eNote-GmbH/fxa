@@ -530,7 +530,7 @@ export class LoginPage extends BaseLayout {
 
   async clickContinueWithGoogle() {
     await this.page.getByText('Continue with Google').click();
-    await this.page.waitForURL(/accounts.google.com/);
+    await this.page.waitForURL(/accounts\.google\.com/);
   }
 
   async clearCache() {

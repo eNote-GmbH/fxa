@@ -7,7 +7,7 @@ import { Integration } from '../../models';
 import { RouteComponentProps } from '@reach/router';
 import { sessionToken } from '../../lib/cache';
 
-// TODO: revisit this component, do we need it?
+// TODO: revisit this component in FXA-8098, do we need it?
 export const PageWithLoggedInStatusState = (
   props: any &
     RouteComponentProps & {

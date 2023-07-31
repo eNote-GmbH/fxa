@@ -6,6 +6,8 @@ import { RouteComponentProps } from '@reach/router';
 import { Integration, useAuthClient } from '../../../models';
 import { useFinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 import AccountRecoveryResetPassword from '.';
+import AppLayout from '../../../components/AppLayout';
+import CardHeader from '../../../components/CardHeader';
 
 const AccountRecoveryResetPasswordContainer = ({
   integration,
@@ -13,10 +15,22 @@ const AccountRecoveryResetPasswordContainer = ({
   integration: Integration;
 } & RouteComponentProps) => {
   const authClient = useAuthClient();
-  const finishOAuthFlowHandler = useFinishOAuthFlowHandler(
+  const { finishOAuthFlowHandler, oAuthDataError } = useFinishOAuthFlowHandler(
     authClient,
     integration
   );
+
+  // TODO: UX for this, FXA-8106
+  if (oAuthDataError) {
+    return (
+      <AppLayout>
+        <CardHeader
+          headingText="Unexpected error"
+          headingTextFtlId="auth-error-999"
+        />
+      </AppLayout>
+    );
+  }
 
   return (
     <AccountRecoveryResetPassword

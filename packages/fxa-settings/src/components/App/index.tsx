@@ -176,7 +176,6 @@ const AuthAndSetUpRoutes = (_: RouteComponentProps) => {
   const sessionTokenId = sessionToken();
   const localAccount = currentAccount();
 
-  // temporary until the relier + integration is combined
   const integration = useIntegration();
   console.log('integration', integration);
 

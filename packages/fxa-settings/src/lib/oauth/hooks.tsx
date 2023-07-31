@@ -9,6 +9,22 @@ import { createEncryptedBundle } from '../crypto/scoped-keys';
 
 // TODO: should this live in lib/oauth/hooks or lib/hooks? Separate dir per hook?
 
+// Do we need this or can we rely on `@bind` methods? FXA-8106
+const checkOAuthData = (integration: Integration): Error | null => {
+  // Ensure a redirect was provided. With out this info, we can't relay the oauth code
+  // and state!
+  if (!integration.data.redirectTo) {
+    return new OAuthErrorInvalidRedirectUri();
+  }
+  if (!integration.data.clientId) {
+    return new OAuthErrorInvalidRelierClientId();
+  }
+  if (!integration.data.state) {
+    return new OAuthErrorInvalidRelierState();
+  }
+  return null;
+};
+
 /**
  * Constructs JSON web encrypted keys
  * @param accountUid - Current account UID
@@ -85,8 +101,7 @@ async function constructOAuthCode(
   );
 
   if (!result) {
-    // throw new OAuthErrorInvalidOAuthCodeResult();
-    throw new Error();
+    throw new OAuthErrorInvalidOAuthCodeResult();
   }
 
   return result;
@@ -122,6 +137,10 @@ export type FinishOAuthFlowHandler = (
   unwrapKB: string
 ) => Promise<{ redirect: string }>;
 
+type FinishOAuthFlowHandlerResult =
+  | { finishOAuthFlowHandler: FinishOAuthFlowHandler; oAuthDataError: null }
+  | { finishOAuthFlowHandler: null; oAuthDataError: Error };
+
 /**
  * After a password reset, this code can be used to generate a redirect link which relays the new oauth token to the relying party.
  * @param accountUid - Current account uid
@@ -133,21 +152,8 @@ export type FinishOAuthFlowHandler = (
 export function useFinishOAuthFlowHandler(
   authClient: AuthClient,
   integration: Integration
-): FinishOAuthFlowHandler {
-  // TODO: error handling, probably return [handler, error]
-
-  // Ensure a redirect was provided. With out this info, we can't relay the oauth code
-  // and state!
-  // if (!integration.relier.redirectTo) {
-  //   throw new OAuthErrorInvalidRedirectUri();
-  // }
-  // if (!integration.relier.clientId) {
-  //   throw new OAuthErrorInvalidRelierClientId();
-  // }
-  // if (!integration.relier.state) {
-  //   throw new OAuthErrorInvalidRelierState();
-  // }
-  return useCallback(
+): FinishOAuthFlowHandlerResult {
+  const finishOAuthFlowHandler: FinishOAuthFlowHandler = useCallback(
     async (accountUid, sessionToken, keyFetchToken, unwrapKB) => {
       const { kB } = await authClient.accountKeys(keyFetchToken, unwrapKB);
       const keys = await constructKeysJwe(
@@ -174,4 +180,43 @@ export function useFinishOAuthFlowHandler(
     },
     [authClient, integration]
   );
+
+  // We can't return early because `useCallback` can't be set conditionally
+  const oAuthDataError = checkOAuthData(integration);
+  return oAuthDataError
+    ? { finishOAuthFlowHandler: null, oAuthDataError }
+    : { finishOAuthFlowHandler, oAuthDataError: null };
+}
+
+// TODO: FXA-8106
+// 1. Is there a better way to handle these errors. I (Dan) prefer having error types that
+// specific even if the error object's state is general.
+// 2. Do we want to surface these errors to users or what's the expected behavior? In
+// content-server we just show the user a banner with "invalid client ID" etc.
+export class OAuthErrorInvalidRelierClientId extends Error {
+  public readonly errno = 1001;
+  constructor() {
+    super('UNEXPECTED_ERROR');
+  }
+}
+
+export class OAuthErrorInvalidOAuthCodeResult extends Error {
+  public readonly errno = 1001;
+  constructor() {
+    super('UNEXPECTED_ERROR');
+  }
+}
+
+export class OAuthErrorInvalidRelierState extends Error {
+  public readonly errno = 1001;
+  constructor() {
+    super('UNEXPECTED_ERROR');
+  }
+}
+
+export class OAuthErrorInvalidRedirectUri extends Error {
+  public readonly errno = 1001;
+  constructor() {
+    super('UNEXPECTED_ERROR');
+  }
 }

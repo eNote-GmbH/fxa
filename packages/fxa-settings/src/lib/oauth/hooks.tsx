@@ -142,7 +142,7 @@ type FinishOAuthFlowHandlerResult =
   | { finishOAuthFlowHandler: null; oAuthDataError: Error };
 
 /**
- * After a password reset, this code can be used to generate a redirect link which relays the new oauth token to the relying party.
+ * Generates a redirect link which relays the new oauth token to the relying party.
  * @param accountUid - Current account uid
  * @param sessionToken - Current session token
  * @param keyFetchToken - Current key fetch token

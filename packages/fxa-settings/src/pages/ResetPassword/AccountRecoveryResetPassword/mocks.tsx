@@ -10,14 +10,13 @@ import {
   UrlQueryData,
 } from '../../../lib/model-data';
 import { MozServices } from '../../../lib/types';
-import { Account, Relier } from '../../../models';
+import { Account, Integration } from '../../../models';
 import { mockAppContext, MOCK_ACCOUNT } from '../../../models/mocks';
 import { ReachRouterWindow } from '../../../lib/window';
-import { DefaultRelierFlags, RelierFactory } from '../../../lib/reliers';
 import AuthClient from 'fxa-auth-client/browser';
 import { OAuthClient } from '../../../lib/oauth';
 import { LocationStateData } from '../../../lib/model-data/data-stores/location-state-data';
-import { IntegrationFactory } from '../../../lib/integrations2/integration-factory';
+import { IntegrationFactory } from '../../../lib/integrations';
 
 const fxDesktopV3ContextParam = { context: 'fx_desktop_v3' };
 

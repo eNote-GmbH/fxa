@@ -11,7 +11,7 @@ import {
   ModelDataStore,
 } from '../../lib/model-data';
 
-// TODO: move this to other file
+// TODO: move this to other file, FXA-8099
 export class WebIntegrationData extends ModelDataProvider {
   @bind([V.isString])
   context: string | undefined;

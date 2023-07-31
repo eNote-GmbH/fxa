@@ -19,7 +19,7 @@ import {
 } from '../../lib/model-data';
 import { Constants } from '../../lib/constants';
 import { OAuthError } from '../../lib/oauth';
-import { IntegrationFlags } from '../../lib/reliers';
+import { IntegrationFlags } from '../../lib/integrations';
 
 interface OAuthIntegrationFeatures extends IntegrationFeatures {
   webChannelSupport: boolean;

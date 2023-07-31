@@ -10,9 +10,8 @@ import { createApolloClient } from '../../lib/gql';
 import { Account } from '../Account';
 import { Session } from '../Session';
 
-// `apolloClient`, `account`, and (likely) `session` are temporarily on
-// AppContext until we refactor to use the container component approach.
-// Once refactored, these should move these to SettingsContext instead.
+// TODO, move some values from AppContext to SettingsContext after
+// using container components, FXA-8107
 export interface AppContextValue {
   authClient?: AuthClient;
   apolloClient?: ApolloClient<object>;

@@ -9,8 +9,7 @@ export * from './sync-desktop-integration';
 export * from './oauth-integration';
 export * from './pairing-authority-integration';
 export * from './pairing-supplicant-integration';
-// TODO: still need to move some stuff around
-export * from '../reliers/channel-info';
-export * from '../reliers/client-info';
-export * from '../reliers/signin-signup-info';
-export * from '../reliers/supplicant-info';
+export * from '../integrations/channel-info';
+export * from '../integrations/client-info';
+export * from '../integrations/signin-signup-info';
+export * from '../integrations/supplicant-info';

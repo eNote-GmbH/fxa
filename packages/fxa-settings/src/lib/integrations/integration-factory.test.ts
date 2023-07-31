@@ -13,8 +13,7 @@ import {
 } from '../../models/integrations';
 import { StorageData, UrlHashData, UrlQueryData } from '../model-data';
 import { IntegrationDelegates } from '../integrations/interfaces';
-import { IntegrationFactory } from '../integrations/integration-factory';
-import { DefaultIntegrationFlags } from './integration-factory-flags';
+import { IntegrationFactory, DefaultIntegrationFlags } from '../integrations';
 import { ReachRouterWindow } from '../window';
 
 type RelierFlagOverrides = {

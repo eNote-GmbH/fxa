@@ -44,16 +44,7 @@ export const PageWithLoggedInStatusState = (
     }
   }, [error, loading, integration, setIsSync, isSync]);
 
-  return (
-    <Page
-      {...{
-        isSignedIn,
-        isSync,
-        serviceName,
-        continueHandler,
-      }}
-    />
-  );
+  return <Page {...{ isSignedIn, isSync, serviceName, continueHandler }} />;
 };
 
 export default PageWithLoggedInStatusState;

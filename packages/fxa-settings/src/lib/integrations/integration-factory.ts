@@ -24,7 +24,7 @@ import {
 import { OAuthError } from '../oauth';
 import { ReachRouterWindow } from '../window';
 import { IntegrationFlags, IntegrationDelegates } from './interfaces';
-import { DefaultIntegrationFlags } from './integration-factory-flags';
+import { DefaultIntegrationFlags } from '.';
 import config from '../config';
 
 /**
@@ -102,7 +102,7 @@ export class IntegrationFactory {
     const storageData = this.storageData;
     const flags = this.flags;
 
-    // Keep trying until something sticks
+    // The order of checks matters
     if (flags.isDevicePairingAsAuthority()) {
       return this.createPairingAuthorityIntegration(channelData, storageData);
     } else if (flags.isDevicePairingAsSupplicant()) {

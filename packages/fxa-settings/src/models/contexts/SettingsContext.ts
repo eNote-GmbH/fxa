@@ -71,9 +71,8 @@ export const INITIAL_SETTINGS_QUERY = gql`
   }
 `;
 
-// When our newly Reactified pages are using the container component
-// pattern, we will move `account`, `apolloClient`, and `session` off of
-// AppContext and onto SettingsContext instead.
+// TODO, move some values from AppContext to SettingsContext after
+// using container components, FXA-8107
 export interface SettingsContextValue {
   alertBarInfo?: AlertBarInfo;
   navigatorLanguages?: readonly string[];

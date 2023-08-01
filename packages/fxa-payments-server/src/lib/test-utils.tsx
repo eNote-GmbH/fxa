@@ -1116,7 +1116,7 @@ export function withLocalizationProvider(
   messages = { en: ['testo: lol'] }
 ) {
   return (
-    <AppLocalizationProvider messages={messages}>
+    <AppLocalizationProvider messages={messages} reportError={() => {}}>
       {children}
     </AppLocalizationProvider>
   );

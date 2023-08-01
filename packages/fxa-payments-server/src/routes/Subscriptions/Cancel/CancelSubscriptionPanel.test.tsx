@@ -253,7 +253,9 @@ describe('CancelSubscriptionPanel', () => {
         ].forEach((x) => bundle.addResource(new FluentResource(x)));
         const plan = findMockPlan('plan_daily');
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -280,7 +282,9 @@ describe('CancelSubscriptionPanel', () => {
         const plan = { ...findMockPlan('plan_daily'), interval_count: 8 };
 
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel {...baseProps} plan={plan} />
           </LocalizationProvider>
         );
@@ -300,7 +304,9 @@ describe('CancelSubscriptionPanel', () => {
         ].forEach((x) => bundle.addResource(new FluentResource(x)));
         const plan = findMockPlan('plan_daily');
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -334,7 +340,9 @@ describe('CancelSubscriptionPanel', () => {
         const plan = { ...findMockPlan('plan_daily'), interval_count: 8 };
 
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -363,7 +371,9 @@ describe('CancelSubscriptionPanel', () => {
         const plan = { ...findMockPlan('plan_daily'), interval_count: 8 };
 
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -394,7 +404,9 @@ describe('CancelSubscriptionPanel', () => {
         ].forEach((x) => bundle.addResource(new FluentResource(x)));
         const plan = findMockPlan('plan_daily');
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -427,7 +439,9 @@ describe('CancelSubscriptionPanel', () => {
         ].forEach((x) => bundle.addResource(new FluentResource(x)));
         const plan = findMockPlan('plan_daily');
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -460,7 +474,9 @@ describe('CancelSubscriptionPanel', () => {
         const plan = { ...findMockPlan('plan_daily'), interval_count: 8 };
 
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -489,7 +505,9 @@ describe('CancelSubscriptionPanel', () => {
         const plan = { ...findMockPlan('plan_daily'), interval_count: 8 };
 
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel
               {...baseProps}
               plan={plan}
@@ -518,7 +536,9 @@ describe('CancelSubscriptionPanel', () => {
         ].forEach((x) => bundle.addResource(new FluentResource(x)));
         const plan = findMockPlan('plan_daily');
         renderWithLocalizationProvider(
-          <LocalizationProvider l10n={new ReactLocalization([bundle])}>
+          <LocalizationProvider
+            l10n={new ReactLocalization([bundle], undefined, () => {})}
+          >
             <CancelSubscriptionPanel {...baseProps} plan={plan} />
           </LocalizationProvider>
         );

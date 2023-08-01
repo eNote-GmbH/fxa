@@ -2,6 +2,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import AppLocalizationProvider from 'fxa-react/lib/AppLocalizationProvider';
 
+const reportError = () => {};
+
 export function renderWithLocalizationProvider(
   children: JSX.Element,
   messages = { en: ['testo: lol'] }
@@ -10,7 +12,7 @@ export function renderWithLocalizationProvider(
   // disable it right now.  see
   // https://github.com/projectfluent/fluent.js/issues/411
   return render(
-    <AppLocalizationProvider {...{ messages }}>
+    <AppLocalizationProvider {...{ messages, reportError }}>
       {children}
     </AppLocalizationProvider>
   );
@@ -22,7 +24,7 @@ export function withLocalizationProvider(
   userLocales = navigator.languages || ['en']
 ) {
   return (
-    <AppLocalizationProvider {...{ baseDir, userLocales }}>
+    <AppLocalizationProvider {...{ baseDir, userLocales, reportError }}>
       {children}
     </AppLocalizationProvider>
   );

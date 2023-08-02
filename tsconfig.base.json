@@ -12,7 +12,7 @@
     "importHelpers": true,
     "target": "es2022",
     "module": "Node16",
-    "lib": ["es2023"],
+    "lib": ["es2022"],
     "strict": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,

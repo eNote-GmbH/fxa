@@ -41,14 +41,14 @@ export const GqlUserState = createParamDecorator(
 export const GqlXHeaders = createParamDecorator(
   (data: unknown, context: ExecutionContext): Headers => {
     const ctx = GqlExecutionContext.create(context).getContext();
-    let headers = {}
-    
+    let headers: Record<string, string> = {};
+
     // Set the x-forwarded-for header since the auth-server will use this
     // to determine client geolocation
     if (ctx.req?.ip) {
       headers['x-forwarded-for'] = ctx.req?.ip;
     }
-    
+
     return new Headers(headers);
   }
 );

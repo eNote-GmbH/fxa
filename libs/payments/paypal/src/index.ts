@@ -4,5 +4,5 @@
 
 export { PayPalClient } from './lib/client';
 export * from './lib/types';
-export { PayPalClientError } from '../../../shared/error/src';
+export { PayPalClientError } from './lib/error';
 export { nvpToObject, objectToNVP, isIpnMerchPmt } from './lib/util';

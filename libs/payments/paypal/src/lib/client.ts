@@ -6,10 +6,6 @@ import pRetry from 'p-retry';
 import superagent from 'superagent';
 
 import {
-  PayPalClientError,
-  PayPalNVPError,
-} from '../../../../shared/error/src';
-import {
   PAYPAL_LIVE_API,
   PAYPAL_LIVE_IPN,
   PAYPAL_SANDBOX_API,
@@ -17,6 +13,7 @@ import {
   PAYPAL_VERSION,
   PLACEHOLDER_URL,
 } from './constants';
+import { PayPalClientError, PayPalNVPError } from './error';
 import {
   BAUpdateOptions,
   CreateBillingAgreementOptions,

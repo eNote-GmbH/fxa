@@ -1,8 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { faker } from '@faker-js/faker';
 import nock from 'nock';
+
+import { faker } from '@faker-js/faker';
 
 import { PayPalClient } from './client';
 import {
@@ -13,7 +14,7 @@ import {
   PAYPAL_VERSION,
   PLACEHOLDER_URL,
 } from './constants';
-import { PayPalClientError } from '@fxa/shared/error';
+import { PayPalClientError } from './error';
 import {
   NVPBAUpdateTransactionResponseFactory,
   NVPDoReferenceTransactionResponseFactory,

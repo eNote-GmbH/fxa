@@ -8,6 +8,7 @@ import { Meta } from '@storybook/react';
 import { MozServices } from '../../lib/types';
 import { withLocalization } from 'fxa-react/lib/storybooks';
 import {
+  mockAccountWithGenericThrottledError,
   mockAccountWithThrottledError,
   mockAccountWithUnexpectedError,
 } from './mocks';
@@ -38,7 +39,7 @@ function renderStory({ account, props, queryParams }: RenderStoryOptions = {}) {
 
 export const Default = () => renderStory();
 
-export const WithServiceName = () =>
+export const HeaderWithServiceName = () =>
   renderStory({ queryParams: `service=${MozServices.MozillaVPN}` });
 
 export const WithForceAuth = () =>
@@ -48,6 +49,9 @@ export const WithForceAuth = () =>
       forceAuth: true,
     },
   });
+
+export const WithGenericThrottledErrorOnSubmit = () =>
+  renderStory({ account: mockAccountWithGenericThrottledError });
 
 export const WithThrottledErrorOnSubmit = () =>
   renderStory({ account: mockAccountWithThrottledError });

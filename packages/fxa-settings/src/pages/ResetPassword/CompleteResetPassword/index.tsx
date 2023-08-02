@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, ReactElement } from 'react';
 import { Link, useLocation, useNavigate } from '@reach/router';
 import { useForm } from 'react-hook-form';
 import { logPageViewEvent } from '../../../lib/metrics';
@@ -13,6 +13,7 @@ import {
   useRelier,
   isOAuthIntegration,
   useAuthClient,
+  useFtlMsgResolver,
 } from '../../../models';
 import WarningMessage from '../../../components/WarningMessage';
 import LinkRememberPassword from '../../../components/LinkRememberPassword';
@@ -36,6 +37,11 @@ import {
   isOriginalTab,
 } from '../../../lib/storage-utils';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
+import {
+  AuthUiErrorNos,
+  AuthUiErrors,
+  composeAuthUiErrorTranslationId,
+} from '../../../lib/auth-errors/auth-errors';
 
 // The equivalent complete_reset_password mustache file included account_recovery_reset_password
 // For React, we have opted to separate these into two pages to align with the routes.
@@ -82,7 +88,9 @@ const CompleteResetPassword = ({
   params: CompleteResetPasswordLink;
   setLinkStatus: React.Dispatch<React.SetStateAction<LinkStatus>>;
 }) => {
-  const [errorType, setErrorType] = useState(ErrorType.none);
+  const [errorMessage, setErrorMessage] = useState<
+    undefined | string | ReactElement
+  >();
   /* Show a loading spinner until all checks complete. Without this, users with a
    * recovery key set or with an expired or damaged link will experience some jank due
    * to an immediate redirect or rerender of this page. */
@@ -96,6 +104,7 @@ const CompleteResetPassword = ({
   const integration = useIntegration();
   const relier = useRelier();
   const authClient = useAuthClient();
+  const ftlMsgResolver = useFtlMsgResolver();
 
   const { handleSubmit, register, getValues, errors, formState, trigger } =
     useForm<FormData>({
@@ -148,7 +157,26 @@ const CompleteResetPassword = ({
           });
         }
       } catch (error) {
-        setErrorType(ErrorType['recovery-key']);
+        // If checking for an account recovery key fails,
+        // we provide the user with the option to manually navigate to the account recovery flow
+        setErrorMessage(
+          <>
+            <FtlMsg id="complete-reset-password-recovery-key-error-v2">
+              <p>
+                Sorry, there was a problem checking if you have an account
+                recovery key.
+              </p>
+            </FtlMsg>
+            <FtlMsg id="complete-reset-password-recovery-key-link">
+              <Link
+                to={`/account_recovery_confirm_key${location.search}`}
+                className="link-white underline-offset-4"
+              >
+                Reset your password with your account recovery key.
+              </Link>
+            </FtlMsg>
+          </>
+        );
       }
     };
 
@@ -169,7 +197,7 @@ const CompleteResetPassword = ({
   ]);
 
   const alertSuccessAndNavigate = useCallback(() => {
-    setErrorType(ErrorType.none);
+    setErrorMessage('');
     navigateWithoutRerender(
       `/reset_password_verified${window.location.search}`,
       { replace: true }
@@ -281,8 +309,39 @@ const CompleteResetPassword = ({
         if (!isHardNavigate) {
           alertSuccessAndNavigate();
         }
-      } catch (e) {
-        setErrorType(ErrorType['complete-reset']);
+      } catch (err) {
+        let localizedError;
+        if (err.errno && AuthUiErrorNos[err.errno]) {
+          if (
+            err.errno === AuthUiErrors.THROTTLED.errno &&
+            err.retryAfterLocalized
+          ) {
+            localizedError = ftlMsgResolver.getMsg(
+              composeAuthUiErrorTranslationId(err),
+              AuthUiErrorNos[err.errno].message,
+              { retryAfter: err.retryAfterLocalized }
+            );
+          } else if (err.errno === AuthUiErrors.THROTTLED.errno) {
+            // For throttling errors where a localized retry after value is not available
+            localizedError = ftlMsgResolver.getMsg(
+              'auth-error-114-generic',
+              AuthUiErrorNos[114].message
+            );
+          } else {
+            // for all other recognized auth UI errors
+            localizedError = ftlMsgResolver.getMsg(
+              composeAuthUiErrorTranslationId(err),
+              AuthUiErrorNos[err.errno].message
+            );
+          }
+        } else {
+          const unexpectedError = AuthUiErrors.UNEXPECTED_ERROR;
+          localizedError = ftlMsgResolver.getMsg(
+            composeAuthUiErrorTranslationId(unexpectedError),
+            unexpectedError.message
+          );
+        }
+        setErrorMessage(localizedError);
       }
     },
     [
@@ -292,45 +351,9 @@ const CompleteResetPassword = ({
       relier.uid,
       alertSuccessAndNavigate,
       authClient,
+      ftlMsgResolver,
     ]
   );
-
-  const renderCompleteResetPasswordErrorBanner = () => {
-    return (
-      <Banner type={BannerType.error}>
-        <FtlMsg id="complete-reset-password-error-alert">
-          <p>Sorry, there was a problem setting your password</p>
-        </FtlMsg>
-      </Banner>
-    );
-  };
-
-  const renderRecoveryKeyErrorBanner = () => {
-    const hasRecoveryKeyErrorLink = (
-      <Link
-        to={`/account_recovery_confirm_key${location.search}`}
-        className="link-white"
-      >
-        Reset your password with your account recovery key.
-      </Link>
-    );
-
-    return (
-      <Banner type={BannerType.error}>
-        <FtlMsg
-          id="complete-reset-password-recovery-key-error"
-          elems={{
-            hasRecoveryKeyErrorLink,
-          }}
-        >
-          <p>
-            Sorry, there was a problem checking if you have an account recovery
-            key. {hasRecoveryKeyErrorLink}.
-          </p>
-        </FtlMsg>
-      </Banner>
-    );
-  };
 
   if (showLoadingSpinner) {
     return (
@@ -344,10 +367,7 @@ const CompleteResetPassword = ({
         headingTextFtlId="complete-reset-pw-header"
       />
 
-      {errorType === ErrorType['recovery-key'] &&
-        renderRecoveryKeyErrorBanner()}
-      {errorType === ErrorType['complete-reset'] &&
-        renderCompleteResetPasswordErrorBanner()}
+      {errorMessage && <Banner type={BannerType.error}>{errorMessage}</Banner>}
 
       <WarningMessage
         warningMessageFtlId="complete-reset-password-warning-message-2"

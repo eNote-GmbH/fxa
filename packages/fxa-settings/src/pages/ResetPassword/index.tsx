@@ -148,16 +148,20 @@ const ResetPassword = ({
               AuthUiErrorNos[err.errno].message,
               { retryAfter: err.retryAfterLocalized }
             );
+          } else if (err.errno === AuthUiErrors.THROTTLED.errno) {
+            // For throttling errors where a localized retry after value is not available
+            localizedError = ftlMsgResolver.getMsg(
+              'auth-error-114-generic',
+              AuthUiErrorNos[114].message
+            );
           } else {
+            // for all other recognized auth UI errors
             localizedError = ftlMsgResolver.getMsg(
               composeAuthUiErrorTranslationId(err),
               AuthUiErrorNos[err.errno].message
             );
           }
         } else {
-          // TEMPORARY deliberate log to help debug FXA-7347, this should be captured server-side
-          // but for some reason isn't logging to Sentry
-          sentryMetrics.captureException(err);
           const unexpectedError = AuthUiErrors.UNEXPECTED_ERROR;
           localizedError = ftlMsgResolver.getMsg(
             composeAuthUiErrorTranslationId(unexpectedError),

@@ -14,7 +14,7 @@ export enum BannerType {
   error = 'error',
 }
 
-type DefaultProps = { type: BannerType; children: ReactElement };
+type DefaultProps = { type: BannerType; children: ReactElement | string };
 
 type OptionalProps =
   | {

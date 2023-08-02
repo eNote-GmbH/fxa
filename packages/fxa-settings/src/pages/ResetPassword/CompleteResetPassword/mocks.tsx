@@ -20,6 +20,31 @@ import { ReachRouterWindow } from '../../../lib/window';
 // TODO: combine a lot of mocks with AccountRecoveryResetPassword
 const fxDesktopV3ContextParam = { context: 'fx_desktop_v3' };
 
+export const mockAccountNoRecoveryKey = {
+  resetPasswordStatus: () => Promise.resolve(true),
+  hasRecoveryKey: () => Promise.resolve(false),
+} as unknown as Account;
+
+export const mockAccountWithRecoveryKeyStatusError = {
+  resetPasswordStatus: () => Promise.resolve(true),
+  hasRecoveryKey: () => {
+    throw new Error('boop');
+  },
+} as unknown as Account;
+
+const throttledErrorObjWithRetryAfter = {
+  errno: 114,
+  retryAfter: 500,
+  retryAfterLocalized: 'in 15 minutes',
+};
+
+// Mocked throttled error with retryAfter value
+export const mockAccountWithThrottledError = {
+  resetPasswordStatus: () => Promise.resolve(true),
+  hasRecoveryKey: () => Promise.resolve(false),
+  completeResetPassword: () => Promise.reject(throttledErrorObjWithRetryAfter),
+} as unknown as Account;
+
 export const mockCompleteResetPasswordParams = {
   email: MOCK_ACCOUNT.primaryEmail.email,
   emailToHashWith: MOCK_ACCOUNT.primaryEmail.email,

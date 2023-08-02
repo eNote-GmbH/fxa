@@ -231,9 +231,7 @@ describe('CompleteResetPassword page', () => {
 
       fireEvent.click(screen.getByText('Reset password'));
 
-      await screen.findByText(
-        'Sorry, there was a problem setting your password'
-      );
+      await screen.findByText('Unexpected error');
     });
 
     it('displays account recovery key check error', async () => {

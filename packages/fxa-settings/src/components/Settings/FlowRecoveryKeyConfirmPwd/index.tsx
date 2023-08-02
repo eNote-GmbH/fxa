@@ -21,6 +21,7 @@ import Banner, { BannerType } from '../../Banner';
 import { RecoveryKeyAction } from '../PageRecoveryKeyCreate';
 import { Link } from '@reach/router';
 import { HomePath } from '../../../constants';
+import sentryMetrics from 'fxa-shared/lib/sentry';
 
 type FormData = {
   password: string;
@@ -77,32 +78,40 @@ export const FlowRecoveryKeyConfirmPwd = ({
       );
       logViewEvent(`flow.${viewName}`, 'confirm-password.success');
       navigateForward();
-    } catch (e) {
+    } catch (err) {
       let localizedError;
-
-      if (e.errno === AuthUiErrors.THROTTLED.errno) {
-        if (e.retryAfterLocalized) {
+      if (err.errno && AuthUiErrorNos[err.errno]) {
+        if (
+          err.errno === AuthUiErrors.THROTTLED.errno &&
+          err.retryAfterLocalized
+        ) {
           localizedError = ftlMsgResolver.getMsg(
-            composeAuthUiErrorTranslationId(e),
-            AuthUiErrorNos[e.errno].message,
-            { retryAfter: e.retryAfterLocalized }
+            composeAuthUiErrorTranslationId(err),
+            AuthUiErrorNos[err.errno].message,
+            { retryAfter: err.retryAfterLocalized }
           );
-        } else {
+        } else if (err.errno === AuthUiErrors.THROTTLED.errno) {
           // For throttling errors where a localized retry after value is not available
           localizedError = ftlMsgResolver.getMsg(
             'auth-error-114-generic',
             AuthUiErrorNos[114].message
           );
+        } else {
+          // for all other recognized auth UI errors
+          localizedError = ftlMsgResolver.getMsg(
+            composeAuthUiErrorTranslationId(err),
+            AuthUiErrorNos[err.errno].message
+          );
         }
-      }
-      // For any errors other than throttling
-      else {
+      } else {
+        const unexpectedError = AuthUiErrors.UNEXPECTED_ERROR;
         localizedError = ftlMsgResolver.getMsg(
-          composeAuthUiErrorTranslationId(e),
-          e.message
+          composeAuthUiErrorTranslationId(unexpectedError),
+          unexpectedError.message
         );
       }
-      if (e.errno === AuthUiErrors.INCORRECT_PASSWORD.errno) {
+
+      if (err.errno === AuthUiErrors.INCORRECT_PASSWORD.errno) {
         setErrorText(localizedError);
       } else {
         setBannerText(localizedError);

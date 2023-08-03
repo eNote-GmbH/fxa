@@ -13,5 +13,10 @@ describe('Error', () => {
       expect(error.message).toEqual(message);
       expect(error).toBeInstanceOf(TypeError);
     });
+
+    // TODO: REMOVE! Just a temporary sanity check to make sure CI actually fails.
+    it('should fail in CI', () => {
+      expect(true).toBe(false); // :[]
+    });
   });
 });

@@ -14,7 +14,6 @@ import {
 import { usePageViewEvent, useMetrics } from '../../lib/metrics';
 import { MozServices } from '../../lib/types';
 import {
-  OAuthRelier,
   isOAuthRelier,
   useAccount,
   useFtlMsgResolver,

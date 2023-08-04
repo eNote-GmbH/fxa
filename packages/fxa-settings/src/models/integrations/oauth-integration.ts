@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import AuthClient from 'fxa-auth-client/lib/client';
 import { Constants } from '../../lib/constants';
 import { IntegrationFlags } from '../../lib/integrations/interfaces/integration-flags';
 import { OAuthRelier } from '../reliers';

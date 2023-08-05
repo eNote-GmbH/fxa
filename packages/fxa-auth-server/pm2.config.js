@@ -10,7 +10,8 @@ module.exports = {
   apps: [
     {
       name: 'auth',
-      script: 'node -r esbuild-register bin/key_server.js',
+      script:
+        'node -r esbuild-register -r tsconfig-paths/register bin/key_server.js',
       cwd: __dirname,
       env: {
         DB: 'mysql',

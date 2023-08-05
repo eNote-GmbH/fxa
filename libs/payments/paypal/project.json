@@ -12,7 +12,7 @@
         "outputPath": "dist/libs/payments/paypal",
         "tsConfig": "libs/payments/paypal/tsconfig.lib.json",
         "packageJson": "libs/payments/paypal/package.json",
-        "main": "libs/payments/paypal/src/index.ts",
+        "main": "libs/payments/paypal/libs/payments/paypal/src/index.ts",
         "assets": ["libs/payments/paypal/*.md"]
       }
     },
@@ -36,6 +36,9 @@
           "codeCoverage": true
         }
       }
+    },
+    "build-ts": {
+      "command": "tsc -b libs/payments/paypal/tsconfig.json"
     }
   },
   "tags": []

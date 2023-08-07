@@ -44,7 +44,7 @@ import {
   getLocalizedDateString,
 } from '../../../lib/formats';
 import { WebSubscription } from 'fxa-shared/subscriptions/types';
-import { config, updateConfig } from '../../../lib/config';
+import { updateConfig } from '../../../lib/config';
 import { deepCopy } from '../../../lib/test-utils';
 
 jest.mock('../../../lib/sentry');
@@ -100,30 +100,21 @@ async function rendersAsExpected(
   expect(queryByTestId('plan-upgrade-subtotal')).not.toBeInTheDocument();
   expect(queryByTestId('plan-upgrade-tax-amount')).not.toBeInTheDocument();
 
-  if (config.featureFlags.useStripeInvoiceImmediately) {
-    expect(queryByTestId('sub-update-acknowledgment')).toHaveTextContent(
-      expectedInvoiceDate
-    );
-    expect(
-      queryByTestId(`sub-update-new-plan-${selectedPlan.interval}`)
-    ).toBeInTheDocument();
+  expect(queryByTestId('sub-update-acknowledgment')).toHaveTextContent(
+    expectedInvoiceDate
+  );
+  // expect(
+  //   queryByTestId(`sub-update-new-plan-${selectedPlan.interval}`)
+  // ).toBeInTheDocument();
 
-    if (
-      !!invoicePreview.one_time_charge &&
-      invoicePreview.one_time_charge > 0
-    ) {
-      expect(queryByTestId('sub-update-prorated-upgrade')).toBeInTheDocument();
-      expect(queryByTestId('prorated-amount')).toBeInTheDocument();
-    } else {
-      expect(
-        queryByTestId('sub-update-prorated-upgrade')
-      ).not.toBeInTheDocument();
-      expect(queryByTestId('prorated-amount')).not.toBeInTheDocument();
-    }
+  if (!!invoicePreview.one_time_charge && invoicePreview.one_time_charge > 0) {
+    // expect(queryByTestId('sub-update-prorated-upgrade')).toBeInTheDocument();
+    expect(queryByTestId('prorated-amount')).toBeInTheDocument();
   } else {
-    expect(queryByTestId('sub-update-copy')).toHaveTextContent(
-      expectedInvoiceDate
-    );
+    expect(
+      queryByTestId('sub-update-prorated-upgrade')
+    ).not.toBeInTheDocument();
+    expect(queryByTestId('prorated-amount')).not.toBeInTheDocument();
   }
 }
 

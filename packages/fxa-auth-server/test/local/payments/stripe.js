@@ -129,7 +129,6 @@ const mockConfig = {
   subscriptions: {
     cacheTtlSeconds: 10,
     productConfigsFirestore: { enabled: true },
-    stripeInvoiceImmediately: { enabled: false },
     stripeApiKey: 'sk_test_4eC39HqLyjWDarjtT1zdp7dc',
   },
   subhub: {
@@ -2093,7 +2092,6 @@ describe('#integration - StripeHelper', () => {
     });
 
     it('retrieves both upcoming invoices with and without proration info', async () => {
-      stripeHelper.config.subscriptions.stripeInvoiceImmediately.enabled = true;
       const stripeStub = sandbox
         .stub(stripeHelper.stripe.invoices, 'retrieveUpcoming')
         .resolves();
@@ -2134,8 +2132,6 @@ describe('#integration - StripeHelper', () => {
         ],
         expand: ['total_tax_amounts.tax_rate'],
       });
-
-      stripeHelper.config.subscriptions.stripeInvoiceImmediately.enabled = false;
     });
   });
 
@@ -3633,7 +3629,7 @@ describe('#integration - StripeHelper', () => {
               plan: 'plan_G93mMKnIFCjZek',
             },
           ],
-          proration_behavior: 'create_prorations',
+          proration_behavior: 'always_invoice',
           metadata: {
             key: 'value',
             previous_plan_id: subscription1.items.data[0].plan.id,
@@ -3661,8 +3657,6 @@ describe('#integration - StripeHelper', () => {
     });
 
     it(`uses 'always_invoice' when the config is enabled`, async () => {
-      stripeHelper.config.subscriptions.stripeInvoiceImmediately.enabled = true;
-
       const unixTimestamp = moment().unix();
       const subscription = deepCopy(subscription1);
       subscription.metadata = {
@@ -5963,8 +5957,6 @@ describe('#integration - StripeHelper', () => {
           const event = deepCopy(eventCustomerSubscriptionUpdated);
           const productIdOld = event.data.previous_attributes.plan.product;
           const productIdNew = event.data.object.plan.product;
-          const invoiceImmediately =
-            stripeHelper.config.subscriptions.stripeInvoiceImmediately.enabled;
 
           const baseDetails = {
             ...expectedBaseUpdateDetails,
@@ -6038,29 +6030,15 @@ describe('#integration - StripeHelper', () => {
               event.data.previous_attributes.plan.interval,
             paymentAmountOldCurrency:
               event.data.previous_attributes.plan.currency,
-            paymentAmountOldInCents:
-              upcomingInvoice && upcomingInvoice.total && !invoiceImmediately
-                ? upcomingInvoice.total
-                : baseDetails.invoiceTotalOldInCents,
+            paymentAmountOldInCents: baseDetails.invoiceTotalOldInCents,
             paymentAmountNewCurrency:
-              upcomingInvoice && upcomingInvoice.currency && !invoiceImmediately
-                ? upcomingInvoice.currency
-                : mockInvoice.currency,
-            paymentAmountNewInCents:
-              upcomingInvoice && upcomingInvoice.total && !invoiceImmediately
-                ? upcomingInvoice.total
-                : mockInvoice.total,
+              upcomingInvoice.currency || mockInvoice.currency,
+            paymentAmountNewInCents: upcomingInvoice.total || mockInvoice.total,
             paymentProratedCurrency:
-              upcomingInvoice && upcomingInvoice.currency && !invoiceImmediately
-                ? upcomingInvoice.currency
-                : mockInvoice.currency,
-            paymentProratedInCents:
-              upcomingInvoice && !invoiceImmediately
-                ? expectedPaymentProratedInCents
-                : mockInvoice.amount_due,
+              upcomingInvoice.currency || mockInvoice.currency,
+            paymentProratedInCents: mockInvoice.amount_due,
             invoiceNumber: mockInvoice.number,
             invoiceId: mockInvoice.id,
-            invoiceImmediately: invoiceImmediately,
           });
         };
 

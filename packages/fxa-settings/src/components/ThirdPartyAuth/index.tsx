@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useEffect } from 'react';
+import React, { Ref, useEffect, useState } from 'react';
 import { FtlMsg } from 'fxa-react/lib/utils';
 
 import { ReactComponent as GoogleLogo } from './google-logo.svg';
@@ -11,22 +11,12 @@ import { ReactComponent as AppleLogo } from './apple-logo.svg';
 import { useAccount, useConfig } from '../../models';
 import Storage from '../../lib/storage';
 import { AUTH_PROVIDER } from 'fxa-auth-client/browser';
+import { useRef } from 'react';
+import { Config } from '../../lib/config';
 
 export type ThirdPartyAuthProps = {
   enabled?: boolean;
 };
-
-type ThirdPartyAuthSigninParams = {
-  authorizationEndpoint: string;
-  clientId: string;
-  scope: string;
-  redirectUri: string;
-  responseType: string;
-  responseMode?: string;
-};
-
-const GOOGLE_SCOPES = 'openid email profile';
-const APPLE_SCOPES = 'email';
 
 /**
  * ThirdPartyAuth component
@@ -34,8 +24,14 @@ const APPLE_SCOPES = 'email';
  * It handles user sign-in with the respective provider when the buttons are clicked.
  */
 const ThirdPartyAuth = ({ enabled = false }: ThirdPartyAuthProps) => {
-  const config = useConfig();
   const account = useAccount();
+  const config = useConfig();
+  const googleSignInFormRef = useRef<HTMLFormElement>(null);
+  const appleSignInFormRef = useRef<HTMLFormElement>(null);
+  const [signInState, setSignInState] = useState({
+    mode: 'none',
+    state: '',
+  });
 
   useEffect(() => {
     // TODO: Figure out why `storageData` is not available
@@ -47,18 +43,31 @@ const ThirdPartyAuth = ({ enabled = false }: ThirdPartyAuthProps) => {
     }
   });
 
+  /**
+   * This effect reacts to changes on sign in state, which responds
+   * to users clicking either the google or apple sign in buttons.
+   */
+  useEffect(() => {
+    if (signInState.mode === 'apple') {
+      appleSignInFormRef.current?.submit();
+    }
+    if (signInState.mode === 'google') {
+      googleSignInFormRef.current?.submit();
+    }
+  }, [signInState]);
+
   if (!enabled) {
     return null;
   }
 
   /**
    * signIn - Handles the sign-in process for third-party authentication providers.
-   * Creates a form, sets necessary parameters, and submits it to the provider's
-   * authorization endpoint.
+   * Sets necessary form parameters and submits the form to the provider's authorization
+   * endpoint.
    *
    * @param {ThirdPartyAuthSigninParams} config - Configuration parameters for the signIn process.
    */
-  function signIn(config: ThirdPartyAuthSigninParams) {
+  function signIn(mode: 'apple' | 'google') {
     clearStoredParams();
 
     // We stash originating location in the state oauth param
@@ -67,45 +76,14 @@ const ThirdPartyAuth = ({ enabled = false }: ThirdPartyAuthProps) => {
     currentParams.delete('deeplink');
     currentParams.set('showReactApp', 'true');
 
-    const state = encodeURIComponent(
-      `${window.location.origin}${
-        window.location.pathname
-      }?${currentParams.toString()}`
-    );
-
-    // TODO: We should this in a more React way. The form and hidden inputs should
-    // be in their own component. Ref: https://mozilla-hub.atlassian.net/browse/FXA-7319
-    const form = window.document.createElement('form');
-
-    form.setAttribute('method', 'GET');
-    form.setAttribute('action', config.authorizationEndpoint);
-
-    const params: Record<string, string | undefined> = {
-      client_id: config.clientId,
-      scope: config.scope,
-      redirect_uri: config.redirectUri,
-      state,
-      access_type: 'offline',
-      prompt: 'consent',
-      response_type: config.responseType,
-      response_mode: config.responseMode,
-    };
-
-    for (const [key, value] of Object.entries(params)) {
-      if (!value) {
-        continue;
-      }
-      const input = window.document.createElement('input');
-      input.setAttribute('type', 'hidden');
-      input.setAttribute('name', key);
-      input.setAttribute('value', value);
-      form.appendChild(input);
-    }
-
-    // To avoid any CORs issues we append the form to the body and submit it.
-    window.document.body.appendChild(form);
-
-    form.submit();
+    setSignInState({
+      mode,
+      state: encodeURIComponent(
+        `${window.location.origin}${
+          window.location.pathname
+        }?${currentParams.toString()}`
+      ),
+    });
   }
 
   async function completeSignIn() {
@@ -147,18 +125,16 @@ const ThirdPartyAuth = ({ enabled = false }: ThirdPartyAuthProps) => {
         </div>
 
         <div className="flex flex-col">
+          <GoogleSignInForm
+            innerRef={googleSignInFormRef}
+            state={signInState.state}
+            {...{ config }}
+          />
           <button
             type="button"
             className="w-full mt-2 justify-center text-black bg-transparent border-black border hover:border-grey-300 font-medium rounded-lg text-sm text-center inline-flex items-center"
             onClick={() => {
-              signIn({
-                authorizationEndpoint:
-                  config.googleAuthConfig.authorizationEndpoint,
-                clientId: config.googleAuthConfig.clientId,
-                scope: GOOGLE_SCOPES,
-                redirectUri: config.googleAuthConfig.redirectUri,
-                responseType: 'code',
-              });
+              signIn('google');
             }}
           >
             <GoogleLogo />
@@ -167,19 +143,16 @@ const ThirdPartyAuth = ({ enabled = false }: ThirdPartyAuthProps) => {
             </FtlMsg>
           </button>
 
+          <AppleSignInForm
+            innerRef={appleSignInFormRef}
+            state={signInState.state}
+            {...{ config }}
+          />
           <button
             type="button"
             className="w-full mt-2 justify-center text-black bg-transparent border-black border hover:border-grey-300 font-medium rounded-lg text-sm text-center inline-flex items-center"
             onClick={() => {
-              signIn({
-                authorizationEndpoint:
-                  config.appleAuthConfig.authorizationEndpoint,
-                clientId: config.appleAuthConfig.clientId,
-                scope: APPLE_SCOPES,
-                redirectUri: config.appleAuthConfig.redirectUri,
-                responseType: 'code id_token',
-                responseMode: 'form_post',
-              });
+              signIn('apple');
             }}
           >
             <AppleLogo />
@@ -188,6 +161,86 @@ const ThirdPartyAuth = ({ enabled = false }: ThirdPartyAuthProps) => {
         </div>
       </div>
     </>
+  );
+};
+
+/**
+ * Represents the sign in form posted to google third party auth.
+ * Note that the innerRef is used by the parent component to trigger
+ * a form submission.
+ */
+const AppleSignInForm = ({
+  innerRef,
+  state,
+  config,
+}: {
+  innerRef: Ref<HTMLFormElement>;
+  state: string;
+  config: Config;
+}) => {
+  if (!state) {
+    return <></>;
+  }
+
+  console.log('!!! setting AppleSignInForm', state);
+  return (
+    <form ref={innerRef} action={config.appleAuthConfig.authorizationEndpoint}>
+      <input
+        type="hidden"
+        name="client_id"
+        value={config.appleAuthConfig.clientId}
+      />
+      <input type="hidden" name="scope" value="email" />
+      <input
+        type="hidden"
+        name="redirect_uri"
+        value={config.appleAuthConfig.redirectUri}
+      />
+      <input type="hidden" name="state" value={state} />
+      <input type="hidden" name="access_type" value="offline" />
+      <input type="hidden" name="prompt" value="consent" />
+      <input type="hidden" name="response_type" value="code id_token" />
+      <input type="hidden" name="response_mode" value="form_post" />
+    </form>
+  );
+};
+
+/**
+ * Represents the sign in form posted to google third party auth.
+ * Note that the innerRef is used by the parent component to trigger
+ * a form submission.
+ */
+const GoogleSignInForm = ({
+  innerRef,
+  state,
+  config,
+}: {
+  innerRef: Ref<HTMLFormElement>;
+  state: string;
+  config: Config;
+}) => {
+  if (!state) {
+    return <></>;
+  }
+  console.log('!!! setting GoogleSignInForm', state);
+  return (
+    <form ref={innerRef} action={config.googleAuthConfig.authorizationEndpoint}>
+      <input
+        type="hidden"
+        name="client_id"
+        value={config.googleAuthConfig.clientId}
+      />
+      <input type="hidden" name="scope" value="openid email profile" />
+      <input
+        type="hidden"
+        name="redirect_uri"
+        value={config.googleAuthConfig.redirectUri}
+      />
+      <input type="hidden" name="state" value={state} />
+      <input type="hidden" name="access_type" value="offline" />
+      <input type="hidden" name="prompt" value="consent" />
+      <input type="hidden" name="response_type" value="code" />
+    </form>
   );
 };
 

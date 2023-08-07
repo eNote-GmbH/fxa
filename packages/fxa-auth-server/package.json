@@ -29,7 +29,7 @@
     "test-scripts": "NODE_ENV=dev mocha -r esbuild-register test/scripts --exit",
     "test-remote": "MAILER_HOST=restmail.net MAILER_PORT=80 CORS_ORIGIN=http://baz mocha -r esbuild-register --timeout=300000 test/remote",
     "format": "prettier --write --config ../../_dev/.prettierrc '**'",
-    "gen-keys": "node -r esbuild-register ./scripts/gen_keys.js; node -r esbuild-register ./scripts/oauth_gen_keys.js; node -r esbuild-register ./scripts/gen_vapid_keys.js",
+    "gen-keys": "node -r esbuild-register -r tsconfig-paths/register ./scripts/gen_keys.js; node -r esbuild-register -r tsconfig-paths/register ./scripts/oauth_gen_keys.js; node -r esbuild-register -r tsconfig-paths/register ./scripts/gen_vapid_keys.js",
     "clean-up-old-ci-stripe-customers": "node -r esbuild-register ./scripts/clean-up-old-ci-stripe-customers.js --limit 1000",
     "populate-firestore-customers": "CONFIG_FILES='config/secrets.json' node -r esbuild-register ./scripts/populate-firestore-customers.ts",
     "populate-vat-taxes": "CONFIG_FILES='config/secrets.json' node -r esbuild-register ./scripts/populate-vat-taxes.ts",

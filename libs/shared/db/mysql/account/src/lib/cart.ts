@@ -12,7 +12,7 @@ export class Cart extends BaseModel {
   protected $uuidFields = ['id', 'uid'];
 
   // table fields
-  id!: string;
+  readonly id!: string;
   uid?: string;
   state!: CartState;
   errorReasonId?: string;
@@ -20,13 +20,13 @@ export class Cart extends BaseModel {
   interval!: string;
   experiment?: string;
   taxAddress?: TaxAddress;
-  createdAt!: number;
-  updatedAt!: number;
+  readonly createdAt!: number;
+  readonly updatedAt!: number;
   couponCode?: string;
   stripeCustomerId?: string;
   email?: string;
   amount!: number;
-  version!: number;
+  readonly version!: number;
 
   static relationMappings = {
     account: {
@@ -56,31 +56,34 @@ export class Cart extends BaseModel {
       .throwIfNotFound();
   }
 
+  // TODO - Remove in FXA-8128 in favor of using update
   static async patchById(id: string, items: Partial<Cart>) {
     const cart = await this.findById(id);
-    const currentCartVersion = cart.version;
     // Patch and fetch instance
     // Use update if you update the whole row with all its columns. Otherwise, using the patch method is recommended.
     // https://vincit.github.io/objection.js/api/query-builder/mutate-methods.html#update
-    await cart
-      .$query()
-      .patchAndFetch({
-        ...items,
-        updatedAt: Date.now(),
-        version: currentCartVersion + 1,
-      })
-      .where('id', uuidTransformer.to(id))
-      .where('version', currentCartVersion);
+    await cart.$query().patchAndFetch({
+      ...items,
+      updatedAt: Date.now(),
+    });
 
-    const updatedRows = await Cart.query()
-      .patch(cart)
-      .where('id', uuidTransformer.to(id))
-      .where('version', currentCartVersion);
-
-    if (!updatedRows) {
-      throw new Error('Could not update');
-    }
+    await Cart.query().patch(cart).where('id', id);
 
     return cart;
+  }
+
+  async update(cart: Cart) {
+    const currentVersion = cart.version;
+    cart.$set({
+      updatedAt: Date.now(),
+      version: currentVersion + 1,
+    });
+    const updatedRows = await Cart.query()
+      .update(cart)
+      .where('id', uuidTransformer.to(cart.id))
+      .where('version', currentVersion);
+    if (!updatedRows) {
+      throw new Error('No rows were updated.');
+    }
   }
 }

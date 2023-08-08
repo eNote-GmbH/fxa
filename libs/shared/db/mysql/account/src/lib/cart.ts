@@ -26,6 +26,7 @@ export class Cart extends BaseModel {
   stripeCustomerId?: string;
   email?: string;
   amount!: number;
+  version!: number;
 
   static relationMappings = {
     account: {
@@ -57,16 +58,28 @@ export class Cart extends BaseModel {
 
   static async patchById(id: string, items: Partial<Cart>) {
     const cart = await this.findById(id);
+    const currentCartVersion = cart.version;
     // Patch and fetch instance
     // Use update if you update the whole row with all its columns. Otherwise, using the patch method is recommended.
     // https://vincit.github.io/objection.js/api/query-builder/mutate-methods.html#update
-    await cart.$query().patchAndFetch({
-      ...items,
-      updatedAt: Date.now(),
-    });
+    await cart
+      .$query()
+      .patchAndFetch({
+        ...items,
+        updatedAt: Date.now(),
+        version: currentCartVersion + 1,
+      })
+      .where('id', uuidTransformer.to(id))
+      .where('version', currentCartVersion);
 
-    // Patch changes to the DB
-    await Cart.query().patch(cart).where('id', id);
+    const updatedRows = await Cart.query()
+      .patch(cart)
+      .where('id', uuidTransformer.to(id))
+      .where('version', currentCartVersion);
+
+    if (!updatedRows) {
+      throw new Error('Could not update');
+    }
 
     return cart;
   }

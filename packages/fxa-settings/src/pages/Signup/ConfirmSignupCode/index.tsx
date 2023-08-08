@@ -33,12 +33,11 @@ import FormVerifyCode, {
 } from '../../../components/FormVerifyCode';
 import { MailImage } from '../../../components/images';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { Newsletter } from '../../../components/ChooseNewsletters/newsletters';
 import { ResendStatus } from 'fxa-settings/src/lib/types';
 
 export const viewName = 'confirm-signup-code';
 
-type LocationState = { email: string; newsletters?: Newsletter[] };
+type LocationState = { email: string; selectedNewsletterSlugs?: string[] };
 
 const ConfirmSignupCode = (_: RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
@@ -133,7 +132,11 @@ const ConfirmSignupCode = (_: RouteComponentProps) => {
   async function verifySession(code: string) {
     logViewEvent(`flow.${viewName}`, 'submit', REACT_ENTRYPOINT);
     try {
-      await account.verifySession(code);
+      const newsletterSlugs = location.state.selectedNewsletterSlugs;
+      const options = newsletterSlugs?.length
+        ? { newsletters: newsletterSlugs }
+        : {};
+      await account.verifySession(code, options);
 
       // FOLLOW-UP: does not yet exist in Settings
       // BEFORE: notifier.trigger('verification.success');
@@ -142,13 +145,15 @@ const ConfirmSignupCode = (_: RouteComponentProps) => {
         'verification.success',
         REACT_ENTRYPOINT
       );
-      // FOLLOW-UP: enable once state can be accessed from previous component
       // BEFORE: this.notifier.trigger('flow.event', {event: 'newsletter.subscribed',})
-      // This might just be a logged event, but will depend if subscription is entirely
-      // handled on the signup page or if it should only happen after verification
-      // if (newsletters) {
-      //   logViewEvent(`flow.${viewName}`, 'newsletter.subscribed', REACT_ENTRYPOINT);
-      // }
+
+      if (location.state.selectedNewsletterSlugs) {
+        logViewEvent(
+          `flow.${viewName}`,
+          'newsletter.subscribed',
+          REACT_ENTRYPOINT
+        );
+      }
 
       // FOLLOW-UP: Broker not yet implemented
       // The broker handles navigation behaviour that varies depending on the relier

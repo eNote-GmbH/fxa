@@ -9,23 +9,25 @@ import { Newsletter } from './newsletters';
 
 export type ChooseNewslettersProps = {
   newsletters: Newsletter[];
-  selectedNewsletters: string[];
-  setSelectedNewsletters: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedNewsletterSlugs: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const ChooseNewsletters = ({
   newsletters,
-  selectedNewsletters,
-  setSelectedNewsletters,
+  setSelectedNewsletterSlugs,
 }: ChooseNewslettersProps) => {
-  const handleSyncChange =
-    (labelText: string) => (event: ChangeEvent<HTMLInputElement>) => {
+  const handleNewsletterChange =
+    (slug: Newsletter['slug']) => (event: ChangeEvent<HTMLInputElement>) => {
       const { checked } = event.target;
-      setSelectedNewsletters((existing) => {
+      const slugs = Array.isArray(slug) ? slug : [slug];
+
+      setSelectedNewsletterSlugs((existing) => {
         if (checked) {
-          return [...existing, labelText];
+          return [...existing, ...slugs];
         } else {
-          return [...existing.filter((text) => text !== labelText)];
+          return existing.filter(
+            (existingSlug) => !slugs.includes(existingSlug)
+          );
         }
       });
     };
@@ -33,9 +35,9 @@ const ChooseNewsletters = ({
   return (
     <>
       <FtlMsg id="choose-newsletters-prompt">
-        <p className="text-start mb-1">
-          Practical knowledge is coming to your inbox. Sign up for more:
-        </p>
+        <h2 className="text-start text-base mb-4 font-bold">
+          Get more from Mozilla:
+        </h2>
       </FtlMsg>
       <ul className="flex flex-wrap text-start text-sm mb-4">
         {newsletters.map((newsletter) => {
@@ -45,7 +47,7 @@ const ChooseNewsletters = ({
                 <InputCheckboxBlue
                   label={newsletter.label}
                   defaultChecked={false}
-                  onChange={handleSyncChange(newsletter.label)}
+                  onChange={handleNewsletterChange(newsletter.slug)}
                 />
               </FtlMsg>
             </li>

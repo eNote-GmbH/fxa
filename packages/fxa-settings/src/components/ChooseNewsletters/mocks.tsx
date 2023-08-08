@@ -7,12 +7,11 @@ import ChooseNewsletters from '.';
 import { newsletters } from './newsletters';
 
 export const Subject = () => {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [, setSelected] = useState<string[]>([]);
 
   return (
     <ChooseNewsletters
       {...{ newsletters }}
-      selectedNewsletters={selected}
       setSelectedNewsletters={setSelected}
     />
   );

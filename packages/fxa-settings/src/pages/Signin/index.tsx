@@ -13,6 +13,7 @@ import TermsPrivacyAgreement from '../../components/TermsPrivacyAgreement';
 import { REACT_ENTRYPOINT } from '../../constants';
 import CardHeader from '../../components/CardHeader';
 import ThirdPartyAuth from '../../components/ThirdPartyAuth';
+import AppLayout from '../../components/AppLayout';
 
 export type SigninProps = {
   email: string;
@@ -78,7 +79,7 @@ const Signin = ({
   // Add in the Banner component in place of the original `success` and `error` display divs
 
   return (
-    <>
+    <AppLayout>
       {isPasswordNeeded ? (
         <CardHeader
           headingText="Enter your password"
@@ -153,7 +154,7 @@ const Signin = ({
           </FtlMsg>
         </div>
       </section>
-    </>
+    </AppLayout>
   );
 };
 

@@ -220,7 +220,9 @@ Router = Router.extend({
     },
     'oauth(/)': createViewHandler(IndexView),
     'oauth/force_auth(/)': createViewHandler(ForceAuthView),
-    'oauth/signin(/)': createViewHandler(SignInPasswordView),
+    'oauth/signin(/)': function () {
+      this.createReactOrBackboneViewHandler('signin', SignInPasswordView);
+    },
     'oauth/signup(/)': createViewHandler(SignUpPasswordView),
     'oauth/success/:client_id(/)': createViewHandler(ReadyView, {
       type: VerificationReasons.SUCCESSFUL_OAUTH,
@@ -404,7 +406,9 @@ Router = Router.extend({
       })}`;
       this.navigateAway(settingsLink);
     },
-    'signin(/)': createViewHandler(SignInPasswordView),
+    'signin(/)': function () {
+      this.createReactOrBackboneViewHandler('signin', SignInPasswordView);
+    },
     'signin_bounced(/)': function () {
       this.createReactOrBackboneViewHandler(
         'signin_bounced',

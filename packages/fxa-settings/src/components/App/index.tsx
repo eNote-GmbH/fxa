@@ -4,7 +4,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, Router } from '@reach/router';
-import { ScrollToTop } from '../Settings/ScrollToTop';
 import { currentAccount, sessionToken } from '../../lib/cache';
 import {
   useAccount,
@@ -17,42 +16,51 @@ import * as Metrics from '../../lib/metrics';
 import sentryMetrics from 'fxa-shared/lib/sentry';
 
 import { PageWithLoggedInStatusState } from '../PageWithLoggedInStatusState';
-import Settings from '../Settings';
-import CannotCreateAccount from '../../pages/CannotCreateAccount';
-import Clear from '../../pages/Clear';
-import CookiesDisabled from '../../pages/CookiesDisabled';
-import ResetPassword from '../../pages/ResetPassword';
-import ConfirmResetPassword from '../../pages/ResetPassword/ConfirmResetPassword';
-
-import ResetPasswordWithRecoveryKeyVerified from '../../pages/ResetPassword/ResetPasswordWithRecoveryKeyVerified';
-import Legal from '../../pages/Legal';
-import LegalTerms from '../../pages/Legal/Terms';
-import LegalPrivacy from '../../pages/Legal/Privacy';
-
-import PrimaryEmailVerified from '../../pages/Signup/PrimaryEmailVerified';
-
-import ResetPasswordConfirmed from '../../pages/ResetPassword/ResetPasswordConfirmed';
-import AccountRecoveryConfirmKey from '../../pages/ResetPassword/AccountRecoveryConfirmKey';
-
-import SigninConfirmed from '../../pages/Signin/SigninConfirmed';
-
-import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
-import ConfirmSignupCode from '../../pages/Signup/ConfirmSignupCode';
-import SigninReported from '../../pages/Signin/SigninReported';
-import SigninBounced from '../../pages/Signin/SigninBounced';
 import LinkValidator from '../LinkValidator';
 import { LinkType } from 'fxa-settings/src/lib/types';
-import Confirm from 'fxa-settings/src/pages/Signup/Confirm';
-import WebChannelExample from '../../pages/WebChannelExample';
 import { CreateCompleteResetPasswordLink } from '../../models/reset-password/verification/factory';
-import ThirdPartyAuthCallback from '../../pages/PostVerify/ThirdPartyAuthCallback';
+import { QueryParams } from '../..';
+
+// Settings app
 import {
   SettingsContext,
   initializeSettingsContext,
 } from '../../models/contexts/SettingsContext';
+import { ScrollToTop } from '../Settings/ScrollToTop';
+import Settings from '../Settings';
+
+// Simple routes pages
+import CannotCreateAccount from '../../pages/CannotCreateAccount';
+import Clear from '../../pages/Clear';
+import CookiesDisabled from '../../pages/CookiesDisabled';
+import Legal from '../../pages/Legal';
+import LegalTerms from '../../pages/Legal/Terms';
+import LegalPrivacy from '../../pages/Legal/Privacy';
+
+// Reset Password pages
+import ResetPassword from '../../pages/ResetPassword';
+import ConfirmResetPassword from '../../pages/ResetPassword/ConfirmResetPassword';
 import CompleteResetPasswordContainer from '../../pages/ResetPassword/CompleteResetPassword/container';
+import AccountRecoveryConfirmKey from '../../pages/ResetPassword/AccountRecoveryConfirmKey';
 import AccountRecoveryResetPasswordContainer from '../../pages/ResetPassword/AccountRecoveryResetPassword/container';
-import { QueryParams } from '../..';
+import ResetPasswordConfirmed from '../../pages/ResetPassword/ResetPasswordConfirmed';
+import ResetPasswordWithRecoveryKeyVerified from '../../pages/ResetPassword/ResetPasswordWithRecoveryKeyVerified';
+
+// Signin pages
+import SigninContainer from '../../pages/Signin/container';
+import SigninConfirmed from '../../pages/Signin/SigninConfirmed';
+import SigninReported from '../../pages/Signin/SigninReported';
+import SigninBounced from '../../pages/Signin/SigninBounced';
+
+// Signup pages
+import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
+import ConfirmSignupCode from '../../pages/Signup/ConfirmSignupCode';
+import Confirm from 'fxa-settings/src/pages/Signup/Confirm';
+import PrimaryEmailVerified from '../../pages/Signup/PrimaryEmailVerified';
+
+// Other pages
+import ThirdPartyAuthCallback from '../../pages/PostVerify/ThirdPartyAuthCallback';
+import WebChannelExample from '../../pages/WebChannelExample';
 
 // TODO: FXA-8098
 // export const INITIAL_METRICS_QUERY = gql`
@@ -159,8 +167,6 @@ const AuthAndAccountSetupRoutes = (_: RouteComponentProps) => {
   const localAccount = currentAccount();
   const integration = useIntegration();
 
-  console.log('integration! in app', integration);
-
   return (
     <Router>
       <WebChannelExample path="/web_channel_example/*" />
@@ -209,6 +215,7 @@ const AuthAndAccountSetupRoutes = (_: RouteComponentProps) => {
         {...{ integration }}
       />
 
+      <SigninContainer path="/signin/*" {...{ integration }} />
       <SigninReported path="/signin_reported/*" />
       <SigninBounced email={localAccount?.email} path="/signin_bounced/*" />
       {/* Pages using the Ready view need to be accessible to logged out viewers,

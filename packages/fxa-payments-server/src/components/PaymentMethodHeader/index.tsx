@@ -34,6 +34,7 @@ const returnPaymentMethodHeader = (type: PaymentMethodHeaderType) => {
 
 export type PaymentMethodHeaderProps = {
   plan: Plan;
+  onEngage: () => void;
   onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
   type?: PaymentMethodHeaderType;
   showTooltip?: boolean;
@@ -41,6 +42,7 @@ export type PaymentMethodHeaderProps = {
 
 export const PaymentMethodHeader = ({
   plan,
+  onEngage,
   onClick,
   type,
   showTooltip = false,
@@ -54,7 +56,7 @@ export const PaymentMethodHeader = ({
           First you’ll need to approve your subscription
         </div>
       </Localized>
-      <Form validator={checkboxValidator}>
+      <Form validator={checkboxValidator} onChange={onEngage}>
         <PaymentConsentCheckbox
           plan={plan}
           onClick={onClick}

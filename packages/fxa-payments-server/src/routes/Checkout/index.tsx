@@ -438,6 +438,7 @@ export const Checkout = ({
 
           <PaymentMethodHeader
             plan={selectedPlan}
+            onEngage={onFormEngaged}
             onClick={() => {
               setCheckboxSet(!checkboxSet);
               setShowTooltip(false);

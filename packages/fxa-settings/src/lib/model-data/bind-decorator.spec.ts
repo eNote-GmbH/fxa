@@ -2,29 +2,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
-  bind,
-  KeyTransforms as T,
-  getBoundKeys,
-  validateData,
-} from './bind-decorator';
-import { ModelValidation as V } from './model-validation';
+import { bind, KeyTransforms as T, getBoundKeys } from './bind-decorator';
 import { GenericData } from './data-stores';
 import { ModelDataProvider } from './model-data-provider';
+import { IsNotEmpty, IsOptional, IsString, validate } from 'class-validator';
 
 /**
  * Example model for testing bind decorators
  */
 class TestModel extends ModelDataProvider {
-  @bind([], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   testField: string | undefined;
 
-  @bind([V.isNonEmptyString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @bind(T.snakeCase)
   testValidatedField: string | undefined;
 }
 
 describe('bind-decorator', function () {
-
   it('creates with empty state', () => {
     const data = new GenericData({});
     const model1 = new TestModel(data);
@@ -104,7 +103,7 @@ describe('bind-decorator', function () {
     const model1 = new TestModel(data);
 
     expect(() => {
-      validateData(model1);
+      validate(model1);
     }).toThrow();
   });
 

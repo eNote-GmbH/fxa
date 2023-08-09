@@ -9,16 +9,21 @@ import {
   RelierAccount,
   RelierClientInfo,
 } from './base-integration';
-import {
-  ModelDataStore,
-  bind,
-  KeyTransforms as T,
-  ModelValidation as V,
-} from '../../lib/model-data';
+import { ModelDataStore, bind, KeyTransforms as T } from '../../lib/model-data';
 import { Constants } from '../../lib/constants';
 import { ERRORS, OAuthError } from '../../lib/oauth';
 import { IntegrationFlags } from '../../lib/integrations';
 import { BaseIntegrationData } from './web-integration';
+import {
+  IsBase64,
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 interface OAuthIntegrationFeatures extends IntegrationFeatures {
   webChannelSupport: boolean;
@@ -45,64 +50,110 @@ export function isOAuthIntegration(integration: {
 
 // TODO: probably move this somewhere else
 export class OAuthIntegrationData extends BaseIntegrationData {
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   clientId: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   imageUri: string | undefined;
 
-  @bind([V.isBoolean])
+  @IsBoolean()
+  @IsOptional()
+  @bind()
   trusted: boolean | undefined;
 
-  @bind([V.isAccessType], T.snakeCase)
+  // TODO: @IsIn([])
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   accessType: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   acrValues: string | undefined;
 
-  @bind([V.isAction])
+  // TODO: @IsIn([])
+  @IsOptional()
+  @IsString()
+  @bind()
   action: string | undefined;
 
-  @bind([V.isCodeChallenge], T.snakeCase)
+  // TODO: @IsIn([])
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   codeChallenge: string | undefined;
 
-  @bind([V.isCodeChallengeMethod])
+  // TODO: @IsIn([])
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   codeChallengeMethod: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsString()
+  @IsOptional()
+  @bind(T.snakeCase)
   keysJwk: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   idTokenHint: string | undefined;
 
-  @bind([V.isGreaterThanZero], T.snakeCase)
+  @IsPositive()
+  @IsOptional()
+  @bind(T.snakeCase)
   maxAge: number | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   permissions: string | undefined;
 
-  @bind([V.isString])
+  @IsString()
+  @IsOptional()
+  @bind()
   prompt: string | undefined;
 
-  @bind([V.isUrl])
+  @IsOptional()
+  @IsUrl()
+  @bind()
   redirectTo: string | undefined;
 
-  @bind([V.isUrl], T.snakeCase)
+  @IsOptional()
+  @IsUrl()
+  @bind(T.snakeCase)
   redirectUrl: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsString()
+  @IsOptional()
+  @bind(T.snakeCase)
   redirectUri: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsBoolean()
+  @IsOptional()
+  @bind(T.snakeCase)
   returnOnError: boolean | undefined;
 
-  @bind([V.isString])
+  // TODO: Should we have a better check?
+  @IsString()
+  @IsOptional()
+  @bind()
   scope: string | undefined;
 
-  @bind([V.isString])
+  // TODO: Maybe this should just be string?
+  @IsOptional()
+  @IsBase64()
+  @bind()
   state: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   loginHint: string | undefined;
 }
 

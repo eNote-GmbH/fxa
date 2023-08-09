@@ -6,13 +6,23 @@ import {
   bind,
   KeyTransforms as T,
   ModelDataProvider,
-  ModelValidation as V,
 } from '../../lib/model-data';
+import { IsIn, IsOptional, IsString } from 'class-validator';
+
+// TODO: Figure out valid values
+export const CHANNEL_IDS = [];
+export const CHANNEL_KEYS = [];
 
 export class ChannelInfo extends ModelDataProvider {
-  @bind([V.isChannelId], T.snakeCase)
+  // TODO: @IsIn(CHANNEL_IDS)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   channelId: string | undefined;
 
-  @bind([V.isChannelKey], T.snakeCase)
+  // TODO: @IsIn(CHANNEL_KEYS)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   channelKey: string | undefined;
 }

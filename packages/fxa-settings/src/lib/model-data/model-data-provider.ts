@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { validateData } from './bind-decorator';
-import { ModelValidationErrors } from './model-validation';
+import { validate, ValidationError } from 'class-validator';
 import { ModelDataStore } from './model-data-store';
 
 export class ModelDataProvider {
@@ -36,7 +35,7 @@ export class ModelDataProvider {
    * @returns
    */
   validate() {
-    return validateData(this);
+    return validate(this);
   }
 
   /**
@@ -48,8 +47,8 @@ export class ModelDataProvider {
       this.validate();
       return true;
     } catch (err) {
-      if (err instanceof ModelValidationErrors) {
-        console.warn(err.errors.map((x) => `${x.key}-${x.value}-${x.message}`));
+      if (err instanceof ValidationError) {
+        console.warn(err.toString());
         return false;
       }
       throw err;
@@ -63,16 +62,16 @@ export class ModelDataProvider {
    */
   tryValidate(): {
     isValid: boolean;
-    error?: ModelValidationErrors;
+    error?: ValidationError;
   } {
-    let error: ModelValidationErrors | undefined;
+    let error: ValidationError | undefined;
     let isValid = true;
     try {
       this.validate();
     } catch (err) {
       console.warn(err);
       isValid = false;
-      if (err instanceof ModelValidationErrors) {
+      if (err instanceof ValidationError) {
         error = err;
       } else {
         throw err;

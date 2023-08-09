@@ -9,14 +9,14 @@ import {
   OAuthIntegrationData,
   OAuthIntegrationOptions,
 } from './oauth-integration';
-import {
-  bind,
-  KeyTransforms as T,
-  ModelValidation as V,
-} from '../../lib/model-data';
+import { bind, KeyTransforms as T } from '../../lib/model-data';
+import { IsOptional, IsString } from 'class-validator';
 
 export class PairingAuthorityIntegrationData extends OAuthIntegrationData {
-  @bind([V.isString], T.snakeCase)
+  // TODO: IsIn([])
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   channelId: string = '';
 }
 

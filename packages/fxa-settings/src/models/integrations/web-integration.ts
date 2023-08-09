@@ -7,58 +7,99 @@ import {
   bind,
   KeyTransforms as T,
   ModelDataProvider,
-  ModelValidation as V,
   ModelDataStore,
 } from '../../lib/model-data';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 // TODO: move this to other file, FXA-8099
 export class BaseIntegrationData extends ModelDataProvider {
-  @bind([V.isString])
+  // TODO Validation - Do we we need custom validation?
+  @IsOptional()
+  @IsString()
+  @bind()
   context: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsEmail()
+  @bind()
   email: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsEmail()
+  @bind()
   emailToHashWith: string | undefined;
 
-  @bind([V.isString])
+  // TODO - Validation - Custom validator?
+  @IsOptional()
+  @IsString()
+  @bind()
   entrypoint: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   entrypointExperiment: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   entrypointVariation: string | undefined;
 
-  @bind([V.isBoolean], T.snakeCase)
+  @IsOptional()
+  @IsBoolean()
+  @bind(T.snakeCase)
   resetPasswordConfirm: boolean | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   setting: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   service: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   style: string | undefined;
 
-  @bind([V.isString])
+  // TODO - Validation - Uid Validation?
+  @IsOptional()
+  @IsString()
+  @bind()
   uid: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   utmCampaign: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   utmContent: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   utmMedium: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   utmSource: string | undefined;
 
-  @bind([V.isString], T.snakeCase)
+  @IsOptional()
+  @IsString()
+  @bind(T.snakeCase)
   utmTerm: string | undefined;
 }
 

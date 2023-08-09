@@ -7,31 +7,44 @@ import {
   IntegrationFeatures,
   IntegrationType,
 } from './base-integration';
-import {
-  bind,
-  ModelValidation as V,
-  ModelDataStore,
-} from '../../lib/model-data';
+import { bind, ModelDataStore } from '../../lib/model-data';
 import { Constants } from '../../lib/constants';
 import { BaseIntegrationData } from './web-integration';
+import { IsISO31661Alpha3, IsOptional, IsString } from 'class-validator';
 
 export class SyncBasicIntegrationData extends BaseIntegrationData {
-  @bind([V.isValidCountry])
+  // TODO - Validation - Check if IsISO31661Alpha3 is the right country code validator
+  @IsOptional()
+  @IsISO31661Alpha3()
+  @bind()
   country: string | undefined;
 
-  @bind([V.isString])
+  // TODO - Validation - Do we want to have a strict check on code chars / length?
+  @IsOptional()
+  @IsString()
+  @bind()
   signinCode: string | undefined;
 
-  @bind([V.isAction])
+  // TODO - Validation - Custom Validator IsAction
+  @IsOptional()
+  @IsString()
+  @bind()
   action: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   syncPreference: string | undefined;
 
-  @bind([V.isString])
+  @IsOptional()
+  @IsString()
+  @bind()
   multiService: boolean | undefined;
 
-  @bind([V.isString])
+  // TODO - Validation - Do we want to have a strict check on code chars / length?
+  @IsOptional()
+  @IsString()
+  @bind()
   tokenCode: string | undefined;
 }
 

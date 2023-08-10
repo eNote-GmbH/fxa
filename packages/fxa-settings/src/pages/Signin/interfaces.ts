@@ -18,6 +18,23 @@ export type SigninSubmitData = {
   password?: string;
 } & SigninParams;
 
+export interface BasicAccountData {
+  account: {
+    avatar: {
+      id: string | null;
+      url: string | null;
+    };
+    primaryEmail: { email: string };
+    passwordCreated: number;
+    metricsEnabled: boolean;
+    linkedAccounts: {
+      providerId: number;
+      authAt: number;
+      enabled: boolean;
+    };
+  };
+}
+
 // TODO Add interface for location state?
 
 // What is in params vs props?
@@ -31,6 +48,10 @@ export interface SigninOAuthIntegration {
 export type SigninIntegration = SigninOAuthIntegration | IntegrationSubsetType;
 
 export interface SigninProps {
+  avatar?: {
+    id: string | null;
+    url: string | null;
+  };
   bannerErrorMessage?: string | ReactElement;
   email?: string;
   isPasswordNeeded?: boolean;

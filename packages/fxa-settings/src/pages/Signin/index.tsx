@@ -20,6 +20,7 @@ import TermsPrivacyAgreement from '../../components/TermsPrivacyAgreement';
 import ThirdPartyAuth from '../../components/ThirdPartyAuth';
 
 const Signin = ({
+  avatar,
   bannerErrorMessage,
   email,
   isPasswordNeeded,
@@ -89,7 +90,10 @@ const Signin = ({
       {/* The avatar size must not increase until the tablet breakpoint due to logging into
        * Pocket with FxA and maybe others later: an Apple-controlled modal displays FxA in a
        * web view and we want the "Sign in" button to be displayed above the fold. See FXA-7425 */}
-      <Avatar className="mt-5 mx-auto h-24 w-24 tablet:h-40 tablet:w-40" />
+      <Avatar
+        className="mt-5 mx-auto h-24 w-24 tablet:h-40 tablet:w-40"
+        {...{ avatar }}
+      />
       <form
         noValidate
         onSubmit={handleSubmit(({ email, password }: SigninSubmitData) =>
@@ -148,6 +152,12 @@ const Signin = ({
 
       <div className="flex justify-between">
         <FtlMsg id="signin-use-a-different-account">
+          {/* COMMENT FROM BACKBONE
+          A user who came from an OAuth relier and was
+          directed directly to /signin will not be able
+          to go back. Send them directly to `/` with the
+          account. The email will be prefilled on that page. */}
+          {/* Why not just send email instead of entire account? */}
           <Link to="/" className="text-sm link-blue">
             Use a different account
           </Link>

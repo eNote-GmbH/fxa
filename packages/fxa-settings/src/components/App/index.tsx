@@ -215,9 +215,9 @@ const AuthAndAccountSetupRoutes = (_: RouteComponentProps) => {
         {...{ integration }}
       />
 
-      <PageWithLoggedInStatusState
-        Page={SigninContainer}
+      <SigninContainer
         path="/signin/*"
+        email={localAccount?.email}
         {...{ integration }}
       />
       <SigninReported path="/signin_reported/*" />

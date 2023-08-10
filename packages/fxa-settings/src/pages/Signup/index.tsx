@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from '@reach/router';
 import { useForm } from 'react-hook-form';
 import {
@@ -35,6 +35,7 @@ import {
 import { sessionToken } from '../../lib/cache';
 import BrandMessaging from '../../components/BrandMessaging';
 import { createPortal } from 'react-dom';
+import GleanMetrics from '../../lib/glean';
 
 export const viewName = 'signup';
 
@@ -60,6 +61,10 @@ const Signup = ({
       setIsAccountSuggestionBannerVisible(isPocketClient(serviceName));
     })();
   });
+
+  useEffect(() => {
+    GleanMetrics.registration.view();
+  }, []);
 
   const canChangeEmail = !isOAuthIntegration(integration);
 

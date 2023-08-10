@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps, Router } from '@reach/router';
 import { ScrollToTop } from '../Settings/ScrollToTop';
 import { currentAccount, sessionToken } from '../../lib/cache';
@@ -34,10 +34,11 @@ import PrimaryEmailVerified from '../../pages/Signup/PrimaryEmailVerified';
 import ResetPasswordConfirmed from '../../pages/ResetPassword/ResetPasswordConfirmed';
 import AccountRecoveryConfirmKey from '../../pages/ResetPassword/AccountRecoveryConfirmKey';
 
-import SigninConfirmed from '../../pages/Signin/SigninConfirmed';
-
-import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
+import Signup from '../../pages/Signup';
 import ConfirmSignupCode from '../../pages/Signup/ConfirmSignupCode';
+import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
+
+import SigninConfirmed from '../../pages/Signin/SigninConfirmed';
 import SigninReported from '../../pages/Signin/SigninReported';
 import SigninBounced from '../../pages/Signin/SigninBounced';
 import LinkValidator from '../LinkValidator';
@@ -54,6 +55,7 @@ import CompleteResetPasswordContainer from '../../pages/ResetPassword/CompleteRe
 import AccountRecoveryResetPasswordContainer from '../../pages/ResetPassword/AccountRecoveryResetPassword/container';
 import { QueryParams } from '../..';
 import SignupContainer from '../../pages/Signup/container';
+import GleanMetrics from '../../lib/glean';
 
 // TODO: FXA-8098
 // export const INITIAL_METRICS_QUERY = gql`
@@ -85,6 +87,7 @@ export const App = ({
   const [isSignedIn, setIsSignedIn] = useState<boolean>();
   const { loading, error } = useInitialSettingsState();
   const account = useAccount();
+  const integration = useIntegration();
   const { metricsEnabled } = account;
 
   // TODO Remove feature flag and experiment logic in FXA-7419
@@ -92,12 +95,32 @@ export const App = ({
     config.showRecoveryKeyV2 && isInRecoveryKeyExperiment === 'true'
   );
 
+  useMemo(() => {
+    GleanMetrics.initialize(
+      {
+        ...config.glean,
+        enabled: metricsEnabled || !isSignedIn,
+        appDisplayVersion: config.version,
+        channel: config.glean.channel,
+      },
+      { flowQueryParams, account, userAgent: navigator.userAgent, integration }
+    );
+  }, [
+    config.glean,
+    config.version,
+    metricsEnabled,
+    isSignedIn,
+    flowQueryParams,
+    account,
+    integration,
+  ]);
+
   useEffect(() => {
     Metrics.init(metricsEnabled || !isSignedIn, flowQueryParams);
     if (metricsEnabled) {
       Metrics.initUserPreferences(account);
     }
-  }, [account, metricsEnabled, isSignedIn, flowQueryParams]);
+  }, [account, metricsEnabled, isSignedIn, flowQueryParams, config]);
 
   useEffect(() => {
     if (!loading && error?.message.includes('Invalid token')) {

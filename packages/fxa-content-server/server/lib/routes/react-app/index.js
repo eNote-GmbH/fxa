@@ -66,6 +66,7 @@ const getReactRouteGroups = (showReactApp, reactRoute) => {
         'confirm',
         'confirm_signup_code',
         'primary_email_verified',
+        'signup',
         'signup_confirmed',
         'signup_verified',
       ]),

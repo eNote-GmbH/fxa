@@ -42,6 +42,14 @@ describe('views/mixins/signin-mixin', function () {
     assert.isArray(SignInMixin.dependsOn);
   });
 
+  beforeEach(() => {
+    sinon.stub(GleanMetrics, 'setEnabled');
+  });
+
+  afterEach(() => {
+    GleanMetrics.setEnabled.restore();
+  });
+
   describe('signIn', function () {
     let account;
     let broker;

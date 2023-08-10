@@ -2,84 +2,70 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useCallback, useState } from 'react';
-import { usePageViewEvent } from '../../lib/metrics';
-import { useFtlMsgResolver } from '../../models';
-import { MozServices } from '../../lib/types';
-import { FtlMsg } from 'fxa-react/lib/utils';
+import React, { useCallback } from 'react';
 import { RouteComponentProps, Link } from '@reach/router';
+import { useForm } from 'react-hook-form';
+import { FtlMsg } from 'fxa-react/lib/utils';
+import { REACT_ENTRYPOINT } from '../../constants';
+import { usePageViewEvent } from '../../lib/metrics';
+import { MozServices } from '../../lib/types';
+import { viewName } from './container';
+import { SigninFormData, SigninProps, SigninSubmitData } from './interfaces';
+import AppLayout from '../../components/AppLayout';
+import Avatar from '../../components/Settings/Avatar';
+import Banner, { BannerType } from '../../components/Banner';
+import CardHeader from '../../components/CardHeader';
 import InputPassword from '../../components/InputPassword';
 import TermsPrivacyAgreement from '../../components/TermsPrivacyAgreement';
-import { REACT_ENTRYPOINT } from '../../constants';
-import CardHeader from '../../components/CardHeader';
 import ThirdPartyAuth from '../../components/ThirdPartyAuth';
-import AppLayout from '../../components/AppLayout';
-
-export type SigninProps = {
-  email: string;
-  isPasswordNeeded: boolean;
-  serviceName?: MozServices;
-};
-
-export const viewName = 'signin';
 
 const Signin = ({
+  bannerErrorMessage,
   email,
   isPasswordNeeded,
+  thirdPartyAuthEnabled = false,
   serviceName,
+  integration,
+  finishOAuthFlowHandler,
 }: SigninProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
   const isPocketClient = serviceName === MozServices.Pocket;
-  const [error, setError] = useState('');
-  const [password, setPassword] = useState('');
-  const ftlMsgResolver = useFtlMsgResolver();
-  const localizedPasswordFormLabel = ftlMsgResolver.getMsg(
-    'password',
-    'Password'
-  );
 
+  const { handleSubmit, register, formState } = useForm<SigninFormData>({
+    mode: 'onTouched',
+    criteriaMode: 'all',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  // TODO These methods should be passed in from the container
   const signInUsingLoggedInAccount = useCallback(() => {
-    // TODO: add in functionality to sign in using the logged in account
-    // return an error to be displayed if anythign goes wrong.
+    // TODO handle sign in without password
   }, []);
 
   const signInWithPassword = useCallback((email: string, password: string) => {
-    // TODO: add in the functionality to actually sign a user in using their password
-    // return an error to be displayed if anything goes wrong.
+    // TODO: handle signin with password
   }, []);
 
-  // TODO: This page is also supposed to render the user card, complete with avatar.
-
-  // TODO: The user-card mixin does some fancy footwork listening to see if you access token changes
-  // because it's possible for the access token to be invalidated when we display the avatar image.
-  // if we get the notification of a change, we re-render the card.
-
-  const onSubmit = useCallback(async () => {
-    try {
-      isPasswordNeeded
-        ? signInWithPassword(email, password)
-        : signInUsingLoggedInAccount();
-      // TODO: add message in Banner re: success, then navigate to where appropriate
-    } catch (e) {
-      // TODO: metrics event for error
-      // TODO: Add in localized Banner message for error
-      setError(e);
-    }
-  }, [
-    email,
-    password,
-    signInUsingLoggedInAccount,
-    signInWithPassword,
-    isPasswordNeeded,
-    setError,
-  ]);
-
-  // TODO:
-  // Add in the Banner component in place of the original `success` and `error` display divs
+  const onSubmit = useCallback(
+    async ({ email, password }: SigninSubmitData) => {
+      try {
+        password && isPasswordNeeded
+          ? signInWithPassword(email, password)
+          : signInUsingLoggedInAccount();
+      } catch (e) {
+        // handle error
+      }
+    },
+    [signInUsingLoggedInAccount, signInWithPassword, isPasswordNeeded]
+  );
 
   return (
     <AppLayout>
+      {/* TODO: Can we simplify these headers?? */}
       {isPasswordNeeded ? (
         <CardHeader
           headingText="Enter your password"
@@ -91,69 +77,87 @@ const Signin = ({
           headingTextFtlId="signin-header"
           subheadingWithDefaultServiceFtlId="signin-subheader-without-logo-default"
           subheadingWithCustomServiceFtlId="signin-subheader-without-logo-with-servicename"
+          // TODO fix header with logo - does not load image when localized
           subheadingWithLogoFtlId="signin-subheader-with-logo"
           {...{ serviceName }}
         />
       )}
-      <section>
-        {/* Alerts and success messages originally went here */}
-        <div className="mt-9">
-          {/* When we get to the functionality stage, we can probably replace this with the Avatar component in Settings*/}
-          {/* The avatar size must not increase until the tablet breakpoint due to logging into
-           * Pocket with FxA and maybe others later: an Apple-controlled modal displays FxA in a
-           * web view and we want the "Sign in" button to be displayed above the fold. See FXA-7425 */}
-          <div className="mx-auto h-24 w-24 tablet:h-40 tablet:w-40"></div>
-          <div className="my-5 text-base break-all">{email}</div>
-        </div>
-        <form noValidate {...{ onSubmit }}>
-          <input type="email" className="email hidden" value={email} disabled />
+      {bannerErrorMessage && (
+        <Banner type={BannerType.error}>{bannerErrorMessage}</Banner>
+      )}
+      {/* TODO retrieve profile data for avatar without breaking if not logged in */}
+      {/* The avatar size must not increase until the tablet breakpoint due to logging into
+       * Pocket with FxA and maybe others later: an Apple-controlled modal displays FxA in a
+       * web view and we want the "Sign in" button to be displayed above the fold. See FXA-7425 */}
+      <Avatar className="mt-5 mx-auto h-24 w-24 tablet:h-40 tablet:w-40" />
+      <form
+        noValidate
+        onSubmit={handleSubmit(({ email, password }: SigninSubmitData) =>
+          onSubmit({
+            email,
+            password,
+          })
+        )}
+      >
+        <input
+          name="email"
+          type="email"
+          className="my-5 text-base break-all w-full text-center"
+          value={email}
+          disabled
+        />
 
-          {isPasswordNeeded && (
+        {isPasswordNeeded && (
+          <FtlMsg id="signin-password-input" attrs={{ label: true }}>
             <InputPassword
+              name="password"
               anchorPosition="start"
               className="mb-5 text-start"
-              label={localizedPasswordFormLabel}
-              hasErrors={error.length > 0}
-              errorText={error}
+              label="Password"
               tooltipPosition="bottom"
               required
               autoFocus
-              onChange={(e) => setPassword(e.currentTarget.value)}
+              inputRef={register}
             />
-          )}
-          {/* This non-fulfilled input tricks the browser, when trying to
+          </FtlMsg>
+        )}
+        {/* This non-fulfilled input tricks the browser, when trying to
               sign in with the wrong password, into not showing the doorhanger.
            */}
-          <input className="hidden" required />
+        <input className="hidden" required />
 
-          <div className="flex">
-            <FtlMsg id="signin-button">
-              <button className="cta-primary cta-xl" type="submit">
-                Sign in
-              </button>
-            </FtlMsg>
-          </div>
-        </form>
-
-        {/* TODO: We will need to pull the enabled flag from feature flags or experiment data
-         */}
-        <ThirdPartyAuth {...{ enabled: false }} />
-
-        <TermsPrivacyAgreement {...{ isPocketClient }} />
-
-        <div className="flex justify-between">
-          <FtlMsg id="signin-use-a-different-account">
-            <Link to="/" className="text-sm link-blue">
-              Use a different account
-            </Link>
-          </FtlMsg>
-          <FtlMsg id="signin-forgot-password">
-            <Link to="/reset_password" className="text-sm link-blue">
-              Forgot password?
-            </Link>
+        <div className="flex">
+          <FtlMsg id="signin-button">
+            <button
+              className="cta-primary cta-xl"
+              type="submit"
+              disabled={!formState.errors}
+            >
+              Sign in
+            </button>
           </FtlMsg>
         </div>
-      </section>
+      </form>
+
+      {/* TODO: Handle logic for showing/enabling third party auth form
+      We will need to pull the enabled flag from feature flags or experiment data
+       */}
+      <ThirdPartyAuth {...{ enabled: thirdPartyAuthEnabled }} />
+
+      <TermsPrivacyAgreement {...{ isPocketClient }} />
+
+      <div className="flex justify-between">
+        <FtlMsg id="signin-use-a-different-account">
+          <Link to="/" className="text-sm link-blue">
+            Use a different account
+          </Link>
+        </FtlMsg>
+        <FtlMsg id="signin-forgot-password">
+          <Link to="/reset_password" className="text-sm link-blue">
+            Forgot password?
+          </Link>
+        </FtlMsg>
+      </div>
     </AppLayout>
   );
 };

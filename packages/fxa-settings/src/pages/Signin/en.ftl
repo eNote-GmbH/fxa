@@ -11,6 +11,8 @@ signin-subheader-with-logo = Continue to <span>{ $serviceLogo }</span>
 # For languages structured like English, the phrase can read "to continue to { $serviceName }"
 signin-subheader-without-logo-with-servicename = Continue to { $serviceName }
 signin-subheader-without-logo-default = Continue to account settings
+signin-password-input =
+ .label = Password
 signin-button = Sign in
 signin-header = Sign in
 signin-use-a-different-account-link = Use a different account

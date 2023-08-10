@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { useFocusOnTriggeringElementOnClose } from '../../../lib/hooks';
 import { Link, RouteComponentProps, useLocation } from '@reach/router';
 import { useLocalization } from '@fluent/react';
+import { useAccount } from '../../../models';
 
 type ModalButtonProps = {
   ctaText: string;
@@ -146,7 +147,10 @@ export const UnitRow = ({
       </div>
       <div className="unit-row-content">
         {avatar ? (
-          <Avatar className="mx-auto mobileLandscape:mx-0 w-32 mobileLandscape:w-16" />
+          <Avatar
+            className="mx-auto mobileLandscape:mx-0 w-32 mobileLandscape:w-16"
+            {...{ avatar }}
+          />
         ) : (
           <p
             className={classNames('font-bold', headerValueClassName)}

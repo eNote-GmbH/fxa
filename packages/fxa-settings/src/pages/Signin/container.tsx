@@ -7,6 +7,9 @@ import { Integration, useAuthClient } from '../../models';
 import { useFinishOAuthFlowHandler } from '../../lib/oauth/hooks';
 import Signin from '.';
 import { MozServices } from '../../lib/types';
+import { ReactElement, useState } from 'react';
+
+export const viewName = 'signin';
 
 const SigninContainer = ({
   integration,
@@ -23,12 +26,17 @@ const SigninContainer = ({
   const email = 'temp@email.com';
   const isPasswordNeeded = true;
   const serviceName = MozServices.Default;
+  const [bannerErrorMessage, setBannerErrorMessage] = useState<
+    string | ReactElement
+  >('');
 
   // TODO: Handle oAuthDataError in FXA-8106
+  oAuthDataError && console.log(oAuthDataError);
 
   return (
     <Signin
       {...{
+        bannerErrorMessage,
         email,
         isPasswordNeeded,
         serviceName,

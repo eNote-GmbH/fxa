@@ -215,7 +215,11 @@ const AuthAndAccountSetupRoutes = (_: RouteComponentProps) => {
         {...{ integration }}
       />
 
-      <SigninContainer path="/signin/*" {...{ integration }} />
+      <PageWithLoggedInStatusState
+        Page={SigninContainer}
+        path="/signin/*"
+        {...{ integration }}
+      />
       <SigninReported path="/signin_reported/*" />
       <SigninBounced email={localAccount?.email} path="/signin_bounced/*" />
       {/* Pages using the Ready view need to be accessible to logged out viewers,

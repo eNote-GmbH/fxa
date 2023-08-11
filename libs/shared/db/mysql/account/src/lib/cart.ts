@@ -58,27 +58,13 @@ export class Cart extends BaseModel {
 
   async delete() {
     return Cart.query()
+      .delete()
       .where('id', uuidTransformer.to(this.id))
       .throwIfNotFound();
   }
 
   setCart(cartItems: Partial<Cart>) {
     this.$set(cartItems);
-  }
-
-  static async patchById(id: string, items: Partial<Cart>) {
-    const cart = await this.findById(id);
-    // Patch and fetch instance
-    // Use update if you update the whole row with all its columns. Otherwise, using the patch method is recommended.
-    // https://vincit.github.io/objection.js/api/query-builder/mutate-methods.html#update
-    await cart.$query().patchAndFetch({
-      ...items,
-      updatedAt: Date.now(),
-    });
-
-    await Cart.query().patch(cart).where('id', id);
-
-    return cart;
   }
 
   async update() {

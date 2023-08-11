@@ -4,10 +4,8 @@
 import { NotFoundError } from 'objection';
 import { Cart, CartState } from '@fxa/shared/db/mysql/account';
 import { Logger } from '@fxa/shared/log';
-import { InvoiceFactory } from './factories';
-import { Cart as CartType, SetupCart, UpdateCart } from './types';
-
-const DEFAULT_INTERVAL = 'monthly';
+import { FinishCart, SetupCart, UpdateCart } from './types';
+import { CartManagerError } from './error';
 
 const VALID_STATE_TRANSITIONS = {
   [CartState.START]: [CartState.PROCESSING, CartState.FAIL],
@@ -29,7 +27,12 @@ const isValidAction = (
 
 // TODO - Adopt error library developed as part of FXA-7656
 export enum ERRORS {
+  CART_GENERAL = 'General error during request to the database',
   CART_NOT_FOUND = 'Cart not found for id',
+  CART_NOT_DELETE = 'Could not delete Cart',
+  INVALID_STATE_TRANSITION = 'Invalid state transition',
+  INVALID_STATE_ACTION = 'Invalid state for executed action',
+  MISSING_REQUIRED_FIELD = 'Required field was not provided',
 }
 
 export class CartManager {
@@ -38,59 +41,15 @@ export class CartManager {
     this.log = log;
   }
 
-  public async setupCart(input: SetupCart): Promise<CartType> {
-    const cart = await Cart.create({
-      ...input,
-      state: CartState.START,
-      interval: input.interval || DEFAULT_INTERVAL,
-      amount: 0, // Hardcoded to 0 for now. TODO - Actual amount to be added in FXA-7521
-    });
-
-    return {
-      ...cart,
-      nextInvoice: InvoiceFactory(), // Temporary
-    };
-  }
-
-  // public async restartCart(cartId: string): Promise<CartType> {
-  //   try {
-  //     const cart = await Cart.patchById(cartId, { state: CartState.START });
-
-  //     return {
-  //       ...cart,
-  //       nextInvoice: InvoiceFactory(), // Temporary
-  //     };
-  //   } catch (error) {
-  //     throw new NotFoundError({ message: ERRORS.CART_NOT_FOUND });
-  //   }
-  // }
-
-  public async checkoutCart(cartId: string): Promise<CartType> {
+  private handleCartRequests(request: Promise<any>, cartId: string) {
     try {
-      const cart = await Cart.patchById(cartId, {
-        state: CartState.PROCESSING,
-      });
-
-      return {
-        ...cart,
-        nextInvoice: InvoiceFactory(), // Temporary
-      };
+      return request;
     } catch (error) {
-      throw new NotFoundError({ message: ERRORS.CART_NOT_FOUND });
-    }
-  }
-
-  public async updateCart(input: UpdateCart): Promise<CartType> {
-    const { id: cartId, ...rest } = input;
-    try {
-      const cart = await Cart.patchById(cartId, { ...rest });
-
-      return {
-        ...cart,
-        nextInvoice: InvoiceFactory(), // Temporary
-      };
-    } catch (error) {
-      throw new NotFoundError({ message: ERRORS.CART_NOT_FOUND });
+      if (error instanceof NotFoundError) {
+        throw new CartManagerError(ERRORS.CART_NOT_FOUND, { cartId }, error);
+      } else {
+        throw new CartManagerError(ERRORS.CART_GENERAL, {}, error);
+      }
     }
   }
 
@@ -98,7 +57,10 @@ export class CartManager {
     const isValid = !!VALID_STATE_TRANSITIONS[current].includes(future);
 
     if (!isValid) {
-      throw new Error(`Invalid state transition from ${current}, to ${future}`);
+      throw new CartManagerError(ERRORS.INVALID_STATE_TRANSITION, {
+        currentState: current,
+        futureState: future,
+      });
     } else {
       return true;
     }
@@ -109,49 +71,49 @@ export class CartManager {
       isValidAction(action) && VALID_STATE_BY_ACTION[action].includes(state);
 
     if (!isValid) {
-      throw new Error(`Invalid state, ${state}, for action, ${action}`);
+      throw new CartManagerError(ERRORS.INVALID_STATE_ACTION, {
+        currentState: state,
+        action,
+      });
     } else {
       return true;
     }
   }
 
-  public async fetchCartById(id: string) {
-    return Cart.findById(id);
+  public async createCart(input: SetupCart) {
+    return Cart.create({
+      ...input,
+      state: CartState.START,
+    });
   }
 
-  public async updateFreshCart(id: string, updateCart: UpdateCart) {
-    const cart = await this.fetchCartById(id);
+  public async fetchCartById(id: string) {
+    return this.handleCartRequests(Cart.findById(id), id);
+  }
 
+  public async updateFreshCart(cart: Cart, updateCart: UpdateCart) {
     this.checkStateByAction(cart.state, 'updateFreshCart');
 
-    cart.$set({
+    cart.setCart({
       ...updateCart,
     });
 
-    // return cart.update();
+    return this.handleCartRequests(cart.update(), cart.id);
   }
 
-  public async finishCart(
-    cart: Cart,
-    uid?: string,
-    amount?: number,
-    stripeCustomerId?: string,
-    error?: string
-  ) {
-    const futureState = error ? CartState.FAIL : CartState.SUCCESS;
+  public async finishCart(cart: Cart, items: FinishCart) {
+    const { uid, amount, stripeCustomerId, errorReasonId } = items;
+    const futureState = errorReasonId ? CartState.FAIL : CartState.SUCCESS;
 
     this.checkStateByAction(cart.state, 'finishCart');
     this.checkStateTransition(cart.state, futureState);
 
     if (futureState === CartState.SUCCESS) {
-      if (!uid) {
-        throw new Error('Uid is required');
-      }
-      if (!amount) {
-        throw new Error('Amount is required');
-      }
-      if (!stripeCustomerId) {
-        throw new Error('Stripe Customer ID is required');
+      if (!uid || !amount || !stripeCustomerId) {
+        throw new CartManagerError(ERRORS.MISSING_REQUIRED_FIELD, {
+          cartId: cart.id,
+          finishCart: items,
+        });
       }
     }
 
@@ -159,23 +121,30 @@ export class CartManager {
       uid: uid || cart.uid,
       amount: amount || cart.amount,
       stripeCustomerId: stripeCustomerId || cart.stripeCustomerId,
-      errorReasonId: error,
+      errorReasonId: errorReasonId || cart.errorReasonId,
     });
 
-    // Update cart with state and input params
-    // return cart.updated();
+    return this.handleCartRequests(cart.update(), cart.id);
   }
 
-  public async deleteCart(id: string) {
-    const cart = await this.fetchCartById(id);
-
+  public async deleteCart(cart: Cart) {
     this.checkStateByAction(cart.state, 'deleteCart');
 
-    return cart.delete();
+    const result = await this.handleCartRequests(cart.delete(), cart.id);
+
+    if (!result) {
+      throw new CartManagerError(ERRORS.CART_NOT_DELETE, { cartId: cart.id });
+    } else {
+      return result;
+    }
   }
 
-  public async restartCart(id: string) {
-    const cart = await this.fetchCartById(id);
+  public async restartCart(cart: Cart) {
     this.checkStateByAction(cart.state, 'restartCart');
+
+    return Cart.create({
+      ...cart,
+      state: CartState.START,
+    });
   }
 }

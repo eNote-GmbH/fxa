@@ -4,6 +4,7 @@
 import {
   Cart as CartDB,
   CartFields,
+  CartState,
 } from '../../../../shared/db/mysql/account/src';
 
 export interface TaxAmount {
@@ -24,6 +25,7 @@ export type Cart = CartFields & {
 export type SetupCart = Pick<
   CartDB,
   | 'uid'
+  | 'interval'
   | 'errorReasonId'
   | 'offeringConfigId'
   | 'experiment'
@@ -31,9 +33,22 @@ export type SetupCart = Pick<
   | 'couponCode'
   | 'stripeCustomerId'
   | 'email'
-> & { interval?: string };
+  | 'amount'
+>;
 
 export type UpdateCart = Pick<
   CartDB,
   'id' | 'taxAddress' | 'couponCode' | 'email'
 >;
+
+export type FinishCart = Pick<CartDB, 'errorReasonId'> &
+  Partial<Pick<CartDB, 'uid' | 'amount' | 'stripeCustomerId'>>;
+
+export interface CartManagerErrorData {
+  cartId?: string;
+  currentState?: CartState;
+  futureState?: CartState;
+  action?: string;
+  updateCart?: UpdateCart;
+  finishCart?: FinishCart;
+}

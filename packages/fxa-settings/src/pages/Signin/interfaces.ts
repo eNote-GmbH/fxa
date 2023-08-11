@@ -18,20 +18,18 @@ export type SigninSubmitData = {
   password?: string;
 } & SigninParams;
 
-export interface BasicAccountData {
-  account: {
-    avatar: {
-      id: string | null;
-      url: string | null;
-    };
-    primaryEmail: { email: string };
-    passwordCreated: number;
-    metricsEnabled: boolean;
-    linkedAccounts: {
-      providerId: number;
-      authAt: number;
-      enabled: boolean;
-    };
+export interface LoggedInAccountData {
+  avatar: {
+    id: string | null;
+    url: string | null;
+  };
+  primaryEmail: { email: string };
+  passwordCreated: number;
+  metricsEnabled: boolean;
+  linkedAccounts: {
+    providerId: number;
+    authAt: number;
+    enabled: boolean;
   };
 }
 

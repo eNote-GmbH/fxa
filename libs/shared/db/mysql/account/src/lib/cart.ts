@@ -56,7 +56,16 @@ export class Cart extends BaseModel {
       .throwIfNotFound();
   }
 
-  // TODO - Remove in FXA-8128 in favor of using update
+  async delete() {
+    return Cart.query()
+      .where('id', uuidTransformer.to(this.id))
+      .throwIfNotFound();
+  }
+
+  setCart(cartItems: Partial<Cart>) {
+    this.$set(cartItems);
+  }
+
   static async patchById(id: string, items: Partial<Cart>) {
     const cart = await this.findById(id);
     // Patch and fetch instance

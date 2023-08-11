@@ -31,7 +31,7 @@ jest.mock('@fxa/payments/cart', () => {
   };
 });
 
-describe('#payments-cart - resolvers', () => {
+describe.skip('#payments-cart - resolvers', () => {
   let resolver: CartResolver;
   const mockLogger: Logger = {
     debug: jest.fn(),

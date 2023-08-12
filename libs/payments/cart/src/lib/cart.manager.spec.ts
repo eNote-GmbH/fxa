@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Cart, CartFactory } from '../../../../shared/db/mysql/account/src';
 import { Logger } from '../../../../shared/log/src';
 import { SetupCartFactory, UpdateCartFactory } from './factories';
-import { CartManager, ERRORS } from './manager';
+import { CartManager, ERRORS } from './cart.manager';
 import { testCartDatabaseSetup } from './tests';
 import { CartState } from '../../../../shared/db/mysql/account/src';
 import { uuidTransformer } from '../../../../shared/db/mysql/core/src';

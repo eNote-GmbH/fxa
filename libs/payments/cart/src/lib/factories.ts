@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { faker } from '@faker-js/faker';
-import { Invoice, SetupCart, TaxAmount, UpdateCart } from './types';
+import { Invoice, SetupCart, TaxAmount, UpdateCart } from './cart.types';
 
 const OFFERING_CONFIG_IDS = [
   'vpn',

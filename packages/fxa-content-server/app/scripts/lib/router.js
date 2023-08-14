@@ -221,7 +221,10 @@ Router = Router.extend({
     'oauth(/)': createViewHandler(IndexView),
     'oauth/force_auth(/)': createViewHandler(ForceAuthView),
     'oauth/signin(/)': createViewHandler(SignInPasswordView),
-    'oauth/signup(/)': createViewHandler(SignUpPasswordView),
+    'oauth/signup(/)': this.createReactOrBackboneViewHandler(
+      'oauth/signup',
+      SignUpPasswordView
+    ),
     'oauth/success/:client_id(/)': createViewHandler(ReadyView, {
       type: VerificationReasons.SUCCESSFUL_OAUTH,
     }),
@@ -446,7 +449,10 @@ Router = Router.extend({
         }
       );
     },
-    'signup(/)': createViewHandler(SignUpPasswordView),
+    'signup(/)': this.createReactOrBackboneViewHandler(
+      'oauth/signup',
+      SignUpPasswordView
+    ),
     'signup_confirmed(/)': function () {
       this.createReactOrBackboneViewHandler(
         'signup_confirmed',

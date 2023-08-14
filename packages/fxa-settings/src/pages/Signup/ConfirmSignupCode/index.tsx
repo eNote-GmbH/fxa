@@ -14,7 +14,11 @@ import {
   composeAuthUiErrorTranslationId,
 } from '../../../lib/auth-errors/auth-errors';
 import { logViewEvent, usePageViewEvent } from '../../../lib/metrics';
-import { FtlMsg, hardNavigateToContentServer } from 'fxa-react/lib/utils';
+import {
+  FtlMsg,
+  hardNavigate,
+  hardNavigateToContentServer,
+} from 'fxa-react/lib/utils';
 import {
   useAccount,
   useAlertBar,
@@ -35,12 +39,23 @@ import { MailImage } from '../../../components/images';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 import { Newsletter } from '../../../components/ChooseNewsletters/newsletters';
 import { ResendStatus } from 'fxa-settings/src/lib/types';
+import { ConfirmSignupCodeProps } from './interfaces';
+import { IntegrationType, isOAuthIntegration } from '../../../models';
+import { notifyFirefoxOfLogin } from '../../../lib/channels/helpers';
+import {
+  clearOAuthData,
+  clearOriginalTab,
+  isOriginalTab,
+} from '../../../lib/storage-utils';
 
 export const viewName = 'confirm-signup-code';
 
 type LocationState = { email: string; newsletters?: Newsletter[] };
 
-const ConfirmSignupCode = (_: RouteComponentProps) => {
+const ConfirmSignupCode = ({
+  integration,
+  finishOAuthFlowHandler,
+}: ConfirmSignupCodeProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
   const ftlMsgResolver = useFtlMsgResolver();
@@ -119,15 +134,75 @@ const ConfirmSignupCode = (_: RouteComponentProps) => {
     }
   }
 
-  function alertSuccessAndGoForward() {
-    alertBar.success(
-      ftlMsgResolver.getMsg(
-        'confirm-signup-code-success-alert',
-        'Account confirmed successfully'
-      )
-    );
-    // TODO redirect elsewhere if relying party
-    navigate('/settings', { replace: true });
+  async function alertSuccessAndGoForward() {
+    switch (integration.type) {
+      case IntegrationType.SyncBasic:
+        // TODO: ConnectAnotherDeviceBehavior
+        break;
+      case IntegrationType.SyncDesktop:
+        // TODO notifyRelierOfLogin
+        // The relier is notified of login here because `beforeSignUpConfirmationPoll`
+        // is never called for users who verify at CWTS. Without the login notice,
+        // the browser will never know the user signed up.
+        break;
+      case IntegrationType.OAuth:
+        // TODO just use type guard instead of switch, FXA-8111
+        // TODO build redirect for ConfirmSignupCode
+        // if (sessionIsVerified && isOAuthIntegration(integration)) {
+        //   const { redirect } = await finishOAuthFlowHandler(
+        //     integration.data.uid || account.uid,
+        //     accountResetData.sessionToken,
+        //     accountResetData.keyFetchToken,
+        //     accountResetData.unwrapBKey
+        //   );
+
+        // Clear session / local storage states
+        //   clearOAuthData();
+        // }
+
+        // Check to see if the relier wants TOTP. Newly created accounts wouldn't have this
+        // so lets redirect them to signin and show a message on how it can be setup.
+        // This is temporary until we have a better landing page for this error.
+        if (
+          isOAuthIntegration(integration) &&
+          integration.wantsTwoStepAuthentication()
+        ) {
+          // TODO verify which message should be displayed, and how to ensure user is redirected to RP after setting up TOTP
+          navigate('/signin');
+        }
+
+        if (isOAuthIntegration(integration)) {
+          const { redirect } = await finishOAuthFlowHandler(
+            integration.data.uid,
+            sessionToken()
+          );
+        }
+
+        // return finishOAuthSignUpFlow(account);
+
+        /**
+         * Chrome for Android will not allow the page to redirect
+         * unless its the result of a user action such as a click.
+         *
+         * Instead of redirecting automatically after confirmation
+         * poll, force the user to the /sign(in|up)_complete page
+         * where they can click a "continue" button.
+         */
+        //     return new NavigateBehavior('signup_confirmed', {account, continueBrokerMethod: 'finishOAuthSignUpFlow', });
+        break;
+      case IntegrationType.Web:
+        alertBar.success(
+          ftlMsgResolver.getMsg(
+            'confirm-signup-code-success-alert',
+            'Account confirmed successfully'
+          )
+        );
+        navigate('/settings', { replace: true });
+        break;
+      default:
+        navigate('signup_confirmed');
+      // TODO: run unpersistVerificationData when reliers are combined
+    }
   }
 
   async function verifySession(code: string) {

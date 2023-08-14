@@ -73,14 +73,9 @@ export class Cart extends BaseModel {
       updatedAt: Date.now(),
       version: currentVersion + 1,
     });
-    const updatedRows = await Cart.query()
+    return Cart.query()
       .update(this)
       .where('id', uuidTransformer.to(this.id))
       .where('version', currentVersion);
-    if (!updatedRows) {
-      throw new Error('No rows were updated.');
-    }
-
-    return this;
   }
 }

@@ -1,11 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import {
-  Cart as CartDB,
-  CartFields,
-  CartState,
-} from '../../../../shared/db/mysql/account/src';
+import { Cart as CartDB, CartFields } from '@fxa/shared/db/mysql/account';
 
 export interface TaxAmount {
   title: string;
@@ -41,14 +37,8 @@ export type UpdateCart = Pick<
   'id' | 'taxAddress' | 'couponCode' | 'email'
 >;
 
-export type FinishCart = Pick<CartDB, 'errorReasonId'> &
-  Partial<Pick<CartDB, 'uid' | 'amount' | 'stripeCustomerId'>>;
+export type FinishCart = Pick<CartDB, 'uid' | 'amount' | 'stripeCustomerId'>;
 
-export interface CartManagerErrorData {
-  cartId?: string;
-  currentState?: CartState;
-  futureState?: CartState;
-  action?: string;
-  updateCart?: UpdateCart;
-  finishCart?: FinishCart;
-}
+export type FinishErrorCart = { errorReasonId: string } & Partial<
+  Pick<CartDB, 'uid' | 'amount' | 'stripeCustomerId'>
+>;

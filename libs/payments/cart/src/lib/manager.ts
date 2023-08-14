@@ -5,7 +5,16 @@ import { NotFoundError } from 'objection';
 import { Cart, CartState } from '@fxa/shared/db/mysql/account';
 import { Logger } from '@fxa/shared/log';
 import { FinishCart, SetupCart, UpdateCart } from './types';
-import { CartManagerError } from './error';
+import {
+  CartError,
+  CartInvalidStateForActionError,
+  CartInvalidStateTransitionError,
+  CartNotCreatedError,
+  CartNotDeletedError,
+  CartNotFoundError,
+  CartNotRestartedError,
+  CartNotUpdatedError,
+} from './error';
 
 const VALID_STATE_TRANSITIONS = {
   [CartState.START]: [CartState.PROCESSING, CartState.FAIL],
@@ -17,6 +26,7 @@ const VALID_STATE_TRANSITIONS = {
 const VALID_STATE_BY_ACTION = {
   updateFreshCart: [CartState.START],
   finishCart: [CartState.PROCESSING],
+  finishErrorCart: [CartState.START, CartState.PROCESSING],
   deleteCart: [CartState.START, CartState.PROCESSING],
   restartCart: [CartState.PROCESSING, CartState.FAIL],
 };
@@ -25,31 +35,18 @@ const isValidAction = (
   key: string
 ): key is keyof typeof VALID_STATE_BY_ACTION => key in VALID_STATE_BY_ACTION;
 
-// TODO - Adopt error library developed as part of FXA-7656
-export enum ERRORS {
-  CART_GENERAL = 'General error during request to the database',
-  CART_NOT_FOUND = 'Cart not found for id',
-  CART_NOT_DELETE = 'Could not delete Cart',
-  INVALID_STATE_TRANSITION = 'Invalid state transition',
-  INVALID_STATE_ACTION = 'Invalid state for executed action',
-  MISSING_REQUIRED_FIELD = 'Required field was not provided',
-}
-
 export class CartManager {
   private log: Logger;
   constructor(log: Logger) {
     this.log = log;
   }
 
-  private handleCartRequests(request: Promise<any>, cartId: string) {
-    try {
-      return request;
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw new CartManagerError(ERRORS.CART_NOT_FOUND, { cartId }, error);
-      } else {
-        throw new CartManagerError(ERRORS.CART_GENERAL, {}, error);
-      }
+  private async handleUpdates(cart: Cart) {
+    const updatedRows = await cart.update();
+    if (!updatedRows) {
+      throw new CartNotUpdatedError(cart.id);
+    } else {
+      return cart;
     }
   }
 
@@ -57,94 +54,122 @@ export class CartManager {
     const isValid = !!VALID_STATE_TRANSITIONS[current].includes(future);
 
     if (!isValid) {
-      throw new CartManagerError(ERRORS.INVALID_STATE_TRANSITION, {
-        currentState: current,
-        futureState: future,
-      });
+      throw new CartInvalidStateTransitionError(current, future);
     } else {
       return true;
     }
   }
 
-  private checkStateByAction(state: CartState, action: string) {
+  private checkValidStateForAction(cart: Cart, action: string) {
     const isValid =
-      isValidAction(action) && VALID_STATE_BY_ACTION[action].includes(state);
+      isValidAction(action) &&
+      VALID_STATE_BY_ACTION[action].includes(cart.state);
 
     if (!isValid) {
-      throw new CartManagerError(ERRORS.INVALID_STATE_ACTION, {
-        currentState: state,
-        action,
-      });
+      throw new CartInvalidStateForActionError(cart.id, cart.state, action);
     } else {
       return true;
     }
   }
 
   public async createCart(input: SetupCart) {
-    return Cart.create({
-      ...input,
-      state: CartState.START,
-    });
+    try {
+      return await Cart.create({
+        ...input,
+        state: CartState.START,
+      });
+    } catch (error) {
+      throw new CartNotCreatedError(input, error);
+    }
   }
 
   public async fetchCartById(id: string) {
-    return this.handleCartRequests(Cart.findById(id), id);
+    try {
+      return await Cart.findById(id);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new CartNotFoundError(id);
+      } else {
+        throw new CartError('General error', error);
+      }
+    }
   }
 
-  public async updateFreshCart(cart: Cart, updateCart: UpdateCart) {
-    this.checkStateByAction(cart.state, 'updateFreshCart');
+  public async updateFreshCart(cart: Cart, items: UpdateCart) {
+    this.checkValidStateForAction(cart, 'updateFreshCart');
 
     cart.setCart({
-      ...updateCart,
+      ...items,
     });
 
-    return this.handleCartRequests(cart.update(), cart.id);
+    try {
+      return await this.handleUpdates(cart);
+    } catch (error) {
+      const cause = error instanceof CartNotUpdatedError ? undefined : error;
+      throw new CartNotUpdatedError(cart.id, items, cause);
+    }
   }
 
   public async finishCart(cart: Cart, items: FinishCart) {
-    const { uid, amount, stripeCustomerId, errorReasonId } = items;
-    const futureState = errorReasonId ? CartState.FAIL : CartState.SUCCESS;
-
-    this.checkStateByAction(cart.state, 'finishCart');
-    this.checkStateTransition(cart.state, futureState);
-
-    if (futureState === CartState.SUCCESS) {
-      if (!uid || !amount || !stripeCustomerId) {
-        throw new CartManagerError(ERRORS.MISSING_REQUIRED_FIELD, {
-          cartId: cart.id,
-          finishCart: items,
-        });
-      }
-    }
+    this.checkValidStateForAction(cart, 'finishCart');
+    this.checkStateTransition(cart.state, CartState.SUCCESS);
 
     cart.setCart({
-      uid: uid || cart.uid,
-      amount: amount || cart.amount,
-      stripeCustomerId: stripeCustomerId || cart.stripeCustomerId,
-      errorReasonId: errorReasonId || cart.errorReasonId,
+      state: CartState.SUCCESS,
+      ...items,
     });
 
-    return this.handleCartRequests(cart.update(), cart.id);
+    try {
+      return await this.handleUpdates(cart);
+    } catch (error) {
+      const cause = error instanceof CartNotUpdatedError ? undefined : error;
+      throw new CartNotUpdatedError(cart.id, items, cause);
+    }
+  }
+
+  public async finishErrorCart(cart: Cart, items: FinishCart) {
+    this.checkValidStateForAction(cart, 'finishErrorCart');
+    this.checkStateTransition(cart.state, CartState.FAIL);
+
+    cart.setCart({
+      state: CartState.FAIL,
+      ...items,
+    });
+
+    try {
+      return await this.handleUpdates(cart);
+    } catch (error) {
+      const cause = error instanceof CartNotUpdatedError ? undefined : error;
+      throw new CartNotUpdatedError(cart.id, items, cause);
+    }
   }
 
   public async deleteCart(cart: Cart) {
-    this.checkStateByAction(cart.state, 'deleteCart');
+    this.checkValidStateForAction(cart, 'deleteCart');
 
-    const result = await this.handleCartRequests(cart.delete(), cart.id);
-
-    if (!result) {
-      throw new CartManagerError(ERRORS.CART_NOT_DELETE, { cartId: cart.id });
-    } else {
-      return result;
+    try {
+      const result = await cart.delete();
+      if (!result) {
+        throw new CartNotDeletedError(cart.id);
+      } else {
+        return result;
+      }
+    } catch (error) {
+      const cause = error instanceof CartNotDeletedError ? undefined : error;
+      throw new CartNotDeletedError(cart.id, cause);
     }
   }
 
   public async restartCart(cart: Cart) {
-    this.checkStateByAction(cart.state, 'restartCart');
+    this.checkValidStateForAction(cart, 'restartCart');
 
-    return Cart.create({
-      ...cart,
-      state: CartState.START,
-    });
+    try {
+      return await Cart.create({
+        ...cart,
+        state: CartState.START,
+      });
+    } catch (error) {
+      throw new CartNotRestartedError(cart.id, error);
+    }
   }
 }

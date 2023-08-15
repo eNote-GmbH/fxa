@@ -4,18 +4,20 @@
 
 import { MultiError, VError } from 'verror';
 
-export class BaseError extends VError {}
+export class BaseError extends VError {
+  constructor(...args: ConstructorParameters<typeof VError>) {
+    super(...args);
+  }
+}
 
-export class BaseMultiError extends MultiError {}
+export class BaseMultiError extends MultiError {
+  constructor(errors: Error[]) {
+    super(errors);
+  }
+}
 
 export class TypeError extends BaseError {
-  constructor(message: string, cause?: Error) {
-    super(
-      {
-        name: 'TypeError',
-        ...(cause && { cause }),
-      },
-      message
-    );
+  constructor(...args: ConstructorParameters<typeof BaseError>) {
+    super(...args);
   }
 }

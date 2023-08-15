@@ -147,14 +147,6 @@ const ConfirmSignupCode = ({
         break;
       case IntegrationType.OAuth:
         // TODO just use type guard instead of switch, FXA-8111
-        // TODO build redirect for ConfirmSignupCode
-        // if (sessionIsVerified && isOAuthIntegration(integration)) {
-        //   const { redirect } = await finishOAuthFlowHandler(
-        //     integration.data.uid || account.uid,
-        //     accountResetData.sessionToken,
-        //     accountResetData.keyFetchToken,
-        //     accountResetData.unwrapBKey
-        //   );
 
         // Clear session / local storage states
         //   clearOAuthData();
@@ -171,12 +163,15 @@ const ConfirmSignupCode = ({
           navigate('/signin');
         }
 
-        if (isOAuthIntegration(integration)) {
-          const { redirect } = await finishOAuthFlowHandler(
-            integration.data.uid,
-            sessionToken()
-          );
-        }
+        // TODO how to get keyFetchToken and unwrapBKey?
+        // TODO build redirect for ConfirmSignupCode
+        // if (sessionIsVerified && isOAuthIntegration(integration)) {
+        //   const { redirect } = await finishOAuthFlowHandler(
+        //     integration.data.uid || account.uid,
+        //     account.sessionToken,
+        //     account.keyFetchToken,
+        //     account.unwrapBKey
+        //   );
 
         // return finishOAuthSignUpFlow(account);
 

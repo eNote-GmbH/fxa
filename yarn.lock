@@ -6893,23 +6893,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/bigquery@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "@google-cloud/bigquery@npm:6.1.0"
+"@google-cloud/bigquery@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "@google-cloud/bigquery@npm:7.1.1"
   dependencies:
     "@google-cloud/common": ^4.0.0
     "@google-cloud/paginator": ^4.0.0
+    "@google-cloud/precise-date": ^3.0.1
     "@google-cloud/promisify": ^3.0.0
     arrify: ^2.0.1
     big.js: ^6.0.0
     duplexify: ^4.0.0
     extend: ^3.0.2
     is: ^3.3.0
-    p-event: ^4.1.0
-    readable-stream: ^4.0.0
     stream-events: ^1.0.5
     uuid: ^9.0.0
-  checksum: a6b9aa30fe5e6ab1f3b3523aa46392f2c7606c4892f5537b0a2dd21b96cf529586841078c868c1a5a4d48ba4105451ca611d7a2f429f1f31dcc588513aadf3ff
+  checksum: c97bb85c6bb05a2d0567a59cb7e036a7e115cf95b53d4900e6ab58474acdc68dd6796e8ae3e042dc69bb0c051bba5a781bb2c23422840a20f083009d612993c2
   languageName: node
   linkType: hard
 
@@ -7013,6 +7012,13 @@ __metadata:
   version: 2.0.3
   resolution: "@google-cloud/precise-date@npm:2.0.3"
   checksum: 39bb2944a3ab7c6d336bd2d290a13f775aad5a37a03190ada35b35fb938ebe57ae35119d9727e494699ae1ab46d98418cfb1d59b93d7a595a09bddca3301fbe1
+  languageName: node
+  linkType: hard
+
+"@google-cloud/precise-date@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@google-cloud/precise-date@npm:3.0.1"
+  checksum: 5f99a8a67909b4b2b66b580821a96f780f55660e096b3eebeae067b6391f8c904866220aa1c2426b67be5e5567818fc565dd44f60173b4f58a713e8fb0d90705
   languageName: node
   linkType: hard
 
@@ -31336,7 +31342,7 @@ fsevents@~2.1.1:
     "@fluent/bundle": ^0.18.0
     "@fluent/dom": ^0.8.1
     "@fluent/langneg": ^0.6.2
-    "@google-cloud/bigquery": ^6.1.0
+    "@google-cloud/bigquery": ^7.1.1
     "@google-cloud/firestore": ^6.6.0
     "@google-cloud/translate": ^6.3.1
     "@googlemaps/google-maps-services-js": ^3.3.16
@@ -44787,28 +44793,12 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
-"p-event@npm:^4.1.0":
-  version: 4.2.0
-  resolution: "p-event@npm:4.2.0"
-  dependencies:
-    p-timeout: ^3.1.0
-  checksum: 8a3588f7a816a20726a3262dfeee70a631e3997e4773d23219176333eda55cce9a76219e3d2b441b331eb746e14fdb381eb2694ab9ff2fcf87c846462696fe89
-  languageName: node
-  linkType: hard
-
 "p-event@npm:^6.0.0":
   version: 6.0.0
   resolution: "p-event@npm:6.0.0"
   dependencies:
     p-timeout: ^6.1.2
   checksum: def3e49cd896fbf51264524959adf3f4542402541fda9c9681702308683df23bf0e75f7512db9509eeafe0bfef5d13b4eea0b6e13c6437766470caef01548654
-  languageName: node
-  linkType: hard
-
-"p-finally@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "p-finally@npm:1.0.0"
-  checksum: 93a654c53dc805dd5b5891bab16eb0ea46db8f66c4bfd99336ae929323b1af2b70a8b0654f8f1eae924b2b73d037031366d645f1fd18b3d30cbd15950cc4b1d4
   languageName: node
   linkType: hard
 
@@ -44945,15 +44935,6 @@ fsevents@~2.1.1:
     "@types/retry": 0.12.0
     retry: ^0.13.1
   checksum: 45c270bfddaffb4a895cea16cb760dcc72bdecb6cb45fef1971fa6ea2e91ddeafddefe01e444ac73e33b1b3d5d29fb0dd18a7effb294262437221ddc03ce0f2e
-  languageName: node
-  linkType: hard
-
-"p-timeout@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "p-timeout@npm:3.2.0"
-  dependencies:
-    p-finally: ^1.0.0
-  checksum: 3dd0eaa048780a6f23e5855df3dd45c7beacff1f820476c1d0d1bcd6648e3298752ba2c877aa1c92f6453c7dd23faaf13d9f5149fc14c0598a142e2c5e8d649c
   languageName: node
   linkType: hard
 
@@ -48993,15 +48974,6 @@ fsevents@~2.1.1:
     string_decoder: ^1.1.1
     util-deprecate: ^1.0.1
   checksum: bdcbe6c22e846b6af075e32cf8f4751c2576238c5043169a1c221c92ee2878458a816a4ea33f4c67623c0b6827c8a400409bfb3cf0bf3381392d0b1dfb52ac8d
-  languageName: node
-  linkType: hard
-
-"readable-stream@npm:^4.0.0":
-  version: 4.1.0
-  resolution: "readable-stream@npm:4.1.0"
-  dependencies:
-    abort-controller: ^3.0.0
-  checksum: ff2bb513af6fb43618c8360211b5b9052e25a59e6626d3669c7ba060d021dfffa43c43832e11b18acd6aac15b057c6deae1c41004c1731688c95c455ad02f982
   languageName: node
   linkType: hard
 

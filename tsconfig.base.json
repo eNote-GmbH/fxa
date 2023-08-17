@@ -25,6 +25,7 @@
     "baseUrl": ".",
     "paths": {
       "@fxa/payments/cart": ["libs/payments/cart/src/index.ts"],
+      "@fxa/payments/next-ui": ["libs/payments/next-ui/src/index.ts"],
       "@fxa/payments/paypal": ["libs/payments/paypal/src/index.ts"],
       "@fxa/shared/contentful": ["libs/shared/contentful/src/index.ts"],
       "@fxa/shared/db/mysql/account": [

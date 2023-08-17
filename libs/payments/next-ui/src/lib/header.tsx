@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import firefoxLogo from '../../images/firefox-logo-combined.svg';
+import firefoxLogo from '../images/firefox-logo-combined.svg';
 
-const ExampleHeader = () => {
+export const Header = () => {
   return (
     <header
       className="bg-white fixed flex justify-between items-center shadow h-16 left-0 top-0 mx-auto my-0 px-4 py-0 w-full z-10 tablet:h-20"
@@ -20,4 +20,4 @@ const ExampleHeader = () => {
   );
 };
 
-export default ExampleHeader;
+export default Header;

@@ -225,6 +225,33 @@ describe('lib/glean', () => {
       sinon.assert.calledWith(setUtmTermStub, mockFlowEventMetadata.utmTerm);
     });
 
+    it('submits the pings in order', async () => {
+      // not await on these calls
+      GleanMetrics.registration.view();
+      GleanMetrics.registration.submit();
+      GleanMetrics.registration.success();
+
+      // the ping submissions are await'd internally in GleanMetrics...
+      await new Promise((resovle) =>
+        setTimeout(() => {
+          sinon.assert.calledThrice(setEventNameStub);
+          sinon.assert.calledWithExactly(
+            setEventNameStub.getCall(0),
+            'reg_view'
+          );
+          sinon.assert.calledWithExactly(
+            setEventNameStub.getCall(1),
+            'reg_submit'
+          );
+          sinon.assert.calledWithExactly(
+            setEventNameStub.getCall(2),
+            'reg_submit_success'
+          );
+          resovle();
+        }, 150)
+      );
+    });
+
     describe('hashed uid', async () => {
       let accountGetterStub;
       beforeEach(() => {
@@ -241,14 +268,20 @@ describe('lib/glean', () => {
       });
 
       it('logs hashed uid when session token exists', async () => {
-        await GleanMetrics.login.success();
-        sinon.assert.calledTwice(accountGetterStub);
-        sinon.assert.calledWith(accountGetterStub, 'sessionToken');
-        sinon.assert.calledWith(accountGetterStub, 'uid');
-        sinon.assert.calledOnce(setuserIdSha256Stub);
-        sinon.assert.calledWith(
-          setuserIdSha256Stub,
-          '7ca0172850c53065046beeac3cdec3fe921532dbfebdf7efeb5c33d019cd7798'
+        GleanMetrics.login.success();
+        // the ping submissions are await'd internally in GleanMetrics...
+        await new Promise((resovle) =>
+          setTimeout(() => {
+            sinon.assert.calledTwice(accountGetterStub);
+            sinon.assert.calledWith(accountGetterStub, 'sessionToken');
+            sinon.assert.calledWith(accountGetterStub, 'uid');
+            sinon.assert.calledOnce(setuserIdSha256Stub);
+            sinon.assert.calledWith(
+              setuserIdSha256Stub,
+              '7ca0172850c53065046beeac3cdec3fe921532dbfebdf7efeb5c33d019cd7798'
+            );
+            resovle();
+          }, 80)
         );
       });
     });

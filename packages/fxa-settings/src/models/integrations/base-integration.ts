@@ -57,7 +57,7 @@ export interface RelierClientInfo {
   imageUri: string | undefined;
   serviceName: string | undefined;
   redirectUri: string | undefined;
-  trusted: boolean | undefined;
+  trusted: string | undefined;
 }
 
 export interface RelierAccount {

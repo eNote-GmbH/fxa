@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
-  IsBoolean,
+  IsBooleanString,
   IsHexadecimal,
   IsOptional,
   IsString,
@@ -38,7 +38,7 @@ export class ClientInfo extends ModelDataProvider {
   redirectUri: string | undefined;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   @bind()
-  trusted: boolean | undefined;
+  trusted: string | undefined;
 }

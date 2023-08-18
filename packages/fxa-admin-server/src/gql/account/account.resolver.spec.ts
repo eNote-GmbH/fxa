@@ -233,6 +233,7 @@ describe('#integration - AccountResolver', () => {
     const result = (await resolver.accountByUid(USER_1.uid, 'joe')) as Account;
     expect(result).toBeDefined();
     expect(result.email).toBe(USER_1.email);
+    expect(result.verifierSetAt).toBeGreaterThan(0);
     expect(logger.info).toBeCalledTimes(2);
   });
 
@@ -464,5 +465,13 @@ describe('#integration - AccountResolver', () => {
     const result = await resolver.accountEvents(user);
     expect(result).toBeDefined();
     expect(result.length).toBe(1);
+  });
+
+  it('load verifierSetAt', async () => {
+    const user = (await resolver.accountByEmail(
+      USER_1.email,
+      true,
+      'joe'
+    )) as Account;
   });
 });

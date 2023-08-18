@@ -45,13 +45,13 @@ const conf = convict({
   },
   user: {
     group: {
-      default: '',
+      default: 'vpn_fxa_admin_panel_stage',
       doc: 'Group to operate under for dev / test.',
       env: 'TEST_USER_GROUP',
       format: String,
     },
     email: {
-      default: '',
+      default: 'hello@mozilla.com',
       doc: 'Email to operate under for dev / test.',
       env: 'TEST_USER_EMAIL',
       format: String,
@@ -246,7 +246,8 @@ const conf = convict({
       env: 'SUBSCRIPTIONS_SHARED_SECRET',
     },
     stripeApiKey: {
-      default: '',
+      default:
+        'sk_test_51GCAr3BVqmGyQTMaNNPwmoQ349cXhRmsQ0LIbyY3JpWyrfM7Ez7052AFUIQNSGsOAoNnRMioUslumaWu7PKqkO3100HuYlZyFx',
       env: 'SUBHUB_STRIPE_APIKEY',
       format: String,
       doc: 'Stripe API key for direct Stripe integration',

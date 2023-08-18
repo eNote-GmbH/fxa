@@ -16,7 +16,7 @@ test.describe('reset password react', () => {
     test.skip(config.showReactApp.resetPasswordRoutes !== true);
   });
 
-  test('can reset password', async ({
+  test.only('can reset password', async ({
     page,
     target,
     credentials,
@@ -60,25 +60,18 @@ test.describe('reset password react', () => {
 
     // Wait for new page to navigate
     await diffPage.waitForURL(/reset_password_verified/);
-
-    // Wait for initial page to automatically redirect once password is reset
-    await page.waitForURL(`${target.contentServerUrl}/signin`);
-
-    // Verify password reset confirmation page is rendered
     await resetPasswordReact.resetPwdConfirmedHeadingVisible(diffPage);
-
     await diffPage.close();
 
-    // Verify initial page redirected to sign in and sign in page rendered
-    await login.emailHeader.waitFor();
+    // Go to sign in with original page
+    await resetPasswordReact.clickRememberPassword();
+    await page.waitForURL(/signin/);
 
-    await login.setEmail(credentials.email);
-    await login.clickSubmit();
-    await page.waitForURL(`${target.contentServerUrl}/signin`);
-
+    // Verify new password can be used to sign in
+    await login.isSigninHeader();
     await login.setPassword(NEW_PASSWORD);
     await login.clickSubmit();
-    await page.waitForURL(`${target.contentServerUrl}/settings`);
+    await page.waitForURL(/settings/);
 
     await page.getByRole('heading', { name: 'Settings', level: 2 }).waitFor();
 

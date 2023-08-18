@@ -91,6 +91,14 @@ export class ResetPasswordReactPage extends BaseLayout {
     await resendLink.click();
   }
 
+  async clickRememberPassword(page: BaseLayout['page'] = this.page) {
+    const rememberPasswordLink = await page.getByRole('link', {
+      name: 'Remember your password? Sign in',
+    });
+    await rememberPasswordLink.waitFor();
+    await rememberPasswordLink.click();
+  }
+
   async resendSuccessMessageVisible(page: BaseLayout['page'] = this.page) {
     await page.getByText(/Email resent/).waitFor();
   }

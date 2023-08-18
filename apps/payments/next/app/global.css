@@ -11,8 +11,96 @@ body {
   @apply flex flex-1 items-center justify-center w-full;
 }
 
+/*
+  Containers
+*/
 .main-content {
   @apply mt-16 mx-7 min-h-[calc(100vh_-_4rem)];
   @apply tablet:grid tablet:grid-cols-[minmax(min-content,500px)_minmax(20rem,1fr)] tablet:grid-rows-[min-content] tablet:gap-x-8 tablet:mt-20 tablet:mb-auto;
-  @apply desktop:grid-cols-[600px_1fr];
+  @apply desktop:grid-cols-[600px_1fr] w-full;
+}
+
+.payment-panel {
+  @apply mb-6 tablet:mt-6 tablet:min-w-[18rem] tablet:max-w-xs tablet:col-start-2 tablet:col-end-auto tablet:row-start-1 tablet:row-end-3;
+}
+
+.page-title-container {
+  @apply bg-white shadow-sm shadow-grey-300 text-center mt-0 mb-auto pt-5 px-4 pb-px min-h-full tablet:mx-0;
+}
+
+/*
+  Cards and related
+*/
+.component-card {
+  @apply bg-white rounded-b-lg shadow-sm shadow-grey-300;
+}
+
+.component-card.rounded-plan {
+  @apply rounded-lg tablet:mt-0;
+}
+
+.payment-error ~ .payment-panel,
+.payment-confirmation ~ .payment-panel {
+  @apply mt-6;
+}
+
+.payment-error ~ .payment-panel .component-card {
+  @apply rounded-t-lg;
+}
+
+/*
+  Plan Details
+*/
+.plan-details-header {
+  @apply flex gap-4 my-0 py-4;
+}
+
+.plan-details-icon {
+  @apply w-16 h-16 rounded-lg;
+}
+
+.plan-details-logo-wrap {
+  @apply flex h-16 items-center justify-center rounded-lg shrink-0 w-16;
+}
+
+.plan-details-product {
+  @apply text-grey-600 text-sm leading-5 my-0 break-words;
+}
+
+.plan-details-item {
+  @apply flex items-center justify-between gap-2 leading-5 text-grey-600 text-sm;
+}
+
+.total-label {
+  @apply text-base;
+}
+
+.total-price {
+  @apply overflow-hidden text-ellipsis text-lg whitespace-nowrap;
+}
+
+/*
+Terms and Privacy
+*/
+.legal-blurb {
+  @apply clear-both mt-5 text-xs leading-5 text-center;
+}
+
+.legal-blurb a {
+  @apply text-blue-500 underline;
+}
+
+.legal-blurb p {
+  @apply m-0 text-grey-400;
+}
+
+.legal-heading {
+  @apply font-semibold text-grey-500;
+}
+
+/*
+  General
+*/
+.row-divider-grey-200 {
+  @apply border-b border-grey-200;
 }

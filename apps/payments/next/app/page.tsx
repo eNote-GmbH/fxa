@@ -1,9 +1,5 @@
-import { PlanDetails } from '@fxa/payments/next-ui';
+import { redirect } from 'next/navigation';
 
 export default async function Index() {
-  return (
-    <>
-      <PlanDetails />
-    </>
-  );
+  redirect('/vpn/checkout');
 }

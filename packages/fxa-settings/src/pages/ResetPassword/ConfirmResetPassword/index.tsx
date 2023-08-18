@@ -4,22 +4,19 @@
 
 import React, { useCallback, useState } from 'react';
 import { RouteComponentProps, useLocation, useNavigate } from '@reach/router';
-import { POLLING_INTERVAL_MS, REACT_ENTRYPOINT } from '../../../constants';
+import { REACT_ENTRYPOINT } from '../../../constants';
 import { usePageViewEvent, logViewEvent } from '../../../lib/metrics';
 import { ResendStatus } from '../../../lib/types';
 import {
   isOAuthIntegration,
   useAccount,
   useFtlMsgResolver,
-  useInterval,
 } from '../../../models';
 import AppLayout from '../../../components/AppLayout';
 import ConfirmWithLink, {
   ConfirmWithLinkPageStrings,
 } from '../../../components/ConfirmWithLink';
 import LinkRememberPassword from '../../../components/LinkRememberPassword';
-import { hardNavigateToContentServer } from 'fxa-react/lib/utils';
-import { setOriginalTabMarker } from '../../../lib/storage-utils';
 import {
   ConfirmResetPasswordIntegration,
   ConfirmResetPasswordLocationState,
@@ -51,11 +48,6 @@ const ConfirmResetPassword = ({
     ResendStatus['not sent']
   );
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [isPolling, setIsPolling] = useState<number | null>(
-    POLLING_INTERVAL_MS
-  );
-  const [currentPasswordForgotToken, setCurrentPasswordForgotToken] =
-    useState<string>(passwordForgotToken);
 
   const navigateToPasswordReset = useCallback(() => {
     navigate('reset_password?showReactApp=true', { replace: true });
@@ -65,36 +57,16 @@ const ConfirmResetPassword = ({
     navigateToPasswordReset();
   }
 
-  useInterval(async () => {
-    try {
-      // A bit unconventional but this endpoint will throw an invalid token error
-      // that represents the password has been reset (or that the token is expired)
-      const isValid = await account.resetPasswordStatus(
-        currentPasswordForgotToken
-      );
-      if (!isValid) {
-        hardNavigateToContentServer('/signin');
-      } else {
-        // TODO: Not sure about this. It works with the flow... but.
-        setOriginalTabMarker();
-      }
-    } catch (err) {
-      setIsPolling(null);
-    }
-  }, isPolling);
-
   const resendEmailHandler = async () => {
     try {
       if (isOAuthIntegration(integration)) {
-        const result = await account.resetPassword(
+        await account.resetPassword(
           email,
           integration.getService(),
           integration.getRedirectUri()
         );
-        setCurrentPasswordForgotToken(result.passwordForgotToken);
       } else {
-        const result = await account.resetPassword(email);
-        setCurrentPasswordForgotToken(result.passwordForgotToken);
+        await account.resetPassword(email);
       }
 
       setResendStatus(ResendStatus['sent']);

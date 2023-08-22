@@ -30,6 +30,7 @@
       "@fxa/payments/paypal": ["libs/payments/paypal/src/index.ts"],
       "@fxa/payments/ui": ["libs/payments/ui/src/index.ts"],
       "@fxa/payments/ui/server": ["libs/payments/ui/src/server.ts"],
+      "@fxa/payments/types": ["libs/payments/types/src/index.ts"],
       "@fxa/shared/account/account": [
         "libs/shared/account/account/src/index.ts"
       ],
@@ -42,7 +43,8 @@
       "@fxa/shared/l10n/fluent": ["libs/shared/l10n/fluent/src/index.ts"],
       "@fxa/shared/log": ["libs/shared/log/src/index.ts"],
       "@fxa/shared/metrics/statsd": ["libs/shared/metrics/statsd/src/index.ts"],
-      "@fxa/shared/styles/*": ["libs/shared/styles/src/lib/*"]
+      "@fxa/shared/styles/*": ["libs/shared/styles/src/lib/*"],
+      "@fxa/shared/types": ["libs/shared/types/src/index.ts"],
     },
     "typeRoots": [
       "./types",

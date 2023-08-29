@@ -210,6 +210,12 @@ const conf = convict({
       env: 'SENTRY_SAMPLE_RATE',
       format: 'Number',
     },
+    tracesSampleRate: {
+      default: 0.0,
+      doc: 'Rate at which errors are sampled.',
+      env: 'SENTRY_SAMPLE_RATE',
+      format: 'Number',
+    },
     serverName: {
       doc: 'Name used by sentry to identify the server.',
       default: 'fxa-event-broker',
@@ -260,5 +266,5 @@ const Config = conf;
 // set to '[object Object]', which NestJS Config grabs if we don' delete it now.
 delete process.env['env'];
 
-export type AppConfig = ReturnType<typeof Config['getProperties']>;
+export type AppConfig = ReturnType<(typeof Config)['getProperties']>;
 export default Config;

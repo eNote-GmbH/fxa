@@ -60,6 +60,7 @@ if (config.get('sentry.dsn')) {
         env: config.get('sentry.env'),
         sampleRate: config.get('sentry.sampleRate'),
         serverName: config.get('sentry.serverName'),
+        tracesSampleRate: config.get('sentry.tracesSampleRate'),
       },
     },
     logger

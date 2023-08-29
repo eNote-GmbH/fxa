@@ -32,6 +32,7 @@ export function buildSentryConfig(config: SentryConfigOpts, log: ILogger) {
     release: config.release || config.version,
     environment: toEnv(config.sentry?.env),
     sampleRate: config.sentry?.sampleRate,
+    tracesSampleRate: config.sentry?.tracesSampleRate,
     clientName: config.sentry?.clientName,
     serverName: config.sentry?.serverName,
     fxaName: config.sentry?.clientName || config.sentry?.serverName,
@@ -71,6 +72,11 @@ function checkSentryConfig(config: SentryConfigOpts, log: ILogger) {
   if (config.sentry?.sampleRate == null) {
     raiseError('config missing sentry.sampleRate');
   }
+
+  if (config.sentry?.tracesSampleRate == null) {
+    raiseError('config missing sentry.tracesSampleRate');
+  }
+
   if (!config.sentry.clientName && !config.sentry.serverName) {
     raiseError('config missing either sentry.clientName or sentry.serverName');
   }

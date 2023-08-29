@@ -333,6 +333,18 @@ const conf = convict({
       format: 'String',
       env: 'SENTRY_SERVER_NAME',
     },
+    sampleRate: {
+      doc: 'Percentage of errors to capture',
+      default: 1.0,
+      format: 'Number',
+      env: 'SENTRY_SAMPLE_RATE',
+    },
+    tracesSampleRate: {
+      doc: 'Percentage of traces to capture',
+      default: 0.0,
+      format: 'Number',
+      env: 'SENTRY_TRACES_SAMPLE_RATE',
+    },
   },
   secretBearerToken: {
     default: 'supersecret',

@@ -22,6 +22,7 @@ export interface Config {
     dsn: string;
     env: string;
     sampleRate: number;
+    tracesSampleRate: number;
     serverName: string;
     clientName: string;
     version: string;
@@ -84,7 +85,7 @@ export function getDefault() {
       env: 'local',
       serverName: 'fxa-settings-server',
       clientName: 'fxa-settings-client',
-      sampleRate: 1.0,
+      tracesSampleRate: 1.0,
     },
     servers: {
       gql: {

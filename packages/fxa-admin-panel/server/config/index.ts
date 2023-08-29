@@ -88,6 +88,12 @@ const conf = convict({
       format: 'String',
       env: 'SENTRY_CLIENT_NAME',
     },
+    tracesSampleRate: {
+      doc: 'Percentage of traces to capture',
+      default: 0.0,
+      format: 'Number',
+      env: 'SENTRY_TRACES_SAMPLE_RATE',
+    },
   },
   listen: {
     host: {

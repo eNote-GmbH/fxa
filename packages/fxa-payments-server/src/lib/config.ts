@@ -21,7 +21,7 @@ export interface Config {
   sentry: {
     dsn: string;
     env: string;
-    sampleRate: number;
+    tracesSampleRate: number;
     clientName?: string;
     serverName?: string;
   };
@@ -73,7 +73,7 @@ export function defaultConfig(): Config {
     sentry: {
       dsn: '',
       env: 'local',
-      sampleRate: 1.0,
+      tracesSampleRate: 1.0,
       serverName: 'fxa-payments-server',
       clientName: 'fxa-payments-client',
     },

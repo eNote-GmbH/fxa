@@ -42,6 +42,7 @@ export function defaultConfig(): IClientConfig {
       serverName: 'fxa-admin-panel-server',
       clientName: 'fxa-admin-panel-client',
       sampleRate: 1.0,
+      tracesSampleRate: 0.0,
     },
     version: undefined,
   };

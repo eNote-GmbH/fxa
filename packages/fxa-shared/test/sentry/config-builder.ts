@@ -35,6 +35,7 @@ describe('config-builder', () => {
       dsn: 'https://foo.sentry.io',
       env: 'test',
       sampleRate: 1,
+      tracesSampleRate: 1,
       serverName: 'fxa-shared-test',
       clientName: 'fxa-shared-client-test',
     },
@@ -104,6 +105,17 @@ describe('config-builder', () => {
     assert.throws(() => {
       buildSentryConfig(clone, loggerSpy);
     }, 'config missing either release or version.');
+    assert.isTrue(loggerSpy.warn.called);
+  });
+
+  it('errors on missing tracesSampleRate', () => {
+    const clone = cloneConfig(testConfig);
+    clone.sentry.strict = true;
+    delete clone.sentry.tracesSampleRate;
+
+    assert.throws(() => {
+      buildSentryConfig(clone, loggerSpy);
+    }, 'sentry.tracesSampleRate');
     assert.isTrue(loggerSpy.warn.called);
   });
 

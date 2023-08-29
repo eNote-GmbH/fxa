@@ -38,6 +38,7 @@ const defaultConfig: IClientConfig = {
     sampleRate: config.get('sentry.sampleRate'),
     serverName: config.get('sentry.serverName'),
     clientName: config.get('sentry.clientName'),
+    tracesSampleRate: config.get('sentry.tracesSampleRate'),
   },
 };
 

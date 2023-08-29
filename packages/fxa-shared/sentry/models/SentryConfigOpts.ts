@@ -13,6 +13,8 @@ export type SentryConfigOpts = {
     env?: string;
     /** The rate (as percent between 0 and 1) at which errors are sampled. Can be reduced to decrease data volume. */
     sampleRate?: number;
+    /** The rate (as percent between 0 and 1) at which performance traces are sampled. Can be reduced to decrease data volume. */
+    tracesSampleRate?: number;
     /** The name of the active client. */
     clientName?: string;
     /** The name of the active server. */

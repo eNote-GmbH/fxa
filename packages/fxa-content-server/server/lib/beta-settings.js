@@ -40,6 +40,7 @@ const settingsConfig = {
     sampleRate: config.get('sentry.sampleRate'),
     clientName: config.get('sentry.clientName'),
     serverName: config.get('sentry.serverName'),
+    tracesSampleRate: config.get('sentry.tracesSampleRate'),
   },
   servers: {
     gql: {

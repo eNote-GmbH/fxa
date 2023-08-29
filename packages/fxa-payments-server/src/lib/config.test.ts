@@ -103,6 +103,7 @@ const mockConfig = {
     dsn: 'https://foo.sentry.io/bar',
     env: 'test',
     sampleRate: 1.0,
+    tracesSampleRate: 1.0,
     serverName: 'fxa-payments-server',
   },
   version: '1.0.0',
@@ -141,7 +142,7 @@ const expectedMergedConfig = {
     clientName: 'fxa-payments-client',
     dsn: 'https://foo.sentry.io/bar',
     env: 'test',
-    sampleRate: 1.0,
+    tracesSampleRate: 1.0,
     serverName: 'fxa-payments-server',
   },
   servers: {

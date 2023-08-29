@@ -28,6 +28,7 @@ export interface IClientConfig {
     serverName: string;
     clientName: string;
     sampleRate: number;
+    tracesSampleRate: number;
   };
   version?: string;
 }

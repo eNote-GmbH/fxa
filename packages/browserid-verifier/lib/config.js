@@ -108,6 +108,12 @@ function loadConf() {
         format: 'String',
         env: 'SENTRY_SERVER_NAME',
       },
+      tracesSampleRate: {
+        doc: 'Percentage of traces to capture',
+        default: 1.0,
+        format: 'Number',
+        env: 'SENTRY_TRACES_SAMPLE_RATE',
+      },
     },
     testServiceFailure: {
       doc: '(testing only) trigger a service failure in the verifier',

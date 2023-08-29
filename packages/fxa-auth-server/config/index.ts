@@ -1653,6 +1653,12 @@ const convictConf = convict({
       format: 'String',
       env: 'SENTRY_SERVER_NAME',
     },
+    tracesSampleRate: {
+      doc: 'Percentage of traces to capture',
+      default: 0.0,
+      format: 'Number',
+      env: 'SENTRY_TRACES_SAMPLE_RATE',
+    },
   },
   totp: {
     serviceName: {

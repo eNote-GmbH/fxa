@@ -21,7 +21,6 @@ FROM test-runner as builder
 WORKDIR /home/circleci
 COPY --chown=circleci:circleci .yarn .yarn
 WORKDIR /home/circleci/project
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
 ENV YARN_CHECKSUM_BEHAVIOR=throw
 ENV FXA_AUTO_INSTALL=0
 RUN _scripts/l10n/clone.sh
@@ -41,7 +40,7 @@ RUN yarn install --immutable; \
 # must based on cimg/node:18.14-browsers, which is why this stage
 # is necessary.
 FROM builder as playwright-install
-RUN npx playwright install --with-deps firefox;
+RUN npx playwright install;
 
 
 # Runs functional tests in our CI. Needs minimal install. Assumes

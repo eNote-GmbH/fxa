@@ -41,7 +41,7 @@ RUN yarn install --immutable; \
 # must based on cimg/node:18.14-browsers, which is why this stage
 # is necessary.
 FROM builder as playwright-install
-RUN npx playwright install firefox;
+RUN npx playwright install --with-deps firefox;
 
 
 # Runs functional tests in our CI. Needs minimal install. Assumes

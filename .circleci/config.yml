@@ -468,9 +468,9 @@ commands:
           name: Prep yarn install
           command: cd .. && mkdir -p .yarn
       - build-ci-image:
-          target: test-runner
+          target: test-runner-v2
       - build-ci-image:
-          target: builder
+          target: builder-v2
       - run:
           name: Prep browser install
           command: |
@@ -479,7 +479,7 @@ commands:
             cp -r /usr/local/bin/firefox* install/.
             cp -r /usr/local/bin/gecko* install/.
       - build-ci-image:
-          target: functional-test-runner
+          target: functional-test-runner-v2
 
       # Push images at the same time. Since these images are related, push them
       # in unison. Doing these operations in parallel cuts down on how expensive this
@@ -898,7 +898,7 @@ workflows:
           filters:
             branches:
               only:
-                - main
+                - dependabot/npm_and_yarn/playwright/test-1.37.1
             tags:
               ignore: /.*/
 

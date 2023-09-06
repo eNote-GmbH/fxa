@@ -59,7 +59,8 @@ export const RecoveryKeyPDF = ({
 
   // Disable word hyphenation - the default behaviour breaks word without regard to locales' hyphenation rules.
   // Exception: some languages prefer words to break at the end of the line (e.g, Chinese, Korean, Japanese)
-  !breakwords && Font.registerHyphenationCallback((word: string) => [word]);
+  breakwords === false &&
+    Font.registerHyphenationCallback((word: string) => [word]);
 
   const styles = StyleSheet.create({
     page: {
@@ -170,6 +171,7 @@ export const RecoveryKeyPDF = ({
             style={{
               fontSize: '14px',
               lineHeight: 1.5,
+              flex: 1,
             }}
           >
             {localizedText.instructions}

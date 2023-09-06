@@ -152,6 +152,7 @@ export const ButtonDownloadRecoveryKeyPDF = ({
           Download and continue
         </button>
       </FtlMsg>
+      <p>{currentLanguage}</p>
     </>
   );
 };

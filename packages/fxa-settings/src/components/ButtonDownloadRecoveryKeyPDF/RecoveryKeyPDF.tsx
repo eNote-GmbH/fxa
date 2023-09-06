@@ -39,7 +39,7 @@ export const RecoveryKeyPDF = ({
   email,
   localizedText,
 }: RecoveryKeyPDFProps) => {
-  const { family, sources, direction } = requiredFont;
+  const { family, sources, direction, breakwords } = requiredFont;
 
   Font.register({
     family,
@@ -58,7 +58,8 @@ export const RecoveryKeyPDF = ({
   });
 
   // Disable word hyphenation - the default behaviour breaks word without regard to locales' hyphenation rules.
-  Font.registerHyphenationCallback((word: string) => [word]);
+  // Exception: some languages prefer words to break at the end of the line (e.g, Chinese, Korean, Japanese)
+  !breakwords && Font.registerHyphenationCallback((word: string) => [word]);
 
   const styles = StyleSheet.create({
     page: {

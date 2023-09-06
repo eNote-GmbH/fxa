@@ -49,6 +49,7 @@ export interface FontData {
   family: string;
   sources: FontSource[];
   direction: 'ltr' | 'rtl';
+  breakwords: boolean;
 }
 
 export const getRequiredFont = (language: string) => {
@@ -82,6 +83,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: true,
       };
       break;
     // Georgian
@@ -106,11 +108,12 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: false,
       };
       break;
     // Hebrew
     case 'he':
-    case 'he-IL':
+    case 'he-il':
       requiredFont = {
         family: 'Noto Sans Hebrew',
         sources: [
@@ -131,6 +134,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'rtl',
+        breakwords: false,
       };
       break;
     // Korean
@@ -157,6 +161,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: true,
       };
       break;
     // Punjabi
@@ -185,6 +190,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'rtl',
+        breakwords: false,
       };
       break;
     // Thai
@@ -209,6 +215,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: false,
       };
       break;
     // Chinese (Mainland) - Simplified Chinese
@@ -234,6 +241,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: true,
       };
       break;
     // Chinese (Taiwan) - Traditional Chinese
@@ -258,6 +266,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: true,
       };
       break;
     default:
@@ -281,6 +290,7 @@ export const getRequiredFont = (language: string) => {
           },
         ],
         direction: 'ltr',
+        breakwords: false,
       };
       break;
   }

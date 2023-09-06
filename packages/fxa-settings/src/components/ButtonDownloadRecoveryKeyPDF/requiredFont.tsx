@@ -110,6 +110,7 @@ export const getRequiredFont = (language: string) => {
       break;
     // Hebrew
     case 'he':
+    case 'he-IL':
       requiredFont = {
         family: 'Noto Sans Hebrew',
         sources: [

@@ -15,10 +15,12 @@ import {
   PROVIDER_NAME,
 } from 'fxa-shared/db/models/auth/linked-account';
 import THIRD_PARTY_AUTH_DOCS from '../../docs/swagger/third-party-auth-api';
+import isA from 'joi';
+import DESCRIPTION from '../../docs/swagger/shared/descriptions';
+import error from '../error';
+import { schema as METRICS_CONTEXT_SCHEMA } from '../metrics/context';
 
-const METRICS_CONTEXT_SCHEMA = require('../metrics/context').schema;
-
-const error = require('../error');
+const HEX_STRING = validators.HEX_STRING;
 
 const appleAud = 'https://appleid.apple.com';
 
@@ -30,7 +32,7 @@ export class LinkedAccountHandler {
     private db: any,
     private config: ConfigType,
     private mailer: any,
-    private profile: ProfileClient,
+    private profile: ProfileClient
   ) {
     if (config.googleAuthConfig && config.googleAuthConfig.clientId) {
       this.googleAuthClient = new OAuth2Client(
@@ -264,7 +266,9 @@ export class LinkedAccountHandler {
       });
     }
 
-    let verificationMethod, mustVerifySession = false, tokenVerificationId = undefined;
+    let verificationMethod,
+      mustVerifySession = false,
+      tokenVerificationId = undefined;
     const hasTotpToken = await this.otpUtils.hasTotpToken(accountRecord);
     if (hasTotpToken) {
       mustVerifySession = true;
@@ -335,6 +339,20 @@ export const linkedAccountRoutes = (
             metricsContext: METRICS_CONTEXT_SCHEMA,
           }),
         },
+        response: {
+          schema: isA.object({
+            uid: isA.string().regex(HEX_STRING).required(),
+            sessionToken: isA.string().regex(HEX_STRING).required(),
+            providerUid: isA
+              .string()
+              .required()
+              .description(DESCRIPTION.providerUid),
+            verificationMethod: isA
+              .string()
+              .optional()
+              .description(DESCRIPTION.verificationMethod),
+          }),
+        },
       },
       handler: async (request: AuthRequest) =>
         handler.loginOrCreateAccount(request),
@@ -350,6 +368,11 @@ export const linkedAccountRoutes = (
         validate: {
           payload: Joi.object({
             provider: validators.thirdPartyProvider,
+          }),
+        },
+        response: {
+          schema: isA.object({
+            success: isA.boolean().required(),
           }),
         },
       },

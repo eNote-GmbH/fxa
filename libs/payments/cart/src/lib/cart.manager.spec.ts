@@ -54,17 +54,10 @@ describe('#payments-cart - manager', () => {
   let db: AccountDatabase;
   let cartManager: CartManager;
   let testCart: ResultCart;
-  const mockLogger: Logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    trace: jest.fn(),
-    warn: jest.fn(),
-  };
 
   beforeAll(async () => {
     db = await testAccountDatabaseSetup(['accounts', 'carts']);
-    cartManager = new CartManager(mockLogger, db);
+    cartManager = new CartManager(db);
     await db
       .insertInto('carts')
       .values({

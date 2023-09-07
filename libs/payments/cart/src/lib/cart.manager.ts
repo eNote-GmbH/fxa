@@ -45,14 +45,17 @@ const isAction = (action: string): action is keyof typeof ACTIONS_VALID_STATE =>
 
 @Injectable()
 export class CartManager {
-  constructor(private log: Logger, private db: AccountDatabase) {}
+  constructor(private db: AccountDatabase) {}
 
   /**
    * Ensure that the action being executed has a valid Cart state for
    * that action. For example, updateFreshCart is only allowed on carts
    * with state CartState.START.
    */
-  private checkActionForValidCartState(cart: ResultCart, action: string) {
+  private checkActionForValidCartState(
+    cart: ResultCart,
+    action: keyof typeof ACTIONS_VALID_STATE
+  ) {
     const isValid =
       isAction(action) && ACTIONS_VALID_STATE[action].includes(cart.state);
 

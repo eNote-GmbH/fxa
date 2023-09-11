@@ -39,7 +39,7 @@ test.describe('OAuth signin', () => {
 
   test('verified using a cached expired login', async ({
     credentials,
-    pages: { login, relier },
+    pages: { login, relier, page },
   }) => {
     await relier.goto();
     await relier.clickEmailFirst();
@@ -56,8 +56,9 @@ test.describe('OAuth signin', () => {
     await login.submit();
     await relier.signOut();
 
-    // Clear cache and try to login
+    // Clear cache and context cookies and try to login
     await login.clearCache();
+    await page.context().clearCookies();
     await relier.goto();
     await relier.clickEmailFirst();
 

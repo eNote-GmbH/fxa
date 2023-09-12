@@ -17,6 +17,10 @@ export class StageTarget extends RemoteTarget {
   readonly contentServerUrl = `https://${ACCOUNTS_DOMAIN}`;
   readonly paymentsServerUrl = `https://${PAYMENTS_DOMAIN}`;
   readonly relierUrl = `https://${RELIER_DOMAIN}`;
+  readonly subscriptionConfig = {
+    product: 'prod_FfiuDs9u11ESbD',
+    plan: 'plan_FfiupsKXZ3mMZ6',
+  };
 
   constructor() {
     super(`https://${ACCOUNTS_API_DOMAIN}`);

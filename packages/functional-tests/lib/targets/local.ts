@@ -7,6 +7,10 @@ export class LocalTarget extends BaseTarget {
   readonly contentServerUrl = 'http://localhost:3030';
   readonly paymentsServerUrl = 'http://localhost:3031';
   readonly relierUrl = 'http://localhost:8080';
+  readonly subscriptionConfig = {
+    product: 'prod_GqM9ToKK62qjkK',
+    plan: 'plan_GqM9N6qyhvxaVk',
+  };
 
   constructor() {
     super('http://localhost:9000', 'http://localhost:9001');

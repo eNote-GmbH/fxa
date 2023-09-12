@@ -8,11 +8,12 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithLocalizationProvider } from 'fxa-react/lib/test-utils/localizationProvider'; // import { getFtlBundle, testAllL10n } from 'fxa-react/lib/test-utils';
 // import { FluentBundle } from '@fluent/bundle';
 import { logViewEvent, usePageViewEvent } from '../../../lib/metrics';
-import ConfirmSignupCode, { viewName } from '.';
+import { viewName } from '.';
 import { REACT_ENTRYPOINT } from '../../../constants';
 import { Account, AppContext } from '../../../models';
 import { MOCK_ACCOUNT, mockAppContext } from '../../../models/mocks';
 import { LocationProvider } from '@reach/router';
+import { Subject } from './mocks';
 
 jest.mock('../../../lib/metrics', () => ({
   usePageViewEvent: jest.fn(),
@@ -41,9 +42,7 @@ let account: Account;
 function renderWithAccount(account: Account) {
   renderWithLocalizationProvider(
     <AppContext.Provider value={mockAppContext({ account })}>
-      <LocationProvider>
-        <ConfirmSignupCode />
-      </LocationProvider>
+      <Subject />
     </AppContext.Provider>
   );
 }

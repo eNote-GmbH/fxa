@@ -36,12 +36,23 @@ import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 import { ResendStatus } from 'fxa-settings/src/lib/types';
 import { useValidatedQueryParams } from '../../../lib/hooks/useValidate';
 import { ConfirmSignupCodeQueryParams } from '../../../models/pages/confirm-signup-code';
+import { isOAuthIntegration, isSyncDesktopIntegration } from '../../../models';
+import { sessionToken } from '../../../lib/cache';
+import { ConfirmSignupCodeProps } from './interfaces';
 
 export const viewName = 'confirm-signup-code';
 
-type LocationState = { email: string; selectedNewsletterSlugs?: string[] };
+type LocationState = {
+  email: string;
+  selectedNewsletterSlugs?: string[];
+  keyFetchToken: string;
+  unwrapBKey: string;
+};
 
-const ConfirmSignupCode = (_: RouteComponentProps) => {
+const ConfirmSignupCode = ({
+  integration,
+  finishOAuthFlowHandler,
+}: ConfirmSignupCodeProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
   const ftlMsgResolver = useFtlMsgResolver();
@@ -125,16 +136,70 @@ const ConfirmSignupCode = (_: RouteComponentProps) => {
     }
   }
 
-  function alertSuccessAndGoForward() {
-    alertBar.success(
-      ftlMsgResolver.getMsg(
-        'confirm-signup-code-success-alert',
-        'Account confirmed successfully'
-      )
-    );
-    // TODO in FXA-6519 redirect elsewhere if relying party
-    navigate('/settings', { replace: true });
+  async function alertSuccessAndGoForward() {
+    // we need to send a web channel message to FF to tell it the account was verified
+    // TODO notifyRelierOfLogin
+
+    if (isSyncDesktopIntegration(integration)) {
+      // TODO: ConnectAnotherDeviceBehavior
+      // see connect-another-device-mixin
+    }
+
+    if (isOAuthIntegration(integration)) {
+      // Check to see if the relier wants TOTP. Newly created accounts wouldn't have this
+      // so lets redirect them to signin and show a message on how it can be set up.
+      // Should instead navigate to post verify TOTP setup
+      if (integration.wantsTwoStepAuthentication()) {
+        // TODO verify which message should be displayed, and how to ensure user is redirected to RP after setting up TOTP
+        navigate('/signin');
+      } else {
+        const { keyFetchToken, unwrapBKey } = location.state;
+        const { redirect } = await finishOAuthFlowHandler(
+          integration.data.uid,
+          sessionToken()!,
+          keyFetchToken,
+          unwrapBKey
+        );
+        navigate(redirect);
+      }
+    }
+
+    /**
+     * TODO Add condition for OAuth on Chrome for Android
+     * Chrome for Android will not allow the page to redirect
+     * unless its the result of a user action such as a click.
+     *
+     * Instead of redirecting automatically after confirmation
+     * poll, force the user to the /signup_confirmed page
+     * where they can click a "continue" button.
+     */
+    //     return new NavigateBehavior('signup_confirmed', {account, continueBrokerMethod: 'finishOAuthSignUpFlow', });
+    if (
+      !isOAuthIntegration(integration) &&
+      !isSyncDesktopIntegration(integration)
+    ) {
+      alertBar.success(
+        ftlMsgResolver.getMsg(
+          'confirm-signup-code-success-alert',
+          'Account confirmed successfully'
+        )
+      );
+      navigate('/settings', { replace: true });
+    }
+
+    // backbone had a base navigation behaviour to 'signup_confirmed' (Ready view)
+    // not sure when this should be shown
+
+    // TODO: run unpersistVerificationData when reliers are combined
   }
+
+  const getScopes = async () => {
+    if (isOAuthIntegration(integration)) {
+      const scopes = await integration.getPermissions();
+      return scopes;
+    }
+    return undefined;
+  };
 
   async function verifySession(code: string) {
     logViewEvent(`flow.${viewName}`, 'submit', REACT_ENTRYPOINT);

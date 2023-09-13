@@ -101,6 +101,9 @@ const ConfirmSignupCode = ({
     'Confirmation code is required'
   );
 
+  // Potential TODO, polling? Do we want this?
+  // await broker.invokeBrokerMethod('afterSignUpConfirmationPoll', account);
+
   // When the user types in the code input field, all banners and tooltips should be cleared
   // Timeout is added to reduce jankiness, but does not include a smooth hiding effect.
   useEffect(() => {
@@ -136,70 +139,13 @@ const ConfirmSignupCode = ({
     }
   }
 
-  async function alertSuccessAndGoForward() {
-    // we need to send a web channel message to FF to tell it the account was verified
-    // TODO notifyRelierOfLogin
-
-    if (isSyncDesktopIntegration(integration)) {
-      // TODO: ConnectAnotherDeviceBehavior
-      // see connect-another-device-mixin
-    }
-
-    if (isOAuthIntegration(integration)) {
-      // Check to see if the relier wants TOTP. Newly created accounts wouldn't have this
-      // so lets redirect them to signin and show a message on how it can be set up.
-      // Should instead navigate to post verify TOTP setup
-      if (integration.wantsTwoStepAuthentication()) {
-        // TODO verify which message should be displayed, and how to ensure user is redirected to RP after setting up TOTP
-        navigate('/signin');
-      } else {
-        const { keyFetchToken, unwrapBKey } = location.state;
-        const { redirect } = await finishOAuthFlowHandler(
-          integration.data.uid,
-          sessionToken()!,
-          keyFetchToken,
-          unwrapBKey
-        );
-        navigate(redirect);
-      }
-    }
-
-    /**
-     * TODO Add condition for OAuth on Chrome for Android
-     * Chrome for Android will not allow the page to redirect
-     * unless its the result of a user action such as a click.
-     *
-     * Instead of redirecting automatically after confirmation
-     * poll, force the user to the /signup_confirmed page
-     * where they can click a "continue" button.
-     */
-    //     return new NavigateBehavior('signup_confirmed', {account, continueBrokerMethod: 'finishOAuthSignUpFlow', });
-    if (
-      !isOAuthIntegration(integration) &&
-      !isSyncDesktopIntegration(integration)
-    ) {
-      alertBar.success(
-        ftlMsgResolver.getMsg(
-          'confirm-signup-code-success-alert',
-          'Account confirmed successfully'
-        )
-      );
-      navigate('/settings', { replace: true });
-    }
-
-    // backbone had a base navigation behaviour to 'signup_confirmed' (Ready view)
-    // not sure when this should be shown
-
-    // TODO: run unpersistVerificationData when reliers are combined
-  }
-
-  const getScopes = async () => {
-    if (isOAuthIntegration(integration)) {
-      const scopes = await integration.getPermissions();
-      return scopes;
-    }
-    return undefined;
-  };
+  // const getScopes = async () => {
+  //   if (isOAuthIntegration(integration)) {
+  //     const scopes = await integration.getPermissions();
+  //     return scopes;
+  //   }
+  //   return undefined;
+  // };
 
   async function verifySession(code: string) {
     logViewEvent(`flow.${viewName}`, 'submit', REACT_ENTRYPOINT);
@@ -227,14 +173,41 @@ const ConfirmSignupCode = ({
         );
       }
 
-      // FOLLOW-UP: Broker not yet implemented
-      // The broker handles navigation behaviour that varies depending on the relier
-      // and may include web channel notifications to ensure the verification is propagated
-      // to other tabs
-      // await broker.invokeBrokerMethod('afterSignUpConfirmationPoll', account);
-      // This may be taken care of with^ but we need to send a web channel message
-      // to FF to tell it the account was verified. Can be done with FXA-8287 or follow up
-      alertSuccessAndGoForward();
+      // Might need this
+      // let isHardNavigate = false;
+      if (isSyncDesktopIntegration(integration)) {
+        // Tell FF the account is verified with webchannel event, FXA-8287
+        // hardNavigateToContentServer('/connect_another_device')
+      } else if (isOAuthIntegration(integration)) {
+        // Certain reliers (at the time of writing, only AMO) require users to set up
+        // 2FA / TOTP before they are redirected back to the RP.
+        if (integration.wantsTwoStepAuthentication()) {
+          // Must pass along query params to ensure user is redirected to RP after setting up TOTP
+          // hardNavigateToContentServer('/inline_totp_setup${location.search}');
+        } else {
+          const { keyFetchToken, unwrapBKey } = location.state;
+          const { redirect } = await finishOAuthFlowHandler(
+            integration.data.uid,
+            sessionToken()!,
+            keyFetchToken,
+            unwrapBKey
+          );
+          navigate(redirect);
+        }
+      } else {
+        // TODO: Check if we ever want to show 'signup_confirmed' (Ready view)
+        // Backbone had a base navigation behaviour navigating here
+        alertBar.success(
+          ftlMsgResolver.getMsg(
+            'confirm-signup-code-success-alert',
+            'Account confirmed successfully'
+          )
+        );
+        navigate('/settings', { replace: true });
+      }
+
+      // TODO: Do we need a ticket for unpersistVerificationData, or remove
+      // all TODOs around it?
     } catch (e) {
       const localizedErrorMessage = ftlMsgResolver.getMsg(
         composeAuthUiErrorTranslationId(e),

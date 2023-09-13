@@ -121,7 +121,7 @@ const SignupContainer = ({
         }
       }
     },
-    [beginSignup]
+    [beginSignup, integration]
   );
 
   // TODO: probably a better way to read this?

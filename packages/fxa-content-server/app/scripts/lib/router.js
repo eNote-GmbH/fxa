@@ -247,6 +247,7 @@ Router = Router.extend({
           ...(this.user.get('emailFromIndex') && {
             emailFromContent: 'true',
           }),
+          ...Url.searchParams(this.window.location.search),
         }
       );
     },

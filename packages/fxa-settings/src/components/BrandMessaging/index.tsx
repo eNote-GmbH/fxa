@@ -125,7 +125,7 @@ const BrandMessaging = ({
             </div>
           </div>
         )}
-        <div className="absolute w-1/12 right-0 top-0 pt-3 start-0">
+        <div className="absolute w-1/12 right-0 top-0 pt-3 rtl:start-0">
           <FtlMsg id="brand-banner-dismiss-button" attrs={{ ariaLabel: true }}>
             <button
               id="close-brand-banner"

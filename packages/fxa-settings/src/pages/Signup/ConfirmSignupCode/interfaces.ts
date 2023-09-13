@@ -20,6 +20,13 @@ export interface ConfirmSignupCodeFormData {
   code: string;
 }
 
+export interface ConfirmSignupCodeBaseIntegration {
+  type: IntegrationType;
+  data: {
+    uid: BaseIntegrationData['uid'];
+  };
+}
+
 export interface ConfirmSignupCodeOAuthIntegration {
   type: IntegrationType.OAuth;
   data: {
@@ -27,13 +34,6 @@ export interface ConfirmSignupCodeOAuthIntegration {
   };
   getService: () => ReturnType<OAuthIntegration['getService']>;
   getRedirectUri: () => ReturnType<OAuthIntegration['getService']>;
-}
-
-export interface ConfirmSignupCodeBaseIntegration {
-  type: IntegrationType;
-  data: {
-    uid: BaseIntegrationData['uid'];
-  };
 }
 
 export type ConfirmSignupCodeIntegration =

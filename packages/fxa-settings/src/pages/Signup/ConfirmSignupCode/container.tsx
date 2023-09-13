@@ -20,6 +20,8 @@ const SignupConfirmCodeContainer = ({
     integration
   );
 
+  oAuthDataError && console.log('oAuthDataError!', oAuthDataError);
+
   // TODO: UX for this, FXA-8106
   if (oAuthDataError) {
     return (

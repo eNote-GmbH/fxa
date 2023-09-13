@@ -12,8 +12,7 @@ import { viewName } from '.';
 import { REACT_ENTRYPOINT } from '../../../constants';
 import { Account, AppContext } from '../../../models';
 import { MOCK_ACCOUNT, mockAppContext } from '../../../models/mocks';
-import { LocationProvider } from '@reach/router';
-import { Subject } from './mocks';
+import { MOCK_AUTH_ERROR, Subject } from './mocks';
 
 jest.mock('../../../lib/metrics', () => ({
   usePageViewEvent: jest.fn(),
@@ -194,7 +193,7 @@ describe('Resending a new code from ConfirmSignupCode page', () => {
 
   it('displays an error banner when unsuccessful', async () => {
     account = {
-      sendVerificationCode: jest.fn().mockRejectedValue(new Error()),
+      sendVerificationCode: jest.fn().mockRejectedValue(MOCK_AUTH_ERROR),
     } as unknown as Account;
 
     renderWithAccount(account);
@@ -204,9 +203,7 @@ describe('Resending a new code from ConfirmSignupCode page', () => {
     });
     fireEvent.click(resendEmailButton);
     await waitFor(() => {
-      expect(
-        screen.getByText('Something went wrong. A new code could not be sent.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Unexpected error')).toBeInTheDocument();
     });
   });
 });

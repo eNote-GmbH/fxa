@@ -2,53 +2,56 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import React from 'react';
 import { LocationProvider } from '@reach/router';
 import ConfirmSignupCode from '.';
-import { MozServices } from '../../../lib/types';
 import { IntegrationType } from '../../../models';
-import { MOCK_REDIRECT_URI, MOCK_SERVICE, MOCK_EMAIL } from '../../mocks';
 import {
-  BeginSignupHandler,
-  SignupBaseIntegration,
-  SignupIntegration,
-  SignupOAuthIntegration,
+  MOCK_REDIRECT_URI,
+  MOCK_SERVICE,
+  MOCK_EMAIL,
+  MOCK_UID,
+} from '../../mocks';
+import {
+  ConfirmSignupCodeBaseIntegration,
+  ConfirmSignupCodeIntegration,
+  ConfirmSignupCodeOAuthIntegration,
 } from './interfaces';
 
 export const MOCK_SEARCH_PARAMS = {
   email: MOCK_EMAIL,
 };
 
-export function createMockSignupWebIntegration(): SignupBaseIntegration {
+export const MOCK_AUTH_ERROR = {
+  errno: 999,
+  message: 'Something broke',
+};
+
+export function createMockWebIntegration(): ConfirmSignupCodeBaseIntegration {
   return {
     type: IntegrationType.Web,
-    getServiceName: () => Promise.resolve(MozServices.Default),
+    data: { uid: MOCK_UID },
   };
 }
 
-export function createMockSignupSyncDesktopIntegration(): SignupBaseIntegration {
-  return {
-    type: IntegrationType.SyncDesktop,
-    getServiceName: () => Promise.resolve(MozServices.FirefoxSync),
-  };
-}
+// TODO add createMockSyncIntegration in FXA-
 
-export function createMockSignupOAuthIntegration(
+export function createMockOAuthIntegration(
   serviceName = MOCK_SERVICE
-): SignupOAuthIntegration {
+): ConfirmSignupCodeOAuthIntegration {
   return {
     type: IntegrationType.OAuth,
+    data: { uid: MOCK_UID },
     getRedirectUri: () => MOCK_REDIRECT_URI,
-    saveOAuthState: () => {},
-    getServiceName: () => Promise.resolve(serviceName),
+    getService: () => Promise.resolve(serviceName),
   };
 }
 
 export const Subject = ({
-  integration = createMockSignupWebIntegration(),
+  integration = createMockWebIntegration(),
 }: {
   queryParams?: Record<string, string>;
-  integration?: SignupIntegration;
-  beginSignupHandler?: BeginSignupHandler;
+  integration?: ConfirmSignupCodeIntegration;
 }) => {
   return (
     <LocationProvider>
@@ -56,6 +59,7 @@ export const Subject = ({
         {...{
           integration,
         }}
+        finishOAuthFlowHandler={() => Promise.resolve({ redirect: 'someUri' })}
       />
     </LocationProvider>
   );

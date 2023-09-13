@@ -6,7 +6,7 @@ import React from 'react';
 import ConfirmSignupCode from '.';
 import { Meta } from '@storybook/react';
 import { withLocalization } from 'fxa-react/lib/storybooks';
-import { LocationProvider } from '@reach/router';
+import { Subject } from './mocks';
 
 export default {
   title: 'Pages/Signup/ConfirmSignupCode',
@@ -14,8 +14,7 @@ export default {
   decorators: [withLocalization],
 } as Meta;
 
-export const Default = () => (
-  <LocationProvider>
-    <ConfirmSignupCode />
-  </LocationProvider>
-);
+// TODO: mock account methods sendVerificationCode and verifySession to mock success and error banners
+export const Default = () => <Subject />;
+
+// no story is needed for integrations (e.g., Sync, OAuth) as these do not change the UI of this page

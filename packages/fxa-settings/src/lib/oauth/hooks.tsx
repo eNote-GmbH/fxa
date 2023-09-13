@@ -15,7 +15,7 @@ import { createEncryptedBundle } from '../crypto/scoped-keys';
 const checkOAuthData = (integration: OAuthIntegration): Error | null => {
   // Ensure a redirect was provided. Without this info, we can't relay the oauth code
   // and state!
-  if (!integration.data.redirectTo) {
+  if (!integration.data.redirectTo && !integration.data.redirectUri) {
     return new OAuthErrorInvalidRedirectUri();
   }
   if (!integration.data.clientId) {
@@ -118,18 +118,19 @@ function constructOAuthRedirectUrl(
   oauthCode: {
     code: string;
     state: string;
+    redirect: string;
   },
-  redirectTo: string
+  redirectUri: string
 ) {
   // Update the state of the redirect URI
-  const redirectUri = new URL(redirectTo);
+  let constructedRedirectUri = new URL(redirectUri);
   if (oauthCode.code) {
-    redirectUri.searchParams.set('code', oauthCode.code);
+    constructedRedirectUri.searchParams.set('code', oauthCode.code);
   }
   if (oauthCode.state) {
-    redirectUri.searchParams.set('state', oauthCode.state);
+    constructedRedirectUri.searchParams.set('state', oauthCode.state);
   }
-  return redirectUri;
+  return constructedRedirectUri;
 }
 
 export type FinishOAuthFlowHandler = (
@@ -168,16 +169,27 @@ export function useFinishOAuthFlowHandler(
         keyFetchToken,
         kB
       );
-      const code = await constructOAuthCode(
+
+      // result is an object that contains code, state and redirect
+      const oAuthCode = await constructOAuthCode(
         authClient,
         oAuthIntegration,
         sessionToken,
         keys
       );
+
       const redirectUrl = constructOAuthRedirectUrl(
-        code,
-        oAuthIntegration.data.redirectTo
+        oAuthCode,
+        // changed to redirectUri for signup - 123Done does not provide redirectTo and was causing 'url constructor null is not a valid url'
+        oAuthIntegration.data.redirectUri
+        // reset password links however DO include a redirectTo param, but no redirectUri.....
+        // oAuthIntegration.data.redirectTo
       );
+
+      // directly using the redirect returned by constructOAuthCode
+      // or using the URI constructed by constructOAuthRedirectUrl DO NOT WORK
+      // and result in the page navigating to the the relier but with errors
+      // e.g., for 123Done, "Bad request - state cookie doesn't match"
       return {
         redirect: redirectUrl.href,
       };

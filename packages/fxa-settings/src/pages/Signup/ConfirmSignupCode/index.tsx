@@ -2,19 +2,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { RouteComponentProps, useLocation, useNavigate } from '@reach/router';
-import {
-  CLEAR_MESSAGES_TIMEOUT,
-  REACT_ENTRYPOINT,
-  RESEND_CODE_TIMEOUT,
-} from '../../../constants';
+import { REACT_ENTRYPOINT } from '../../../constants';
 import {
   AuthUiErrors,
   composeAuthUiErrorTranslationId,
 } from '../../../lib/auth-errors/auth-errors';
 import { logViewEvent, usePageViewEvent } from '../../../lib/metrics';
-import { FtlMsg, hardNavigateToContentServer } from 'fxa-react/lib/utils';
+import {
+  FtlMsg,
+  hardNavigate,
+  hardNavigateToContentServer,
+} from 'fxa-react/lib/utils';
 import {
   useAccount,
   useAlertBar,
@@ -24,7 +24,6 @@ import AppLayout from '../../../components/AppLayout';
 import Banner, {
   BannerProps,
   BannerType,
-  ResendCodeErrorBanner,
   ResendEmailSuccessBanner,
 } from '../../../components/Banner';
 import CardHeader from '../../../components/CardHeader';
@@ -59,8 +58,6 @@ const ConfirmSignupCode = ({
   const alertBar = useAlertBar();
   const account = useAccount();
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>('');
-  const [resendCodeCount, setResendCodeCount] = useState<number>(0);
-  const [clearMessages, setClearMessages] = useState<boolean>(false);
   const [resendStatus, setResendStatus] = useState<ResendStatus>(
     ResendStatus['not sent']
   );
@@ -104,48 +101,38 @@ const ConfirmSignupCode = ({
   // Potential TODO, polling? Do we want this?
   // await broker.invokeBrokerMethod('afterSignUpConfirmationPoll', account);
 
-  // When the user types in the code input field, all banners and tooltips should be cleared
-  // Timeout is added to reduce jankiness, but does not include a smooth hiding effect.
-  useEffect(() => {
-    if (clearMessages) {
-      const timer = setTimeout(() => {
-        setCodeErrorMessage('');
-        setBanner({ type: undefined, children: undefined });
-        setClearMessages(false);
-      }, CLEAR_MESSAGES_TIMEOUT);
-      return () => clearTimeout(timer);
-    }
-    return;
-  }, [clearMessages]);
-
-  // Hide the ResendCode button after too many attempts. Redisplay button after a delay.
-  useEffect(() => {
-    if (resendCodeCount > 3) {
-      const timer = setTimeout(() => {
-        setResendCodeCount(0);
-      }, RESEND_CODE_TIMEOUT);
-      return () => clearTimeout(timer);
-    }
-    return;
-  }, [resendCodeCount]);
-
+  // TODO: fix invalid token error received after using new code (verifySession fails on keys)
   async function handleResendCode() {
     try {
       await account.sendVerificationCode();
-      setResendCodeCount(resendCodeCount + 1);
-      setResendStatus(ResendStatus['sent']);
+      // if resending a code is succesful, clear any banner already present on screen
+      if (resendStatus !== ResendStatus['sent']) {
+        setBanner({
+          type: undefined,
+          children: undefined,
+        });
+        setResendStatus(ResendStatus['sent']);
+      }
     } catch (e) {
-      setResendStatus(ResendStatus['error']);
+      setResendStatus(ResendStatus['not sent']);
+      const localizedErrorMessage = ftlMsgResolver.getMsg(
+        composeAuthUiErrorTranslationId(e),
+        e.message
+      );
+      setBanner({
+        type: BannerType.error,
+        children: <p>{localizedErrorMessage}</p>,
+      });
     }
   }
 
-  // const getScopes = async () => {
-  //   if (isOAuthIntegration(integration)) {
-  //     const scopes = await integration.getPermissions();
-  //     return scopes;
-  //   }
-  //   return undefined;
-  // };
+  const getScopes = async () => {
+    if (isOAuthIntegration(integration)) {
+      const scopes = await integration.getPermissions();
+      return scopes;
+    }
+    return undefined;
+  };
 
   async function verifySession(code: string) {
     logViewEvent(`flow.${viewName}`, 'submit', REACT_ENTRYPOINT);
@@ -192,7 +179,9 @@ const ConfirmSignupCode = ({
             keyFetchToken,
             unwrapBKey
           );
-          navigate(redirect);
+
+          // Navigate back to relying party (exit react app)
+          hardNavigate(redirect);
         }
       } else {
         // TODO: Check if we ever want to show 'signup_confirmed' (Ready view)
@@ -219,9 +208,10 @@ const ConfirmSignupCode = ({
         e.errno === AuthUiErrors.OTP_CODE_REQUIRED.errno ||
         e.errno === AuthUiErrors.INVALID_OTP_CODE.errno
       ) {
-        setBanner({ type: undefined, children: undefined });
         setCodeErrorMessage(localizedErrorMessage);
       } else {
+        // Clear resend link success banner (if displayed) before rendering an error banner
+        setResendStatus(ResendStatus['not sent']);
         // Any other error messages should be displayed in an error banner
         setBanner({
           type: BannerType.error,
@@ -261,7 +251,6 @@ const ConfirmSignupCode = ({
       )}
 
       {resendStatus === ResendStatus['sent'] && <ResendEmailSuccessBanner />}
-      {resendStatus === ResendStatus['error'] && <ResendCodeErrorBanner />}
 
       <div className="flex justify-center mx-auto">
         <MailImage className="w-3/5" />
@@ -281,27 +270,24 @@ const ConfirmSignupCode = ({
           localizedCustomCodeRequiredMessage,
           codeErrorMessage,
           setCodeErrorMessage,
-          setClearMessages,
         }}
       />
 
       <div className="animate-delayed-fade-in opacity-0 mt-5 text-grey-500 text-xs inline-flex gap-1">
-        {resendCodeCount < 4 && (
-          <>
-            <FtlMsg id="confirm-signup-code-code-expired">
-              <p>Code expired?</p>
-            </FtlMsg>
-            <FtlMsg id="confirm-signup-code-resend-code-link">
-              <button
-                id="resend"
-                className="link-blue"
-                onClick={handleResendCode}
-              >
-                Email new code.
-              </button>
-            </FtlMsg>
-          </>
-        )}
+        <>
+          <FtlMsg id="confirm-signup-code-code-expired">
+            <p>Code expired?</p>
+          </FtlMsg>
+          <FtlMsg id="confirm-signup-code-resend-code-link">
+            <button
+              id="resend"
+              className="link-blue"
+              onClick={handleResendCode}
+            >
+              Email new code.
+            </button>
+          </FtlMsg>
+        </>
       </div>
     </AppLayout>
   );

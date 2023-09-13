@@ -68,7 +68,10 @@ const BrandMessaging = ({
   }
 
   return (
-    <div id="banner-brand-message" className="fixed w-full top-0 left-0">
+    <div
+      id="banner-brand-message"
+      className="w-full relative mobileLandscape:absolute mobileLandscape:top-0 mobileLandscape:left-0"
+    >
       <div className="flex relative justify-center p-2 brand-banner-bg">
         {mode === 'prelaunch' && (
           <div className="flex" data-testid="brand-prelaunch">
@@ -83,12 +86,12 @@ const BrandMessaging = ({
               </div>
             </div>
             <div className="flex-initial max-w-md pr-2">
-              <p className="text-left text-sm font-bold">
+              <p className="text-left text-sm font-bold w-5/6 mobileLandscape:w-full">
                 <FtlMsg id="brand-prelaunch-title">
                   Firefox accounts will be renamed Mozilla accounts on Nov 1
                 </FtlMsg>
               </p>
-              <p className="text-left text-xs">
+              <p className="text-left text-xs w-5/6 mobileLandscape:w-full">
                 <FtlMsg id="brand-prelaunch-subtitle">
                   You’ll still sign in with the same username and password, and
                   there are no other changes to the products that you use.
@@ -108,7 +111,7 @@ const BrandMessaging = ({
         {mode === 'postlaunch' && (
           <div className="flex" data-testid="brand-postlaunch">
             <div className="flex-initial max-w-md pr-2">
-              <p className="text-sm font-bold">
+              <p className="text-sm font-bold w-5/6 mobileLandscape:w-full">
                 <FtlMsg id="brand-postlaunch-title">
                   We’ve renamed Firefox accounts to Mozilla accounts. You’ll
                   still sign in with the same username and password, and there
@@ -125,7 +128,7 @@ const BrandMessaging = ({
             </div>
           </div>
         )}
-        <div className="absolute w-1/12 right-0 top-0 pt-3 start-0">
+        <div className="absolute w-1/12 rtl:left-0 ltr:right-0 top-0 pt-3">
           <FtlMsg id="brand-banner-dismiss-button" attrs={{ ariaLabel: true }}>
             <button
               id="close-brand-banner"

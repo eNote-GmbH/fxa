@@ -92,12 +92,7 @@
         background: #000;
       }
     }
-  }
-
-  @include respond-to('small') {
-    top: initial;
-    bottom: 0;
-  }
+    }
 }
 /** Work around for sticky fixed banner */
 body.brand-messaging {
@@ -109,6 +104,7 @@ body.brand-messaging {
   body.brand-messaging {
     padding-top: inherit;
   }
+
 }
 .choose-what-to-sync {
   .success-email-created {

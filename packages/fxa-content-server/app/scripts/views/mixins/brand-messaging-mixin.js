@@ -43,11 +43,22 @@ const Mixin = {
       this.logFlowEvent(`brand-messaging-${this.mode}-view`, this.viewName);
 
       // hack add some padding to prevent overlap
-      setTimeout(() => {
-        console.log('!!! adding padding2');
-        document.body.classList.add('brand-messaging');
-      }, 300);
+      // setTimeout(() => {
+      //   document.body.classList.add('brand-messaging');
+      //   document.querySelector;
+      // }, 0);
     }
+  },
+
+  afterRender() {
+    setTimeout(() => {
+      document.body.classList.add('brand-messaging');
+      const el = document.querySelector('#banner-brand-message');
+      if (el) {
+        el.remove();
+        document.body.append(el);
+      }
+    }, 0);
   },
 
   setInitialContext(context) {

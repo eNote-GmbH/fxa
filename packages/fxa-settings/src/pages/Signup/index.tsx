@@ -20,6 +20,8 @@ import TermsPrivacyAgreement from '../../components/TermsPrivacyAgreement';
 import Banner, { BannerType } from '../../components/Banner';
 import CardHeader from '../../components/CardHeader';
 import { REACT_ENTRYPOINT } from '../../constants';
+import BrandMessaging from '../../components/BrandMessaging';
+import { createPortal } from 'react-dom';
 
 interface SharedProps {
   email: string;
@@ -144,6 +146,7 @@ const Signup = ({
     // TODO: if force_auth && AuthErrors.is(error, 'DELETED_ACCOUNT') :
     //       - forceMessage('Account no longer exists. Recreate it?')
     <>
+      {createPortal(<BrandMessaging {...{ viewName }} />, document.body)}
       <CardHeader
         headingText="Set your password"
         headingTextFtlId="signup-heading"

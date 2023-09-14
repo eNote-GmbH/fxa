@@ -9,6 +9,8 @@
  * - Contentful data fetch by offering
  *
  */
+import 'server-only';
+
 import { CartState } from '@fxa/shared/db/mysql/account';
 
 export async function fetchFromContentful() {

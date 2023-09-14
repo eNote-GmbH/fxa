@@ -1,5 +1,7 @@
 import { PurchaseDetails, TermsAndPrivacy } from '@fxa/payments/ui/server';
+import { CartService } from '@fxa/payments/cart';
 import { getCartData, getContentfulContent } from '../../lib/apiClient';
+import { getApp } from '../../nestapp/app';
 
 interface CheckoutParams {
   offeringId: string;
@@ -17,6 +19,7 @@ export default async function Index({ params }: { params: CheckoutParams }) {
   const contentfulData = getContentfulContent(params.offeringId, locale);
   const cartData = getCartData(cartId);
   const [contentful, cart] = await Promise.all([contentfulData, cartData]);
+  const cartService = (await getApp()).get(CartService);
 
   return (
     <>

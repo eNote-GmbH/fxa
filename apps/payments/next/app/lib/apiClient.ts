@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { fetchCartData, fetchFromContentful } from './stubs';
 
 export async function getCartData(cartId: string) {

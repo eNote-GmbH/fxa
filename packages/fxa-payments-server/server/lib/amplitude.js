@@ -31,6 +31,8 @@ const remoteAddress =
 const geolocate = require('fxa-shared/express/geo-locate').geolocate(geodb)(
   remoteAddress
 )(log);
+// TODO - Uncomment - Currently causing test failures
+// const { determineLocale } = require('@fxa/shared/l10n');
 const {determineLocale} = require('fxa-shared/l10n/determineLocale')
 
 const FUZZY_EVENTS = new Map([

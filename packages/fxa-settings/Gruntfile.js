@@ -5,7 +5,7 @@
 module.exports = function (grunt) {
   const srcPaths = ['.license.header', 'src/**/*.ftl'];
   const testPaths = [
-    '../fxa-shared/l10n/branding.ftl',
+    '../../libs/shared/l10n/src/lib/branding.ftl',
     '../fxa-react/components/**/*.ftl',
     'src/**/*.ftl',
   ];

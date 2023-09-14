@@ -4,7 +4,7 @@ import {
   getFormattedMsg,
   getLocalizedCurrency,
   getLocalizedCurrencyString,
-} from '@fxa/shared/l10n/fluent';
+} from '@fxa/shared/l10n';
 import { headers } from 'next/headers';
 import Image from 'next/image';
 import { formatPlanPricing } from '../utils/helpers';

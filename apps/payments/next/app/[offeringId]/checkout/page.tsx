@@ -22,26 +22,30 @@ export default async function Index({ params }: { params: CheckoutParams }) {
     <>
       <h1 className="page-title-container">Under Construction</h1>
       <section className="payment-panel" aria-label="Purchase details">
-        <PurchaseDetails
-          interval={cart.interval}
-          invoice={cart.nextInvoice}
-          purchaseDetails={contentful.purchaseDetails}
-        />
+        <div className="component-card text-sm px-4 rounded-t-none tablet:rounded-t-lg">
+          <PurchaseDetails
+            interval={cart.interval}
+            invoice={cart.nextInvoice}
+            purchaseDetails={contentful.purchaseDetails}
+          />
+        </div>
       </section>
-      <section
-        aria-label="Payment method and terms and privacy notices"
-        className="component-card border-t-0 mb-6 pt-4 px-4 pb-14 rounded-t-lg text-grey-600 tablet:rounded-t-none desktop:px-12 desktop:pb-12"
-      >
-        <p className="h-[640px] flex items-center justify-center">
+      <div className="component-card border-t-0 mb-6 pt-4 px-4 pb-14 rounded-t-lg text-grey-600 tablet:rounded-t-none desktop:px-12 desktop:pb-12">
+        <section
+          className="h-[640px] flex items-center justify-center"
+          aria-label="Section under construction"
+        >
           Section Under Construction
-        </p>
-        <TermsAndPrivacy
-          {...cart}
-          {...contentful.commonContent}
-          {...contentful.purchaseDetails}
-          showFXALinks={true}
-        />
-      </section>
+        </section>
+        <section className="pt-14" aria-label="Terms and Privacy Notices">
+          <TermsAndPrivacy
+            {...cart}
+            {...contentful.commonContent}
+            {...contentful.purchaseDetails}
+            showFXALinks={true}
+          />
+        </section>
+      </div>
     </>
   );
 }

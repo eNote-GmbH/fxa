@@ -1,0 +1,10 @@
+{
+  "subject": {
+    "id": "postChangeAccountRecovery-email-subject",
+    "message": "Account recovery key changed"
+  },
+  "action": {
+    "id": "postChangeAccountRecovery-email-action-button",
+    "message": "Manage account"
+  }
+}

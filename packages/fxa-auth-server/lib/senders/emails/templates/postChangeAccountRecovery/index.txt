@@ -1,0 +1,18 @@
+postAddAccountRecovery-title2 = "You created a new account recovery key"
+
+postAddAccountRecovery-description-2 = "A new key was created from:"
+
+<%- include('/partials/userInfo/index.txt') %>
+
+postAddAccountRecovery-not-you = "Not you?"
+
+postAddAccountRecovery-delete-key = "Delete the new key:"
+<%- revokeAccountRecoveryLink %>
+
+postAddAccountRecovery-changd-password = "Change your password:"
+<%- passwordChangeLink %>
+
+<%- include('/partials/manageAccount/index.txt') %>
+<%- include('/partials/automatedEmailNotAuthorized/index.txt') %>
+
+<%- include('/partials/support/index.txt') %>

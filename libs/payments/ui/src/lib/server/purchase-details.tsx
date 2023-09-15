@@ -91,7 +91,7 @@ export async function PurchaseDetails(props: PurchaseDetailsProps) {
   const l10n = await getBundle(languages);
 
   return (
-    <>
+    <div className="component-card text-sm px-4 rounded-t-none tablet:rounded-t-lg">
       <div className="flex gap-4 my-0 py-4 row-divider-grey-200">
         <Image
           src={webIcon}
@@ -212,7 +212,7 @@ export async function PurchaseDetails(props: PurchaseDetailsProps) {
         </span>
       </div>
       {/* TODO - Add InfoBox as part of Coupon Form - Consider adding as child component */}
-    </>
+    </div>
   );
 }
 

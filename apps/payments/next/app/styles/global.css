@@ -27,14 +27,6 @@ body {
   @apply bg-white shadow-sm shadow-grey-300 text-center mt-0 mb-auto pt-5 px-4 pb-px tablet:mx-0;
 }
 
-.component-card {
-  @apply bg-white rounded-b-lg shadow-sm shadow-grey-300;
-}
-
-.component-card.rounded-plan {
-  @apply rounded-lg tablet:mt-0;
-}
-
 .payment-error ~ .payment-panel,
 .payment-confirmation ~ .payment-panel {
   @apply mt-6;

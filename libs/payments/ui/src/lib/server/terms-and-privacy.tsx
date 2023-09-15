@@ -37,7 +37,7 @@ function GenericTerms({
         {l10n.getMessage(titleLocalizationId)?.value?.toString() || title}
       </h4>
 
-      <ul className="inline m-0 text-grey-400">
+      <ul className="m-0 text-grey-500">
         {items.map((item) => (
           <li key={`span-${item.key}`} className="inline mr-3 last:mr-0">
             <a
@@ -104,11 +104,11 @@ export async function TermsAndPrivacy({
   const l10n = await getBundle(languages);
 
   return (
-    <>
+    <aside className="pt-14" aria-label="Terms and Privacy Notices">
       {terms.map((term) => (
         <GenericTerms {...term} titleId={term.key} key={term.key} l10n={l10n} />
       ))}
-    </>
+    </aside>
   );
 }
 

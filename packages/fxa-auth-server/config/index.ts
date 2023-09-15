@@ -1979,6 +1979,26 @@ const convictConf = convict({
       format: String,
     },
   },
+  graphql: {
+    contentfulApiKey: {
+      default: '',
+      doc: 'GraphQL Content API key for Contentful hCMS to fetch RP-provided content',
+      env: 'CONTENTFUL_GRAPHQL_API_KEY',
+      format: String,
+    },
+    contentfulSpaceId: {
+      default: '',
+      doc: 'Alphanumeric id used for instantiating the ContentfulClient',
+      env: 'CONTENTFUL_GRAPHQL_SPACE_ID',
+      format: String,
+    },
+    contentfulEnvironment: {
+      default: '',
+      doc: 'Environment alias used for instantiating the ContentfulClient',
+      env: 'CONTENTFUL_GRAPHQL_ENVIRONMENT',
+      format: String,
+    },
+  },
 });
 
 // handle configuration files.  you can specify a CSV list of configuration

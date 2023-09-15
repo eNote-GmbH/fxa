@@ -4,6 +4,7 @@
 
 import 'server-only';
 
+import { CartService } from '@fxa/payments/cart';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
@@ -14,4 +15,8 @@ export async function getApp() {
   if (app) return app;
   app = await NestFactory.createApplicationContext(AppModule);
   return app;
+}
+
+export async function getCartService() {
+  return (await getApp()).get(CartService);
 }

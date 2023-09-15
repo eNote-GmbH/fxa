@@ -44,7 +44,19 @@ const conf = convict({
   contentfulApiKey: {
     doc: 'GraphQL Content API key for Contentful hCMS to fetch RP-provided content',
     format: String,
-    env: 'CONTENTFUL_API_KEY',
+    env: 'CONTENTFUL_GRAPHQL_API_KEY',
+    default: '',
+  },
+  contentfulSpaceId: {
+    doc: 'Alphanumeric id used for instantiating the ContentfulClient',
+    format: String,
+    env: 'CONTENTFUL_GRAPHQL_SPACE_ID',
+    default: '',
+  },
+  contentfulEnvironment: {
+    doc: 'Environment alias used for instantiating the ContentfulClient',
+    format: String,
+    env: 'CONTENTFUL_GRAPHQL_ENVIRONMENT',
     default: '',
   },
   corsOrigin: {
@@ -253,5 +265,5 @@ conf.loadFile(files);
 conf.validate({ allowed: 'strict' });
 const Config = conf;
 
-export type AppConfig = ReturnType<(typeof Config)['getProperties']>;
+export type AppConfig = ReturnType<typeof Config['getProperties']>;
 export default Config;

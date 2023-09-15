@@ -2,44 +2,31 @@
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = {
-  [K in keyof T]: T[K];
-};
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]?: Maybe<T[SubKey]>;
-};
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]: Maybe<T[SubKey]>;
-};
-export type MakeEmpty<
-  T extends { [key: string]: unknown },
-  K extends keyof T
-> = { [_ in K]?: never };
-export type Incremental<T> =
-  | T
-  | {
-      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never;
-    };
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string };
-  String: { input: string; output: string };
-  Boolean: { input: boolean; output: boolean };
-  Int: { input: number; output: number };
-  Float: { input: number; output: number };
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
   /**
    * A date-time string at UTC, such as 2007-12-03T10:15:30Z,
    *     compliant with the 'date-time' format outlined in section 5.6 of
    *     the RFC 3339 profile of the ISO 8601 standard for representation
    *     of dates and times using the Gregorian calendar.
    */
-  DateTime: { input: any; output: any };
+  DateTime: { input: any; output: any; }
   /** The 'Dimension' type represents dimensions as whole numeric values between `1` and `4000`. */
-  Dimension: { input: any; output: any };
+  Dimension: { input: any; output: any; }
   /** The 'HexColor' type represents color in `rgb:ffffff` string format. */
-  HexColor: { input: any; output: any };
+  HexColor: { input: any; output: any; }
   /** The 'Quality' type represents quality as whole numeric values between `1` and `100`. */
-  Quality: { input: any; output: any };
+  Quality: { input: any; output: any; }
 };
 
 /** Represents a binary file in a space. An asset can be any file type. */
@@ -58,46 +45,55 @@ export type Asset = {
   width?: Maybe<Scalars['Int']['output']>;
 };
 
+
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetContentTypeArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetFileNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetHeightArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetSizeArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetTitleArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetUrlArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
   transform?: InputMaybe<ImageTransformOptions>;
 };
+
 
 /** Represents a binary file in a space. An asset can be any file type. */
 export type AssetWidthArgs = {
@@ -121,9 +117,7 @@ export type AssetFilter = {
   contentType_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contentType_not?: InputMaybe<Scalars['String']['input']>;
   contentType_not_contains?: InputMaybe<Scalars['String']['input']>;
-  contentType_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  contentType_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
   description?: InputMaybe<Scalars['String']['input']>;
   description_contains?: InputMaybe<Scalars['String']['input']>;
@@ -131,9 +125,7 @@ export type AssetFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   fileName?: InputMaybe<Scalars['String']['input']>;
   fileName_contains?: InputMaybe<Scalars['String']['input']>;
   fileName_exists?: InputMaybe<Scalars['Boolean']['input']>;
@@ -190,6 +182,7 @@ export type AssetLinkingCollections = {
   entryCollection?: Maybe<EntryCollection>;
 };
 
+
 export type AssetLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -217,7 +210,7 @@ export enum AssetOrder {
   UrlAsc = 'url_ASC',
   UrlDesc = 'url_DESC',
   WidthAsc = 'width_ASC',
-  WidthDesc = 'width_DESC',
+  WidthDesc = 'width_DESC'
 }
 
 /** Capabilities that services honor, and that customers are entitled to depending on the offering they've purchased. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/capability) */
@@ -232,20 +225,24 @@ export type Capability = Entry & {
   sys: Sys;
 };
 
+
 /** Capabilities that services honor, and that customers are entitled to depending on the offering they've purchased. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/capability) */
 export type CapabilityDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Capabilities that services honor, and that customers are entitled to depending on the offering they've purchased. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/capability) */
 export type CapabilityInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Capabilities that services honor, and that customers are entitled to depending on the offering they've purchased. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/capability) */
 export type CapabilityLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Capabilities that services honor, and that customers are entitled to depending on the offering they've purchased. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/capability) */
 export type CapabilityServicesCollectionArgs = {
@@ -256,6 +253,7 @@ export type CapabilityServicesCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<ServiceFilter>;
 };
+
 
 /** Capabilities that services honor, and that customers are entitled to depending on the offering they've purchased. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/capability) */
 export type CapabilitySlugArgs = {
@@ -280,18 +278,14 @@ export type CapabilityFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
   internalName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   services?: InputMaybe<CfServiceNestedFilter>;
   servicesCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
@@ -311,6 +305,7 @@ export type CapabilityLinkingCollections = {
   serviceCollection?: Maybe<ServiceCollection>;
 };
 
+
 export type CapabilityLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -318,22 +313,20 @@ export type CapabilityLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type CapabilityLinkingCollectionsOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<CapabilityLinkingCollectionsOfferingCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<CapabilityLinkingCollectionsOfferingCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type CapabilityLinkingCollectionsServiceCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<CapabilityLinkingCollectionsServiceCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<CapabilityLinkingCollectionsServiceCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -354,7 +347,7 @@ export enum CapabilityLinkingCollectionsOfferingCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum CapabilityLinkingCollectionsServiceCollectionOrder {
@@ -371,7 +364,7 @@ export enum CapabilityLinkingCollectionsServiceCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum CapabilityOrder {
@@ -388,7 +381,7 @@ export enum CapabilityOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type CapabilityServicesCollection = {
@@ -413,7 +406,7 @@ export enum CapabilityServicesCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
@@ -433,50 +426,60 @@ export type CommonContent = Entry & {
   termsOfServiceUrl?: Maybe<Scalars['String']['output']>;
 };
 
+
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentCancellationUrlArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentEmailIconArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
+
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentPrivacyNoticeDownloadUrlArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentPrivacyNoticeUrlArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentSuccessActionButtonLabelArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentSuccessActionButtonUrlArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentTermsOfServiceDownloadUrlArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Content used on multiple pages, not specific to a certain component. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/commonContent) */
 export type CommonContentTermsOfServiceUrlArgs = {
@@ -497,14 +500,10 @@ export type CommonContentFilter = {
   cancellationUrl?: InputMaybe<Scalars['String']['input']>;
   cancellationUrl_contains?: InputMaybe<Scalars['String']['input']>;
   cancellationUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  cancellationUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  cancellationUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cancellationUrl_not?: InputMaybe<Scalars['String']['input']>;
   cancellationUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  cancellationUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  cancellationUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
   emailIcon?: InputMaybe<Scalars['String']['input']>;
   emailIcon_contains?: InputMaybe<Scalars['String']['input']>;
@@ -519,82 +518,50 @@ export type CommonContentFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeDownloadUrl?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeDownloadUrl_contains?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeDownloadUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  privacyNoticeDownloadUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeDownloadUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeDownloadUrl_not?: InputMaybe<Scalars['String']['input']>;
-  privacyNoticeDownloadUrl_not_contains?: InputMaybe<
-    Scalars['String']['input']
-  >;
-  privacyNoticeDownloadUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeDownloadUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
+  privacyNoticeDownloadUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeUrl?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeUrl_contains?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  privacyNoticeUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeUrl_not?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  privacyNoticeUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonLabel?: InputMaybe<Scalars['String']['input']>;
   successActionButtonLabel_contains?: InputMaybe<Scalars['String']['input']>;
   successActionButtonLabel_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  successActionButtonLabel_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonLabel_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonLabel_not?: InputMaybe<Scalars['String']['input']>;
-  successActionButtonLabel_not_contains?: InputMaybe<
-    Scalars['String']['input']
-  >;
-  successActionButtonLabel_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonLabel_not_contains?: InputMaybe<Scalars['String']['input']>;
+  successActionButtonLabel_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonUrl?: InputMaybe<Scalars['String']['input']>;
   successActionButtonUrl_contains?: InputMaybe<Scalars['String']['input']>;
   successActionButtonUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  successActionButtonUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonUrl_not?: InputMaybe<Scalars['String']['input']>;
   successActionButtonUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  successActionButtonUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
   termsOfServiceDownloadUrl?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceDownloadUrl_contains?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceDownloadUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  termsOfServiceDownloadUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceDownloadUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   termsOfServiceDownloadUrl_not?: InputMaybe<Scalars['String']['input']>;
-  termsOfServiceDownloadUrl_not_contains?: InputMaybe<
-    Scalars['String']['input']
-  >;
-  termsOfServiceDownloadUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceDownloadUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
+  termsOfServiceDownloadUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   termsOfServiceUrl?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceUrl_contains?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  termsOfServiceUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   termsOfServiceUrl_not?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  termsOfServiceUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type CommonContentLinkingCollections = {
@@ -603,6 +570,7 @@ export type CommonContentLinkingCollections = {
   offeringCollection?: Maybe<OfferingCollection>;
 };
 
+
 export type CommonContentLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -610,12 +578,11 @@ export type CommonContentLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type CommonContentLinkingCollectionsOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<CommonContentLinkingCollectionsOfferingCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<CommonContentLinkingCollectionsOfferingCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -636,7 +603,7 @@ export enum CommonContentLinkingCollectionsOfferingCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum CommonContentOrder {
@@ -665,7 +632,7 @@ export enum CommonContentOrder {
   TermsOfServiceDownloadUrlAsc = 'termsOfServiceDownloadUrl_ASC',
   TermsOfServiceDownloadUrlDesc = 'termsOfServiceDownloadUrl_DESC',
   TermsOfServiceUrlAsc = 'termsOfServiceUrl_ASC',
-  TermsOfServiceUrlDesc = 'termsOfServiceUrl_DESC',
+  TermsOfServiceUrlDesc = 'termsOfServiceUrl_DESC'
 }
 
 export type ContentfulMetadata = {
@@ -705,20 +672,24 @@ export type CouponConfig = Entry & {
   sys: Sys;
 };
 
+
 /** Additional Coupon configuration options that are not currently supported by Stripe. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/couponConfig) */
 export type CouponConfigCountriesArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Additional Coupon configuration options that are not currently supported by Stripe. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/couponConfig) */
 export type CouponConfigInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Additional Coupon configuration options that are not currently supported by Stripe. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/couponConfig) */
 export type CouponConfigLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Additional Coupon configuration options that are not currently supported by Stripe. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/couponConfig) */
 export type CouponConfigStripePromotionCodesArgs = {
@@ -750,18 +721,10 @@ export type CouponConfigFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePromotionCodes_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePromotionCodes_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePromotionCodes_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePromotionCodes_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePromotionCodes_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePromotionCodes_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripePromotionCodes_exists?: InputMaybe<Scalars['Boolean']['input']>;
   sys?: InputMaybe<SysFilter>;
 };
@@ -772,6 +735,7 @@ export type CouponConfigLinkingCollections = {
   offeringCollection?: Maybe<OfferingCollection>;
 };
 
+
 export type CouponConfigLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -779,12 +743,11 @@ export type CouponConfigLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type CouponConfigLinkingCollectionsOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<CouponConfigLinkingCollectionsOfferingCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<CouponConfigLinkingCollectionsOfferingCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -805,7 +768,7 @@ export enum CouponConfigLinkingCollectionsOfferingCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum CouponConfigOrder {
@@ -820,7 +783,7 @@ export enum CouponConfigOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type Entry = {
@@ -851,7 +814,7 @@ export enum EntryOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 /** IAP configuration options required for IAP integrations. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/iap) */
@@ -865,20 +828,24 @@ export type Iap = Entry & {
   sys: Sys;
 };
 
+
 /** IAP configuration options required for IAP integrations. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/iap) */
 export type IapAppleProductIDsArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** IAP configuration options required for IAP integrations. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/iap) */
 export type IapGoogleSkUsArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** IAP configuration options required for IAP integrations. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/iap) */
 export type IapInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** IAP configuration options required for IAP integrations. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/iap) */
 export type IapLinkedFromArgs = {
@@ -896,26 +863,14 @@ export type IapCollection = {
 export type IapFilter = {
   AND?: InputMaybe<Array<InputMaybe<IapFilter>>>;
   OR?: InputMaybe<Array<InputMaybe<IapFilter>>>;
-  appleProductIDs_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  appleProductIDs_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  appleProductIDs_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  appleProductIDs_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  appleProductIDs_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  appleProductIDs_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   appleProductIDs_exists?: InputMaybe<Scalars['Boolean']['input']>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
-  googleSKUs_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  googleSKUs_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  googleSKUs_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  googleSKUs_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  googleSKUs_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  googleSKUs_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   googleSKUs_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
@@ -923,9 +878,7 @@ export type IapFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
 };
 
@@ -935,6 +888,7 @@ export type IapLinkingCollections = {
   offeringCollection?: Maybe<OfferingCollection>;
 };
 
+
 export type IapLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -942,12 +896,11 @@ export type IapLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type IapLinkingCollectionsOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<IapLinkingCollectionsOfferingCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<IapLinkingCollectionsOfferingCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -968,7 +921,7 @@ export enum IapLinkingCollectionsOfferingCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum IapOrder {
@@ -981,7 +934,7 @@ export enum IapOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum ImageFormat {
@@ -1003,7 +956,7 @@ export enum ImageFormat {
    */
   Png8 = 'PNG8',
   /** WebP image format. */
-  Webp = 'WEBP',
+  Webp = 'WEBP'
 }
 
 export enum ImageResizeFocus {
@@ -1028,7 +981,7 @@ export enum ImageResizeFocus {
   /** Focus the resizing on the top left. */
   TopLeft = 'TOP_LEFT',
   /** Focus the resizing on the top right. */
-  TopRight = 'TOP_RIGHT',
+  TopRight = 'TOP_RIGHT'
 }
 
 export enum ImageResizeStrategy {
@@ -1046,7 +999,7 @@ export enum ImageResizeStrategy {
   /** Resizes the image to the specified dimensions, changing the original aspect ratio if needed. */
   Scale = 'SCALE',
   /** Creates a thumbnail from the image. */
-  Thumb = 'THUMB',
+  Thumb = 'THUMB'
 }
 
 export type ImageTransformOptions = {
@@ -1098,10 +1051,12 @@ export type Offering = Entry & {
   sys: Sys;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingApiIdentifierArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingCapabilitiesCollectionArgs = {
@@ -1113,6 +1068,7 @@ export type OfferingCapabilitiesCollectionArgs = {
   where?: InputMaybe<CapabilityFilter>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingCommonContentArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -1120,10 +1076,12 @@ export type OfferingCommonContentArgs = {
   where?: InputMaybe<CommonContentFilter>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingCountriesArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingCouponConfigCollectionArgs = {
@@ -1135,6 +1093,7 @@ export type OfferingCouponConfigCollectionArgs = {
   where?: InputMaybe<CouponConfigFilter>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingDefaultPurchaseArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -1142,22 +1101,23 @@ export type OfferingDefaultPurchaseArgs = {
   where?: InputMaybe<PurchaseFilter>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingExperimentPurchaseCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<OfferingExperimentPurchaseCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<OfferingExperimentPurchaseCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<PurchaseFilter>;
 };
+
 
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingIapCollectionArgs = {
@@ -1169,15 +1129,18 @@ export type OfferingIapCollectionArgs = {
   where?: InputMaybe<IapFilter>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Offering configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/offering) */
 export type OfferingStripeProductIdArgs = {
@@ -1206,7 +1169,7 @@ export enum OfferingCapabilitiesCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type OfferingCollection = {
@@ -1237,7 +1200,7 @@ export enum OfferingCouponConfigCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type OfferingExperimentPurchaseCollection = {
@@ -1260,7 +1223,7 @@ export enum OfferingExperimentPurchaseCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type OfferingFilter = {
@@ -1272,23 +1235,15 @@ export type OfferingFilter = {
   apiIdentifier_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   apiIdentifier_not?: InputMaybe<Scalars['String']['input']>;
   apiIdentifier_not_contains?: InputMaybe<Scalars['String']['input']>;
-  apiIdentifier_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  apiIdentifier_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   capabilities?: InputMaybe<CfCapabilityNestedFilter>;
   capabilitiesCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   commonContent?: InputMaybe<CfCommonContentNestedFilter>;
   commonContent_exists?: InputMaybe<Scalars['Boolean']['input']>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
-  countries_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  countries_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  countries_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  countries_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  countries_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  countries_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   countries_exists?: InputMaybe<Scalars['Boolean']['input']>;
   couponConfig?: InputMaybe<CfCouponConfigNestedFilter>;
   couponConfigCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1300,9 +1255,7 @@ export type OfferingFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   experimentPurchase?: InputMaybe<CfPurchaseNestedFilter>;
   experimentPurchaseCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   iap?: InputMaybe<CfIapNestedFilter>;
@@ -1313,20 +1266,14 @@ export type OfferingFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripeProductId?: InputMaybe<Scalars['String']['input']>;
   stripeProductId_contains?: InputMaybe<Scalars['String']['input']>;
   stripeProductId_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  stripeProductId_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  stripeProductId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripeProductId_not?: InputMaybe<Scalars['String']['input']>;
   stripeProductId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  stripeProductId_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  stripeProductId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
 };
 
@@ -1348,14 +1295,16 @@ export enum OfferingIapCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type OfferingLinkingCollections = {
   __typename?: 'OfferingLinkingCollections';
   entryCollection?: Maybe<EntryCollection>;
   purchaseCollection?: Maybe<PurchaseCollection>;
+  subGroupCollection?: Maybe<SubGroupCollection>;
 };
+
 
 export type OfferingLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1364,12 +1313,20 @@ export type OfferingLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type OfferingLinkingCollectionsPurchaseCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<OfferingLinkingCollectionsPurchaseCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<OfferingLinkingCollectionsPurchaseCollectionOrder>>>;
+  preview?: InputMaybe<Scalars['Boolean']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type OfferingLinkingCollectionsSubGroupCollectionArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  locale?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<Array<InputMaybe<OfferingLinkingCollectionsSubGroupCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -1386,7 +1343,22 @@ export enum OfferingLinkingCollectionsPurchaseCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
+}
+
+export enum OfferingLinkingCollectionsSubGroupCollectionOrder {
+  GroupNameAsc = 'groupName_ASC',
+  GroupNameDesc = 'groupName_DESC',
+  InternalNameAsc = 'internalName_ASC',
+  InternalNameDesc = 'internalName_DESC',
+  SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
+  SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
+  SysIdAsc = 'sys_id_ASC',
+  SysIdDesc = 'sys_id_DESC',
+  SysPublishedAtAsc = 'sys_publishedAt_ASC',
+  SysPublishedAtDesc = 'sys_publishedAt_DESC',
+  SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum OfferingOrder {
@@ -1405,7 +1377,7 @@ export enum OfferingOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
@@ -1421,20 +1393,24 @@ export type Purchase = Entry & {
   sys: Sys;
 };
 
+
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
 export type PurchaseDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
 export type PurchaseInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
 export type PurchaseLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
 export type PurchaseOfferingArgs = {
@@ -1443,12 +1419,14 @@ export type PurchaseOfferingArgs = {
   where?: InputMaybe<OfferingFilter>;
 };
 
+
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
 export type PurchasePurchaseDetailsArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   where?: InputMaybe<PurchaseDetailsFilter>;
 };
+
 
 /** Purchase flow related configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchase) */
 export type PurchaseStripePlanChoicesArgs = {
@@ -1476,30 +1454,36 @@ export type PurchaseDetails = Entry & {
   webIcon?: Maybe<Scalars['String']['output']>;
 };
 
+
 /** Available Purchase details component configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchaseDetails) */
 export type PurchaseDetailsDetailsArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Available Purchase details component configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchaseDetails) */
 export type PurchaseDetailsInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Available Purchase details component configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchaseDetails) */
 export type PurchaseDetailsLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Available Purchase details component configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchaseDetails) */
 export type PurchaseDetailsProductNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Available Purchase details component configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchaseDetails) */
 export type PurchaseDetailsSubtitleArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Available Purchase details component configuration options. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/purchaseDetails) */
 export type PurchaseDetailsWebIconArgs = {
@@ -1531,18 +1515,14 @@ export type PurchaseDetailsFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   productName?: InputMaybe<Scalars['String']['input']>;
   productName_contains?: InputMaybe<Scalars['String']['input']>;
   productName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   productName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   productName_not?: InputMaybe<Scalars['String']['input']>;
   productName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  productName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  productName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   subtitle?: InputMaybe<Scalars['String']['input']>;
   subtitle_contains?: InputMaybe<Scalars['String']['input']>;
   subtitle_exists?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1566,6 +1546,7 @@ export type PurchaseDetailsLinkingCollections = {
   purchaseCollection?: Maybe<PurchaseCollection>;
 };
 
+
 export type PurchaseDetailsLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -1573,12 +1554,11 @@ export type PurchaseDetailsLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type PurchaseDetailsLinkingCollectionsPurchaseCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<PurchaseDetailsLinkingCollectionsPurchaseCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<PurchaseDetailsLinkingCollectionsPurchaseCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -1595,7 +1575,7 @@ export enum PurchaseDetailsLinkingCollectionsPurchaseCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum PurchaseDetailsOrder {
@@ -1614,7 +1594,7 @@ export enum PurchaseDetailsOrder {
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
   SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
   WebIconAsc = 'webIcon_ASC',
-  WebIconDesc = 'webIcon_DESC',
+  WebIconDesc = 'webIcon_DESC'
 }
 
 export type PurchaseFilter = {
@@ -1627,31 +1607,21 @@ export type PurchaseFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
   internalName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   offering?: InputMaybe<CfOfferingNestedFilter>;
   offering_exists?: InputMaybe<Scalars['Boolean']['input']>;
   purchaseDetails?: InputMaybe<CfPurchaseDetailsNestedFilter>;
   purchaseDetails_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  stripePlanChoices_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePlanChoices_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePlanChoices_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  stripePlanChoices_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePlanChoices_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePlanChoices_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripePlanChoices_exists?: InputMaybe<Scalars['Boolean']['input']>;
   sys?: InputMaybe<SysFilter>;
 };
@@ -1662,6 +1632,7 @@ export type PurchaseLinkingCollections = {
   offeringCollection?: Maybe<OfferingCollection>;
 };
 
+
 export type PurchaseLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -1669,12 +1640,11 @@ export type PurchaseLinkingCollectionsEntryCollectionArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type PurchaseLinkingCollectionsOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<PurchaseLinkingCollectionsOfferingCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<PurchaseLinkingCollectionsOfferingCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -1695,7 +1665,7 @@ export enum PurchaseLinkingCollectionsOfferingCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum PurchaseOrder {
@@ -1710,7 +1680,7 @@ export enum PurchaseOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type Query = {
@@ -1738,11 +1708,13 @@ export type Query = {
   subGroupCollection?: Maybe<SubGroupCollection>;
 };
 
+
 export type QueryAssetArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryAssetCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1753,11 +1725,13 @@ export type QueryAssetCollectionArgs = {
   where?: InputMaybe<AssetFilter>;
 };
 
+
 export type QueryCapabilityArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryCapabilityCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1768,11 +1742,13 @@ export type QueryCapabilityCollectionArgs = {
   where?: InputMaybe<CapabilityFilter>;
 };
 
+
 export type QueryCommonContentArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryCommonContentCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1783,11 +1759,13 @@ export type QueryCommonContentCollectionArgs = {
   where?: InputMaybe<CommonContentFilter>;
 };
 
+
 export type QueryCouponConfigArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryCouponConfigCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1798,6 +1776,7 @@ export type QueryCouponConfigCollectionArgs = {
   where?: InputMaybe<CouponConfigFilter>;
 };
 
+
 export type QueryEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
@@ -1807,11 +1786,13 @@ export type QueryEntryCollectionArgs = {
   where?: InputMaybe<EntryFilter>;
 };
 
+
 export type QueryIapArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryIapCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1822,11 +1803,13 @@ export type QueryIapCollectionArgs = {
   where?: InputMaybe<IapFilter>;
 };
 
+
 export type QueryOfferingArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1837,11 +1820,13 @@ export type QueryOfferingCollectionArgs = {
   where?: InputMaybe<OfferingFilter>;
 };
 
+
 export type QueryPurchaseArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryPurchaseCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1852,11 +1837,13 @@ export type QueryPurchaseCollectionArgs = {
   where?: InputMaybe<PurchaseFilter>;
 };
 
+
 export type QueryPurchaseDetailsArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryPurchaseDetailsCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1867,11 +1854,13 @@ export type QueryPurchaseDetailsCollectionArgs = {
   where?: InputMaybe<PurchaseDetailsFilter>;
 };
 
+
 export type QueryServiceArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QueryServiceCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1882,11 +1871,13 @@ export type QueryServiceCollectionArgs = {
   where?: InputMaybe<ServiceFilter>;
 };
 
+
 export type QuerySubGroupArgs = {
   id: Scalars['String']['input'];
   locale?: InputMaybe<Scalars['String']['input']>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
 
 export type QuerySubGroupCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1909,6 +1900,7 @@ export type Service = Entry & {
   sys: Sys;
 };
 
+
 /** Mapping of services to relevant OAuth configuration and capabilities. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/service) */
 export type ServiceCapabilitiesCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -1919,20 +1911,24 @@ export type ServiceCapabilitiesCollectionArgs = {
   where?: InputMaybe<CapabilityFilter>;
 };
 
+
 /** Mapping of services to relevant OAuth configuration and capabilities. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/service) */
 export type ServiceDescriptionArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Mapping of services to relevant OAuth configuration and capabilities. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/service) */
 export type ServiceInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Mapping of services to relevant OAuth configuration and capabilities. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/service) */
 export type ServiceLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
+
 
 /** Mapping of services to relevant OAuth configuration and capabilities. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/service) */
 export type ServiceOauthClientIdArgs = {
@@ -1961,7 +1957,7 @@ export enum ServiceCapabilitiesCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type ServiceCollection = {
@@ -1984,27 +1980,21 @@ export type ServiceFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
   internalName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   oauthClientId?: InputMaybe<Scalars['String']['input']>;
   oauthClientId_contains?: InputMaybe<Scalars['String']['input']>;
   oauthClientId_exists?: InputMaybe<Scalars['Boolean']['input']>;
   oauthClientId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   oauthClientId_not?: InputMaybe<Scalars['String']['input']>;
   oauthClientId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  oauthClientId_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  oauthClientId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
 };
 
@@ -2014,15 +2004,15 @@ export type ServiceLinkingCollections = {
   entryCollection?: Maybe<EntryCollection>;
 };
 
+
 export type ServiceLinkingCollectionsCapabilityCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<
-    Array<InputMaybe<ServiceLinkingCollectionsCapabilityCollectionOrder>>
-  >;
+  order?: InputMaybe<Array<InputMaybe<ServiceLinkingCollectionsCapabilityCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
 };
+
 
 export type ServiceLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -2045,7 +2035,7 @@ export enum ServiceLinkingCollectionsCapabilityCollectionOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export enum ServiceOrder {
@@ -2062,7 +2052,7 @@ export enum ServiceOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 /** Subscription Group configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/subGroup) */
@@ -2076,27 +2066,33 @@ export type SubGroup = Entry & {
   sys: Sys;
 };
 
+
 /** Subscription Group configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/subGroup) */
 export type SubGroupGroupNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
+
 
 /** Subscription Group configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/subGroup) */
 export type SubGroupInternalNameArgs = {
   locale?: InputMaybe<Scalars['String']['input']>;
 };
 
+
 /** Subscription Group configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/subGroup) */
 export type SubGroupLinkedFromArgs = {
   allowedLocales?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
+
 /** Subscription Group configuration. [See type definition](https://app.contentful.com/spaces/l7gqxxg5i1gg/content_types/subGroup) */
 export type SubGroupOfferingCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   locale?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<Array<InputMaybe<SubGroupOfferingCollectionOrder>>>;
   preview?: InputMaybe<Scalars['Boolean']['input']>;
   skip?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<OfferingFilter>;
 };
 
 export type SubGroupCollection = {
@@ -2124,9 +2120,8 @@ export type SubGroupFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  offering?: InputMaybe<CfOfferingNestedFilter>;
   offeringCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   sys?: InputMaybe<SysFilter>;
 };
@@ -2135,6 +2130,7 @@ export type SubGroupLinkingCollections = {
   __typename?: 'SubGroupLinkingCollections';
   entryCollection?: Maybe<EntryCollection>;
 };
+
 
 export type SubGroupLinkingCollectionsEntryCollectionArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -2145,11 +2141,30 @@ export type SubGroupLinkingCollectionsEntryCollectionArgs = {
 
 export type SubGroupOfferingCollection = {
   __typename?: 'SubGroupOfferingCollection';
-  items: Array<Maybe<Entry>>;
+  items: Array<Maybe<Offering>>;
   limit: Scalars['Int']['output'];
   skip: Scalars['Int']['output'];
   total: Scalars['Int']['output'];
 };
+
+export enum SubGroupOfferingCollectionOrder {
+  ApiIdentifierAsc = 'apiIdentifier_ASC',
+  ApiIdentifierDesc = 'apiIdentifier_DESC',
+  DescriptionAsc = 'description_ASC',
+  DescriptionDesc = 'description_DESC',
+  InternalNameAsc = 'internalName_ASC',
+  InternalNameDesc = 'internalName_DESC',
+  StripeProductIdAsc = 'stripeProductId_ASC',
+  StripeProductIdDesc = 'stripeProductId_DESC',
+  SysFirstPublishedAtAsc = 'sys_firstPublishedAt_ASC',
+  SysFirstPublishedAtDesc = 'sys_firstPublishedAt_DESC',
+  SysIdAsc = 'sys_id_ASC',
+  SysIdDesc = 'sys_id_DESC',
+  SysPublishedAtAsc = 'sys_publishedAt_ASC',
+  SysPublishedAtDesc = 'sys_publishedAt_DESC',
+  SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
+}
 
 export enum SubGroupOrder {
   GroupNameAsc = 'groupName_ASC',
@@ -2163,7 +2178,7 @@ export enum SubGroupOrder {
   SysPublishedAtAsc = 'sys_publishedAt_ASC',
   SysPublishedAtDesc = 'sys_publishedAt_DESC',
   SysPublishedVersionAsc = 'sys_publishedVersion_ASC',
-  SysPublishedVersionDesc = 'sys_publishedVersion_DESC',
+  SysPublishedVersionDesc = 'sys_publishedVersion_DESC'
 }
 
 export type Sys = {
@@ -2181,15 +2196,11 @@ export type SysFilter = {
   firstPublishedAt_exists?: InputMaybe<Scalars['Boolean']['input']>;
   firstPublishedAt_gt?: InputMaybe<Scalars['DateTime']['input']>;
   firstPublishedAt_gte?: InputMaybe<Scalars['DateTime']['input']>;
-  firstPublishedAt_in?: InputMaybe<
-    Array<InputMaybe<Scalars['DateTime']['input']>>
-  >;
+  firstPublishedAt_in?: InputMaybe<Array<InputMaybe<Scalars['DateTime']['input']>>>;
   firstPublishedAt_lt?: InputMaybe<Scalars['DateTime']['input']>;
   firstPublishedAt_lte?: InputMaybe<Scalars['DateTime']['input']>;
   firstPublishedAt_not?: InputMaybe<Scalars['DateTime']['input']>;
-  firstPublishedAt_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['DateTime']['input']>>
-  >;
+  firstPublishedAt_not_in?: InputMaybe<Array<InputMaybe<Scalars['DateTime']['input']>>>;
   id?: InputMaybe<Scalars['String']['input']>;
   id_contains?: InputMaybe<Scalars['String']['input']>;
   id_exists?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2205,22 +2216,16 @@ export type SysFilter = {
   publishedAt_lt?: InputMaybe<Scalars['DateTime']['input']>;
   publishedAt_lte?: InputMaybe<Scalars['DateTime']['input']>;
   publishedAt_not?: InputMaybe<Scalars['DateTime']['input']>;
-  publishedAt_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['DateTime']['input']>>
-  >;
+  publishedAt_not_in?: InputMaybe<Array<InputMaybe<Scalars['DateTime']['input']>>>;
   publishedVersion?: InputMaybe<Scalars['Float']['input']>;
   publishedVersion_exists?: InputMaybe<Scalars['Boolean']['input']>;
   publishedVersion_gt?: InputMaybe<Scalars['Float']['input']>;
   publishedVersion_gte?: InputMaybe<Scalars['Float']['input']>;
-  publishedVersion_in?: InputMaybe<
-    Array<InputMaybe<Scalars['Float']['input']>>
-  >;
+  publishedVersion_in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
   publishedVersion_lt?: InputMaybe<Scalars['Float']['input']>;
   publishedVersion_lte?: InputMaybe<Scalars['Float']['input']>;
   publishedVersion_not?: InputMaybe<Scalars['Float']['input']>;
-  publishedVersion_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['Float']['input']>>
-  >;
+  publishedVersion_not_in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
 };
 
 export type CfCapabilityNestedFilter = {
@@ -2233,18 +2238,14 @@ export type CfCapabilityNestedFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
   internalName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   servicesCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
   slug_contains?: InputMaybe<Scalars['String']['input']>;
@@ -2262,14 +2263,10 @@ export type CfCommonContentNestedFilter = {
   cancellationUrl?: InputMaybe<Scalars['String']['input']>;
   cancellationUrl_contains?: InputMaybe<Scalars['String']['input']>;
   cancellationUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  cancellationUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  cancellationUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   cancellationUrl_not?: InputMaybe<Scalars['String']['input']>;
   cancellationUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  cancellationUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  cancellationUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
   emailIcon?: InputMaybe<Scalars['String']['input']>;
   emailIcon_contains?: InputMaybe<Scalars['String']['input']>;
@@ -2284,82 +2281,50 @@ export type CfCommonContentNestedFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeDownloadUrl?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeDownloadUrl_contains?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeDownloadUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  privacyNoticeDownloadUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeDownloadUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeDownloadUrl_not?: InputMaybe<Scalars['String']['input']>;
-  privacyNoticeDownloadUrl_not_contains?: InputMaybe<
-    Scalars['String']['input']
-  >;
-  privacyNoticeDownloadUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeDownloadUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
+  privacyNoticeDownloadUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeUrl?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeUrl_contains?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  privacyNoticeUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   privacyNoticeUrl_not?: InputMaybe<Scalars['String']['input']>;
   privacyNoticeUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  privacyNoticeUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  privacyNoticeUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonLabel?: InputMaybe<Scalars['String']['input']>;
   successActionButtonLabel_contains?: InputMaybe<Scalars['String']['input']>;
   successActionButtonLabel_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  successActionButtonLabel_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonLabel_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonLabel_not?: InputMaybe<Scalars['String']['input']>;
-  successActionButtonLabel_not_contains?: InputMaybe<
-    Scalars['String']['input']
-  >;
-  successActionButtonLabel_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonLabel_not_contains?: InputMaybe<Scalars['String']['input']>;
+  successActionButtonLabel_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonUrl?: InputMaybe<Scalars['String']['input']>;
   successActionButtonUrl_contains?: InputMaybe<Scalars['String']['input']>;
   successActionButtonUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  successActionButtonUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   successActionButtonUrl_not?: InputMaybe<Scalars['String']['input']>;
   successActionButtonUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  successActionButtonUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  successActionButtonUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
   termsOfServiceDownloadUrl?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceDownloadUrl_contains?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceDownloadUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  termsOfServiceDownloadUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceDownloadUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   termsOfServiceDownloadUrl_not?: InputMaybe<Scalars['String']['input']>;
-  termsOfServiceDownloadUrl_not_contains?: InputMaybe<
-    Scalars['String']['input']
-  >;
-  termsOfServiceDownloadUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceDownloadUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
+  termsOfServiceDownloadUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   termsOfServiceUrl?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceUrl_contains?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceUrl_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  termsOfServiceUrl_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceUrl_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   termsOfServiceUrl_not?: InputMaybe<Scalars['String']['input']>;
   termsOfServiceUrl_not_contains?: InputMaybe<Scalars['String']['input']>;
-  termsOfServiceUrl_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  termsOfServiceUrl_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type CfCouponConfigNestedFilter = {
@@ -2379,18 +2344,10 @@ export type CfCouponConfigNestedFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePromotionCodes_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePromotionCodes_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePromotionCodes_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePromotionCodes_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePromotionCodes_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePromotionCodes_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripePromotionCodes_exists?: InputMaybe<Scalars['Boolean']['input']>;
   sys?: InputMaybe<SysFilter>;
 };
@@ -2398,26 +2355,14 @@ export type CfCouponConfigNestedFilter = {
 export type CfIapNestedFilter = {
   AND?: InputMaybe<Array<InputMaybe<CfIapNestedFilter>>>;
   OR?: InputMaybe<Array<InputMaybe<CfIapNestedFilter>>>;
-  appleProductIDs_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  appleProductIDs_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  appleProductIDs_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  appleProductIDs_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  appleProductIDs_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  appleProductIDs_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   appleProductIDs_exists?: InputMaybe<Scalars['Boolean']['input']>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
-  googleSKUs_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  googleSKUs_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  googleSKUs_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  googleSKUs_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  googleSKUs_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  googleSKUs_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   googleSKUs_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
@@ -2425,9 +2370,7 @@ export type CfIapNestedFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
 };
 
@@ -2440,21 +2383,13 @@ export type CfOfferingNestedFilter = {
   apiIdentifier_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   apiIdentifier_not?: InputMaybe<Scalars['String']['input']>;
   apiIdentifier_not_contains?: InputMaybe<Scalars['String']['input']>;
-  apiIdentifier_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  apiIdentifier_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   capabilitiesCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   commonContent_exists?: InputMaybe<Scalars['Boolean']['input']>;
   contentfulMetadata?: InputMaybe<ContentfulMetadataFilter>;
-  countries_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  countries_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  countries_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  countries_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  countries_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  countries_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   countries_exists?: InputMaybe<Scalars['Boolean']['input']>;
   couponConfigCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   defaultPurchase_exists?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2464,9 +2399,7 @@ export type CfOfferingNestedFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   experimentPurchaseCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   iapCollection_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName?: InputMaybe<Scalars['String']['input']>;
@@ -2475,20 +2408,14 @@ export type CfOfferingNestedFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripeProductId?: InputMaybe<Scalars['String']['input']>;
   stripeProductId_contains?: InputMaybe<Scalars['String']['input']>;
   stripeProductId_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  stripeProductId_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  stripeProductId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripeProductId_not?: InputMaybe<Scalars['String']['input']>;
   stripeProductId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  stripeProductId_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  stripeProductId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
 };
 
@@ -2509,18 +2436,14 @@ export type CfPurchaseDetailsNestedFilter = {
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   productName?: InputMaybe<Scalars['String']['input']>;
   productName_contains?: InputMaybe<Scalars['String']['input']>;
   productName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   productName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   productName_not?: InputMaybe<Scalars['String']['input']>;
   productName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  productName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  productName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   subtitle?: InputMaybe<Scalars['String']['input']>;
   subtitle_contains?: InputMaybe<Scalars['String']['input']>;
   subtitle_exists?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2548,29 +2471,19 @@ export type CfPurchaseNestedFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
   internalName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   offering_exists?: InputMaybe<Scalars['Boolean']['input']>;
   purchaseDetails_exists?: InputMaybe<Scalars['Boolean']['input']>;
-  stripePlanChoices_contains_all?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePlanChoices_contains_none?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
-  stripePlanChoices_contains_some?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  stripePlanChoices_contains_all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePlanChoices_contains_none?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  stripePlanChoices_contains_some?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   stripePlanChoices_exists?: InputMaybe<Scalars['Boolean']['input']>;
   sys?: InputMaybe<SysFilter>;
 };
@@ -2586,27 +2499,21 @@ export type CfServiceNestedFilter = {
   description_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   description_not?: InputMaybe<Scalars['String']['input']>;
   description_not_contains?: InputMaybe<Scalars['String']['input']>;
-  description_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  description_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName?: InputMaybe<Scalars['String']['input']>;
   internalName_contains?: InputMaybe<Scalars['String']['input']>;
   internalName_exists?: InputMaybe<Scalars['Boolean']['input']>;
   internalName_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   internalName_not?: InputMaybe<Scalars['String']['input']>;
   internalName_not_contains?: InputMaybe<Scalars['String']['input']>;
-  internalName_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  internalName_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   oauthClientId?: InputMaybe<Scalars['String']['input']>;
   oauthClientId_contains?: InputMaybe<Scalars['String']['input']>;
   oauthClientId_exists?: InputMaybe<Scalars['Boolean']['input']>;
   oauthClientId_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   oauthClientId_not?: InputMaybe<Scalars['String']['input']>;
   oauthClientId_not_contains?: InputMaybe<Scalars['String']['input']>;
-  oauthClientId_not_in?: InputMaybe<
-    Array<InputMaybe<Scalars['String']['input']>>
-  >;
+  oauthClientId_not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   sys?: InputMaybe<SysFilter>;
 };
 
@@ -2614,817 +2521,40 @@ export type CapabilityServiceByPriceIdsQueryVariables = Exact<{
   skip: Scalars['Int']['input'];
   limit: Scalars['Int']['input'];
   locale: Scalars['String']['input'];
-  stripePlanIds:
-    | Array<InputMaybe<Scalars['String']['input']>>
-    | InputMaybe<Scalars['String']['input']>;
+  stripePlanIds: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
 }>;
 
-export type CapabilityServiceByPriceIdsQuery = {
-  __typename?: 'Query';
-  purchaseCollection?: {
-    __typename?: 'PurchaseCollection';
-    items: Array<{
-      __typename?: 'Purchase';
-      stripePlanChoices?: Array<string | null> | null;
-      offering?: {
-        __typename?: 'Offering';
-        capabilitiesCollection?: {
-          __typename?: 'OfferingCapabilitiesCollection';
-          items: Array<{
-            __typename?: 'Capability';
-            slug?: string | null;
-            servicesCollection?: {
-              __typename?: 'CapabilityServicesCollection';
-              items: Array<{
-                __typename?: 'Service';
-                oauthClientId?: string | null;
-              } | null>;
-            } | null;
-          } | null>;
-        } | null;
-      } | null;
-    } | null>;
-  } | null;
-};
+
+export type CapabilityServiceByPriceIdsQuery = { __typename?: 'Query', purchaseCollection?: { __typename?: 'PurchaseCollection', items: Array<{ __typename?: 'Purchase', stripePlanChoices?: Array<string | null> | null, offering?: { __typename?: 'Offering', capabilitiesCollection?: { __typename?: 'OfferingCapabilitiesCollection', items: Array<{ __typename?: 'Capability', slug?: string | null, servicesCollection?: { __typename?: 'CapabilityServicesCollection', items: Array<{ __typename?: 'Service', oauthClientId?: string | null } | null> } | null } | null> } | null } | null } | null> } | null };
 
 export type OfferingQueryVariables = Exact<{
   id: Scalars['String']['input'];
   locale: Scalars['String']['input'];
 }>;
 
-export type OfferingQuery = {
-  __typename?: 'Query';
-  offering?: {
-    __typename?: 'Offering';
-    stripeProductId?: string | null;
-    countries?: Array<string | null> | null;
-    defaultPurchase?: {
-      __typename?: 'Purchase';
-      purchaseDetails?: {
-        __typename?: 'PurchaseDetails';
-        productName?: string | null;
-        details?: string | null;
-        subtitle?: string | null;
-        webIcon?: string | null;
-      } | null;
-    } | null;
-  } | null;
-};
+
+export type OfferingQuery = { __typename?: 'Query', offering?: { __typename?: 'Offering', stripeProductId?: string | null, countries?: Array<string | null> | null, defaultPurchase?: { __typename?: 'Purchase', purchaseDetails?: { __typename?: 'PurchaseDetails', productName?: string | null, details?: string | null, subtitle?: string | null, webIcon?: string | null } | null } | null } | null };
 
 export type PurchaseWithDetailsQueryVariables = Exact<{
   id: Scalars['String']['input'];
   locale: Scalars['String']['input'];
 }>;
 
-export type PurchaseWithDetailsQuery = {
-  __typename?: 'Query';
-  purchase?: {
-    __typename?: 'Purchase';
-    internalName?: string | null;
-    description?: string | null;
-    purchaseDetails?: {
-      __typename?: 'PurchaseDetails';
-      productName?: string | null;
-      details?: string | null;
-      webIcon?: string | null;
-    } | null;
-  } | null;
-};
+
+export type PurchaseWithDetailsQuery = { __typename?: 'Query', purchase?: { __typename?: 'Purchase', internalName?: string | null, description?: string | null, purchaseDetails?: { __typename?: 'PurchaseDetails', productName?: string | null, details?: string | null, webIcon?: string | null } | null } | null };
 
 export type PurchaseWithDetailsOfferingContentQueryVariables = Exact<{
   skip: Scalars['Int']['input'];
   limit: Scalars['Int']['input'];
   locale: Scalars['String']['input'];
-  stripePlanIds:
-    | Array<InputMaybe<Scalars['String']['input']>>
-    | InputMaybe<Scalars['String']['input']>;
+  stripePlanIds: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
 }>;
 
-export type PurchaseWithDetailsOfferingContentQuery = {
-  __typename?: 'Query';
-  purchaseCollection?: {
-    __typename?: 'PurchaseCollection';
-    items: Array<{
-      __typename?: 'Purchase';
-      stripePlanChoices?: Array<string | null> | null;
-      purchaseDetails?: {
-        __typename?: 'PurchaseDetails';
-        details?: string | null;
-        productName?: string | null;
-        subtitle?: string | null;
-        webIcon?: string | null;
-      } | null;
-      offering?: {
-        __typename?: 'Offering';
-        stripeProductId?: string | null;
-        commonContent?: {
-          __typename?: 'CommonContent';
-          privacyNoticeUrl?: string | null;
-          privacyNoticeDownloadUrl?: string | null;
-          termsOfServiceUrl?: string | null;
-          termsOfServiceDownloadUrl?: string | null;
-          cancellationUrl?: string | null;
-          emailIcon?: string | null;
-          successActionButtonUrl?: string | null;
-          successActionButtonLabel?: string | null;
-        } | null;
-      } | null;
-    } | null>;
-  } | null;
-};
 
-export const CapabilityServiceByPriceIdsDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'CapabilityServiceByPriceIds' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'skip' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'limit' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'locale' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
-            },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'stripePlanIds' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'ListType',
-              type: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'String' },
-              },
-            },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'purchaseCollection' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'skip' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'skip' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'limit' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'limit' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'locale' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'locale' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'where' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: {
-                        kind: 'Name',
-                        value: 'stripePlanChoices_contains_some',
-                      },
-                      value: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'stripePlanIds' },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'items' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'stripePlanChoices' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'offering' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: {
-                                kind: 'Name',
-                                value: 'capabilitiesCollection',
-                              },
-                              arguments: [
-                                {
-                                  kind: 'Argument',
-                                  name: { kind: 'Name', value: 'skip' },
-                                  value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'skip' },
-                                  },
-                                },
-                                {
-                                  kind: 'Argument',
-                                  name: { kind: 'Name', value: 'limit' },
-                                  value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'limit' },
-                                  },
-                                },
-                              ],
-                              selectionSet: {
-                                kind: 'SelectionSet',
-                                selections: [
-                                  {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'items' },
-                                    selectionSet: {
-                                      kind: 'SelectionSet',
-                                      selections: [
-                                        {
-                                          kind: 'Field',
-                                          name: { kind: 'Name', value: 'slug' },
-                                        },
-                                        {
-                                          kind: 'Field',
-                                          name: {
-                                            kind: 'Name',
-                                            value: 'servicesCollection',
-                                          },
-                                          arguments: [
-                                            {
-                                              kind: 'Argument',
-                                              name: {
-                                                kind: 'Name',
-                                                value: 'skip',
-                                              },
-                                              value: {
-                                                kind: 'Variable',
-                                                name: {
-                                                  kind: 'Name',
-                                                  value: 'skip',
-                                                },
-                                              },
-                                            },
-                                            {
-                                              kind: 'Argument',
-                                              name: {
-                                                kind: 'Name',
-                                                value: 'limit',
-                                              },
-                                              value: {
-                                                kind: 'Variable',
-                                                name: {
-                                                  kind: 'Name',
-                                                  value: 'limit',
-                                                },
-                                              },
-                                            },
-                                          ],
-                                          selectionSet: {
-                                            kind: 'SelectionSet',
-                                            selections: [
-                                              {
-                                                kind: 'Field',
-                                                name: {
-                                                  kind: 'Name',
-                                                  value: 'items',
-                                                },
-                                                selectionSet: {
-                                                  kind: 'SelectionSet',
-                                                  selections: [
-                                                    {
-                                                      kind: 'Field',
-                                                      name: {
-                                                        kind: 'Name',
-                                                        value: 'oauthClientId',
-                                                      },
-                                                    },
-                                                  ],
-                                                },
-                                              },
-                                            ],
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<
-  CapabilityServiceByPriceIdsQuery,
-  CapabilityServiceByPriceIdsQueryVariables
->;
-export const OfferingDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'Offering' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
-            },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'locale' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
-            },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'offering' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'id' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'id' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'locale' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'locale' },
-                },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'stripeProductId' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'countries' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'defaultPurchase' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'purchaseDetails' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'productName' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'details' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'subtitle' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'webIcon' },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<OfferingQuery, OfferingQueryVariables>;
-export const PurchaseWithDetailsDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'PurchaseWithDetails' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
-            },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'locale' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
-            },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'purchase' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'id' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'id' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'locale' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'locale' },
-                },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'internalName' },
-                },
-                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'purchaseDetails' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'productName' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'details' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'webIcon' },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<
-  PurchaseWithDetailsQuery,
-  PurchaseWithDetailsQueryVariables
->;
-export const PurchaseWithDetailsOfferingContentDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'PurchaseWithDetailsOfferingContent' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'skip' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'limit' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'locale' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'NamedType',
-              name: { kind: 'Name', value: 'String' },
-            },
-          },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: {
-            kind: 'Variable',
-            name: { kind: 'Name', value: 'stripePlanIds' },
-          },
-          type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'ListType',
-              type: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'String' },
-              },
-            },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'purchaseCollection' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'skip' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'skip' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'limit' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'limit' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'locale' },
-                value: {
-                  kind: 'Variable',
-                  name: { kind: 'Name', value: 'locale' },
-                },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'where' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: {
-                        kind: 'Name',
-                        value: 'stripePlanChoices_contains_some',
-                      },
-                      value: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'stripePlanIds' },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'items' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'stripePlanChoices' },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'purchaseDetails' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'details' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'productName' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'subtitle' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'webIcon' },
-                            },
-                          ],
-                        },
-                      },
-                      {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'offering' },
-                        selectionSet: {
-                          kind: 'SelectionSet',
-                          selections: [
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'stripeProductId' },
-                            },
-                            {
-                              kind: 'Field',
-                              name: { kind: 'Name', value: 'commonContent' },
-                              selectionSet: {
-                                kind: 'SelectionSet',
-                                selections: [
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'privacyNoticeUrl',
-                                    },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'privacyNoticeDownloadUrl',
-                                    },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'termsOfServiceUrl',
-                                    },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'termsOfServiceDownloadUrl',
-                                    },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'cancellationUrl',
-                                    },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'emailIcon' },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'successActionButtonUrl',
-                                    },
-                                  },
-                                  {
-                                    kind: 'Field',
-                                    name: {
-                                      kind: 'Name',
-                                      value: 'successActionButtonLabel',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<
-  PurchaseWithDetailsOfferingContentQuery,
-  PurchaseWithDetailsOfferingContentQueryVariables
->;
+export type PurchaseWithDetailsOfferingContentQuery = { __typename?: 'Query', purchaseCollection?: { __typename?: 'PurchaseCollection', items: Array<{ __typename?: 'Purchase', stripePlanChoices?: Array<string | null> | null, purchaseDetails?: { __typename?: 'PurchaseDetails', details?: string | null, productName?: string | null, subtitle?: string | null, webIcon?: string | null } | null, offering?: { __typename?: 'Offering', stripeProductId?: string | null, commonContent?: { __typename?: 'CommonContent', privacyNoticeUrl?: string | null, privacyNoticeDownloadUrl?: string | null, termsOfServiceUrl?: string | null, termsOfServiceDownloadUrl?: string | null, cancellationUrl?: string | null, emailIcon?: string | null, successActionButtonUrl?: string | null, successActionButtonLabel?: string | null } | null } | null } | null> } | null };
+
+
+export const CapabilityServiceByPriceIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CapabilityServiceByPriceIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"skip"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locale"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"stripePlanIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"purchaseCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"locale"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locale"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"stripePlanChoices_contains_some"},"value":{"kind":"Variable","name":{"kind":"Name","value":"stripePlanIds"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stripePlanChoices"}},{"kind":"Field","name":{"kind":"Name","value":"offering"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capabilitiesCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"servicesCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"oauthClientId"}}]}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<CapabilityServiceByPriceIdsQuery, CapabilityServiceByPriceIdsQueryVariables>;
+export const OfferingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Offering"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locale"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"offering"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"locale"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locale"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stripeProductId"}},{"kind":"Field","name":{"kind":"Name","value":"countries"}},{"kind":"Field","name":{"kind":"Name","value":"defaultPurchase"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"purchaseDetails"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"subtitle"}},{"kind":"Field","name":{"kind":"Name","value":"webIcon"}}]}}]}}]}}]}}]} as unknown as DocumentNode<OfferingQuery, OfferingQueryVariables>;
+export const PurchaseWithDetailsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PurchaseWithDetails"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locale"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"purchase"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"locale"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locale"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"internalName"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"purchaseDetails"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"webIcon"}}]}}]}}]}}]} as unknown as DocumentNode<PurchaseWithDetailsQuery, PurchaseWithDetailsQueryVariables>;
+export const PurchaseWithDetailsOfferingContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PurchaseWithDetailsOfferingContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"skip"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locale"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"stripePlanIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"purchaseCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"skip"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skip"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"locale"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locale"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"stripePlanChoices_contains_some"},"value":{"kind":"Variable","name":{"kind":"Name","value":"stripePlanIds"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stripePlanChoices"}},{"kind":"Field","name":{"kind":"Name","value":"purchaseDetails"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"subtitle"}},{"kind":"Field","name":{"kind":"Name","value":"webIcon"}}]}},{"kind":"Field","name":{"kind":"Name","value":"offering"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"stripeProductId"}},{"kind":"Field","name":{"kind":"Name","value":"commonContent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"privacyNoticeUrl"}},{"kind":"Field","name":{"kind":"Name","value":"privacyNoticeDownloadUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceDownloadUrl"}},{"kind":"Field","name":{"kind":"Name","value":"cancellationUrl"}},{"kind":"Field","name":{"kind":"Name","value":"emailIcon"}},{"kind":"Field","name":{"kind":"Name","value":"successActionButtonUrl"}},{"kind":"Field","name":{"kind":"Name","value":"successActionButtonLabel"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<PurchaseWithDetailsOfferingContentQuery, PurchaseWithDetailsOfferingContentQueryVariables>;

@@ -38,6 +38,12 @@ describe('ContentfulClient', () => {
     Object.defineProperty(contentfulClientConfig, 'graphqlApiUri', {
       value: faker.string.uuid(),
     });
+    Object.defineProperty(contentfulClientConfig, 'graphqlSpaceId', {
+      value: faker.string.uuid(),
+    });
+    Object.defineProperty(contentfulClientConfig, 'graphqlEnvironment', {
+      value: faker.string.uuid(),
+    });
     contentfulClient = new ContentfulClient(contentfulClientConfig);
   });
 

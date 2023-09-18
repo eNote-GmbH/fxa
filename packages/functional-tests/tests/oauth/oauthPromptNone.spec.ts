@@ -8,8 +8,12 @@ let email;
 const password = 'passwordzxcv';
 
 test.describe('oauth prompt none', () => {
-  test.beforeEach(async ({ pages: { login } }) => {
+  test.beforeEach(async ({ pages: { login } }, { project }) => {
     test.slow();
+    test.skip(
+      project.name === 'production',
+      'test plan not yet available in prod'
+    );
     email = login.createEmail();
     await login.clearCache();
   });
@@ -140,8 +144,12 @@ test.describe('oauth prompt none', () => {
 });
 
 test.describe('oauth prompt none with emails', () => {
-  test.beforeEach(async ({ pages: { login } }) => {
+  test.beforeEach(async ({ pages: { login } }, { project }) => {
     test.slow();
+    test.skip(
+      project.name === 'production',
+      'test plan not yet available in prod'
+    );
     email = login.createEmail();
     await login.clearCache();
   });

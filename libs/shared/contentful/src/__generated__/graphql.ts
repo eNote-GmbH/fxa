@@ -2697,6 +2697,26 @@ export type CapabilityServiceByPriceIdsQuery = {
   } | null;
 };
 
+export type AllClientsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllClientsQuery = {
+  __typename?: 'Query';
+  serviceCollection?: {
+    __typename?: 'ServiceCollection';
+    items: Array<{
+      __typename?: 'Service';
+      oauthClientId?: string | null;
+      capabilitiesCollection?: {
+        __typename?: 'ServiceCapabilitiesCollection';
+        items: Array<{
+          __typename?: 'Capability';
+          slug?: string | null;
+        } | null>;
+      } | null;
+    } | null>;
+  } | null;
+};
+
 export type OfferingQueryVariables = Exact<{
   id: Scalars['String']['input'];
   locale: Scalars['String']['input'];
@@ -3034,6 +3054,65 @@ export const CapabilityServiceByPriceIdsDocument = {
   CapabilityServiceByPriceIdsQuery,
   CapabilityServiceByPriceIdsQueryVariables
 >;
+export const AllClientsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AllClients' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'serviceCollection' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'oauthClientId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'capabilitiesCollection' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'items' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'slug' },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AllClientsQuery, AllClientsQueryVariables>;
 export const OfferingDocument = {
   kind: 'Document',
   definitions: [

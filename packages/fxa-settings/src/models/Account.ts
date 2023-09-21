@@ -7,6 +7,7 @@ import { gql, ApolloClient, Reference, ApolloError } from '@apollo/client';
 import config from '../lib/config';
 import AuthClient, {
   AUTH_PROVIDER,
+  PasswordForgotSendCodeOptions,
   generateRecoveryKey,
   getRecoveryKeyIdByUid,
 } from 'fxa-auth-client/browser';
@@ -559,17 +560,17 @@ export class Account implements AccountData {
     service?: string,
     redirectTo?: string
   ): Promise<PasswordForgotSendCodePayload> {
-    let serviceName;
-    if (service && service === MozServices.FirefoxSync) {
-      serviceName = 'sync';
-    } else {
-      serviceName = service;
-    }
-    const result = await this.authClient.passwordForgotSendCode(email, {
-      service: serviceName,
+    const opts: PasswordForgotSendCodeOptions = {
       resume: 'e30=', // base64 json for {}
       redirectTo,
-    });
+    };
+
+    // Important! Only set the service option when it's sync.
+    if (service && service === MozServices.FirefoxSync) {
+      opts.service = 'sync';
+    }
+
+    const result = await this.authClient.passwordForgotSendCode(email, opts);
     return result;
   }
 

@@ -86,6 +86,14 @@ export type AuthServerError = Error & {
   retryAfterLocalized?: string;
 };
 
+export type PasswordForgotSendCodeOptions = {
+  service?: string;
+  redirectTo?: string;
+  resume?: string;
+  lang?: string;
+  metricsContext?: MetricsContext;
+};
+
 export interface MetricsContext {
   deviceId?: string;
   flowId?: string;
@@ -455,13 +463,7 @@ export default class AuthClient {
 
   async passwordForgotSendCode(
     email: string,
-    options: {
-      service?: string;
-      redirectTo?: string;
-      resume?: string;
-      lang?: string;
-      metricsContext?: MetricsContext;
-    } = {},
+    options: PasswordForgotSendCodeOptions = {},
     headers: Headers = new Headers()
   ) {
     const payloadOptions = ({ lang, ...rest }: any) => rest;

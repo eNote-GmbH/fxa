@@ -142,9 +142,7 @@ describe('PageResetPassword', () => {
     expect(account.resetPassword).toHaveBeenCalled();
 
     expect(account.resetPassword).toHaveBeenCalledWith(
-      MOCK_ACCOUNT.primaryEmail.email,
-      MOCK_SERVICE,
-      MOCK_REDIRECT_URI
+      MOCK_ACCOUNT.primaryEmail.email
     );
 
     expect(mockNavigate).toHaveBeenCalledWith(

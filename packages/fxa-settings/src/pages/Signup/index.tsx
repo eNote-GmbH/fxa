@@ -33,8 +33,7 @@ import {
   setCurrentAccount,
 } from '../../lib/storage-utils';
 import { sessionToken } from '../../lib/cache';
-import BrandMessaging from '../../components/BrandMessaging';
-import { createPortal } from 'react-dom';
+import { BrandMessagingPortal } from '../../components/BrandMessaging';
 
 export const viewName = 'signup';
 
@@ -211,7 +210,7 @@ const Signup = ({
     // TODO: FXA-8268, if force_auth && AuthErrors.is(error, 'DELETED_ACCOUNT'):
     //       - forceMessage('Account no longer exists. Recreate it?')
     <AppLayout>
-      {createPortal(<BrandMessaging {...{ viewName }} />, document.body)}
+      <BrandMessagingPortal {...{ viewName }} />
       <CardHeader
         headingText="Set your password"
         headingTextFtlId="signup-heading"

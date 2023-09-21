@@ -7,8 +7,7 @@ import HeaderLockup from '../HeaderLockup';
 import ContentSkip from '../ContentSkip';
 import Footer from 'fxa-react/components/Footer';
 import { AlertBar } from '../AlertBar';
-import BrandMessaging from '../../BrandMessaging';
-import { createPortal } from 'react-dom';
+import { BrandMessagingPortal } from '../../BrandMessaging';
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -20,7 +19,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       className="flex flex-col justify-between min-h-screen"
       data-testid="app"
     >
-      {createPortal(<BrandMessaging viewName="settings" />, document.body)}
+      <div id="body-top" className="hidden mobileLandscape:block" />
+
+      <BrandMessagingPortal viewName="settings" />
       <ContentSkip />
       <HeaderLockup />
       <div className="max-w-screen-desktopXl flex-1 w-full mx-auto tablet:px-20 desktop:px-12">
@@ -30,6 +31,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         </main>
       </div>
       <Footer />
+      <div id="body-bottom" className="block mobileLandscape:hidden" />
     </div>
   );
 };

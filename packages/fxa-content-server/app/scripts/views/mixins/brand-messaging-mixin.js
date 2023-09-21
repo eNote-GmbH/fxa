@@ -42,21 +42,41 @@ const Mixin = {
 
   afterRender() {
     setTimeout(() => {
+      const brandMessageNode = document.querySelector('.banner-brand-message');
+      const insertBanner = (selector) => {
+        const container = document.querySelector(selector);
+
+        // Clears out text incase of double render scenario...
+        container.innerText = '';
+        const clone = brandMessageNode.cloneNode(true);
+        container.append(clone);
+      };
+
+      const bindClickHandlers = () => {
+        /**
+         * Note, we can't use backbone's event object, because moving the elements
+         * unbinds its events. Instead, directly bind events here.
+         */
+        document.querySelectorAll('.close-brand-banner').forEach((x) => {
+          x.onclick = () => {
+            this.onBrandBannerClose();
+          };
+        });
+        document.querySelectorAll('.brand-learn-more').forEach((x) => {
+          x.onclick = () => {
+            this.onBrandLearnMoreClick();
+          };
+        });
+      };
+
       /**
-       * Move element up to body, so that it can be sticky header or inline footer.
-       *
-       * Note, we can't use backbone's event object, because moving the elements
-       * unbinds it's events. Instead, directly bind events here.
+       * Inject the brand message into the top and bottom of the page.
        */
-      const el = document.querySelector('#banner-brand-message');
-      if (el) {
-        document.body.append(el);
-        document.querySelector('#close-brand-banner').onclick = () => {
-          this.onBrandBannerClose();
-        };
-        document.querySelector('.brand-learn-more').onclick = () => {
-          this.onBrandLearnMoreClick();
-        };
+      if (brandMessageNode) {
+        insertBanner('#body-top');
+        insertBanner('#body-bottom');
+        brandMessageNode.remove();
+        bindClickHandlers();
       }
     }, 0);
   },
@@ -81,8 +101,9 @@ const Mixin = {
       `${bannerClosedLocalStorageKey}_${this.mode}`,
       this.disableBanner
     );
-    document.querySelector('#banner-brand-message').remove();
-    document.body.classList.remove('brand-messaging');
+    document
+      .querySelectorAll('.banner-brand-message')
+      .forEach((x) => x.remove());
     this.logFlowEvent(
       `brand-messaging-${this.mode}-banner-close`,
       this.viewName

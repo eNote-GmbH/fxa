@@ -5,11 +5,11 @@
 import { graphql } from '../../__generated__/gql';
 
 export const clientsQuery = graphql(`
-  query AllClients {
-    serviceCollection {
+  query AllClients($skip: Int!, $limit: Int!, $locale: String!) {
+    serviceCollection(skip: $skip, limit: $limit, locale: $locale) {
       items {
         oauthClientId
-        capabilitiesCollection {
+        capabilitiesCollection(skip: $skip, limit: $limit) {
           items {
             slug
           }

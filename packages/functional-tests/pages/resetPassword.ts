@@ -28,14 +28,15 @@ export class ResetPasswordPage extends BaseLayout {
     return this.page.locator(selectors.EMAIL);
   }
 
-  async resetPasswordHeader(title?: string) {
+  async resetPasswordHeader(headerTextPartial?: string) {
     if (this.react) {
-      const resetPass = await this.page.waitForSelector('#root .card-header');
+      const header = await this.page.waitForSelector('#root .card-header');
+      const headerText =
+        (await header.textContent())?.replace(/[^\x00-\x7F]/g, '') || '';
+
       return (
-        (await resetPass.textContent())
-          ?.replace(/[^\x00-\x7F]/g, '')
-          ?.startsWith(title || 'Reset password') &&
-        (await resetPass.isVisible())
+        headerText.includes(headerTextPartial || 'Reset password') &&
+        (await header.isVisible())
       );
     }
 

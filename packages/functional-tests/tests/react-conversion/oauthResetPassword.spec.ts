@@ -21,7 +21,6 @@ test.describe('oauth reset password react', () => {
     resetPassword.react = resetPasswordReactFlag;
   });
 
-  /*Disabling test in stage and prod until Fxa-8192 is worked on
   test('reset password', async ({
     target,
     page,
@@ -79,7 +78,6 @@ test.describe('oauth reset password react', () => {
       }
     );
   });
-  */
 
   test('reset password with PKCE different tab', async ({
     target,
@@ -248,10 +246,10 @@ async function passwordResetFlow(
   await checkForReactApp({ page });
 
   // Verify reset password header
+  // This service name can change based on environments, so only reference
+  // a partial service name that's present in all
   expect(
-    await resetPassword.resetPasswordHeader(
-      'Reset password to continue to 123Done'
-    )
+    await resetPassword.resetPasswordHeader('Reset password to continue to 123')
   ).toBe(true);
 
   await resetPassword.fillOutResetPassword(credentials.email);

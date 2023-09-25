@@ -85,7 +85,7 @@ describe('views/authorization', function () {
     it('handles default action', () => {
       return view.render().then(() => {
         assert.ok(
-          view.replaceCurrentPage.calledOnceWith('/oauth/'),
+          windowMock.href.includes('/oauth/?'),
           'called with proper action'
         );
       });

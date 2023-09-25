@@ -76,11 +76,12 @@ export const Modal = ({
           />
           <div className="flex justify-end pe-2 py-2">
             <button
+              className="border-2 border-transparent"
               data-testid="modal-dismiss"
               onClick={(event) => onDismiss()}
               title={ftlMsgResolver.getMsg('modal-close-title', 'Close')}
             >
-              <CloseIcon className="w-4 h-4 m-3" role="img" />
+              <CloseIcon className="w-4 h-4 m-3 fill-current" />
             </button>
           </div>
 

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useConfig } from '../../models';
 import { useMetrics } from '../../lib/metrics';
 import { FtlMsg } from 'fxa-react/lib/utils';
+import { ReactComponent as CloseIcon } from 'fxa-react/images/close.svg';
 import { Localized } from '@fluent/react';
 
 export const bannerClosedLocalStorageKey =
@@ -131,7 +132,7 @@ const BrandMessaging = ({
             </div>
           </div>
         )}
-        <div className="flex justify-right order-last rtl:justify-left m-4 mt-1 mb-1">
+        <div className="flex justify-end mx-2 my-1">
           <FtlMsg id="brand-banner-dismiss-button" attrs={{ ariaLabel: true }}>
             <button
               className="w-4 h-4"
@@ -140,13 +141,7 @@ const BrandMessaging = ({
               aria-label="Close Banner"
               onClick={onClickCloseBanner}
             >
-              <Localized id="brand-close-banner" attrs={{ alt: true }}>
-                <img
-                  src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+CiAgPGc+CiAgICA8cGF0aCBmaWxsPSJyZ2JhKDEyLCAxMiwgMTMsIC44KSIgZD0iTTkuNDE0IDhsNS4yOTMtNS4yOTNhMSAxIDAgMDAtMS40MTQtMS40MTRMOCA2LjU4NiAyLjcwNyAxLjI5M2ExIDEgMCAwMC0xLjQxNCAxLjQxNEw2LjU4NiA4bC01LjI5MyA1LjI5M2ExIDEgMCAxMDEuNDE0IDEuNDE0TDggOS40MTRsNS4yOTMgNS4yOTNhMSAxIDAgMDAxLjQxNC0xLjQxNHoiLz4KICA8L2c+Cjwvc3ZnPgo="
-                  className="cursor-pointer h-4 w-4"
-                  alt="Close Banner"
-                />
-              </Localized>
+              <CloseIcon className="w-4 h-4 fill-current" />
             </button>
           </FtlMsg>
         </div>

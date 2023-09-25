@@ -52,7 +52,9 @@ export const FlowContainer = ({
           {subtitle}
         </h2>
       )}
-      <div className="w-full flex flex-col mt-2">{children}</div>
+      <div className="w-full flex flex-col mt-2 border-transparent">
+        {children}
+      </div>
     </div>
   );
 };

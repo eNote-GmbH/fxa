@@ -26,7 +26,9 @@ type OptionalProps =
 export type BannerProps = DefaultProps & OptionalProps;
 
 const Banner = ({ type, children, dismissible, setIsVisible }: BannerProps) => {
-  const baseClassNames = 'text-xs font-bold p-3 my-3 rounded';
+  // Transparent border is for Windows HCM  - to ensure there is a border around the banner
+  const baseClassNames =
+    'text-xs font-bold p-3 my-3 rounded border-transparent border-1 border-solid';
 
   return (
     <div

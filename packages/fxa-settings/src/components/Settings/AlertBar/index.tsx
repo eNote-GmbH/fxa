@@ -43,7 +43,8 @@ export const AlertBar = () => {
       >
         <div
           data-testid="alert-bar-inner"
-          className={`max-w-2xl w-full desktop:min-w-sm flex shadow-md rounded font-bold text-sm ${
+          // Transparent border is for Windows HCM - to ensure there is a border around the alert when background color is removed
+          className={`max-w-2xl w-full desktop:min-w-sm flex shadow-md rounded font-bold text-sm border-transparent border-1 border-solid ${
             typeClasses[alertType()]
           }`}
         >
@@ -52,25 +53,26 @@ export const AlertBar = () => {
             ref={tabFenceRef}
             data-testid="alert-bar-tab-fence"
             className="outline-none"
-          />
-          <div className="flex-1 py-2 px-8 text-center">
-            <p data-testid="alert-bar-content">{alertContent()}</p>
-          </div>
-          <div className="flex">
-            <button
-              data-testid="alert-bar-dismiss"
-              className={`self-center rounded-r h-full px-1 ${
-                typeClasses[alertType()]
-              } hover:bg-black/20 active:bg-black/30`}
-              onClick={() => alertVisible(false)}
-              title={l10n.getString(
-                'alert-bar-close-message',
-                null,
-                'Close message'
-              )}
-            >
-              <CloseIcon className="w-3 h-3 m-2 fill-current" />
-            </button>
+          >
+            <div className="flex-1 py-2 px-8 text-center">
+              <p data-testid="alert-bar-content">{alertContent()}</p>
+            </div>
+            <div className="flex">
+              <button
+                data-testid="alert-bar-dismiss"
+                className={`self-center rounded-r h-full px-1 ${
+                  typeClasses[alertType()]
+                } hover:bg-black/20 active:bg-black/30`}
+                onClick={() => alertVisible(false)}
+                title={l10n.getString(
+                  'alert-bar-close-message',
+                  null,
+                  'Close message'
+                )}
+              >
+                <CloseIcon className="w-3 h-3 m-2 fill-current" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -52,7 +52,8 @@ export const FlowContainer = ({
           {subtitle}
         </h2>
       )}
-      <div className="w-full flex flex-col mt-2 border-transparent">
+      {/* Transparent border is for Windows HCM - to ensure there is a visible border around the card */}
+      <div className="w-full flex flex-col mt-2 border-transparent border-1 border-solid">
         {children}
       </div>
     </div>

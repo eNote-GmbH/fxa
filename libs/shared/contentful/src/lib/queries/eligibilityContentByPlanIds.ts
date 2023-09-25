@@ -19,9 +19,25 @@ export const eligibilityContentByPlanIdsQuery = graphql(`
     ) {
       items {
         stripePlanChoices
+        purchaseDetails {
+          details
+          productName
+          subtitle
+          webIcon
+        }
         offering {
           stripeProductId
           countries
+          capabilitiesCollection(skip: $skip, limit: $limit) {
+            items {
+              slug
+              servicesCollection(skip: $skip, limit: $limit) {
+                items {
+                  oauthClientId
+                }
+              }
+            }
+          }
           linkedFrom {
             subGroupCollection(skip: $skip, limit: $limit) {
               items {

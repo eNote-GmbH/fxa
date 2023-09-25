@@ -2713,10 +2713,31 @@ export type EligibilityContentByPlanIdsQuery = {
     items: Array<{
       __typename?: 'Purchase';
       stripePlanChoices?: Array<string | null> | null;
+      purchaseDetails?: {
+        __typename?: 'PurchaseDetails';
+        details?: string | null;
+        productName?: string | null;
+        subtitle?: string | null;
+        webIcon?: string | null;
+      } | null;
       offering?: {
         __typename?: 'Offering';
         stripeProductId?: string | null;
         countries?: Array<string | null> | null;
+        capabilitiesCollection?: {
+          __typename?: 'OfferingCapabilitiesCollection';
+          items: Array<{
+            __typename?: 'Capability';
+            slug?: string | null;
+            servicesCollection?: {
+              __typename?: 'CapabilityServicesCollection';
+              items: Array<{
+                __typename?: 'Service';
+                oauthClientId?: string | null;
+              } | null>;
+            } | null;
+          } | null>;
+        } | null;
         linkedFrom?: {
           __typename?: 'OfferingLinkingCollections';
           subGroupCollection?: {
@@ -3226,6 +3247,31 @@ export const EligibilityContentByPlanIdsDocument = {
                       },
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'purchaseDetails' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'details' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'productName' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'subtitle' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'webIcon' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'offering' },
                         selectionSet: {
                           kind: 'SelectionSet',
@@ -3237,6 +3283,110 @@ export const EligibilityContentByPlanIdsDocument = {
                             {
                               kind: 'Field',
                               name: { kind: 'Name', value: 'countries' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: {
+                                kind: 'Name',
+                                value: 'capabilitiesCollection',
+                              },
+                              arguments: [
+                                {
+                                  kind: 'Argument',
+                                  name: { kind: 'Name', value: 'skip' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'skip' },
+                                  },
+                                },
+                                {
+                                  kind: 'Argument',
+                                  name: { kind: 'Name', value: 'limit' },
+                                  value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'limit' },
+                                  },
+                                },
+                              ],
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'items' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        {
+                                          kind: 'Field',
+                                          name: { kind: 'Name', value: 'slug' },
+                                        },
+                                        {
+                                          kind: 'Field',
+                                          name: {
+                                            kind: 'Name',
+                                            value: 'servicesCollection',
+                                          },
+                                          arguments: [
+                                            {
+                                              kind: 'Argument',
+                                              name: {
+                                                kind: 'Name',
+                                                value: 'skip',
+                                              },
+                                              value: {
+                                                kind: 'Variable',
+                                                name: {
+                                                  kind: 'Name',
+                                                  value: 'skip',
+                                                },
+                                              },
+                                            },
+                                            {
+                                              kind: 'Argument',
+                                              name: {
+                                                kind: 'Name',
+                                                value: 'limit',
+                                              },
+                                              value: {
+                                                kind: 'Variable',
+                                                name: {
+                                                  kind: 'Name',
+                                                  value: 'limit',
+                                                },
+                                              },
+                                            },
+                                          ],
+                                          selectionSet: {
+                                            kind: 'SelectionSet',
+                                            selections: [
+                                              {
+                                                kind: 'Field',
+                                                name: {
+                                                  kind: 'Name',
+                                                  value: 'items',
+                                                },
+                                                selectionSet: {
+                                                  kind: 'SelectionSet',
+                                                  selections: [
+                                                    {
+                                                      kind: 'Field',
+                                                      name: {
+                                                        kind: 'Name',
+                                                        value: 'oauthClientId',
+                                                      },
+                                                    },
+                                                  ],
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
                             },
                             {
                               kind: 'Field',

@@ -48,3 +48,9 @@ export class ContentfulLinkError extends ContentfulQueryError {
     super(...args);
   }
 }
+
+/**
+ * Thrown when errors occur processing a Contentful result against the expected
+ * query result schema.
+ */
+export class ContentfulResultProcessingError extends ContentfulError {}

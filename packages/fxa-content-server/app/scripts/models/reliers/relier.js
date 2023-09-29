@@ -67,6 +67,8 @@ const QUERY_PARAMETER_SCHEMA = {
   flow_id: Vat.string().renameTo('flowId'),
   flow_begin_time: Vat.string().renameTo('flowBeginTime'),
   device_id: Vat.string().renameTo('deviceId'),
+  // Temporary parameter for React app -> Backbone app communication
+  prefillEmail: Vat.string(),
 };
 
 const EMAIL_FIRST_EMAIL_SCHEMA = {
@@ -157,6 +159,7 @@ var Relier = BaseRelier.extend({
         // to handle the email.
         this.importSearchParamsUsingSchema(QUERY_PARAMETER_SCHEMA, AuthErrors);
         if (this.get('action') === 'email') {
+          console.log('action=email');
           this.importSearchParamsUsingSchema(
             EMAIL_FIRST_EMAIL_SCHEMA,
             AuthErrors

@@ -48,8 +48,8 @@ describe('ContentfulManager', () => {
       const result = await manager.getPurchaseDetailsForEligibility(['test']);
       const planId = result.purchaseCollection.items[0].stripePlanChoices[0];
       expect(result).toBeDefined();
-      expect(result.getSubgroupsForPlanId(planId)).toHaveLength(1);
-      expect(result.getOfferingForPlanId(planId)).toBeDefined();
+      expect(result.subgroupsForPlanId(planId)).toHaveLength(1);
+      expect(result.offeringForPlanId(planId)).toBeDefined();
     });
   });
 });

@@ -8,6 +8,7 @@ import { SeverityLevel } from '@sentry/types';
 import { getAccountCustomerByUid } from 'fxa-shared/db/models/auth';
 import {
   AbbrevPlan,
+  ClientIdCapabilityMap,
   SubscriptionEligibilityResult,
   SubscriptionUpdateEligibility,
 } from 'fxa-shared/subscriptions/types';
@@ -39,7 +40,10 @@ import { AuthLogger, AuthRequest, TaxAddress } from '../../types';
 import { sendFinishSetupEmailForStubAccount } from '../subscriptions/account';
 import validators from '../validators';
 import { handleAuth } from './utils';
-import { generateIdempotencyKey } from '../../payments/utils';
+import {
+  clientIdCapabilityMapFromMetadata,
+  generateIdempotencyKey,
+} from '../../payments/utils';
 import { COUNTRIES_LONG_NAME_TO_SHORT_NAME_MAP } from '../../payments/stripe';
 import { deleteAccountIfUnverified } from '../utils/account';
 import SUBSCRIPTIONS_DOCS from '../../../docs/swagger/subscriptions-api';
@@ -143,13 +147,11 @@ export class StripeHandler {
    */
   async getClients(request: AuthRequest) {
     this.log.begin('subscriptions.getClients', request);
-    const capabilitiesByClientId: { [clientId: string]: string[] } = {};
+    let result: ClientIdCapabilityMap = {};
 
-    const plans = await this.stripeHelper.allAbbrevPlans();
     const planConfigs = await this.stripeHelper.allMergedPlanConfigs();
-
     const capabilitiesForAll: string[] = [];
-    for (const plan of plans) {
+    for (const plan of await this.stripeHelper.allAbbrevPlans()) {
       const metadata = metadataFromPlan(plan);
       const pConfig = planConfigs?.[plan.plan_id] || {};
 
@@ -158,38 +160,42 @@ export class StripeHandler {
         ...(pConfig.capabilities?.[ALL_RPS_CAPABILITIES_KEY] || [])
       );
 
-      const capabilityKeys = Object.keys(metadata).filter((key) =>
-        key.startsWith('capabilities:')
+      result = ClientIdCapabilityMap.merge(
+        result,
+        clientIdCapabilityMapFromMetadata(
+          plan.plan_metadata || {},
+          'capabilities:'
+        )
       );
-      for (const key of capabilityKeys) {
-        const clientId = key.split(':')[1];
-        const capabilities = commaSeparatedListToArray((metadata as any)[key]);
-        capabilitiesByClientId[clientId] = (
-          capabilitiesByClientId[clientId] || []
-        ).concat(capabilities);
-      }
+
+      result = ClientIdCapabilityMap.merge(
+        result,
+        clientIdCapabilityMapFromMetadata(
+          plan.product_metadata || {},
+          'capabilities:'
+        )
+      );
+
       if (pConfig.capabilities) {
         Object.keys(pConfig.capabilities)
           .filter((x) => x !== ALL_RPS_CAPABILITIES_KEY)
           .forEach(
             (clientId) =>
-              (capabilitiesByClientId[clientId] = (
-                capabilitiesByClientId[clientId] || []
-              ).concat(pConfig.capabilities?.[clientId]))
+              (result[clientId] = (result[clientId] || []).concat(
+                pConfig.capabilities?.[clientId]
+              ))
           );
       }
     }
 
-    return Object.entries(capabilitiesByClientId).map(
-      ([clientId, capabilities]) => {
-        // Merge dupes with Set
-        const capabilitySet = new Set([...capabilitiesForAll, ...capabilities]);
-        return {
-          clientId,
-          capabilities: [...capabilitySet],
-        };
-      }
-    );
+    return Object.entries(result).map(([clientId, capabilities]) => {
+      // Merge dupes with Set
+      const capabilitySet = new Set([...capabilitiesForAll, ...capabilities]);
+      return {
+        clientId,
+        capabilities: [...capabilitySet],
+      };
+    });
   }
 
   async deleteSubscription(request: AuthRequest) {

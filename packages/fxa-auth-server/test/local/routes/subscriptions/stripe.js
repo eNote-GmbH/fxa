@@ -546,11 +546,10 @@ describe('DirectStripeRoutes', () => {
 
       const expected = [
         {
-          clientId: 'client1',
           capabilities: ['exampleCap0', 'exampleCap1', 'exampleCap3'],
+          clientId: 'client1',
         },
         {
-          clientId: 'client2',
           capabilities: [
             'exampleCap0',
             'exampleCap2',
@@ -559,6 +558,7 @@ describe('DirectStripeRoutes', () => {
             'exampleCap6',
             'exampleCap7',
           ],
+          clientId: 'client2',
         },
       ];
 
@@ -581,16 +581,15 @@ describe('DirectStripeRoutes', () => {
       );
       const expected = [
         {
-          clientId: 'client1',
           capabilities: [
             'exampleCap0',
             'goodnewseveryone',
             'exampleCap1',
             'exampleCap3',
           ],
+          clientId: 'client1',
         },
         {
-          clientId: 'client2',
           capabilities: [
             'exampleCap0',
             'goodnewseveryone',
@@ -602,6 +601,7 @@ describe('DirectStripeRoutes', () => {
             'exampleCap6',
             'exampleCap7',
           ],
+          clientId: 'client2',
         },
       ];
       const actual = await directStripeRoutesInstance.getClients();

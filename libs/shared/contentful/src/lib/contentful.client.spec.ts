@@ -30,6 +30,7 @@ describe('ContentfulClient', () => {
 
   beforeEach(() => {
     contentfulClient = new ContentfulClient({
+      cdnApiUri: faker.string.uuid(),
       graphqlApiKey: faker.string.uuid(),
       graphqlApiUri: faker.string.uuid(),
       graphqlSpaceId: faker.string.uuid(),
@@ -171,6 +172,63 @@ describe('ContentfulClient', () => {
             ),
           ])
         );
+      });
+    });
+  });
+
+  describe('getLocale', () => {
+    const DEFAULT_LOCALE = 'en';
+    const ACCEPT_LANGUAGE = 'en-US,fr-FR;q=0.7,de-DE;q=0.3';
+    const MOCK_DATA = {
+      items: [{ code: 'en' }, { code: 'fr-FR' }],
+    };
+
+    beforeEach(() => {
+      (global.fetch as jest.Mock) = jest.fn(() =>
+        Promise.resolve({
+          json: () => Promise.resolve(MOCK_DATA),
+        })
+      );
+    });
+
+    afterEach(() => {
+      (global.fetch as jest.Mock).mockClear();
+    });
+    describe('success', () => {
+      it('Returns prefered locale', async () => {
+        const result = await contentfulClient.getLocale(ACCEPT_LANGUAGE);
+        expect(result).toBe(DEFAULT_LOCALE);
+      });
+
+      it('Returns 2nd prefered locale, if prefered locale is not in configured', async () => {
+        const acceptLanguage = 'de-DE,fr-FR;q=0.7,en-US;q=0.3';
+        const result = await contentfulClient.getLocale(acceptLanguage);
+        expect(result).toBe('fr-FR');
+      });
+
+      it('Returns the default locale, if no matching locale in Contentful', async () => {
+        const acceptLanguage = 'de-DE';
+        const result = await contentfulClient.getLocale(acceptLanguage);
+        expect(result).toBe(DEFAULT_LOCALE);
+      });
+
+      it('Returns prefered locale from cache instead of fetching from Contentful', async () => {
+        await contentfulClient.getLocale(ACCEPT_LANGUAGE);
+        await contentfulClient.getLocale(ACCEPT_LANGUAGE);
+        expect(global.fetch).toBeCalledTimes(1);
+      });
+    });
+
+    describe('errors', () => {
+      it('Returns the default locale, on Contentful locale error', async () => {
+        (global.fetch as jest.Mock) = jest.fn(() =>
+          Promise.resolve({
+            json: () => Promise.reject(new Error('stuff went badly')),
+          })
+        );
+
+        const result = await contentfulClient.getLocale(ACCEPT_LANGUAGE);
+        expect(result).toBe(DEFAULT_LOCALE);
       });
     });
   });

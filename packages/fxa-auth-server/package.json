@@ -9,6 +9,7 @@
     "test": "test"
   },
   "scripts": {
+    "reino-test": "node -r esbuild-register ./lib/test.ts",
     "prebuild": "nx l10n-prime && nx install-ejs",
     "build": "nx build-l10n && nx build-ts && nx build-css && nx build-finalize",
     "build-l10n": "nx l10n-merge && nx l10n-merge-test",

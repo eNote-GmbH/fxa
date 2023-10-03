@@ -485,6 +485,7 @@ export class Account implements AccountData {
       const { recoveryData } = data.getRecoveryKeyBundle;
       return { recoveryData, recoveryKeyId };
     } catch (err) {
+      console.log('err in Account.ts getRecoveryKeyBundle', err);
       const errno = (err as ApolloError).graphQLErrors[0].extensions?.errno;
       if (errno && AuthUiErrorNos[errno]) {
         throw AuthUiErrorNos[errno];
@@ -623,9 +624,25 @@ export class Account implements AccountData {
     return result;
   }
 
+  async passwordForgotVerifyCode(
+    token: string,
+    code: string,
+    accountResetWithRecoveryKey = false
+  ): Promise<string> {
+    const { accountResetToken } =
+      await this.authClient.passwordForgotVerifyCode(code, token, {
+        accountResetWithRecoveryKey,
+      });
+    return accountResetToken;
+  }
+
   /**
    * Verify a passwordForgotToken, which returns an accountResetToken that can
    * be used to perform the actual password reset.
+   *
+   * NOTE! and TODO: this is currently unused. We need to update the GQL
+   * endpoint to accept the `accountResetWithRecoveryKey` option and
+   * fix graphql-api not reporting the correct IP address.
    *
    * @param token passwordForgotToken
    * @param code code
@@ -669,7 +686,8 @@ export class Account implements AccountData {
     token: string,
     code: string,
     email: string,
-    newPassword: string
+    newPassword: string,
+    resetToken?: string
   ): Promise<any> {
     try {
       // TODO: Temporary workaround (use auth-client directly) for GraphQL not
@@ -678,10 +696,8 @@ export class Account implements AccountData {
       //   token,
       //   code
       // );
-      const { accountResetToken } =
-        await this.authClient.passwordForgotVerifyCode(code, token, {
-          accountResetWithoutRecoveryKey: true,
-        });
+      const accountResetToken =
+        resetToken || (await this.passwordForgotVerifyCode(token, code));
       const {
         data: { accountReset },
       } = await this.apolloClient.mutate({

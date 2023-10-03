@@ -146,9 +146,14 @@ const AccountRecoveryConfirmKey = ({
       try {
         let resetToken = fetchedResetToken;
         if (!resetToken) {
-          const { accountResetToken } = await account.verifyPasswordForgotToken(
+          // const { accountResetToken } = await account.verifyPasswordForgotToken(
+          //   token,
+          //   code
+          // );
+          const accountResetToken = await account.passwordForgotVerifyCode(
             token,
-            code
+            code,
+            true
           );
           setFetchedResetToken(accountResetToken);
           resetToken = accountResetToken;
@@ -160,6 +165,7 @@ const AccountRecoveryConfirmKey = ({
           email,
         });
       } catch (error) {
+        console.log('error! on L163', error);
         setIsLoading(false);
         logViewEvent('flow', `${viewName}.fail`, REACT_ENTRYPOINT);
         // if the link expired or the reset was completed in another tab/browser
@@ -308,7 +314,10 @@ const AccountRecoveryConfirmKey = ({
           to={`/complete_reset_password${location.search}`}
           className="link-blue text-sm"
           id="lost-recovery-key"
-          state={{ lostRecoveryKey: true }}
+          state={{
+            lostRecoveryKey: true,
+            accountResetToken: fetchedResetToken,
+          }}
           onClick={() => {
             logViewEvent(
               'flow',

@@ -21,3 +21,7 @@ export const MOCK_USER_INFO_ALL = {
   primaryEmail: 'primaryFoo@bar.com',
   ...MOCK_USER_INFO,
 };
+
+export const MOCK_BRAND_MESSAGING_MODE = {
+  brandMessagingMode: 'launch',
+};

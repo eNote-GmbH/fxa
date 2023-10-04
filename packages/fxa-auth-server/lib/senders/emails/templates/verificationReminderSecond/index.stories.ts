@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Templates/verificationReminderSecond',
@@ -13,6 +14,7 @@ const createStory = storyWithProps(
   'verificationReminderSecond',
   'Reminder sent 5 days after an ignored verification.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     link: 'http://localhost:3030/verify_email',
   }
 );

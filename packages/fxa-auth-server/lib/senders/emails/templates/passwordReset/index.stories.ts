@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Templates/passwordReset',
@@ -13,6 +14,7 @@ const createStory = storyWithProps(
   'passwordReset',
   'Sent when password has been reset.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     resetLink: 'http://localhost:3030/settings/change_password',
   }
 );

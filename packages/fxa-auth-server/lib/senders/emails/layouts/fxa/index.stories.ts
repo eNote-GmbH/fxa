@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Layout',
@@ -12,6 +13,7 @@ export default {
 const createStory = storyWithProps('_storybook', 'The FxA email base layout.', {
   sync: false,
   subject: 'N/A',
+  ...MOCK_BRAND_MESSAGING_MODE,
 });
 
 export const NotThroughSyncFlow = createStory(

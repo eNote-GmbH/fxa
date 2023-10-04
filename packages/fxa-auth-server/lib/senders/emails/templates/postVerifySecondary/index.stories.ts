@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Templates/postVerifySecondary',
@@ -13,6 +14,7 @@ const createStory = storyWithProps(
   'postVerifySecondary',
   'Sent to primary email after secondary email is verified.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     link: 'http://localhost:3030/settings',
     secondaryEmail: 'secondary@email.com',
     passwordChangeLink: 'http://localhost:3030/settings/change_password',

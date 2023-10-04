@@ -16,6 +16,7 @@
     <mj-include path="<%- locals.cssPath %>/global.css" type="css" css-inline="inline" />
     <mj-include path="<%- locals.cssPath %>/fxa/index.css" type="css" css-inline="inline" />
     <mj-include path="<%- locals.cssPath %>/locale-dir.css" type="css" />
+    <%- include('/partials/brandMessaging/index.mjml') %>
 
     <mj-section>
       <mj-column>

@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Meta } from '@storybook/html';
-import { MOCK_USER_INFO } from '../../partials/userInfo/mocks';
+import {
+  MOCK_BRAND_MESSAGING_MODE,
+  MOCK_USER_INFO,
+} from '../../partials/userInfo/mocks';
 import { storyWithProps } from '../../storybook-email';
 
 export default {
@@ -14,6 +17,7 @@ const createStory = storyWithProps(
   'verifyLoginCode',
   'Sent to verify a login via code.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     ...MOCK_USER_INFO,
     code: '918398',
     passwordChangeLink: 'http://localhost:3030/settings/change_password',

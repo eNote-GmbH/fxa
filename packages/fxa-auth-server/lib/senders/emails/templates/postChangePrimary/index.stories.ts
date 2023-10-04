@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Templates/postChangePrimary',
@@ -13,6 +14,7 @@ const createStory = storyWithProps(
   'postChangePrimary',
   'Sent to new primary email when it has been updated',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     email: 'foo@bar.com',
     link: 'http://localhost:3030/settings',
     passwordChangeLink: 'http://localhost:3030/settings/change_password',

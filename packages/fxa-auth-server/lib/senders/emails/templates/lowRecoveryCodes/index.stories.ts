@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Templates/lowRecoveryCodes',
@@ -13,6 +14,7 @@ const createStory = storyWithProps(
   'lowRecoveryCodes',
   'Sent when a user has 2 or less backup authentication codes remaining.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     link: 'http://localhost:3030/settings/two_step_authentication/replace_codes?low_recovery_codes=true',
     numberRemaining: 1,
   }

@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Meta } from '@storybook/html';
-import { MOCK_USER_INFO } from '../../partials/userInfo/mocks';
+import {
+  MOCK_BRAND_MESSAGING_MODE,
+  MOCK_USER_INFO,
+} from '../../partials/userInfo/mocks';
 import { storyWithProps } from '../../storybook-email';
 
 export default {
@@ -14,6 +17,7 @@ const createStory = storyWithProps(
   'recovery',
   'Sent when user begins password reset flow',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     ...MOCK_USER_INFO,
     link: 'http://localhost:3030/complete_reset_password',
   }

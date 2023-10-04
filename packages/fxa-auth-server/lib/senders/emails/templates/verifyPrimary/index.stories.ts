@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Meta } from '@storybook/html';
-import { MOCK_USER_INFO } from '../../partials/userInfo/mocks';
+import {
+  MOCK_BRAND_MESSAGING_MODE,
+  MOCK_USER_INFO,
+} from '../../partials/userInfo/mocks';
 import { storyWithProps } from '../../storybook-email';
 
 export default {
@@ -14,6 +17,7 @@ const createStory = storyWithProps(
   'verifyPrimary',
   'Sent to users with an unverified primary email, meaning an unverified account, when they attempt an action requiring a verified account.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     ...MOCK_USER_INFO,
     link: 'http://localhost:3030/verify_primary_email',
     sync: false,

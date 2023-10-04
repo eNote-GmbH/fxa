@@ -4,6 +4,7 @@
 
 import { Meta } from '@storybook/html';
 import { storyWithProps } from '../../storybook-email';
+import { MOCK_BRAND_MESSAGING_MODE } from '../../partials/userInfo/mocks';
 
 export default {
   title: 'FxA Emails/Templates/postVerify',
@@ -13,6 +14,7 @@ const createStory = storyWithProps(
   'postVerify',
   'Sent after account is confirmed during Sync registration on non-mobile and mobile devices.',
   {
+    ...MOCK_BRAND_MESSAGING_MODE,
     link: 'http://localhost:3030/connect_another_device',
     desktopLink: 'https://firefox.com',
     onDesktopOrTabletDevice: true,

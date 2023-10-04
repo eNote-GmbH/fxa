@@ -108,7 +108,7 @@ describe('components/PaymentConsentCheckbox', () => {
       it('renders Localized for a plan with correct props and displays correct default string', async () => {
         const plan_id = 'plan_daily';
         const plan = findMockPlan(plan_id);
-        const expectedMsgId = 'payment-confirm-with-legal-links-static';
+        const expectedMsgId = 'payment-confirm-with-legal-links-static-2';
 
         runTests(plan, expectedMsgId);
       });

@@ -29,7 +29,7 @@ const getIapSubscriptionAppStoreL10Id = (
   s: IapRoadblockProps['subscription']
 ) => {
   if (s && s._subscription_type === MozillaSubscriptionTypes.IAP_GOOGLE) {
-    return 'brand-name-google-play';
+    return 'brand-name-google-play-2';
   } else if (s && s._subscription_type === MozillaSubscriptionTypes.IAP_APPLE) {
     return 'brand-name-apple-app-store';
   } else {

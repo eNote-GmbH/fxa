@@ -77,8 +77,8 @@ export const SettingsLayout = ({ children }: { children: ReactNode }) => {
         <div id="fxa-settings-header-wrapper">
           <header id="fxa-settings-header">
             <h1 id="fxa-manage-account">
-              <Localized id="project-brand">
-                <span className="fxa-account-title">Firefox Accounts</span>
+              <Localized id="project-brand-2">
+                <span className="fxa-account-title">Firefox accounts</span>
               </Localized>
             </h1>
             {/*

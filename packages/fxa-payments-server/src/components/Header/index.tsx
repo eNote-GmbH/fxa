@@ -33,7 +33,7 @@ export const Header = ({ profile, className = 'default' }: HeaderProps) => {
       <div data-testid="branding">
         <img
           src={firefoxLogo}
-          alt={l10n.getString('brand-name-firefox-logo', null, 'Firefox logo')}
+          alt={l10n.getString('brand-name-firefox-logo-2', null, 'Firefox logo')}
           className="w-[120px]"
         />
       </div>

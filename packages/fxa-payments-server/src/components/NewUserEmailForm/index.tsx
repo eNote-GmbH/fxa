@@ -131,7 +131,7 @@ export const NewUserEmailForm = ({
       {...{ onChange }}
     >
       <Localized
-        id="new-user-sign-in-link"
+        id="new-user-sign-in-link-1"
         elems={{
           a: (
             <a

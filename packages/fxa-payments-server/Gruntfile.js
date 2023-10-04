@@ -4,11 +4,7 @@
 
 module.exports = function (grunt) {
   const srcPaths = [
-    // 'src/branding.ftl' is temporary
-    // and will be replaced with '../fxa-shared/lib/l10n/branding.ftl'
-    // in a later ticket - will require coordination with l10n to resolve
-    // conflicting IDs for identical terms.
-    'src/branding.ftl',
+    '../fxa-shared/l10n/branding.ftl',
     'src/**/*.ftl',
   ];
 

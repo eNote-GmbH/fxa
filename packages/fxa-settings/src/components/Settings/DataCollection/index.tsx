@@ -31,12 +31,12 @@ export const DataCollection = () => {
         ? [
             'dc-opt-in-success',
             null,
-            'Thanks! Sharing this data helps us improve Firefox Accounts.',
+            'Thanks! Sharing this data helps us improve Firefox accounts.',
           ]
         : [
             'dc-opt-out-success',
             null,
-            'Opt out successful. Firefox Accounts won’t send technical or interaction data to Mozilla.',
+            'Opt out successful. Firefox accounts won’t send technical or interaction data to Mozilla.',
           ];
       alertBar.success(l10n.getString.apply(l10n, alertArgs));
     } catch (err) {
@@ -63,13 +63,13 @@ export const DataCollection = () => {
           <div className="flex-5 tablet:flex-7 ltr:pr-6 tablet:ltr:pr-12 rtl:pl-6 tablet:rtl:pl-12">
             <Localized id="dc-subheader">
               <h3 className="font-header mb-4">
-                Help improve Firefox Accounts
+                Help improve Firefox accounts
               </h3>
             </Localized>
 
             <p className="text-sm">
               <Localized id="dc-subheader-content">
-                Allow Firefox Accounts to send technical and interaction data to
+                Allow Firefox accounts to send technical and interaction data to
                 Mozilla.
               </Localized>{' '}
               <LinkExternal

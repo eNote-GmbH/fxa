@@ -22,6 +22,8 @@ import Transform from '../lib/transform';
 import UserCardMixin from './mixins/user-card-mixin';
 import Vat from '../lib/vat';
 import BrandMessagingMixin from './mixins/brand-messaging-mixin';
+import PocketMigrationMixin from './mixins/pocket-migration-mixin';
+import MonitorClientMixin from './mixins/monitor-client-mixin';
 
 const t = (msg) => msg;
 
@@ -171,6 +173,7 @@ const View = FormView.extend({
     context.set({
       buttonSignInText,
       email: this.relier.get('email'),
+      defaultTermsOnly: true,
     });
   },
 
@@ -252,7 +255,9 @@ Cocktail.mixin(
   SignInMixin,
   SignedInNotificationMixin,
   UserCardMixin,
-  BrandMessagingMixin
+  BrandMessagingMixin,
+  PocketMigrationMixin,
+  MonitorClientMixin
 );
 
 export default View;

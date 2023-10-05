@@ -22,6 +22,7 @@ import SignedInNotificationMixin from './mixins/signed-in-notification-mixin';
 import SignUpMixin from './mixins/signup-mixin';
 import GleanMetrics from '../lib/glean';
 import BrandMessagingMixin from './mixins/brand-messaging-mixin';
+import MonitorClientMixin from './mixins/monitor-client-mixin';
 
 const t = (msg) => msg;
 
@@ -70,6 +71,7 @@ const SignUpPasswordView = FormView.extend({
     context.set({
       canChangeAccount: !this.model.get('forceEmail'),
       email: this.getAccount().get('email'),
+      defaultTermsOnly: true,
     });
 
     // We debounce the password check function to give the password input
@@ -166,7 +168,8 @@ Cocktail.mixin(
   SignUpMixin,
   PocketMigrationMixin,
   AccountSuggestionMixin,
-  BrandMessagingMixin
+  BrandMessagingMixin,
+  MonitorClientMixin
 );
 
 export default SignUpPasswordView;

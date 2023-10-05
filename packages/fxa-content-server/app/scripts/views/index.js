@@ -26,6 +26,7 @@ import Template from 'templates/index.mustache';
 import checkEmailDomain from '../lib/email-domain-validator';
 import PocketMigrationMixin from './mixins/pocket-migration-mixin';
 import BrandMessagingMixin from './mixins/brand-messaging-mixin';
+import MonitorClientMixin from './mixins/monitor-client-mixin';
 
 const EMAIL_SELECTOR = 'input[type=email]';
 
@@ -44,6 +45,7 @@ class IndexView extends FormView {
       unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
         showSeparator: true,
       }),
+      defaultTermsOnly: true,
     });
   }
 
@@ -289,7 +291,8 @@ Cocktail.mixin(
     entrypoint: 'fxa:enter_email',
     flowEvent: 'link.signin',
   }),
-  PocketMigrationMixin
+  PocketMigrationMixin,
+  MonitorClientMixin
 );
 
 export default IndexView;

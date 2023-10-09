@@ -2,31 +2,65 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ApolloClient, NormalizedCacheObject, from } from '@apollo/client';
+import {
+  ApolloClient,
+  ApolloLink,
+  NormalizedCacheObject,
+  from,
+} from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { ErrorHandler, onError } from '@apollo/client/link/error';
 import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import { cache, sessionToken, typeDefs } from './cache';
+import { GraphQLError } from 'graphql';
+import { GET_LOCAL_SIGNED_IN_STATUS } from '../components/App/gql';
 
-export const pagesRequiringAuthentication = ['settings'];
+const operationNamesRequiringAuth = [
+  'GetInitialMetricsState',
+  'GetInitialSettingsState',
+];
+
+export const isUnauthorizedError = (error: GraphQLError) =>
+  error.message === 'Invalid token' &&
+  error.extensions?.response.error === 'Unauthorized';
+
+const afterwareLink = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
+    // The error link handles GQL errors and network errors. This handles
+    // successful queries and checks to see if we should update the `isSignedIn` state.
+    const successWithAuth =
+      !response.errors &&
+      operation.query.definitions.some((definition) => {
+        return (
+          definition.kind === 'OperationDefinition' &&
+          definition.name?.value &&
+          operationNamesRequiringAuth.includes(definition.name.value)
+        );
+      });
+
+    if (successWithAuth) {
+      cache.writeQuery({
+        query: GET_LOCAL_SIGNED_IN_STATUS,
+        data: { isSignedIn: true },
+      });
+    }
+    return response;
+  });
+});
 
 export const errorHandler: ErrorHandler = ({ graphQLErrors, networkError }) => {
   let reauth = false;
 
-  const currentPageRequiresAuthentication = pagesRequiringAuthentication.some(
-    (urlSnippet) => {
-      // We check if the url for the current page contains the path of a page which requires authentication
-      return (
-        window?.location?.pathname &&
-        window.location.pathname.includes(urlSnippet)
-      );
-    }
-  );
-
   if (graphQLErrors) {
     for (const error of graphQLErrors) {
-      if (error.message === 'Invalid token') {
+      if (isUnauthorizedError(error)) {
         reauth = true;
+
+        cache.writeQuery({
+          query: GET_LOCAL_SIGNED_IN_STATUS,
+          data: { isSignedIn: false },
+        });
+        // TODO: Improve in FXA-7626
       } else if (error.message === 'Must verify') {
         return window.location.replace(
           `/signin_token_code?action=email&service=sync`
@@ -35,18 +69,15 @@ export const errorHandler: ErrorHandler = ({ graphQLErrors, networkError }) => {
     }
   }
   if (networkError && 'statusCode' in networkError) {
+    // TODO: I think we can take 'reauth' bits out, and manually send this
+    // to Sentry. If we hit a network error it's because the GQL server
+    // couldn't be reached, otherwise it's a GQL Error.
     if (networkError.statusCode === 401) {
       reauth = true;
     }
   }
-  if (reauth && currentPageRequiresAuthentication) {
-    window.location.replace(
-      `/signin?redirect_to=${encodeURIComponent(window.location.pathname)}`
-    );
-  } else {
-    if (!reauth) {
-      console.error('graphql errors', graphQLErrors, networkError);
-    }
+  if (!reauth) {
+    console.error('graphql errors', graphQLErrors, networkError);
   }
 };
 
@@ -61,8 +92,7 @@ export function createApolloClient(gqlServerUri: string) {
     uri: `${gqlServerUri}/graphql`,
   });
 
-  // authLink sets the Authentication header on outgoing requests
-  const authLink = setContext((_, { headers }) => {
+  const authLink = setContext((_, { headers, operation }) => {
     return {
       headers: {
         ...headers,
@@ -76,7 +106,7 @@ export function createApolloClient(gqlServerUri: string) {
 
   apolloClientInstance = new ApolloClient({
     cache,
-    link: from([errorLink, authLink, httpLink]),
+    link: from([errorLink, authLink, afterwareLink, httpLink]),
     typeDefs,
   });
 

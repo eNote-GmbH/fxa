@@ -25,12 +25,17 @@ import { observeNavigationTiming } from 'fxa-shared/metrics/navigation-timing';
 import PageAvatar from './PageAvatar';
 import PageRecentActivity from './PageRecentActivity';
 import PageRecoveryKeyCreate from './PageRecoveryKeyCreate';
+import { useQuery } from '@apollo/client';
+import { SignedInAccountStatus } from '../App/interfaces';
+import { GET_LOCAL_SIGNED_IN_STATUS } from '../App/gql';
 
 export const Settings = ({
   showRecoveryKeyV2,
 }: { showRecoveryKeyV2?: boolean } & RouteComponentProps) => {
   const config = useConfig();
   const { metricsEnabled, hasPassword } = useAccount();
+  const { data, loading: isSignedInStatusLoading } =
+    useQuery<SignedInAccountStatus>(GET_LOCAL_SIGNED_IN_STATUS);
 
   useEffect(() => {
     if (config.metrics.navTiming.enabled && metricsEnabled) {
@@ -44,10 +49,7 @@ export const Settings = ({
 
   const { loading, error } = useInitialSettingsState();
 
-  // In case of an invalid token the page will redirect,
-  // but to prevent a flash of the error message we show
-  // the spinner.
-  if (loading || error?.message.includes('Invalid token')) {
+  if (loading || isSignedInStatusLoading) {
     return (
       <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
     );
@@ -55,6 +57,13 @@ export const Settings = ({
 
   if (error) {
     return <AppErrorDialog data-testid="error-dialog" {...{ error }} />;
+  }
+
+  if (data?.isSignedIn === false) {
+    // TODO: use hardNavigateToContentServer
+    window.location.replace(
+      `/signin?redirect_to=${encodeURIComponent(window.location.pathname)}`
+    );
   }
 
   return (

@@ -13,18 +13,9 @@ export const viewName = 'reset-password-confirmed';
 const ResetPasswordConfirmed = ({
   continueHandler,
   isSignedIn,
-  integration,
+  serviceName,
+  isSync,
 }: ResetPasswordConfirmedProps & RouteComponentProps) => {
-  const [serviceName, setServiceName] = useState<string>();
-  const [isSync, setIsSync] = useState<boolean>();
-
-  useEffect(() => {
-    (async () => {
-      setServiceName(await integration.getServiceName());
-      setIsSync(await integration.isSync());
-    })();
-  });
-
   return (
     <AppLayout>
       <Ready

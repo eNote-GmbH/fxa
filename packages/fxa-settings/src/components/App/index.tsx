@@ -55,38 +55,21 @@ import AccountRecoveryResetPasswordContainer from '../../pages/ResetPassword/Acc
 import { QueryParams } from '../..';
 import SignupContainer from '../../pages/Signup/container';
 import GleanMetrics from '../../lib/glean';
-
-// TODO: FXA-8098
-// export const INITIAL_METRICS_QUERY = gql`
-//   query GetInitialMetricsState {
-//     account {
-//       recoveryKey
-//       metricsEnabled
-//       emails {
-//         email
-//         isPrimary
-//         verified
-//       }
-//       totp {
-//         exists
-//         verified
-//       }
-//     }
-//   }
-// `;
+import { useQuery } from '@apollo/client';
+import { GET_LOCAL_SIGNED_IN_STATUS, INITIAL_METRICS_QUERY } from './gql';
+import { MetricsData, SignedInAccountStatus } from './interfaces';
 
 export const App = ({
   flowQueryParams,
 }: { flowQueryParams: QueryParams } & RouteComponentProps) => {
   const config = useConfig();
-
-  // TODO: stop overfetching / improve this, FXA-8098
-  const [isSignedIn, setIsSignedIn] = useState<boolean>();
-  const { loading, error } = useInitialSettingsState();
-  const account = useAccount();
   const integration = useIntegration();
-  const { metricsEnabled } = account;
 
+  const { loading, data } = useQuery<MetricsData>(INITIAL_METRICS_QUERY);
+  const { data: isSignedInData } = useQuery<SignedInAccountStatus>(
+    GET_LOCAL_SIGNED_IN_STATUS
+  );
+  const isSignedIn = isSignedInData?.isSignedIn;
   // TODO Remove feature flag in FXA-7419
   const showRecoveryKeyV2 = config.showRecoveryKeyV2;
 
@@ -94,36 +77,46 @@ export const App = ({
     GleanMetrics.initialize(
       {
         ...config.glean,
-        enabled: metricsEnabled || !isSignedIn,
+        enabled: data?.metricsEnabled || !isSignedIn,
         appDisplayVersion: config.version,
         channel: config.glean.channel,
       },
-      { flowQueryParams, account, userAgent: navigator.userAgent, integration }
+      {
+        flowQueryParams,
+        accountData: { metricsEnabled: data?.metricsEnabled, uid: data?.uid },
+        userAgent: navigator.userAgent,
+        integration,
+      }
     );
   }, [
     config.glean,
     config.version,
-    metricsEnabled,
+    data?.metricsEnabled,
+    data?.uid,
     isSignedIn,
     flowQueryParams,
-    account,
     integration,
   ]);
 
   useEffect(() => {
-    Metrics.init(metricsEnabled || !isSignedIn, flowQueryParams);
-    if (metricsEnabled) {
-      Metrics.initUserPreferences(account);
+    Metrics.init(data?.metricsEnabled || !isSignedIn, flowQueryParams);
+    if (data?.metricsEnabled) {
+      Metrics.initUserPreferences({
+        recoveryKey: data.recoveryKey,
+        hasSecondaryVerifiedEmail:
+          data.emails.length > 1 && data.emails[1].verified,
+        totpActive: data.totp.exists && data.totp.verified,
+      });
     }
-  }, [account, metricsEnabled, isSignedIn, flowQueryParams, config]);
-
-  useEffect(() => {
-    if (!loading && error?.message.includes('Invalid token')) {
-      setIsSignedIn(false);
-    } else if (!loading && !error) {
-      setIsSignedIn(true);
-    }
-  }, [error, loading]);
+  }, [
+    data?.metricsEnabled,
+    data?.emails,
+    data?.totp,
+    data?.recoveryKey,
+    isSignedIn,
+    flowQueryParams,
+    config,
+  ]);
 
   useEffect(() => {
     if (!loading) {
@@ -134,7 +127,7 @@ export const App = ({
       // who opt to have metrics enabled.
       // A bit of chicken and egg but it could be possible that we miss some
       // errors while the page is loading and user is being fetched.
-      if (metricsEnabled || !isSignedIn) {
+      if (data?.metricsEnabled || !isSignedIn) {
         sentryMetrics.configure({
           release: config.version,
           sentry: {
@@ -145,7 +138,13 @@ export const App = ({
         sentryMetrics.disable();
       }
     }
-  }, [metricsEnabled, config.sentry, config.version, loading, isSignedIn]);
+  }, [
+    data?.metricsEnabled,
+    config.sentry,
+    config.version,
+    loading,
+    isSignedIn,
+  ]);
 
   return (
     <Router basepath="/">
@@ -160,10 +159,7 @@ const SettingsRoutes = ({
 }: {
   showRecoveryKeyV2?: boolean;
 } & RouteComponentProps) => {
-  // TODO: FXA-8098
-  // const { loading, error } = useInitialSettingsState();
   const settingsContext = initializeSettingsContext();
-
   return (
     <SettingsContext.Provider value={settingsContext}>
       <ScrollToTop default>

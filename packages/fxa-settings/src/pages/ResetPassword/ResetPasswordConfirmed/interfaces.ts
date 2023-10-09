@@ -4,14 +4,15 @@
 
 import { BaseIntegration, IntegrationType } from '../../../models';
 
-export interface ResetPasswordConfirmedBaseIntegration {
-  type: IntegrationType;
-  getServiceName: () => ReturnType<BaseIntegration['getServiceName']>;
-  isSync: () => ReturnType<BaseIntegration['isSync']>;
-}
+// export interface ResetPasswordConfirmedBaseIntegration {
+//   type: IntegrationType;
+//   getServiceName: () => ReturnType<BaseIntegration['getServiceName']>;
+//   isSync: () => ReturnType<BaseIntegration['isSync']>;
+// }
 
 export type ResetPasswordConfirmedProps = {
   continueHandler?: Function;
   isSignedIn: boolean;
-  integration: ResetPasswordConfirmedBaseIntegration;
+  serviceName: string;
+  isSync: boolean;
 };

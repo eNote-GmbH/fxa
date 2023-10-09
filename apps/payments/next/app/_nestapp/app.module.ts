@@ -15,9 +15,20 @@ import { RootConfig } from './config';
     TypedConfigModule.forRoot({
       schema: RootConfig,
       load: [
-        dotenvLoader({ separator: '__', ignoreEnvFile: true }),
-        fileLoader(),
+        fileLoader(), // fileLoader() needs to be first, else next build doesn't include .env.json in build
+        dotenvLoader({
+          separator: '__',
+          ignoreEnvFile: true,
+        }),
       ],
+      normalize(config) {
+        config.mysqlConfig.port = parseInt(config.mysqlConfig.port, 10);
+        config.mysqlConfig.connectionLimitMax = parseInt(
+          config.mysqlConfig.connectionLimitMax,
+          10
+        );
+        return config;
+      },
     }),
   ],
   controllers: [],

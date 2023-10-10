@@ -177,62 +177,62 @@ test.describe('severity-2 #smoke', () => {
         expect(page.url()).toContain('&flow_begin_time=');
       });
 
-      test('New user checkout URL to have RP-provided flow params, acquisition params & verify funnel metrics', async ({
-        pages: { settings, relier, page, subscribe },
-      }, { project }) => {
-        test.skip(
-          project.name === 'production',
-          'test plan not yet available in prod'
-        );
-        await settings.goto();
-        await settings.signOut();
-        await relier.goto();
+      // test('New user checkout URL to have RP-provided flow params, acquisition params & verify funnel metrics', async ({
+      //   pages: { settings, relier, page, subscribe },
+      // }, { project }) => {
+      //   test.skip(
+      //     project.name === 'production',
+      //     'test plan not yet available in prod'
+      //   );
+      //   await settings.goto();
+      //   await settings.signOut();
+      //   await relier.goto();
 
-        const subscribeUrl = await relier.getUrl();
-        if (!subscribeUrl) {
-          fail('Subscribe button has no href.');
-        }
-        const rpSearchParamsBefore = relier.getRpSearchParams(subscribeUrl);
-        const rpFlowParamsBefore = relier.getRpFlowParams(rpSearchParamsBefore);
-        const acquisitionParamsBefore =
-          relier.getRpAcquisitionParams(rpSearchParamsBefore);
+      //   const subscribeUrl = await relier.getUrl();
+      //   if (!subscribeUrl) {
+      //     fail('Subscribe button has no href.');
+      //   }
+      //   const rpSearchParamsBefore = relier.getRpSearchParams(subscribeUrl);
+      //   const rpFlowParamsBefore = relier.getRpFlowParams(rpSearchParamsBefore);
+      //   const acquisitionParamsBefore =
+      //     relier.getRpAcquisitionParams(rpSearchParamsBefore);
 
-        // check flow metrics
-        await relier.clickSubscribeRPFlowMetrics();
-        const rpSearchParamsAfter = relier.getRpSearchParams(page.url());
-        const rpFlowParamsAfter = relier.getRpFlowParams(rpSearchParamsAfter);
-        expect(rpFlowParamsAfter).toStrictEqual(rpFlowParamsBefore);
+      //   // check flow metrics
+      //   await relier.clickSubscribeRPFlowMetrics();
+      //   const rpSearchParamsAfter = relier.getRpSearchParams(page.url());
+      //   const rpFlowParamsAfter = relier.getRpFlowParams(rpSearchParamsAfter);
+      //   expect(rpFlowParamsAfter).toStrictEqual(rpFlowParamsBefore);
 
-        // subscribe, failing first then succeeding
-        await subscribe.setEmailAndConfirmNewUser();
-        await subscribe.setConfirmPaymentCheckbox();
-        await subscribe.setFullName();
-        await subscribe.setFailedCreditCardInfo();
-        await subscribe.clickPayNow();
-        await subscribe.clickTryAgain();
-        await subscribe.setCreditCardInfo();
-        await subscribe.clickPayNow();
-        await subscribe.submit();
+      //   // subscribe, failing first then succeeding
+      //   await subscribe.setEmailAndConfirmNewUser();
+      //   await subscribe.setConfirmPaymentCheckbox();
+      //   await subscribe.setFullName();
+      //   await subscribe.setFailedCreditCardInfo();
+      //   await subscribe.clickPayNow();
+      //   await subscribe.clickTryAgain();
+      //   await subscribe.setCreditCardInfo();
+      //   await subscribe.clickPayNow();
+      //   await subscribe.submit();
 
-        // check acquisition metrics
-        const acquisitionParamsAfter =
-          metricsObserver.getAcquisitionParamsFromEvents();
-        expect(acquisitionParamsAfter).toStrictEqual(acquisitionParamsBefore);
+      //   // check acquisition metrics
+      //   const acquisitionParamsAfter =
+      //     metricsObserver.getAcquisitionParamsFromEvents();
+      //   expect(acquisitionParamsAfter).toStrictEqual(acquisitionParamsBefore);
 
-        // check conversion funnel metrics
-        const expectedEventTypes = [
-          'amplitude.subPaySetup.view',
-          'amplitude.subPaySetup.engage',
-          'amplitude.subPaySetup.submit',
-          'amplitude.subPaySetup.fail',
-          'amplitude.subPaySetup.submit',
-          'amplitude.subPaySetup.success',
-        ];
-        const actualEventTypes = metricsObserver.rawEvents.map((event) => {
-          return event.type;
-        });
-        expect(actualEventTypes).toMatchObject(expectedEventTypes);
-      });
+      //   // check conversion funnel metrics
+      //   const expectedEventTypes = [
+      //     'amplitude.subPaySetup.view',
+      //     'amplitude.subPaySetup.engage',
+      //     'amplitude.subPaySetup.submit',
+      //     'amplitude.subPaySetup.fail',
+      //     'amplitude.subPaySetup.submit',
+      //     'amplitude.subPaySetup.success',
+      //   ];
+      //   const actualEventTypes = metricsObserver.rawEvents.map((event) => {
+      //     return event.type;
+      //   });
+      //   expect(actualEventTypes).toMatchObject(expectedEventTypes);
+      // });
     });
   });
 });

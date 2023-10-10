@@ -1,20 +1,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { ModelDataStore } from './model-data-store';
+import { ModelDataStore, RawData } from './model-data-store';
 
 class TestModelData extends ModelDataStore {
   getKeys(): Iterable<string> {
     return Object.keys(this.dataStore);
   }
-  get(key: string): unknown {
+  get(key: string): RawData {
     return this.dataStore[key];
   }
-  set(key: string, val: unknown): void {
+  set(key: string, val: RawData): void {
     this.dataStore[key] = val;
   }
 
-  constructor(public readonly dataStore: Record<string, unknown> = {}) {
+  constructor(public readonly dataStore: Record<string, RawData> = {}) {
     super();
   }
 }

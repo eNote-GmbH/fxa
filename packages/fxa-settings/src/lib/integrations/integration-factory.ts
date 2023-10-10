@@ -264,7 +264,8 @@ export class IntegrationFactory {
 
     try {
       const serviceInfo = await this.delegates.getClientInfo(clientId);
-      const clientInfo = new ClientInfo(new GenericData(serviceInfo));
+      const json = JSON.stringify(serviceInfo);
+      const clientInfo = new ClientInfo(new GenericData(JSON.parse(json)));
       return clientInfo;
     } catch (err) {
       if (

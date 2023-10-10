@@ -2,13 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+export type RawData = string | undefined;
+
 /**
  * Abstract base class for model data store classes
  */
 export abstract class ModelDataStore {
   abstract getKeys(): Iterable<string>;
-  abstract get(key: string): unknown;
-  abstract set(key: string, val: unknown): void;
+  abstract get(key: string): RawData;
+  abstract set(key: string, val: RawData): void;
 
   requiresSync(): boolean {
     return false;

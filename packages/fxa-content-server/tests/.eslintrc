@@ -6,7 +6,6 @@
       "strict": "off"
     },
     "globals": {
-      "intern": true,
       "require": true
     }
   }

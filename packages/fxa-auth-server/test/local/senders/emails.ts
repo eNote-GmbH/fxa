@@ -715,7 +715,7 @@ const TESTS: [string, any, Record<string, any>?][] = [
       { test: 'notInclude', expected: 'utm_source=email' },
     ]],
     ['text', [
-      { test: 'include', expected: 'Your Firefox account was used to sign in' },
+      { test: 'include', expected: 'Your Mozilla account was used to sign in' },
       { test: 'include', expected: `Not you? Change your password:\n${configUrl('initiatePasswordChangeUrl', 'new-device-signin', 'change-password', 'email')}` },
       { test: 'include', expected: `Manage account:\n${configUrl('accountSettingsUrl', 'new-device-signin', 'manage-account', 'email', 'uid')}` },
       { test: 'include', expected: `Mozilla Privacy Policy\n${configUrl('privacyUrl', 'new-device-signin', 'privacy')}` },

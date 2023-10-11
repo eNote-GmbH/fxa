@@ -529,13 +529,13 @@ module.exports = function (
 
         // If/when we use .localizeStrings in other files, probably move where strings are
         // maintained to separate file?
-        const titleFtlId = 'session-verify-send-push-title';
-        const bodyFtlId = 'session-verify-send-push-body';
+        const titleFtlId = 'session-verify-send-push-title-2';
+        const bodyFtlId = 'session-verify-send-push-body-2';
 
         const ftlIdMsgs = [
           {
             id: titleFtlId,
-            message: 'Logging in to Firefox accounts?',
+            message: 'Logging in to your Mozilla account?',
           },
           {
             id: bodyFtlId,

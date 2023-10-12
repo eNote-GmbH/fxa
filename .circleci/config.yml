@@ -376,6 +376,7 @@ commands:
             - packages/**/styles
             - packages/**/vendor
             - packages/**/var
+            - packages/**/emails/css
             - configs/gql/allowlist
 
   restore-workspace:

@@ -52,12 +52,12 @@ export interface SignupOAuthIntegration {
   type: IntegrationType.OAuth;
   getRedirectUri: () => ReturnType<OAuthIntegration['getRedirectUri']>;
   saveOAuthState: () => ReturnType<OAuthIntegration['saveOAuthState']>;
-  getServiceName: () => ReturnType<OAuthIntegration['getServiceName']>;
+  getService: () => ReturnType<OAuthIntegration['getService']>;
 }
 
 export interface SignupBaseIntegration {
   type: IntegrationType;
-  getServiceName: () => ReturnType<BaseIntegration['getServiceName']>;
+  getService: () => ReturnType<BaseIntegration['getService']>;
 }
 
 export interface SignupFormData {

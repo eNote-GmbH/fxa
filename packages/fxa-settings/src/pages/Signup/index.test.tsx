@@ -25,16 +25,17 @@ import {
   createMockSignupSyncDesktopIntegration,
 } from './mocks';
 import {
+  MOCK_CLIENT_ID,
   MOCK_EMAIL,
   MOCK_KEY_FETCH_TOKEN,
   MOCK_PASSWORD,
-  MOCK_SERVICE,
   MOCK_UNWRAP_BKEY,
 } from '../mocks';
 import { newsletters } from '../../components/ChooseNewsletters/newsletters';
 import { notifyFirefoxOfLogin } from '../../lib/channels/helpers';
 import GleanMetrics from '../../lib/glean';
 import * as utils from 'fxa-react/lib/utils';
+import { POCKET_CLIENTIDS } from '../../models/integrations/client-matching';
 
 jest.mock('../../lib/metrics', () => ({
   usePageViewEvent: jest.fn(),
@@ -163,7 +164,7 @@ describe('Signup page', () => {
   it('shows an info banner and Pocket-specific TOS when client is Pocket', async () => {
     renderWithLocalizationProvider(
       <Subject
-        integration={createMockSignupOAuthIntegration(MozServices.Pocket)}
+        integration={createMockSignupOAuthIntegration(POCKET_CLIENTIDS[0])}
       />
     );
 
@@ -232,8 +233,6 @@ describe('Signup page', () => {
 
   describe('handles submission', () => {
     async function fillOutForm(age = '13') {
-      const passwordInput = await screen.findByLabelText('Password');
-      const repeatPasswordInput = screen.getByLabelText('Repeat password');
       const ageInput = screen.getByLabelText('How old are you?');
 
       fireEvent.input(screen.getByLabelText('Password'), {
@@ -426,7 +425,7 @@ describe('Signup page', () => {
 
       renderWithLocalizationProvider(
         <Subject
-          integration={createMockSignupOAuthIntegration()}
+          integration={createMockSignupOAuthIntegration(MOCK_CLIENT_ID)}
           beginSignupHandler={mockBeginSignupHandler}
         />
       );
@@ -439,10 +438,9 @@ describe('Signup page', () => {
         expect(mockBeginSignupHandler).toHaveBeenCalledWith(
           MOCK_EMAIL,
           MOCK_PASSWORD,
-          { service: MOCK_SERVICE }
+          { service: MOCK_CLIENT_ID }
         );
       });
-      // TODO: other tests here in OAuth ticket (FXA-6519)
     });
     it('on fail', async () => {
       const mockBeginSignupHandler = jest

@@ -81,8 +81,13 @@ const SignupContainer = ({
 
   const beginSignupHandler: BeginSignupHandler = useCallback(
     async (email, password, options) => {
-      options.verificationMethod = 'email-otp';
-      options.keys = isOAuthIntegration(integration);
+      const service = integration.getService();
+      options = {
+        verificationMethod: 'email-otp',
+        // keys must be true to receive keyFetchToken for oAuth
+        keys: isOAuthIntegration(integration),
+        service,
+      };
       try {
         const { authPW, unwrapBKey } = await getCredentials(email, password);
         const { data } = await beginSignup({
@@ -96,6 +101,7 @@ const SignupContainer = ({
         });
         return data ? { data: { ...data, unwrapBKey } } : { data: null };
       } catch (error) {
+        // not necessarily a GraphQlError?
         const graphQLError: GraphQLError = error.graphQLErrors[0];
         if (graphQLError && graphQLError.extensions?.errno) {
           const { errno } = graphQLError.extensions;

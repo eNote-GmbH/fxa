@@ -34,10 +34,7 @@ export const errorHandler: ErrorHandler = ({ graphQLErrors, networkError }) => {
         // if the account is not in localStorage, which is handled in ConfirmSignupCode
         // container. So, for now, we don't care about that page here. We'll still
         // likely want to modify this for cases where the service is NOT sync.
-        if (
-          window.location &&
-          !window.location.pathname.includes('confirm_signup_code')
-        ) {
+        if (window.location && !window.location.pathname.includes('signup')) {
           return window.location.replace(
             `/signin_token_code?action=email&service=sync`
           );

@@ -74,7 +74,7 @@ const Ready = ({
   const templateValues = getTemplateValues(viewName);
 
   const showReadyToUseService =
-    !isSync && isSignedIn && serviceName && serviceName !== 'account settings';
+    !isSync && serviceName && serviceName !== 'account settings';
 
   const showReadyToUseSettings =
     !isSync &&

@@ -4,14 +4,23 @@
 
 import parser from 'accept-language-parser';
 
+import { CapabilityManager } from '@fxa/payments/capability';
+
 import {
   DEFAULT_PRODUCT_DETAILS,
   metadataFromPlan,
   productDetailsFromPlan,
 } from '../metadata';
-import { Plan } from '../types';
+import { AbbrevPlan, Plan, SubscriptionEligibilityResult } from '../types';
 import { MergedPlanConfig, PlanConfig } from './plan';
 import { ProductConfig, ProductConfigLocalesConfig } from './product';
+import {
+  EligibilityManager,
+  IntervalComparison,
+  OfferingComparison,
+  intervalComparison,
+} from '../../../../libs/payments/eligibility/src';
+import assert from 'assert';
 
 const DEFAULT_LOCALE = 'en';
 
@@ -242,4 +251,60 @@ export const productUpgradeFromProductConfig = (
       productSet: metadata.productSet,
     };
   }
+};
+
+export const eligibilityFromCapabilityManager = async (
+  eligibilityManager: EligibilityManager,
+  stripeSubscribedPlans: AbbrevPlan[],
+  iapSubscribedPlans: AbbrevPlan[],
+  targetPlan: AbbrevPlan
+) => {
+  const iapPlanIds = iapSubscribedPlans.map((p) => p.plan_id);
+  const planIds = [
+    ...stripeSubscribedPlans.map((p) => p.plan_id),
+    ...iapPlanIds,
+  ];
+  const overlaps = await eligibilityManager.getOfferingOverlap(
+    planIds,
+    [],
+    targetPlan.plan_id
+  );
+  if (!overlaps.length)
+    return [SubscriptionEligibilityResult.CREATE, undefined];
+  if (
+    overlaps.some(
+      (overlap) =>
+        overlap.type === 'plan' && iapPlanIds.includes(overlap.planId)
+    )
+  )
+    return [SubscriptionEligibilityResult.BLOCKED_IAP, undefined];
+  if (overlaps.length > 1)
+    return [SubscriptionEligibilityResult.INVALID, undefined];
+  const overlap = overlaps[0];
+  assert(
+    overlap.type === 'plan',
+    'Unexpected overlap type, only plans are compared.'
+  );
+  if (overlap.comparison === OfferingComparison.DOWNGRADE)
+    return [SubscriptionEligibilityResult.DOWNGRADE, overlap.planId];
+  const existingPlan = stripeSubscribedPlans.find(
+    (p) => p.plan_id === overlap.planId
+  );
+  if (!existingPlan || existingPlan.plan_id === targetPlan.plan_id)
+    return [SubscriptionEligibilityResult.INVALID, undefined];
+
+  const fromPlan = stripeSubscribedPlans.find(
+    (p) => p.plan_id === overlap.planId
+  );
+  if (!fromPlan) return [SubscriptionEligibilityResult.INVALID, undefined];
+
+  if (
+    intervalComparison(
+      { unit: fromPlan.interval, count: fromPlan.interval_count },
+      { unit: targetPlan.interval, count: targetPlan.interval_count }
+    ) === IntervalComparison.SHORTER
+  ) {
+    return [SubscriptionEligibilityResult.DOWNGRADE, overlap.planId];
+  }
+  return [SubscriptionEligibilityResult.UPGRADE, overlap.planId];
 };

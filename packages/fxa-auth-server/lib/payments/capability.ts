@@ -29,6 +29,7 @@ import { StripeHelper } from './stripe';
 import { PaymentConfigManager } from './configuration/manager';
 import { ALL_RPS_CAPABILITIES_KEY } from 'fxa-shared/subscriptions/configuration/base';
 import { productUpgradeFromProductConfig } from 'fxa-shared/subscriptions/configuration/utils';
+import { CapabilityManager } from '@fxa/payments/capability';
 
 function hex(blob: Buffer | string): string {
   if (Buffer.isBuffer(blob)) {
@@ -54,6 +55,7 @@ export class CapabilityService {
   private stripeHelper: StripeHelper;
   private profileClient: ProfileClient;
   private paymentConfigManager?: PaymentConfigManager;
+  private capabilityManager?: CapabilityManager;
 
   constructor() {
     // TODO: the mock stripeHelper here fixes this specific instance when
@@ -75,6 +77,9 @@ export class CapabilityService {
     }
     if (Container.has(PaymentConfigManager)) {
       this.paymentConfigManager = Container.get(PaymentConfigManager);
+    }
+    if (Container.has(CapabilityManager)) {
+      this.capabilityManager = Container.get(CapabilityManager);
     }
 
     this.log = Container.get(AuthLogger);

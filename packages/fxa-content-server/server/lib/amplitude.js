@@ -144,34 +144,6 @@ const EVENTS = {
     event: 'signup_confirmed_start_browsing',
   },
 
-  // Add account recovery key metrics, on `post_verify/account_recovery/*`
-  'screen.add-recovery-key': {
-    group: GROUPS.activity,
-    event: 'add_recovery_key_view',
-  },
-  'flow.add-recovery-key.submit': {
-    group: GROUPS.activity,
-    event: 'add_recovery_key_submit',
-  },
-
-  // Account recovery key confirm password
-  'screen.confirm-password': {
-    group: GROUPS.activity,
-    event: 'recovery_key_confirm_password_view',
-  },
-  'flow.confirm-password.engage': {
-    group: GROUPS.activity,
-    event: 'recovery_key_confirm_password_engage',
-  },
-  'flow.confirm-password.submit': {
-    group: GROUPS.activity,
-    event: 'recovery_key_confirm_password_submit',
-  },
-  'flow.confirm-password.success': {
-    group: GROUPS.activity,
-    event: 'recovery_key_confirm_password_success',
-  },
-
   // Reset password confirmation
   'screen.reset-password-confirmed': {
     group: GROUPS.login,
@@ -480,11 +452,6 @@ const EVENTS = {
   'flow.settings.account-recovery.recovery-key.skip-download': {
     group: GROUPS.settings,
     event: 'account_recovery_skip_download',
-  },
-  // TODO remove in FXA-7419, print option not available in new UI
-  'flow.settings.account-recovery.recovery-key.print-option': {
-    group: GROUPS.settings,
-    event: 'account_recovery_option_print',
   },
   // Save hint page
   'flow.settings.account-recovery.create-hint.view': {

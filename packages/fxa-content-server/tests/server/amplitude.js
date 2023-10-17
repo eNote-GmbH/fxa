@@ -753,19 +753,6 @@ registerSuite('amplitude', {
       );
     },
 
-    // TODO remove in FXA-7419, print option not available in new UI
-    'flow.settings.account-recovery.recovery-key.print-option': () => {
-      createAmplitudeEvent(
-        'flow.settings.account-recovery.recovery-key.print-option'
-      );
-
-      assert.equal(logger.info.callCount, 1);
-      assert.equal(
-        logger.info.args[0][1].event_type,
-        'fxa_pref - account_recovery_option_print'
-      );
-    },
-
     'flow.settings.account-recovery.create-hint.submit': () => {
       createAmplitudeEvent('flow.settings.account-recovery.create-hint.submit');
 

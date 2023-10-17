@@ -611,8 +611,6 @@ export class LoginPage extends BaseLayout {
   }
 
   async denormalizeStoredEmail(email: string) {
-    const account = await this.getAccountFromFromLocalStorage(email);
-
     return this.page.evaluate((uid) => {
       const accounts = JSON.parse(
         localStorage.getItem('__fxa_storage.accounts') || '{}'
@@ -639,7 +637,7 @@ export class LoginPage extends BaseLayout {
     const metaConfig = this.page.locator(
       'meta[name="fxa-content-server/config"]'
     );
-    const config = await metaConfig.getAttribute('content');
+    const config = (await metaConfig.getAttribute('content')) || '';
     this.page.goBack();
     return JSON.parse(decodeURIComponent(config));
   }

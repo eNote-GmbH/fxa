@@ -72,7 +72,7 @@
     "@hapi/hapi": "^20.2.1",
     "@hapi/hawk": "^8.0.0",
     "@hapi/hoek": "^11.0.2",
-    "@mozilla/glean": "^2.0.0",
+    "@mozilla/glean": "^2.0.5",
     "@sentry/integrations": "^7.66.0",
     "@sentry/node": "^7.66.0",
     "@type-cacheable/core": "^11.0.0",

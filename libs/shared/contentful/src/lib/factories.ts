@@ -8,6 +8,7 @@ import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 
 import {
   EligibilityContentByPlanIdsQuery,
+  CapabilityServiceByPriceIdsQuery,
   OfferingQuery,
   PurchaseWithDetailsQuery,
 } from '../__generated__/graphql';
@@ -17,6 +18,37 @@ import {
   EligibilitySubgroupResult,
 } from './queries/eligibility-content-by-plan-ids';
 import { ContentfulErrorResponse } from './types';
+
+export const CapabilityServiceByPlanIdsQueryFactory = (
+  override?: Partial<CapabilityServiceByPriceIdsQuery>
+): CapabilityServiceByPriceIdsQuery => {
+  return {
+    purchaseCollection: {
+      items: [
+        {
+          stripePlanChoices: [faker.string.sample()],
+          offering: {
+            capabilitiesCollection: {
+              items: [
+                {
+                  slug: faker.string.sample(),
+                  servicesCollection: {
+                    items: [
+                      {
+                        oauthClientId: faker.string.sample(),
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+    ...override,
+  };
+};
 
 export const EligibilityContentByPlanIdsQueryFactory = (
   override?: Partial<EligibilityContentByPlanIdsQuery>

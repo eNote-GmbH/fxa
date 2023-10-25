@@ -19,4 +19,7 @@ export class ContentfulClientConfig {
 
   @IsString()
   public readonly graphqlEnvironment!: string;
+
+  @IsString()
+  public readonly cacheTTL?: string;
 }

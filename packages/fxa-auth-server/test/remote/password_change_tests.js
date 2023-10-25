@@ -203,9 +203,9 @@ describe('#integration - remote password change', function () {
         const query = url.parse(link, true).query;
         assert.ok(query.email, 'email is in the link');
         assert.equal(
-          emailData.html.indexOf('IP address') > -1,
-          true,
-          'contains ip location data'
+          emailData.html.indexOf('IP address'),
+          -1,
+          'does not contains ip location data'
         );
       })
       .then(() => {

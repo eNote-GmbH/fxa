@@ -1357,6 +1357,7 @@ export class AccountHandler {
         request.emitMetricsEvent('account.reset', {
           uid: account.uid,
         }),
+        this.glean.resetPassword.accountReset(request, { uid: account.uid }),
         this.log.notifyAttachedServices('reset', request, {
           uid: account.uid,
           generation: account.verifierSetAt,

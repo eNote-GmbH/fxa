@@ -140,6 +140,7 @@ export function gleanMetrics(config: ConfigType) {
 
     resetPassword: {
       emailSent: createEventFn('password_reset_email_sent'),
+      accountReset: createEventFn('account_password_reset'),
     },
   };
 }

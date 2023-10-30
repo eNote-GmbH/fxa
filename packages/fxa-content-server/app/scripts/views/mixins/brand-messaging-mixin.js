@@ -71,6 +71,11 @@ const Mixin = {
           x.onclick = () => {
             this.onBrandLearnMoreClick();
           };
+          x.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+              this.onBrandLearnMoreClick();
+            }
+          });
         });
       };
 

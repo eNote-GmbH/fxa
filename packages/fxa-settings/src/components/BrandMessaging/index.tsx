@@ -81,6 +81,12 @@ export const BrandMessaging = ({
     );
   }
 
+  function onKeyUpLearnMore(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') {
+      onClickLearnMore();
+    }
+  }
+
   function onClickCloseBanner() {
     logViewEventOnce(
       `flow.${viewName}`,
@@ -125,6 +131,7 @@ export const BrandMessaging = ({
                   tabIndex={0}
                   className="brand-learn-more underline cursor-pointer"
                   onClick={onClickLearnMore}
+                  onKeyUp={onKeyUpLearnMore}
                 >
                   <FtlMsg id="brand-learn-more">Learn more</FtlMsg>
                 </span>
@@ -148,6 +155,7 @@ export const BrandMessaging = ({
                   tabIndex={0}
                   className="brand-learn-more underline cursor-pointer"
                   onClick={onClickLearnMore}
+                  onKeyUp={onKeyUpLearnMore}
                 >
                   <FtlMsg id="brand-learn-more">Learn more</FtlMsg>
                 </span>

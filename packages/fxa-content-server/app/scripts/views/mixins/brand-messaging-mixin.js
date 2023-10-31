@@ -71,11 +71,6 @@ const Mixin = {
           x.onclick = () => {
             this.onBrandLearnMoreClick();
           };
-          x.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-              this.onBrandLearnMoreClick();
-            }
-          });
         });
       };
 
@@ -127,10 +122,6 @@ const Mixin = {
 
   onBrandLearnMoreClick() {
     this.logFlowEvent(`brand-messaging-${this.mode}-learn-more`, this.viewName);
-    window.open(
-      'https://support.mozilla.org/kb/firefox-accounts-renamed-mozilla-accounts',
-      '_blank'
-    );
   },
 };
 

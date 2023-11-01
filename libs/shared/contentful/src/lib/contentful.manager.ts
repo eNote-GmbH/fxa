@@ -37,7 +37,7 @@ export class ContentfulManager {
     );
 
     return new EligibilityContentByPlanIdsResultUtil(
-      queryResult.data as DeepNonNullable<EligibilityContentByPlanIdsQuery>
+      queryResult as DeepNonNullable<EligibilityContentByPlanIdsQuery>
     );
   }
 
@@ -49,7 +49,7 @@ export class ContentfulManager {
     });
 
     return new ServicesWithCapabilitiesResultUtil(
-      queryResult.data as DeepNonNullable<ServicesWithCapabilitiesQuery>
+      queryResult as DeepNonNullable<ServicesWithCapabilitiesQuery>
     );
   }
 }

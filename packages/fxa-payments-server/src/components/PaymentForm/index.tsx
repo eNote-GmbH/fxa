@@ -330,7 +330,7 @@ export const PaymentForm = ({
         data-testid="submit"
         className="payment-button cta-primary h-10 mobileLandscape:h-12 cursor-pointer"
         name="submit"
-        aria-disabled={inProgress}
+        disabled={inProgress}
       >
         {inProgress ? (
           <LoadingSpinner
@@ -351,7 +351,7 @@ export const PaymentForm = ({
       data-testid="submit"
       className="payment-button cta-primary !font-bold w-full mt-8 h-12 cursor-pointer mb-5"
       name="submit"
-      aria-disabled={!allowSubmit}
+      disabled={!allowSubmit}
     >
       {showProgressSpinner ? (
         <LoadingSpinner

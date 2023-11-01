@@ -28,6 +28,11 @@ import { PaymentConfigManager } from './configuration/manager';
 import { AppStoreSubscriptionPurchase } from './iap/apple-app-store/subscription-purchase';
 import { PlayStoreSubscriptionPurchase } from './iap/google-play/subscription-purchase';
 import { FirestoreStripeError, StripeFirestore } from './stripe-firestore';
+import {
+  ContentfulManager,
+  ContentfulStripeMapper,
+} from '@fxa/shared/contentful';
+import * as Sentry from '@sentry/node';
 
 export const CHARGES_RESOURCE = 'charges';
 export const COUPON_RESOURCE = 'coupons';
@@ -107,6 +112,9 @@ export abstract class StripeHelper {
 
   /** Optional Redis instance used for caching. */
   protected readonly redis?: ioredis.Redis;
+
+  /** */
+  protected abstract readonly contentfulManager?: ContentfulManager;
 
   /**
    * Create a Stripe Helper with built-in caching.
@@ -433,18 +441,57 @@ export abstract class StripeHelper {
     return this.fetchAllPlans();
   }
 
-  async allAbbrevPlans(): Promise<AbbrevPlan[]> {
+  async allAbbrevPlans(acceptLanguage = 'en'): Promise<AbbrevPlan[]> {
     const plans = await this.allConfiguredPlans();
     const validPlans: (Stripe.Plan | ConfiguredPlan)[] = [];
+    const validPlansFinal: (Stripe.Plan | ConfiguredPlan)[] = [];
+    const validPlanIds: Stripe.Plan['id'][] = [];
 
     for (const p of plans) {
       // @ts-ignore: depending the SUBSCRIPTIONS_FIRESTORE_CONFIGS_ENABLED feature flag, p can be a Stripe.Plan, which does not have a `configuration`
       if (p.configuration || (await this.validatePlan(p))) {
         validPlans.push(p);
+        validPlanIds.push(p.id);
       }
     }
 
-    return validPlans.map((p) => ({
+    if (this.contentfulManager) {
+      try {
+        const contentfulConfig =
+          await this.contentfulManager?.getPurchaseWithDetailsOfferingContentByPlanIds(
+            validPlanIds,
+            'en'
+          );
+
+        const contentfulToStripeMapper = new ContentfulStripeMapper();
+
+        const validPlansMapped =
+          contentfulToStripeMapper.mapContentfulToStripePlans(
+            validPlans,
+            contentfulConfig
+          );
+
+        validPlansFinal.push(...validPlansMapped.mappedPlans);
+        if (validPlansMapped.nonMatchingPlans.length) {
+          Sentry.withScope((scope) => {
+            scope.setContext('allAbbrevPlans', {
+              nonMatchingPlans: validPlansMapped.nonMatchingPlans,
+            });
+            Sentry.captureMessage(
+              `StripeHelper.allAbbrevPlans - Contentful config does not match Stripe metadata`,
+              'error' as SeverityLevel
+            );
+          });
+        }
+      } catch (error) {
+        Sentry.captureException(error);
+        validPlansFinal.push(...validPlans);
+      }
+    } else {
+      validPlansFinal.push(...validPlans);
+    }
+
+    return validPlansFinal.map((p) => ({
       amount: p.amount,
       currency: p.currency,
       interval_count: p.interval_count,

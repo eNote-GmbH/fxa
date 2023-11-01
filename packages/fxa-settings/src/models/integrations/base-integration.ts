@@ -41,10 +41,6 @@ export interface IntegrationFeatures {
    * Does this environment support pairing?
    */
   supportsPairing: boolean;
-  /**
-   * Does this environment support the Sync Optional flow?
-   */
-  syncOptional: boolean;
 }
 
 export interface RelierSubscriptionInfo {
@@ -141,9 +137,6 @@ export abstract class Integration<
     }
   }
 
-  shouldOfferToSync(view: string): boolean {
-    return false;
-  }
   wantsKeys(): boolean {
     return false;
   }
@@ -181,7 +174,6 @@ export class BaseIntegration<
       handleSignedInNotification: true,
       reuseExistingSession: false,
       supportsPairing: false,
-      syncOptional: false,
     } as T);
   }
 }

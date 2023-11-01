@@ -51,6 +51,7 @@ export default BaseAuthenticationBroker.extend({
    * @private
    */
   onFxaStatus(response = {}) {
+    console.log('fxaStatus response from backbone in fx-sync', response);
     const syncEngines = this.get('chooseWhatToSyncWebV1Engines');
     const multiService =
       response.capabilities && response.capabilities.multiService;

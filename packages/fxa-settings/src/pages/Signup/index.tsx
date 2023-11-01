@@ -16,7 +16,12 @@ import LinkExternal from 'fxa-react/components/LinkExternal';
 import FormPasswordWithBalloons from '../../components/FormPasswordWithBalloons';
 import InputText from '../../components/InputText';
 import ChooseWhatToSync from '../../components/ChooseWhatToSync';
-import { engines } from '../../components/ChooseWhatToSync/sync-engines';
+import {
+  EngineConfig,
+  defaultDesktopSyncEngineConfigs,
+  syncEngineConfigs,
+  webChannelDesktopEngineConfigs,
+} from '../../components/ChooseWhatToSync/sync-engines';
 import ChooseNewsletters from '../../components/ChooseNewsletters';
 import { newsletters } from '../../components/ChooseNewsletters/newsletters';
 import TermsPrivacyAgreement from '../../components/TermsPrivacyAgreement';
@@ -25,7 +30,6 @@ import CardHeader from '../../components/CardHeader';
 import { REACT_ENTRYPOINT } from '../../constants';
 import AppLayout from '../../components/AppLayout';
 import { SignupFormData, SignupProps } from './interfaces';
-import { notifyFirefoxOfLogin } from '../../lib/channels/helpers';
 import {
   StoredAccountData,
   persistAccount,
@@ -39,6 +43,12 @@ import {
   isClientPocket,
 } from '../../models/integrations/client-matching';
 import { MozServices } from '../../lib/types';
+import firefox, {
+  FirefoxCommand,
+  FxAStatusResponse,
+} from '../../lib/channels/firefox';
+import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
+import { Constants } from '../../lib/constants';
 
 export const viewName = 'signup';
 
@@ -46,6 +56,9 @@ const Signup = ({
   integration,
   queryParamModel,
   beginSignupHandler,
+  webChannelEngines,
+  isSyncMobileWebChannel,
+  isSync,
 }: SignupProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
@@ -59,7 +72,6 @@ const Signup = ({
 
   const [beginSignupLoading, setBeginSignupLoading] = useState<boolean>(false);
   const [bannerErrorText, setBannerErrorText] = useState<string>('');
-
   const [ageCheckErrorText, setAgeCheckErrorText] = useState<string>('');
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [
@@ -68,6 +80,11 @@ const Signup = ({
   ] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [declinedSyncEngines, setDeclinedSyncEngines] = useState<string[]>([]);
+  // no newsletters are selected by default
+  const [selectedNewsletterSlugs, setSelectedNewsletterSlugs] = useState<
+    string[]
+  >([]);
   const [client, setClient] = useState<MozServices | undefined>(undefined);
 
   useEffect(() => {
@@ -83,18 +100,39 @@ const Signup = ({
     }
   }, [integration]);
 
-  // prefill selected sync engines based on defaultChecked state
-  const initialSyncEnginesList: string[] = engines
-    .filter((engine) => engine.defaultChecked)
-    .map((engine) => engine.text);
-  const [selectedEngines, setSelectedEngines] = useState<string[]>(
-    initialSyncEnginesList
-  );
+  const [offeredSyncEngineConfigs, setOfferedSyncEngineConfigs] = useState<
+    EngineConfig[] | undefined
+  >();
 
-  // no newsletters are selected by default
-  const [selectedNewsletterSlugs, setSelectedNewsletterSlugs] = useState<
-    string[]
-  >([]);
+  useEffect(() => {
+    if (webChannelEngines) {
+      if (isSyncDesktopIntegration(integration)) {
+        // Desktop web channel message offers additional engines
+        setOfferedSyncEngineConfigs([
+          ...defaultDesktopSyncEngineConfigs,
+          ...webChannelDesktopEngineConfigs.filter((engine) =>
+            webChannelEngines.includes(engine.id)
+          ),
+        ]);
+      } else if (isSyncMobileWebChannel) {
+        // Mobile web channel message offers all engines
+        setOfferedSyncEngineConfigs(
+          syncEngineConfigs?.filter((engine) =>
+            webChannelEngines.includes(engine.id)
+          )
+        );
+      }
+    }
+  }, [integration, isSyncMobileWebChannel, webChannelEngines]);
+
+  useEffect(() => {
+    if (offeredSyncEngineConfigs) {
+      const defaultSelectedSyncEngines = offeredSyncEngineConfigs
+        .filter((engineConfig) => engineConfig.defaultChecked)
+        .map((engineConfig) => engineConfig.id);
+      setDeclinedSyncEngines(defaultSelectedSyncEngines);
+    }
+  }, [offeredSyncEngineConfigs, setDeclinedSyncEngines]);
 
   const { handleSubmit, register, getValues, errors, formState, trigger } =
     useForm<SignupFormData>({
@@ -169,16 +207,23 @@ const Signup = ({
         setCurrentAccount(data.SignUp.uid);
         sessionToken(data.SignUp.sessionToken);
 
-        // TODO: send up selected sync engines, FXA-8287
         if (isSyncDesktopIntegration(integration)) {
-          notifyFirefoxOfLogin({
-            authAt: data.SignUp.authAt,
+          const offeredSyncEngines =
+            offeredSyncEngineConfigs?.map((engineConfig) => engineConfig.id) ||
+            [];
+          firefox.fxaLogin({
             email: queryParamModel.email,
             keyFetchToken: data.SignUp.keyFetchToken,
             sessionToken: data.SignUp.sessionToken,
             uid: data.SignUp.uid,
             unwrapBKey: data.unwrapBKey,
             verified: false,
+            services: {
+              sync: {
+                offeredEngines: offeredSyncEngines,
+                declinedEngines: declinedSyncEngines,
+              },
+            },
           });
         }
 
@@ -203,11 +248,37 @@ const Signup = ({
       ftlMsgResolver,
       navigate,
       selectedNewsletterSlugs,
+      offeredSyncEngineConfigs,
+      declinedSyncEngines,
       queryParamModel.email,
       location.search,
       integration,
     ]
   );
+
+  console.log('offeredSyncEngineConfigs', offeredSyncEngineConfigs);
+
+  const showCWTS = () => {
+    if (isSyncDesktopIntegration(integration) || isSyncMobileWebChannel) {
+      if (offeredSyncEngineConfigs) {
+        return (
+          <ChooseWhatToSync
+            {...{
+              offeredSyncEngineConfigs,
+              setDeclinedSyncEngines,
+            }}
+          />
+        );
+      } else {
+        // Waiting to receive webchannel message from browser
+        return <LoadingSpinner className="flex justify-center mb-4" />;
+      }
+    } else {
+      // Display nothing if Sync flow that does not support webchannels
+      // or if CWTS is disabled
+      return <></>;
+    }
+  };
 
   return (
     // TODO: FXA-8268, if force_auth && AuthErrors.is(error, 'DELETED_ACCOUNT'):
@@ -279,9 +350,6 @@ const Signup = ({
                 // for more info.
                 params.delete('emailFromContent');
                 params.delete('email');
-                // make sure the user returns to the React flow after changing the email
-                params.set('forceExperiment', 'generalizedReactApp');
-                params.set('forceExperimentGroup', 'react');
                 hardNavigateToContentServer(`/?${params.toString()}`);
               }}
             >
@@ -343,11 +411,8 @@ const Signup = ({
           </LinkExternal>
         </FtlMsg>
 
-        {/* TODO: Update offered engines based on received webchannel message, FXA-8287 */}
-        {isSyncDesktopIntegration(integration) ? (
-          <ChooseWhatToSync
-            {...{ engines, selectedEngines, setSelectedEngines }}
-          />
+        {isSync ? (
+          showCWTS()
         ) : (
           <ChooseNewsletters
             {...{

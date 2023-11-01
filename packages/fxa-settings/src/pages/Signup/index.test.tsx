@@ -31,7 +31,7 @@ import {
   MOCK_UNWRAP_BKEY,
 } from '../mocks';
 import { newsletters } from '../../components/ChooseNewsletters/newsletters';
-import { notifyFirefoxOfLogin } from '../../lib/channels/helpers';
+import firefox from '../../lib/channels/firefox';
 import GleanMetrics from '../../lib/glean';
 import * as utils from 'fxa-react/lib/utils';
 import { POCKET_CLIENTIDS } from '../../models/integrations/client-matching';
@@ -46,12 +46,6 @@ jest.mock('../../lib/metrics', () => ({
     logViewEventOnce: jest.fn(),
   }),
 }));
-
-jest.mock('../../lib/channels/helpers', () => {
-  return {
-    notifyFirefoxOfLogin: jest.fn(),
-  };
-});
 
 const mockLocation = () => {
   return {
@@ -131,9 +125,7 @@ describe('Signup page', () => {
         );
       });
       expect(hardNavigateToContentServerSpy).toHaveBeenCalledWith(
-        `/?prefillEmail=${encodeURIComponent(
-          MOCK_EMAIL
-        )}&forceExperiment=generalizedReactApp&forceExperimentGroup=react`
+        `/?prefillEmail=${encodeURIComponent(MOCK_EMAIL)}`
       );
     });
   });
@@ -362,93 +354,101 @@ describe('Signup page', () => {
       });
     });
 
-    it('on success with Web integration', async () => {
-      const mockBeginSignupHandler = jest
-        .fn()
-        .mockResolvedValue(BEGIN_SIGNUP_HANDLER_RESPONSE);
+    describe('integrations', () => {
+      let fxaLoginSignedInUserSpy: jest.SpyInstance;
+      beforeEach(() => {
+        fxaLoginSignedInUserSpy = jest.spyOn(firefox, 'fxaLoginSignedInUser');
+      });
+      it('on success with Web integration', async () => {
+        const fxaLoginSignedInUserSpy = jest.spyOn(
+          firefox,
+          'fxaLoginSignedInUser'
+        );
 
-      renderWithLocalizationProvider(
-        <Subject beginSignupHandler={mockBeginSignupHandler} />
-      );
+        renderWithLocalizationProvider(
+          <Subject beginSignupHandler={mockBeginSignupHandler} />
+        );
 
-      await fillOutForm();
-      submit();
+        await fillOutForm();
+        submit();
 
-      await waitFor(() => {
-        expect(mockBeginSignupHandler).toHaveBeenCalledWith(
-          MOCK_EMAIL,
-          MOCK_PASSWORD
+        await waitFor(() => {
+          expect(mockBeginSignupHandler).toHaveBeenCalledWith(
+            MOCK_EMAIL,
+            MOCK_PASSWORD
+          );
+        });
+
+        expect(fxaLoginSignedInUserSpy).not.toBeCalled();
+
+        expect(mockNavigate).toHaveBeenCalledWith(
+          `/confirm_signup_code${mockLocation().search}`,
+          {
+            state: {
+              keyFetchToken: MOCK_KEY_FETCH_TOKEN,
+              selectedNewsletterSlugs: [],
+              unwrapBKey: MOCK_UNWRAP_BKEY,
+            },
+            replace: true,
+          }
         );
       });
 
-      expect(notifyFirefoxOfLogin).not.toBeCalled();
-
-      expect(mockNavigate).toHaveBeenCalledWith(
-        `/confirm_signup_code${mockLocation().search}`,
-        {
-          state: {
-            keyFetchToken: MOCK_KEY_FETCH_TOKEN,
-            selectedNewsletterSlugs: [],
-            unwrapBKey: MOCK_UNWRAP_BKEY,
-          },
-          replace: true,
-        }
-      );
-    });
-
-    it('on success with Sync integration', async () => {
-      const mockBeginSignupHandler = jest
-        .fn()
-        .mockResolvedValue(BEGIN_SIGNUP_HANDLER_RESPONSE);
-      renderWithLocalizationProvider(
-        <Subject
-          integration={createMockSignupSyncDesktopIntegration()}
-          beginSignupHandler={mockBeginSignupHandler}
-        />
-      );
-
-      await fillOutForm();
-      // TODO: CWTS, FXA-8287 (probably need tests for none/all selected)
-      submit();
-
-      await waitFor(() => {
-        expect(mockBeginSignupHandler).toHaveBeenCalledWith(
-          MOCK_EMAIL,
-          MOCK_PASSWORD
+      it('on success with Sync integration', async () => {
+        const mockBeginSignupHandler = jest
+          .fn()
+          .mockResolvedValue(BEGIN_SIGNUP_HANDLER_RESPONSE);
+        renderWithLocalizationProvider(
+          <Subject
+            integration={createMockSignupSyncDesktopIntegration()}
+            beginSignupHandler={mockBeginSignupHandler}
+          />
         );
+
+        await fillOutForm();
+        // TODO: CWTS, FXA-8287 (probably need tests for none/all selected)
+        submit();
+
+        await waitFor(() => {
+          expect(mockBeginSignupHandler).toHaveBeenCalledWith(
+            MOCK_EMAIL,
+            MOCK_PASSWORD
+          );
+        });
+
+        expect(fxaLoginSignedInUserSpy).toBeCalledWith({
+          authAt: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.authAt,
+          email: MOCK_EMAIL,
+          keyFetchToken:
+            BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.keyFetchToken,
+          sessionToken: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.sessionToken,
+          uid: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.uid,
+          unwrapBKey: BEGIN_SIGNUP_HANDLER_RESPONSE.data.unwrapBKey,
+          verified: false,
+        });
       });
+      it('on success with OAuth integration', async () => {
+        const mockBeginSignupHandler = jest
+          .fn()
+          .mockResolvedValue(BEGIN_SIGNUP_HANDLER_RESPONSE);
 
-      expect(notifyFirefoxOfLogin).toBeCalledWith({
-        authAt: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.authAt,
-        email: MOCK_EMAIL,
-        keyFetchToken: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.keyFetchToken,
-        sessionToken: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.sessionToken,
-        uid: BEGIN_SIGNUP_HANDLER_RESPONSE.data.SignUp.uid,
-        unwrapBKey: BEGIN_SIGNUP_HANDLER_RESPONSE.data.unwrapBKey,
-        verified: false,
-      });
-    });
-    it('on success with OAuth integration', async () => {
-      const mockBeginSignupHandler = jest
-        .fn()
-        .mockResolvedValue(BEGIN_SIGNUP_HANDLER_RESPONSE);
-
-      renderWithLocalizationProvider(
-        <Subject
-          integration={createMockSignupOAuthIntegration(MOCK_CLIENT_ID)}
-          beginSignupHandler={mockBeginSignupHandler}
-        />
-      );
-      await fillOutForm();
-      submit();
-
-      expect(notifyFirefoxOfLogin).not.toBeCalled();
-
-      await waitFor(() => {
-        expect(mockBeginSignupHandler).toHaveBeenCalledWith(
-          MOCK_EMAIL,
-          MOCK_PASSWORD
+        renderWithLocalizationProvider(
+          <Subject
+            integration={createMockSignupOAuthIntegration(MOCK_CLIENT_ID)}
+            beginSignupHandler={mockBeginSignupHandler}
+          />
         );
+        await fillOutForm();
+        submit();
+
+        expect(fxaLoginSignedInUserSpy).not.toBeCalled();
+
+        await waitFor(() => {
+          expect(mockBeginSignupHandler).toHaveBeenCalledWith(
+            MOCK_EMAIL,
+            MOCK_PASSWORD
+          );
+        });
       });
     });
     it('on fail', async () => {

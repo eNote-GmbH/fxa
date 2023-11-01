@@ -59,6 +59,10 @@ const OAuthWebChannelBroker = OAuthRedirectAuthenticationBroker.extend({
    * @private
    */
   onFxaStatus(response = {}) {
+    console.log(
+      'fxaStatus response from backbone in oauth-webchannel-v1',
+      response
+    );
     const cwtsStatus =
       (response.capabilities && response.capabilities.choose_what_to_sync) ||
       false;

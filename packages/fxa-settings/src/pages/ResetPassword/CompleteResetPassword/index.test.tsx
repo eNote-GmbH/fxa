@@ -17,7 +17,7 @@ import {
   paramsWithSyncDesktop,
   Subject,
 } from './mocks';
-import { notifyFirefoxOfLogin } from '../../../lib/channels/helpers';
+import firefox from '../../../lib/channels/firefox';
 import {
   createAppContext,
   createHistoryWithQuery,
@@ -67,12 +67,6 @@ const mockLocation = () => {
     },
   };
 };
-
-jest.mock('../../../lib/channels/helpers', () => {
-  return {
-    notifyFirefoxOfLogin: jest.fn(),
-  };
-});
 
 jest.mock('@reach/router', () => ({
   ...jest.requireActual('@reach/router'),
@@ -419,7 +413,11 @@ describe('CompleteResetPassword page', () => {
       });
     });
     describe('SyncDesktop integration', () => {
-      it('calls notifyFirefoxOfLogin', async () => {
+      it('calls fxaLoginSignedInUser', async () => {
+        const fxaLoginSignedInUserSpy = jest.spyOn(
+          firefox,
+          'fxaLoginSignedInUser'
+        );
         render(
           <Subject
             integrationType={IntegrationType.SyncDesktop}
@@ -429,7 +427,7 @@ describe('CompleteResetPassword page', () => {
         );
         await enterPasswordAndSubmit();
 
-        expect(notifyFirefoxOfLogin).toBeCalled();
+        expect(fxaLoginSignedInUserSpy).toBeCalled();
       });
     });
   });

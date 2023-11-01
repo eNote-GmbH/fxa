@@ -21,7 +21,7 @@ type IntegrationFlagOverrides = {
   isDevicePairingAsAuthority?: boolean;
   isDevicePairingAsSupplicant?: boolean;
   isOAuth?: boolean;
-  isSyncService?: boolean;
+  isServiceSync?: boolean;
   isV3DesktopContext?: boolean;
 };
 
@@ -60,7 +60,7 @@ describe('lib/integrations/integration-factory', () => {
       .stub(flags, 'isDevicePairingAsSupplicant')
       .returns(!!flagOverrides.isDevicePairingAsSupplicant);
     sandbox.stub(flags, 'isOAuth').returns(!!flagOverrides.isOAuth);
-    sandbox.stub(flags, 'isSyncService').returns(!!flagOverrides.isSyncService);
+    sandbox.stub(flags, 'isServiceSync').returns(!!flagOverrides.isServiceSync);
     sandbox
       .stub(flags, 'isV3DesktopContext')
       .returns(!!flagOverrides.isV3DesktopContext);
@@ -177,7 +177,7 @@ describe('lib/integrations/integration-factory', () => {
 
     beforeAll(async () => {
       integration = await setup<SyncDesktopIntegration>(
-        { isSyncService: true, isV3DesktopContext: true },
+        { isServiceSync: true, isV3DesktopContext: true },
         { initIntegration: 1, initSyncDesktopIntegration: 1 },
         (i: Integration) => i instanceof SyncDesktopIntegration
       );

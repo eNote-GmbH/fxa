@@ -297,8 +297,11 @@ const AuthAndAccountSetupRoutes = ({
         {...{ isSignedIn, serviceName }}
       />
 
-      <SignupContainer path="/signup/*" {...{ integration }} />
-      <SignupContainer path="/oauth/signup/*" {...{ integration }} />
+      <SignupContainer path="/signup/*" {...{ integration, serviceName }} />
+      <SignupContainer
+        path="/oauth/signup/*"
+        {...{ integration, serviceName }}
+      />
 
       <Confirm path="/confirm/*" {...{ sessionTokenId }} />
       <ConfirmSignupCodeContainer

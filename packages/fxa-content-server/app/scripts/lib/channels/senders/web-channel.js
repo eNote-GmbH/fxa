@@ -26,6 +26,7 @@ class WebChannelSender {
    * @returns {Promise}
    */
   send(command, data, messageId) {
+    console.log('sending!', command, data, messageId);
     return Promise.resolve().then(() => {
       // save command name for testing purposes
       this._saveEventForTests(command, data);

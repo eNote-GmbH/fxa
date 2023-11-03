@@ -15,7 +15,12 @@ export const purchaseWithDetailsOfferingContentQuery = graphql(`
       skip: $skip
       limit: $limit
       locale: $locale
-      where: { stripePlanChoices_contains_some: $stripePlanIds }
+      where: {
+        OR: [
+          { stripePlanChoices_contains_some: $stripePlanIds }
+          { offering: { stripeLegacyPlans_contains_some: $stripePlanIds } }
+        ]
+      }
     ) {
       items {
         stripePlanChoices
@@ -27,6 +32,7 @@ export const purchaseWithDetailsOfferingContentQuery = graphql(`
         }
         offering {
           stripeProductId
+          stripeLegacyPlans
           commonContent {
             privacyNoticeUrl
             privacyNoticeDownloadUrl

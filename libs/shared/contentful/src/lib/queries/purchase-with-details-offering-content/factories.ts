@@ -49,6 +49,9 @@ export const PurchaseOfferingResultFactory = (
   override?: Partial<PurchaseOfferingResult>
 ): PurchaseOfferingResult => ({
   stripeProductId: faker.string.alpha(10),
+  stripeLegacyPlans: Array.from({ length: faker.number.int(5) }, () =>
+    faker.string.alpha(10)
+  ),
   commonContent: OfferingCommonContentResultFactory(),
   ...override,
 });

@@ -25,11 +25,12 @@ export interface OfferingCommonContentResult {
 
 export interface PurchaseOfferingResult {
   stripeProductId: string;
+  stripeLegacyPlans: string[] | null;
   commonContent: OfferingCommonContentResult;
 }
 
 export interface PurchaseWithDetailsOfferingContentResult {
-  stripePlanChoices: string[];
+  stripePlanChoices: string[] | null;
   purchaseDetails: PurchaseDetailsResult;
   offering: PurchaseOfferingResult;
 }

@@ -12,7 +12,9 @@ import { PurchaseWithDetailsOfferingContentByPlanIdsResult } from './types';
 describe('PurchaseWithDetailsOfferingContentUtil', () => {
   it('should create a util from response', () => {
     const result = PurchaseWithDetailsOfferingContentByPlanIdsResultFactory();
-    const planId = result.purchaseCollection?.items[0]?.stripePlanChoices?.[0];
+    const purchase = result.purchaseCollection?.items[0];
+    const planId = purchase.stripePlanChoices?.[0];
+    const legacyPlanId = purchase.offering.stripeLegacyPlans?.[0];
     const util = new PurchaseWithDetailsOfferingContentUtil(
       result as PurchaseWithDetailsOfferingContentByPlanIdsResult
     );
@@ -20,6 +22,10 @@ describe('PurchaseWithDetailsOfferingContentUtil', () => {
     expect(
       util.transformedPurchaseWithCommonContentForPlanId(planId ?? '')?.offering
         .stripeProductId
+    ).toBeDefined();
+    expect(
+      util.transformedPurchaseWithCommonContentForPlanId(legacyPlanId ?? '')
+        ?.offering.stripeProductId
     ).toBeDefined();
     expect(util.purchaseCollection.items.length).toBe(1);
   });

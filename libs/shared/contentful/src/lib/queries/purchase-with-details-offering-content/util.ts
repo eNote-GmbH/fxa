@@ -18,12 +18,18 @@ export class PurchaseWithDetailsOfferingContentUtil {
       const transformedPurchaseDetails = this.purchaseDetailsTransform(
         purchase.purchaseDetails
       );
-      for (const planId of purchase.stripePlanChoices) {
+      purchase.stripePlanChoices?.forEach((planId) => {
         this.transformedPurchaseByPlanId[planId] = {
           ...purchase,
           purchaseDetails: transformedPurchaseDetails,
         };
-      }
+      });
+      purchase.offering.stripeLegacyPlans?.forEach((planId) => {
+        this.transformedPurchaseByPlanId[planId] = {
+          ...purchase,
+          purchaseDetails: transformedPurchaseDetails,
+        };
+      });
     }
   }
 

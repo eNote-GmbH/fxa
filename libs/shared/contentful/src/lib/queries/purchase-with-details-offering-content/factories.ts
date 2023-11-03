@@ -23,7 +23,7 @@ export const PurchaseDetailsTransformedFactory = (
   override?: Partial<PurchaseDetailsTransformed>
 ): PurchaseDetailsTransformed => ({
   ...PurchaseDetailsResultFactory(),
-  details: Array.from({ length: faker.number.int(4) }, () =>
+  details: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () =>
     faker.string.alpha(10)
   ),
   ...override,
@@ -49,8 +49,9 @@ export const PurchaseOfferingResultFactory = (
   override?: Partial<PurchaseOfferingResult>
 ): PurchaseOfferingResult => ({
   stripeProductId: faker.string.alpha(10),
-  stripeLegacyPlans: Array.from({ length: faker.number.int(5) }, () =>
-    faker.string.alpha(10)
+  stripeLegacyPlans: Array.from(
+    { length: faker.number.int({ min: 1, max: 5 }) },
+    () => faker.string.alpha(10)
   ),
   commonContent: OfferingCommonContentResultFactory(),
   ...override,
@@ -59,8 +60,9 @@ export const PurchaseOfferingResultFactory = (
 export const PurchaseWithDetailsOfferingContentResultFactory = (
   override?: Partial<PurchaseWithDetailsOfferingContentResult>
 ): PurchaseWithDetailsOfferingContentResult => ({
-  stripePlanChoices: Array.from({ length: faker.number.int(5) }, () =>
-    faker.string.alpha(10)
+  stripePlanChoices: Array.from(
+    { length: faker.number.int({ min: 1, max: 5 }) },
+    () => faker.string.alpha(10)
   ),
   purchaseDetails: PurchaseDetailsResultFactory(),
   offering: PurchaseOfferingResultFactory(),

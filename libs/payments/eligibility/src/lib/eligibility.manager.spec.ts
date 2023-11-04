@@ -8,7 +8,7 @@ import {
   EligibilityContentByPlanIdsResultUtil,
   EligibilityOfferingResultFactory,
   EligibilitySubgroupResultFactory,
-} from '../../../../shared/contentful/src';
+} from '@fxa/shared/contentful';
 import { EligibilityManager } from './eligibility.manager';
 import { OfferingComparison } from './eligibility.types';
 

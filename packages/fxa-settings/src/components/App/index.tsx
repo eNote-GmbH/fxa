@@ -9,10 +9,12 @@ import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 
 import { currentAccount, sessionToken } from '../../lib/cache';
 import {
+  useClientInfoState,
   useConfig,
   useInitialMetricsQueryState,
   useIntegration,
   useLocalSignedInQueryState,
+  useProductInfoState,
 } from '../../models';
 import * as Metrics from '../../lib/metrics';
 
@@ -67,13 +69,25 @@ export const App = ({
   flowQueryParams,
 }: { flowQueryParams: QueryParams } & RouteComponentProps) => {
   const config = useConfig();
-  const integration = useIntegration();
 
-  const { loading, data } = useInitialMetricsQueryState();
+  // GQL call for minimal metrics data
+  const { loading: metricsLoading, data } = useInitialMetricsQueryState();
+
+  const { loading: clientInfoLoading, data: clientInfo } = useClientInfoState(
+    flowQueryParams.client_id || flowQueryParams.service || ''
+  );
+  const { loading: productInfoLoading, data: productInfo } =
+    useProductInfoState(
+      new RegExp('/subscriptions/products/(.*)').exec(
+        window.location.pathname
+      )?.[1] || ''
+    );
+
   // Because this query depends on the result of an initial query (in this case,
   // metrics), we need to run it separately.
   const { data: isSignedInData } = useLocalSignedInQueryState();
 
+  const integration = useIntegration(clientInfo, productInfo);
   const isSignedIn = isSignedInData?.isSignedIn;
 
   useMemo(() => {
@@ -122,7 +136,7 @@ export const App = ({
   ]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!metricsLoading && !clientInfoLoading && !productInfoLoading) {
       // Previously, when Sentry was just loaded in Settings, we only enabled
       // Sentry once we know the user's metrics preferences (and of course,
       // only when the user was logged in, since all users in Settings are.)
@@ -145,11 +159,18 @@ export const App = ({
     data?.metricsEnabled,
     config.sentry,
     config.version,
-    loading,
+    metricsLoading,
+    clientInfoLoading,
+    productInfoLoading,
     isSignedIn,
   ]);
 
-  if (loading || isSignedIn === undefined) {
+  if (
+    metricsLoading ||
+    clientInfoLoading ||
+    productInfoLoading ||
+    isSignedIn === undefined
+  ) {
     return fullPageLoadingSpinner;
   }
 

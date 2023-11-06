@@ -53,3 +53,21 @@ export const GET_LOCAL_SIGNED_IN_STATUS = gql`
     isSignedIn @client
   }
 `;
+
+export const GET_CLIENT_INFO = gql`
+  query GetClientInfo($input: String!) {
+    getClientInfo(input: $input) {
+      serviceName
+      clientId
+    }
+  }
+`;
+
+export const GET_PRODUCT_INFO = gql`
+  query GetProductInfo($input: String!) {
+    getProductInfo(input: $input) {
+      subscriptionProductId
+      subscriptionProductName
+    }
+  }
+`;

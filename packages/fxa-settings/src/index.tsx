@@ -28,6 +28,8 @@ export interface FlowQueryParams {
 // Temporary query params
 export interface QueryParams extends FlowQueryParams {
   showReactApp?: string;
+  client_id?: string;
+  service?: string;
 }
 
 try {

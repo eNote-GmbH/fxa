@@ -13,22 +13,24 @@ import { clearSignedInAccountUid } from '../lib/cache';
 import { gql, useQuery } from '@apollo/client';
 import { useLocalization } from '@fluent/react';
 import { FtlMsgResolver } from 'fxa-react/lib/utils';
-import config, { getDefault } from '../lib/config';
+import { getDefault } from '../lib/config';
 import {
   DefaultIntegrationFlags,
   IntegrationFactory,
 } from '../lib/integrations';
 import { ReachRouterWindow } from '../lib/window';
 import { StorageData, UrlHashData, UrlQueryData } from '../lib/model-data';
-import { OAuthClient } from '../lib/oauth';
 import {
   GET_LOCAL_SIGNED_IN_STATUS,
   INITIAL_METRICS_QUERY,
+  GET_PRODUCT_INFO,
+  GET_CLIENT_INFO,
 } from '../components/App/gql';
 import {
   MetricsData,
   SignedInAccountStatus,
 } from '../components/App/interfaces';
+import { RelierClientInfo, RelierSubscriptionInfo } from './integrations';
 
 export function useAccount() {
   const { account } = useContext(AppContext);
@@ -61,36 +63,28 @@ export function useAuthClient() {
   return authClient;
 }
 
-export function useIntegration() {
-  const authClient = useAuthClient();
-
+export function useIntegration(
+  clientInfo?: RelierClientInfo,
+  productInfo?: RelierSubscriptionInfo
+) {
   return useMemo(() => {
     const windowWrapper = new ReachRouterWindow();
     const urlQueryData = new UrlQueryData(windowWrapper);
     const urlHashData = new UrlHashData(windowWrapper);
     const storageData = new StorageData(windowWrapper);
-    const oauthClient = new OAuthClient(config.servers.oauth.url);
 
-    // TODO: we shouldn't do this here, move to shared hook or read from config. FXA-6836
-    const delegates = {
-      getClientInfo: (id: string) => oauthClient.getClientInfo(id),
-      getProductInfo: (id: string) => authClient.getProductInfo(id),
-      getProductIdFromRoute: () => {
-        const re = new RegExp('/subscriptions/products/(.*)');
-        return re.exec(window.location.pathname)?.[1] || '';
-      },
-    };
     const flags = new DefaultIntegrationFlags(urlQueryData, storageData);
     const integrationFactory = new IntegrationFactory({
       flags,
       window: windowWrapper,
-      delegates,
+      clientInfo,
+      productInfo,
       data: urlQueryData,
       channelData: urlHashData,
       storageData,
     });
     return integrationFactory.getIntegration();
-  }, [authClient]);
+  }, [clientInfo, productInfo]);
 }
 
 export function useSession() {
@@ -160,6 +154,29 @@ export function useInitialMetricsQueryState() {
     throw new Error('Are you forgetting an AppContext.Provider?');
   }
   return useQuery<MetricsData>(INITIAL_METRICS_QUERY, { client: apolloClient });
+}
+
+export function useClientInfoState(clientId: string) {
+  const { apolloClient } = useContext(AppContext);
+  if (!apolloClient) {
+    throw new Error('Are you forgetting an AppContext.Provider?');
+  }
+
+  return useQuery<RelierClientInfo>(GET_CLIENT_INFO, {
+    client: apolloClient,
+    variables: { input: clientId },
+  });
+}
+
+export function useProductInfoState(productId: string) {
+  const { apolloClient } = useContext(AppContext);
+  if (!apolloClient) {
+    throw new Error('Are you forgetting an AppContext.Provider?');
+  }
+  return useQuery<RelierSubscriptionInfo>(GET_PRODUCT_INFO, {
+    client: apolloClient,
+    variables: { input: productId },
+  });
 }
 
 // TODO: FXA-8286, test pattern for container components, which will determine

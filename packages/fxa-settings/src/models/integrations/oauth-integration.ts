@@ -20,9 +20,8 @@ import {
   IsHexadecimal,
   IsIn,
   IsNotEmpty,
-  IsNumber,
+  IsInt,
   IsOptional,
-  IsPositive,
   IsString,
   MaxLength,
   MinLength,
@@ -109,8 +108,7 @@ export class OAuthIntegrationData extends BaseIntegrationData {
   idTokenHint: string | undefined;
 
   @IsOptional()
-  @IsNumber()
-  @IsPositive()
+  @IsInt()
   @bind(T.snakeCase)
   maxAge: number | undefined;
 

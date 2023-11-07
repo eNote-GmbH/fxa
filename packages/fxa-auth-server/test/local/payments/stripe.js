@@ -5864,7 +5864,6 @@ describe('#integration - StripeHelper', () => {
           expectedBaseUpdateDetails,
           mockInvoice,
           undefined,
-          event.data.object.plan.metadata.productOrder,
           oldPlan
         );
       });
@@ -5890,7 +5889,6 @@ describe('#integration - StripeHelper', () => {
           expectedBaseUpdateDetails,
           mockInvoice,
           undefined,
-          event.data.object.plan.metadata.productOrder,
           oldPlan
         );
       });
@@ -5998,7 +5996,6 @@ describe('#integration - StripeHelper', () => {
               baseDetails,
               mockInvoice,
               upcomingInvoice,
-              event.data.object.plan.metadata.productOrder,
               event.data.previous_attributes.plan
             );
 
@@ -6104,7 +6101,6 @@ describe('#integration - StripeHelper', () => {
             baseDetails,
             mockInvoice,
             undefined,
-            event.data.object.plan.metadata.productOrder,
             event.data.previous_attributes.plan
           );
 

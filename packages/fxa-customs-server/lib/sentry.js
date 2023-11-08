@@ -23,6 +23,8 @@ async function configureSentry(server, config, log) {
     },
     logger
   );
+
+  console.log('!!! sentry init');
   Sentry.init({
     ...opts,
     integrations: [new Sentry.Integrations.LinkedErrors({ key: 'jse_cause' })],

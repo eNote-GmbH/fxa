@@ -144,6 +144,8 @@ SentryMetrics.prototype = {
 
     try {
       const opts = buildSentryConfig(config, this._logger);
+
+      console.log('!!! sentry init');
       Sentry.init({
         ...opts,
         integrations: [new Sentry.BrowserTracing()],

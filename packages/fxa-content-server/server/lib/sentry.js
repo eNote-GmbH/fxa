@@ -65,6 +65,7 @@ if (config.get('sentry.dsn')) {
     logger
   );
 
+  console.log('!!! sentry init');
   Sentry.init({
     ...opts,
     beforeSend(event, _hint) {

@@ -21,6 +21,7 @@ export class SentryService {
     const opts = buildSentryConfig(sentryConfig.sentryConfig, logger);
 
     // Setup Sentry
+    logger.debug('!!! sentry init', opts);
     Sentry.init({
       ...opts,
 

@@ -39,6 +39,7 @@ if (sentryConfig.dsn) {
     },
     log
   );
+  console.log('!!! sentry init');
   Sentry.init({
     ...opts,
     beforeSend(event, _hint) {

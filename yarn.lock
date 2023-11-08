@@ -13696,6 +13696,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/core@npm:7.77.0":
+  version: 7.77.0
+  resolution: "@sentry/core@npm:7.77.0"
+  dependencies:
+    "@sentry/types": 7.77.0
+    "@sentry/utils": 7.77.0
+  checksum: f76e83ba5da4710b87b5e03f747ac5b5f93c93814447d29e1863b6bd3734d87f3a8fb197060a9a8370430d1d47b5c8c33dc86acc7f7b212322630e280435c6d8
+  languageName: node
+  linkType: hard
+
 "@sentry/integrations@npm:^7.66.0":
   version: 7.66.0
   resolution: "@sentry/integrations@npm:7.66.0"
@@ -13724,6 +13734,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/opentelemetry-node@npm:^7.77.0":
+  version: 7.77.0
+  resolution: "@sentry/opentelemetry-node@npm:7.77.0"
+  dependencies:
+    "@sentry/core": 7.77.0
+    "@sentry/types": 7.77.0
+    "@sentry/utils": 7.77.0
+  peerDependencies:
+    "@opentelemetry/api": 1.x
+    "@opentelemetry/core": 1.x
+    "@opentelemetry/sdk-trace-base": 1.x
+    "@opentelemetry/semantic-conventions": 1.x
+  checksum: 19c5177755229f1252f72a283ddbd9431442d57f073a92cefedb67e9e5aa3c022e0de02a604b7e81cbc47cc37cab6ca1388947e73236f544fe0a87f8ea9de113
+  languageName: node
+  linkType: hard
+
 "@sentry/replay@npm:7.66.0":
   version: 7.66.0
   resolution: "@sentry/replay@npm:7.66.0"
@@ -13742,6 +13768,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:7.77.0":
+  version: 7.77.0
+  resolution: "@sentry/types@npm:7.77.0"
+  checksum: ff8047425d4b0caae9221a9fa52fa0122ddf23b51152b7d71914f6465cf72dc3fdf00b7db16e3e95b4a1d2d429824d91ed586b1abac6d5286bd7800504e30824
+  languageName: node
+  linkType: hard
+
 "@sentry/utils@npm:7.66.0":
   version: 7.66.0
   resolution: "@sentry/utils@npm:7.66.0"
@@ -13749,6 +13782,15 @@ __metadata:
     "@sentry/types": 7.66.0
     tslib: ^2.4.1 || ^1.9.3
   checksum: b33d89c18cfcac1bf4bf20453f6ebd5229911a3264b32f25d6591cfab303c86da9b06ce46e8f3490f391c7b4efe5ddd153e5dffe8b2316cf605daa789da0c39c
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:7.77.0":
+  version: 7.77.0
+  resolution: "@sentry/utils@npm:7.77.0"
+  dependencies:
+    "@sentry/types": 7.77.0
+  checksum: 000bb1caec44812dc39a8026ecba78c14a8332f15cb78d2935c91a7ba8d61eab9553a791a4af528a113ca90b83db6e81791e3562b2559b76596accc69e4d57ad
   languageName: node
   linkType: hard
 
@@ -35554,6 +35596,7 @@ fsevents@~2.1.1:
     "@sentry/browser": ^7.66.0
     "@sentry/integrations": ^7.66.0
     "@sentry/node": ^7.66.0
+    "@sentry/opentelemetry-node": ^7.77.0
     "@type-cacheable/core": ^11.0.0
     "@type-cacheable/ioredis-adapter": ^10.0.4
     "@types/accept-language-parser": ^1.5.3

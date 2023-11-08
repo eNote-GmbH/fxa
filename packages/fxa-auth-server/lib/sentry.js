@@ -180,6 +180,7 @@ async function configureSentry(server, config, processName = 'key_server') {
       logger
     );
 
+    console.log('!!! sentry init');
     Sentry.init({
       ...opts,
       beforeSend(event, hint) {

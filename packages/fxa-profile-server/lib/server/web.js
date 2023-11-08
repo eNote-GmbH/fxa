@@ -108,6 +108,8 @@ exports.create = async function createServer() {
       },
       logger
     );
+
+    console.log('!!! sentry init');
     Sentry.init({
       ...opts,
       beforeSend(event) {

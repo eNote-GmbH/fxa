@@ -132,6 +132,8 @@ module.exports = () => {
       },
       logger
     );
+
+    console.log('!!! sentry init');
     Sentry.init({
       ...opts,
       beforeSend(event) {

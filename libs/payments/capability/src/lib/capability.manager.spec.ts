@@ -44,19 +44,21 @@ describe('CapabilityManager', () => {
     });
 
     it('should return services with capabilities', async () => {
-      const clientResults = ServiceResultFactory({
-        oauthClientId: 'client1',
-        capabilitiesCollection: {
-          items: [
-            { slug: 'exampleCap0' },
-            { slug: 'exampleCap2' },
-            { slug: 'exampleCap4' },
-            { slug: 'exampleCap5' },
-            { slug: 'exampleCap6' },
-            { slug: 'exampleCap8' },
-          ],
-        },
-      });
+      const clientResults = [
+        ServiceResultFactory({
+          oauthClientId: 'client1',
+          capabilitiesCollection: {
+            items: [
+              { slug: 'exampleCap0' },
+              { slug: 'exampleCap2' },
+              { slug: 'exampleCap4' },
+              { slug: 'exampleCap5' },
+              { slug: 'exampleCap6' },
+              { slug: 'exampleCap8' },
+            ],
+          },
+        }),
+      ];
       mockResult.getServices = jest.fn().mockReturnValue(clientResults);
       const result = await manager.getClients();
       expect(result.length).toBe(1);

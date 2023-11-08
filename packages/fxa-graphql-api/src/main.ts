@@ -18,7 +18,6 @@ const appConfig = Config.getProperties();
 
 async function bootstrap() {
   // Initialize tracing first
-  mozLog.debug('!!! tracing init');
   tracing.init(
     appConfig.tracing,
     mozLog(Config.getProperties().log)(Config.getProperties().log.app)

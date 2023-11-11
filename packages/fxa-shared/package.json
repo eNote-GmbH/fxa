@@ -311,7 +311,7 @@
     "@opentelemetry/sdk-trace-base": "~1.7.0",
     "@opentelemetry/sdk-trace-node": "~1.7.0",
     "@opentelemetry/sdk-trace-web": "~1.13.0",
-    "@sentry/browser": "^7.66.0",
+    "@sentry/browser": "^7.80.0",
     "@sentry/integrations": "^7.66.0",
     "@sentry/node": "^7.66.0",
     "accept-language-parser": "^1.5.0",

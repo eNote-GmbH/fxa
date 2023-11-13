@@ -3,6 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const { TERMS_PRIVACY_REGEX } = require('./content-server-routes');
+// React route groups specified here will effectively be set to
+// 100% roll out in production. Only add group names here once they've
+// been verified in production at the 15% experiment roll out.
+const ALWAYS_SHOWN_REACT_GROUPS = ['simpleRoutes', 'resetPasswordRoutes'];
 
 /**
  * When you're ready to serve the React version of a page, identify which feature flag
@@ -16,7 +20,9 @@ const { TERMS_PRIVACY_REGEX } = require('./content-server-routes');
 const getReactRouteGroups = (showReactApp, reactRoute) => {
   return {
     simpleRoutes: {
-      featureFlagOn: showReactApp.simpleRoutes,
+      featureFlagOn:
+        ALWAYS_SHOWN_REACT_GROUPS.includes('simpleRoutes') ||
+        showReactApp.simpleRoutes,
       routes: reactRoute.getRoutes([
         'cannot_create_account',
         'clear',
@@ -32,7 +38,9 @@ const getReactRouteGroups = (showReactApp, reactRoute) => {
     },
 
     resetPasswordRoutes: {
-      featureFlagOn: showReactApp.resetPasswordRoutes,
+      featureFlagOn:
+        ALWAYS_SHOWN_REACT_GROUPS.includes('resetPasswordRoutes') ||
+        showReactApp.resetPasswordRoutes,
       routes: reactRoute.getRoutes([
         'reset_password',
         'complete_reset_password',
@@ -101,4 +109,5 @@ const getReactRouteGroups = (showReactApp, reactRoute) => {
 
 module.exports = {
   getReactRouteGroups,
+  ALWAYS_SHOWN_REACT_GROUPS,
 };

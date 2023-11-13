@@ -40,13 +40,9 @@ import WouldYouLikeToSync from '../views/would_you_like_to_sync';
 import { isAllowed } from 'fxa-shared/configuration/convict-format-allow-list';
 import ReactExperimentMixin from './generalized-react-app-experiment-mixin';
 import { getClientReactRouteGroups } from '../../../server/lib/routes/react-app/route-groups-client';
+import { ALWAYS_SHOWN_REACT_GROUPS } from '../../../server/lib/routes/react-app';
 
 const NAVIGATE_AWAY_IN_MOBILE_DELAY_MS = 75;
-
-// React route groups specified here will effectively be set to
-// 100% roll out in production. Only add group names here once they've
-// been verified in production at the 15% experiment roll out.
-const ALWAYS_SHOWN_REACT_GROUPS = ['simpleRoutes', 'resetPasswordRoutes'];
 
 function getView(ViewOrPath) {
   if (typeof ViewOrPath === 'string') {
@@ -507,6 +503,10 @@ Router = Router.extend({
   createReactViewHandler(routeName, additionalParams) {
     const { deviceId, flowBeginTime, flowId } =
       this.metrics.getFlowEventMetadata();
+
+    if ('showReactApp' in additionalParams) {
+      delete additionalParams.showReactApp;
+    }
 
     const link = `/${routeName}${Url.objToSearchString({
       showReactApp: true,

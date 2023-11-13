@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, useNavigate } from '@reach/router';
+import { RouteComponentProps, useLocation, useNavigate } from '@reach/router';
 import { REACT_ENTRYPOINT } from '../../../constants';
 import {
   AuthUiErrors,
@@ -40,6 +40,7 @@ import { StoredAccountData, persistAccount } from '../../../lib/storage-utils';
 import { BrandMessagingPortal } from '../../../components/BrandMessaging';
 import { currentAccount } from '../../../lib/cache';
 import GleanMetrics from '../../../lib/glean';
+import { useRedirect } from '../../../lib/hooks/useRedirect';
 
 export const viewName = 'confirm-signup-code';
 
@@ -56,6 +57,7 @@ const ConfirmSignupCode = ({
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
 
   const ftlMsgResolver = useFtlMsgResolver();
+  const location = useLocation();
   const alertBar = useAlertBar();
   const account = useAccount();
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>('');
@@ -67,6 +69,7 @@ const ConfirmSignupCode = ({
     isOAuthIntegration(integration) && integration.isSync();
 
   const navigate = useNavigate();
+  const redirectCheck = useRedirect(integration.data.redirectTo);
 
   useEffect(() => {
     GleanMetrics.signupConfirmation.view();
@@ -150,7 +153,7 @@ const ConfirmSignupCode = ({
       if (isSyncDesktopIntegration(integration)) {
         // Connect another device tells Sync the user is signed in
         hardNavigateToContentServer(
-          `/connect_another_device${window.location.search}`
+          `/connect_another_device${location.search}`
         );
       } else if (isOAuthIntegration(integration)) {
         // Check to see if the relier wants TOTP.
@@ -167,7 +170,7 @@ const ConfirmSignupCode = ({
 
         // Params are included to eventually allow for redirect to RP after 2FA setup
         if (integration.wantsTwoStepAuthentication()) {
-          hardNavigateToContentServer(`oauth/signin${window.location.search}`);
+          hardNavigateToContentServer(`oauth/signin${location.search}`);
           return;
         } else {
           const { redirect, code, state } = await finishOAuthFlowHandler(
@@ -196,6 +199,20 @@ const ConfirmSignupCode = ({
             return;
           }
         }
+        // Web integration, SubPlat redirect
+      } else if (integration.data.redirectTo) {
+        if (redirectCheck.isValid) {
+          hardNavigate(integration.data.redirectTo);
+        } else {
+          // For now we just want to show the user this error message to match parity
+          // even if the code is successful - this matches parity with content-server
+          // behavior but may be revisited when we look at our signup flows as a whole.
+          setBanner({
+            type: BannerType.error,
+            children: <p>{redirectCheck.localizedErrorMessage}</p>,
+          });
+        }
+        // Web integration, no redirect
       } else {
         // TODO: Check if we ever want to show 'signup_confirmed' (Ready view)
         // Backbone had a base navigation behaviour navigating there
@@ -205,7 +222,7 @@ const ConfirmSignupCode = ({
             'Account confirmed successfully'
           )
         );
-        navigate('/settings', { replace: true });
+        navigate(`/settings${location.search}`, { replace: true });
       }
     } catch (error) {
       let localizedErrorMessage: string;

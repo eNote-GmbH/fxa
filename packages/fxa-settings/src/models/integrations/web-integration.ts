@@ -53,6 +53,12 @@ export class BaseIntegrationData extends ModelDataProvider {
   @bind(T.snakeCase)
   entrypointVariation: string | undefined;
 
+  // TODO - Validation - Needs @IsEncodedUrl()
+  // This is for SubPlat redirects that don't use the OAuth flow
+  @IsOptional()
+  @bind(T.snakeCase)
+  redirectTo: string | undefined;
+
   @IsOptional()
   @IsIn(['true', 'false', true, false])
   @bind(T.snakeCase)

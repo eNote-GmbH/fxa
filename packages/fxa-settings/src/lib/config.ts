@@ -76,6 +76,7 @@ export interface Config {
     logPings: boolean;
     debugViewTag: string;
   };
+  redirectAllowList: string[];
 }
 
 export function getDefault() {
@@ -142,6 +143,7 @@ export function getDefault() {
       logPings: false,
       debugViewTag: '',
     },
+    redirectAllowList: ['localhost'],
   } as Config;
 }
 

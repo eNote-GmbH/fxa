@@ -503,8 +503,13 @@ Router = Router.extend({
   createReactViewHandler(routeName, additionalParams) {
     const { deviceId, flowBeginTime, flowId } =
       this.metrics.getFlowEventMetadata();
+    console.log(additionalParams);
 
-    if ('showReactApp' in additionalParams) {
+    if (
+      additionalParams &&
+      typeof additionalParams === 'object' &&
+      'showReactApp' in additionalParams
+    ) {
       delete additionalParams.showReactApp;
     }
 

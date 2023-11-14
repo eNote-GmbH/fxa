@@ -23,6 +23,7 @@ import SignUpMixin from './mixins/signup-mixin';
 import GleanMetrics from '../lib/glean';
 import BrandMessagingMixin from './mixins/brand-messaging-mixin';
 import MonitorClientMixin from './mixins/monitor-client-mixin';
+import ThirdPartyAuth from '../templates/partial/third-party-auth.mustache';
 
 const t = (msg) => msg;
 
@@ -71,6 +72,9 @@ const SignUpPasswordView = FormView.extend({
     context.set({
       canChangeAccount: !this.model.get('forceEmail'),
       email: this.getAccount().get('email'),
+      unsafeThirdPartyAuthHTML: this.renderTemplate(ThirdPartyAuth, {
+        showSeparator: true,
+      }),
     });
 
     // We debounce the password check function to give the password input

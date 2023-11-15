@@ -106,7 +106,7 @@ class IndexView extends FormView {
   afterVisible() {
     super.afterVisible();
 
-    if (this._hasEmailBounced()) {
+    if (this._hasEmailBounced() || this.getSearchParam('has_bounced')) {
       this.showValidationError(
         'input[type=email]',
         AuthErrors.toError('SIGNUP_EMAIL_BOUNCE')

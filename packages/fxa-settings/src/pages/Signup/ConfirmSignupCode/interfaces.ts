@@ -12,6 +12,11 @@ import {
   OAuthIntegrationData,
 } from '../../../models';
 import { StoredAccountData } from '../../../lib/storage-utils';
+import { SessionVerifiedState } from 'fxa-shared/db/models/auth/session-token';
+
+export interface GetSessionStatusResponse {
+  sessionStatus: { uid: string; state: SessionVerifiedState };
+}
 
 export type LocationState = {
   selectedNewsletterSlugs?: string[];
@@ -27,7 +32,6 @@ export type ConfirmSignupCodeContainerProps = {
 export type ConfirmSignupCodeProps = {
   email: string;
   sessionToken: hexstring;
-  uid: hexstring;
   integration: ConfirmSignupCodeIntegration;
   finishOAuthFlowHandler: FinishOAuthFlowHandler;
   newsletterSlugs?: string[];

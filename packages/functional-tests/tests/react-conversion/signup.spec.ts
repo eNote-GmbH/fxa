@@ -11,6 +11,7 @@ const PASSWORD = 'passwordzxcv';
 test.describe('severity-1 #smoke', () => {
   test.describe('signup react', () => {
     let email;
+    let bouncedEmail;
 
     test.beforeEach(async ({ pages: { configPage, login } }, { project }) => {
       test.slow();
@@ -21,21 +22,24 @@ test.describe('severity-1 #smoke', () => {
         email = undefined;
       } else {
         email = login.createEmail('signup_react{id}');
+        bouncedEmail = login.createEmail('bounced{id}');
+        await login.clearCache();
       }
 
       test.skip(project.name === 'production', 'skip for production');
     });
 
     test.afterEach(async ({ target }) => {
-      if (email) {
-        try {
+      const accountStatus = await target.auth.accountStatusByEmail(email);
+      try {
+        if (accountStatus.exists) {
           await target.auth.accountDestroy(email, PASSWORD);
-        } catch (e) {
-          // Handle the error here
-          console.error('An error occurred during account cleanup:', e);
-          // Optionally, rethrow the error to propagate it further
-          throw e;
         }
+      } catch (e) {
+        // Handle the error here
+        console.error('An error occurred during account cleanup:', e);
+        // Optionally, rethrow the error to propagate it further
+        throw e;
       }
     });
 
@@ -59,6 +63,33 @@ test.describe('severity-1 #smoke', () => {
       // Verify logged into settings page
       await page.waitForURL(/settings/);
       await settings.signOut();
+    });
+
+    test.only('signup, bounce email', async ({
+      page,
+      target,
+      pages: { login, relier, signupReact },
+    }) => {
+      const client = await login.getFxaClient(target);
+
+      await signupReact.goto();
+      await signupReact.fillOutEmailFirst(bouncedEmail);
+      await signupReact.fillOutSignupForm(PASSWORD);
+
+      //Verify sign up code header
+      await page.waitForURL(/confirm_signup_code/);
+      await signupReact.confirmCodeHeading();
+      const accountStatus = await target.auth.accountStatusByEmail(
+        bouncedEmail
+      );
+      expect(accountStatus.exists).toBeTruthy();
+
+      await client.accountDestroy(bouncedEmail, PASSWORD);
+
+      //Verify error message
+      expect(await login.getTooltipError()).toContain(
+        'Your confirmation email was just returned. Mistyped email?'
+      );
     });
 
     test('signup oauth', async ({

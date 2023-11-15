@@ -16,9 +16,12 @@ import CardHeader from '../../../components/CardHeader';
 import ConfirmSignupCode from '.';
 import { hardNavigateToContentServer } from 'fxa-react/lib/utils';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { LocationState } from './interfaces';
+import { GetSessionStatusResponse, LocationState } from './interfaces';
 import sentryMetrics from 'fxa-shared/lib/sentry';
-
+import { GET_SESSION_STATUS } from './gql';
+import { useQuery } from '@apollo/client';
+import { AuthUiErrors } from '../../../lib/auth-errors/auth-errors';
+import { StoredAccountData } from '../../../lib/storage-utils';
 const SignupConfirmCodeContainer = ({
   integration,
 }: {
@@ -34,15 +37,70 @@ const SignupConfirmCodeContainer = ({
     unwrapBKey,
   } = location.state || {};
 
+  const storedLocalAccount: StoredAccountData | undefined = currentAccount();
+
+  const params = new URLSearchParams(location.search);
   const { finishOAuthFlowHandler, oAuthDataError } = useFinishOAuthFlowHandler(
     authClient,
     integration
   );
 
-  if (!integration) {
-    return (
-      <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
-    );
+  const navigateToSignin = (hasBounced?: boolean) => {
+    // Passing back the 'email' param causes various behaviors in
+    // content-server since it marks the email as "coming from a RP".
+    // Also remove `emailFromContent` since we pass that when coming
+    // from content-server to Backbone, see Signup container component
+    // for more info.
+    params.delete('emailFromContent');
+    params.delete('email');
+    hasBounced && params.set('has_bounced', 'true');
+    hardNavigateToContentServer(`/?${params.toString()}`);
+  };
+
+  // TODO ***** replace with emailBounceStatus query poll ****
+
+  // Poll for session verification errors
+  const { error: sessionStatusError } = useQuery<GetSessionStatusResponse>(
+    GET_SESSION_STATUS,
+    {
+      pollInterval: 2000,
+    }
+  );
+
+  if (sessionStatusError) {
+    if (sessionStatusError.message === AuthUiErrors.INVALID_TOKEN.message) {
+      // Something has tripped an invalid token error. Note, there are quite a
+      // few ways this can happen. One of which is cross contamination due
+      // to interactions on other tabs. This error state is a bit nebulous,
+      // so let's redirect the user to the main sign in, as it indicates that
+      // something invalidated local storage or perhaps their session token has
+      // expired and a polling operation picked up on this. Either way, the user
+      // is likely in the middle of login flow on another tab, or the tab has been
+      // idle for quite some time. See #13806
+      navigateToSignin();
+      return <LoadingSpinner fullScreen />;
+    } else if ('hello') {
+      // If the uid is not associated with an account,
+      // the user's email may have bounced because it was invalid.
+      // If arriving from signup, redirect them to the email first page.
+      // Adding the 'hasBounced' param will display an error message on '/'
+      const hasBounced = true;
+      navigateToSignin(hasBounced);
+      return <LoadingSpinner fullScreen />;
+
+      // TODO in FXA-6488: if this page is instead reached from signin,
+      // redirect to signin_bounced for support info
+    } else if (
+      sessionStatusError.message ===
+      (AuthUiErrors.UNEXPECTED_ERROR.message ||
+        AuthUiErrors.BACKEND_SERVICE_FAILURE.message)
+    ) {
+      // Hide the error from the user if it is an unexpected error.
+      // an error may happen here if the status api is overloaded or
+      // if the user is switching networks.
+    } else {
+      // TODO display localized error message in banner
+    }
   }
 
   // TODO: UX for this, FXA-8106
@@ -57,6 +115,20 @@ const SignupConfirmCodeContainer = ({
     );
   }
 
+  // Users in this state should never reach this as they should see the Backbone version
+  // of this page until we convert signin to React, but guard against anyway. See
+  // comment in `router.js` for this route for more info.
+  if (isOAuthIntegration(integration) && (!keyFetchToken || !unwrapBKey)) {
+    // Report an error to Sentry on the off-chance that this React page is reached without required state
+    sentryMetrics.captureException(
+      new Error(
+        'WARNING: User should not have reached ConfirmSignupCode in React without required state for OAuth integration. Redirecting to Backbone signin page.'
+      )
+    );
+    navigateToSignin();
+    return <LoadingSpinner fullScreen />;
+  }
+
   /* Users who reach this page should have account data set in localStorage.
    * Account data is persisted local storage after creating an (unverified) account
    * and after sign in. Users may also have localStorage set by the browser if
@@ -69,50 +141,17 @@ const SignupConfirmCodeContainer = ({
    * TOOD: when we pull the account.verifySession call into the container component,
    * ensure we're only reading from localStorage once. `sessionToken()` also reads from
    * localStorage. */
-  const storedLocalAccount = currentAccount();
-  const { email, sessionToken, uid } = storedLocalAccount;
 
-  // Users in this state should never reach this as they should see the Backbone version
-  // of this page until we convert signin to React, but guard against anyway. See
-  // comment in `router.js` for this route for more info.
-  if (isOAuthIntegration(integration) && (!keyFetchToken || !unwrapBKey)) {
-    // Report an error to Sentry on the off-chance that this React page is reached without required state
-    sentryMetrics.captureException(
-      new Error(
-        'WARNING: User should not have reached ConfirmSignupCode in React without required state for OAuth integration. Redirecting to Backbone signin page.'
-      )
-    );
-    const params = new URLSearchParams(location.search);
-    // Remove `emailFromContent` since we pass that when coming
-    // from content-server to Backbone, see Signup container component
-    // for more info.
-    params.delete('emailFromContent');
-    hardNavigateToContentServer(`/signin?${params.toString()}`);
-    return (
-      <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
-    );
+  if (!integration || !storedLocalAccount) {
+    navigateToSignin();
+    return <LoadingSpinner fullScreen />;
   }
 
-  if (!storedLocalAccount || !email || !sessionToken || !uid) {
-    const params = new URLSearchParams(location.search);
-    // Passing back the 'email' param causes various behaviors in
-    // content-server since it marks the email as "coming from a RP".
-    // Also remove `emailFromContent` since we pass that when coming
-    // from content-server to Backbone, see Signup container component
-    // for more info.
-    params.delete('emailFromContent');
-    params.delete('email');
-    hardNavigateToContentServer(`/?${params.toString()}`);
-    return (
-      <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
-    );
-  }
-
+  const { email, sessionToken } = storedLocalAccount;
   return (
     <ConfirmSignupCode
       {...{
         email,
-        uid,
         sessionToken,
         integration,
         finishOAuthFlowHandler,

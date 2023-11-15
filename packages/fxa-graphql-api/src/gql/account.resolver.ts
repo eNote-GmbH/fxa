@@ -16,6 +16,7 @@ import AuthClient, { deriveHawkCredentials } from 'fxa-auth-client';
 import {
   Account,
   AccountOptions,
+  EmailBounce,
   SessionToken,
 } from 'fxa-shared/db/models/auth';
 import { profileByUid, selectedAvatar } from 'fxa-shared/db/models/profile';
@@ -85,6 +86,8 @@ import { Account as AccountType } from './model/account';
 import { uuidTransformer } from 'fxa-shared/db/transformers';
 import { FinishedSetupAccountPayload } from './dto/payload/finished-setup-account';
 import { FinishSetupInput } from './dto/input/finish-setup';
+import { EmailBounceStatusPayload } from './dto/payload/email-bounce';
+import { EmailBounceStatusInput } from './dto/input/email-bounce';
 
 function snakeToCamel(str: string) {
   return str.replace(/(_\w)/g, (m: string) => m[1].toUpperCase());
@@ -806,5 +809,21 @@ export class AccountResolver {
       });
     }
     return [];
+  }
+
+  @Query((returns) => EmailBounceStatusPayload, {
+    description: 'Check if bounces exist for an account, using email address.',
+  })
+  @CatchGatewayError
+  public async emailBounceStatus(
+    @Args('input', { type: () => EmailBounceStatusInput })
+    input: EmailBounceStatusInput
+  ): Promise<EmailBounceStatusPayload> {
+    if (input.email) {
+      const bounces = await EmailBounce.findByEmail(input.email);
+      return { hasBounces: bounces.length > 0 };
+    } else {
+      return { hasBounces: undefined };
+    }
   }
 }

@@ -58,11 +58,6 @@ import { hardNavigateToContentServer } from 'fxa-react/lib/utils';
 
 const Settings = lazy(() => import('../Settings'));
 
-// TODO: FXA-8305, DRY this up in the codebase
-const fullPageLoadingSpinner = (
-  <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
-);
-
 export const App = ({
   flowQueryParams,
 }: { flowQueryParams: QueryParams } & RouteComponentProps) => {
@@ -159,7 +154,7 @@ export const App = ({
 
   // Wait until metrics is done loading, integration has been created, and isSignedIn has been determined.
   if (metricsLoading || !integration || isSignedIn === undefined) {
-    return fullPageLoadingSpinner;
+    return <LoadingSpinner fullScreen />;
   }
 
   // TODO: Do we like passing `isSignedIn` here, or query in page components instead?
@@ -182,14 +177,14 @@ const SettingsRoutes = ({
     hardNavigateToContentServer(
       `/signin?redirect_to=${encodeURIComponent(location.pathname)}`
     );
-    return fullPageLoadingSpinner;
+    return <LoadingSpinner fullScreen />;
   }
 
   const settingsContext = initializeSettingsContext();
   return (
     <SettingsContext.Provider value={settingsContext}>
       <ScrollToTop default>
-        <Suspense fallback={fullPageLoadingSpinner}>
+        <Suspense fallback={<LoadingSpinner fullScreen />}>
           <Settings path="/settings/*" {...{ isSignedIn }} />
         </Suspense>
       </ScrollToTop>
@@ -217,9 +212,7 @@ const AuthAndAccountSetupRoutes = ({
 
   // Show loading spinner until integration is ready and service name has been determined.
   if (!integration || serviceName === undefined) {
-    return (
-      <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
-    );
+    return <LoadingSpinner fullScreen />;
   }
 
   return (

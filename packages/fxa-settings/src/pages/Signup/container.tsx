@@ -217,19 +217,13 @@ const SignupContainer = ({
     navigate('/cannot_create_account');
   }
 
-  // TODO: In FXA-8305 - create option for LoadingSpinner to use these classes and use it throughout
-  // settings since we use this set of classes often
-  const pageSpinner = (
-    <LoadingSpinner className="bg-grey-20 flex items-center flex-col justify-center h-screen select-none" />
-  );
-
   if (showLoadingSpinner) {
-    return pageSpinner;
+    return <LoadingSpinner fullScreen />;
   }
 
   if (validationError) {
     hardNavigateToContentServer('/');
-    return pageSpinner;
+    return <LoadingSpinner fullScreen />;
   }
 
   return (

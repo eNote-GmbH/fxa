@@ -62,4 +62,8 @@ export class SignupReactPage extends BaseLayout {
   async submit(label: string) {
     await this.page.getByRole('button', { name: label }).click();
   }
+
+  async confirmCodeHeading() {
+    await this.page.getByRole('heading', { name: /Enter confirmation code/ });
+  }
 }

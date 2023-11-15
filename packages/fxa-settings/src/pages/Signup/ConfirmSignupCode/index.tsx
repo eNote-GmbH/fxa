@@ -51,7 +51,6 @@ export const viewName = 'confirm-signup-code';
 const ConfirmSignupCode = ({
   email,
   sessionToken,
-  uid,
   integration,
   finishOAuthFlowHandler,
   newsletterSlugs: newsletters,
@@ -269,13 +268,6 @@ const ConfirmSignupCode = ({
     'confirm-signup-code-page-title',
     'Enter confirmation code'
   );
-
-  // TODO: handle bounced emails/blocked accounts in FXA-8306
-  // poll for session verification (does not exist on Settings), and
-  // - if invalid token + account does not exist (no account for uid) - email bounced
-  //   --> Direct the user to sign up again
-  // - if the account is blocked (invalid token, but account exists)
-  //   --> redirect to signin_bounced
 
   return (
     <AppLayout title={localizedPageTitle}>

@@ -197,6 +197,7 @@
       "import": "./dist/esm/packages/fxa-shared/subscriptions/*.js",
       "require": "./dist/cjs/packages/fxa-shared/subscriptions/*.js"
     },
+
     "./tracing/*": {
       "import": "./dist/esm/packages/fxa-shared/tracing/*.js",
       "require": "./dist/cjs/packages/fxa-shared/tracing/*.js"

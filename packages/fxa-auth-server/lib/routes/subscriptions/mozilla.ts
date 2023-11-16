@@ -92,12 +92,14 @@ export class MozillaSubscriptionHandler {
 
     const targetPlanId = request.params.planId;
 
-    const eligibility = (
-      await this.capabilityService.getPlanEligibility(uid, targetPlanId)
-    )[0];
+    const eligibility = await this.capabilityService.getPlanEligibility(
+      uid,
+      targetPlanId
+    );
 
     return {
-      eligibility,
+      eligibility: eligibility[0],
+      currentPlan: eligibility[1],
     };
   }
 }

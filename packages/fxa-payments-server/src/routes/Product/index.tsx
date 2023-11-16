@@ -17,7 +17,6 @@ import { actions, ActionFunctions } from '../../store/actions';
 import { selectors, SelectorReturns } from '../../store/selectors';
 import { Plan, ProductMetadata } from '../../store/types';
 import { metadataFromPlan } from 'fxa-shared/subscriptions/metadata';
-import { getSubscriptionUpdateEligibility } from 'fxa-shared/subscriptions/stripe';
 
 import FetchErrorDialogMessage from '../../components/FetchErrorDialogMessage';
 import PlanErrorDialog from '../../components/PlanErrorDialog';
@@ -58,7 +57,7 @@ const indexPlansById = (plans: State['plans']): PlansByIdType =>
 const customerIsSubscribedToProduct = (
   customerSubscriptions: ProductProps['customerSubscriptions'],
   productId: string
-) =>
+): boolean | null =>
   customerSubscriptions &&
   customerSubscriptions.some(
     (customerSubscription) => customerSubscription.product_id === productId
@@ -69,51 +68,13 @@ const customerIsSubscribedToProduct = (
 const customerIsSubscribedToPlan = (
   customerSubscriptions: ProductProps['customerSubscriptions'],
   selectedPlan: Plan
-) =>
+): boolean | null =>
   customerSubscriptions &&
   customerSubscriptions.some(
     (customerSubscription) =>
       isWebSubscription(customerSubscription) &&
       selectedPlan.plan_id === customerSubscription.plan_id
   );
-
-// If the customer has any subscribed plan that matches the productSet for the
-// selected plan, determine whether if it's an upgrade or downgrade.
-// Otherwise, it's 'invalid'.
-const subscriptionUpdateEligibilityResult = (
-  customerSubscriptions: WebSubscription[],
-  selectedPlan: Plan,
-  plansById: PlansByIdType,
-  useFirestoreProductConfigs: boolean
-):
-  | {
-      subscriptionUpdateEligibility: SubscriptionUpdateEligibility;
-      plan: Plan;
-      subscription: WebSubscription;
-    }
-  | typeof SubscriptionUpdateEligibility.INVALID => {
-  if (customerSubscriptions) {
-    for (const customerSubscription of customerSubscriptions) {
-      const subscriptionPlanInfo = plansById[customerSubscription.plan_id];
-      const subscriptionUpdateEligibility = getSubscriptionUpdateEligibility(
-        subscriptionPlanInfo.plan,
-        selectedPlan,
-        useFirestoreProductConfigs
-      );
-      if (
-        subscriptionUpdateEligibility !== SubscriptionUpdateEligibility.INVALID
-      ) {
-        return {
-          subscriptionUpdateEligibility,
-          plan: subscriptionPlanInfo.plan,
-          subscription: customerSubscription,
-        };
-      }
-    }
-  }
-
-  return SubscriptionUpdateEligibility.INVALID;
-};
 
 export type ProductProps = {
   profile: SelectorReturns['profile'];
@@ -176,7 +137,7 @@ export const Product = ({
   );
   const plansById = useMemo(() => indexPlansById(plans), [plans]);
 
-  const selectedPlan = useMemo(
+  const selectedPlan: Plan = useMemo(
     () => getSelectedPlan(productId, planId, plansByProductId),
     [productId, planId, plansByProductId]
   );
@@ -264,10 +225,8 @@ export const Product = ({
 
   // Only check for upgrade or existing subscription if we have a customer.
   if (customer.result && subscriptionChangeEligibility.result !== null) {
-    const iapSubscription = findCustomerIapSubscriptionByProductId(
-      customerSubscriptions,
-      productId
-    );
+    const iapSubscription: IapSubscription | null =
+      findCustomerIapSubscriptionByProductId(customerSubscriptions, productId);
 
     // Note regarding IAP roadblock:
     //
@@ -341,10 +300,8 @@ export const Product = ({
       isWebSubscription(s)
     ) as WebSubscription[];
 
-    const alreadySubscribedToSelectedPlan = customerIsSubscribedToPlan(
-      webSubscriptions,
-      selectedPlan
-    );
+    const alreadySubscribedToSelectedPlan: boolean | null =
+      customerIsSubscribedToPlan(webSubscriptions, selectedPlan);
 
     if (invoicePreview.error || !invoicePreview.result) {
       const ariaLabelledBy = 'product-invoice-preview-error-title';
@@ -383,15 +340,11 @@ export const Product = ({
       );
     }
 
-    const planUpdateEligibilityResult = subscriptionUpdateEligibilityResult(
-      webSubscriptions,
-      selectedPlan,
-      plansById,
-      config.featureFlags.useFirestoreProductConfigs
-    );
-
     // Not an upgrade or a downgrade.
-    if (planUpdateEligibilityResult === SubscriptionUpdateEligibility.INVALID) {
+    if (
+      subscriptionChangeEligibility.result.eligibility ===
+      SubscriptionUpdateEligibility.INVALID
+    ) {
       if (customerIsSubscribedToProduct(webSubscriptions, productId)) {
         return (
           <SubscriptionChangeRoadblock
@@ -415,7 +368,7 @@ export const Product = ({
     }
 
     if (
-      planUpdateEligibilityResult.subscriptionUpdateEligibility ===
+      subscriptionChangeEligibility.result.eligibility ===
       SubscriptionUpdateEligibility.DOWNGRADE
     ) {
       return (
@@ -426,9 +379,16 @@ export const Product = ({
     }
 
     if (
-      planUpdateEligibilityResult.subscriptionUpdateEligibility ===
+      subscriptionChangeEligibility.result.eligibility ===
       SubscriptionUpdateEligibility.UPGRADE
     ) {
+      const currentSubscription: WebSubscription | undefined =
+        webSubscriptions.find(
+          (sub) =>
+            sub.plan_id ===
+            subscriptionChangeEligibility.result.currentPlan!.plan_id
+        );
+
       return (
         <SubscriptionUpgrade
           {...{
@@ -436,8 +396,8 @@ export const Product = ({
             profile: profile.result,
             customer: customer.result,
             selectedPlan,
-            upgradeFromPlan: planUpdateEligibilityResult.plan,
-            upgradeFromSubscription: planUpdateEligibilityResult.subscription,
+            upgradeFromPlan: subscriptionChangeEligibility.result.currentPlan!,
+            upgradeFromSubscription: currentSubscription!,
             updateSubscriptionPlanAndRefresh,
             resetUpdateSubscriptionPlan,
             updateSubscriptionPlanStatus,

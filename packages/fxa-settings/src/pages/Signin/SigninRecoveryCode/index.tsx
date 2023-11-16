@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, RouteComponentProps } from '@reach/router';
 import { FtlMsg } from 'fxa-react/lib/utils';
 import { useFtlMsgResolver } from '../../../models';
@@ -16,6 +16,7 @@ import FormVerifyCode, {
 } from '../../../components/FormVerifyCode';
 import { MozServices } from '../../../lib/types';
 import { REACT_ENTRYPOINT } from '../../../constants';
+import GleanMetrics from '../../../lib/glean';
 
 export type SigninRecoveryCodeProps = {
   email: string;
@@ -29,6 +30,9 @@ const SigninRecoveryCode = ({
   serviceName,
 }: SigninRecoveryCodeProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
+  useEffect(() => {
+    GleanMetrics.loginRecoveryCode.view();
+  }, []);
 
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>('');
   const ftlMsgResolver = useFtlMsgResolver();
@@ -48,8 +52,12 @@ const SigninRecoveryCode = ({
 
   const onSubmit = () => {
     try {
+      GleanMetrics.loginRecoveryCode.submit();
+
       // Check recovery code
       // Log success event
+      GleanMetrics.loginRecoveryCode.success();
+
       // Check if isForcePasswordChange
     } catch (e) {
       // TODO: error handling, error message confirmation

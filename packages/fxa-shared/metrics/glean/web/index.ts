@@ -51,6 +51,12 @@ export const eventsMap = {
     success: 'login_email_confirmation_success_view',
   },
 
+  loginRecoveryCode: {
+    view: 'login_backup_code_view',
+    submit: 'login_backup_code_submit',
+    success: 'login_backup_code_success_view',
+  },
+
   totpForm: {
     view: 'login_totp_form_view',
     submit: 'login_totp_code_submit',

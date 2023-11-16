@@ -36,6 +36,7 @@ const { setupFirestore } = require('../lib/firestore-db');
 const { AppleIAP } = require('../lib/payments/iap/apple-app-store/apple-iap');
 const { AccountEventsManager } = require('../lib/account-events');
 const { gleanMetrics } = require('../lib/metrics/glean');
+const Customs = require('../lib/customs');
 
 async function run(config) {
   Container.set(AppConfig, config);
@@ -180,8 +181,7 @@ async function run(config) {
   };
   const signer = require('../lib/signer')(config.secretKeyFile, config.domain);
   const Password = require('../lib/crypto/password')(log, config);
-  const Customs = require('../lib/customs')(log, error, statsd);
-  const customs = new Customs(config.customsUrl);
+  const customs = new Customs(config.customsUrl, log, error, statsd);
   const zendeskClient = require('../lib/zendesk-client').createZendeskClient(
     config
   );

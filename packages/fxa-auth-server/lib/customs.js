@@ -13,7 +13,7 @@ const localizeTimestamp =
   });
 const serviceName = 'customs';
 
-class Customs {
+class CustomsClient {
   constructor(url, log, error, statsd) {
     this.log = log;
     this.error = error;
@@ -170,4 +170,4 @@ class Customs {
   }
 }
 
-module.exports = Customs;
+module.exports = CustomsClient;

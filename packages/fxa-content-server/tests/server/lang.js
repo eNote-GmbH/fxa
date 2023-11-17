@@ -7,8 +7,7 @@ const { registerSuite } = intern.getInterface('object');
 const assert = intern.getPlugin('chai').assert;
 const got = require('got');
 const util = require('util');
-const fxaSharedL10n = require('../../../../libs/shared/l10n/src');
-var languages = fxaSharedL10n.supportedLanguages;
+const languages = require('../../../../libs/shared/l10n/src/lib/supported-languages.json');
 var httpsUrl = intern._config.fxaContentRoot.replace(/\/$/, '');
 
 var suite = {

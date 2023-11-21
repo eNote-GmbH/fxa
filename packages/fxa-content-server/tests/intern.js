@@ -121,22 +121,6 @@ if (args.unit) {
   config.functionalSuites.unshift('tests/functional/mocha.js');
 }
 
-if (args.groups !== undefined && args.groupIndex !== undefined) {
-  const index = args.groupIndex;
-  const groups = args.groups;
-  const groupSize = Math.ceil(config.functionalSuites.length / groups);
-  const originalSuiteSize = config.functionalSuites.length;
-  const targeted = config.functionalSuites.splice(groupSize * index, groupSize);
-
-  console.log(`Running group ${args.groupIndex + 1} of ${args.groups}.`);
-  console.log(
-    `Running ${targeted.length} of ${originalSuiteSize} tests suites.`
-  );
-
-  // Target a 'block' of tests to run
-  config.functionalSuites = targeted;
-}
-
 config.capabilities = {};
 config.capabilities['moz:firefoxOptions'] = {};
 // to create a profile, give it the `config` option.
@@ -146,9 +130,6 @@ config.capabilities['moz:firefoxOptions'].profile = firefoxProfile(config); //es
 
 // custom Firefox binary location, if specified then the default is ignored.
 // ref: https://code.google.com/p/selenium/wiki/DesiredCapabilities#WebDriver
-if (args.firefoxBinary) {
-  config.capabilities['moz:firefoxOptions'].binary = args.firefoxBinary; //eslint-disable-line camelcase
-}
 
 const failed = [];
 

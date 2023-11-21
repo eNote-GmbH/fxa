@@ -11,7 +11,6 @@ var checkHeaders = routesHelpers.checkHeaders;
 var extractAndCheckUrls = routesHelpers.extractAndCheckUrls;
 var makeRequest = routesHelpers.makeRequest;
 
-//var languages = fxaSharedL10n.supportedLanguages;
 var httpsUrl = intern._config.fxaContentRoot.replace(/\/$/, '');
 
 var hookDns = process.env.FXA_DNS_ELB && process.env.FXA_DNS_ALIAS;

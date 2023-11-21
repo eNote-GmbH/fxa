@@ -9,5 +9,5 @@ export class EmailBounceStatusPayload {
     description:
       'Whether or not there are email bounces for the provided email',
   })
-  public hasBounces!: boolean | undefined;
+  public hasBounces!: boolean;
 }

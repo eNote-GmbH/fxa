@@ -87,7 +87,6 @@ import { uuidTransformer } from 'fxa-shared/db/transformers';
 import { FinishedSetupAccountPayload } from './dto/payload/finished-setup-account';
 import { FinishSetupInput } from './dto/input/finish-setup';
 import { EmailBounceStatusPayload } from './dto/payload/email-bounce';
-import { EmailBounceStatusInput } from './dto/input/email-bounce';
 
 function snakeToCamel(str: string) {
   return str.replace(/(_\w)/g, (m: string) => m[1].toUpperCase());
@@ -462,6 +461,18 @@ export class AccountResolver {
     return Account.findByUid(uid, options);
   }
 
+  @Query((returns) => EmailBounceStatusPayload, {
+    description: 'Check if bounces exist for an account, using email address.',
+  })
+  @CatchGatewayError
+  public async emailBounceStatus(
+    @Args('input', { type: () => String! })
+    input: string
+  ): Promise<EmailBounceStatusPayload> {
+    const bounces = await EmailBounce.findByEmail(input);
+    return { hasBounces: bounces.length > 0 };
+  }
+
   @Mutation((returns) => PasswordForgotSendCodePayload, {
     description: 'Send a password reset email.',
   })
@@ -809,21 +820,5 @@ export class AccountResolver {
       });
     }
     return [];
-  }
-
-  @Query((returns) => EmailBounceStatusPayload, {
-    description: 'Check if bounces exist for an account, using email address.',
-  })
-  @CatchGatewayError
-  public async emailBounceStatus(
-    @Args('input', { type: () => EmailBounceStatusInput })
-    input: EmailBounceStatusInput
-  ): Promise<EmailBounceStatusPayload> {
-    if (input.email) {
-      const bounces = await EmailBounce.findByEmail(input.email);
-      return { hasBounces: bounces.length > 0 };
-    } else {
-      return { hasBounces: undefined };
-    }
   }
 }

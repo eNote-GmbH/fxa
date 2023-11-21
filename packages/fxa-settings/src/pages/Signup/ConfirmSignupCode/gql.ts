@@ -4,11 +4,10 @@
 
 import { gql } from '@apollo/client';
 
-export const GET_SESSION_STATUS = gql`
-  query GetSessionStatus {
-    sessionStatus {
-      uid
-      state
+export const EMAIL_BOUNCE_STATUS_QUERY = gql`
+  query GetEmailBounceStatus($input: String!) {
+    emailBounceStatus(input: $input) {
+      hasBounces
     }
   }
 `;

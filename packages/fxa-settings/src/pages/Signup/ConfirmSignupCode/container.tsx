@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React from 'react';
-import { RouteComponentProps, useLocation } from '@reach/router';
+import React, { useCallback, useEffect } from 'react';
+import { RouteComponentProps, navigate, useLocation } from '@reach/router';
 import { currentAccount } from '../../../lib/cache';
 import { useFinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 import {
@@ -16,12 +16,11 @@ import CardHeader from '../../../components/CardHeader';
 import ConfirmSignupCode from '.';
 import { hardNavigateToContentServer } from 'fxa-react/lib/utils';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { GetSessionStatusResponse, LocationState } from './interfaces';
+import { GetEmailBounceStatusResponse, LocationState } from './interfaces';
 import sentryMetrics from 'fxa-shared/lib/sentry';
-import { GET_SESSION_STATUS } from './gql';
-import { useQuery } from '@apollo/client';
-import { AuthUiErrors } from '../../../lib/auth-errors/auth-errors';
 import { StoredAccountData } from '../../../lib/storage-utils';
+import { useQuery } from '@apollo/client';
+import { EMAIL_BOUNCE_STATUS_QUERY } from './gql';
 const SignupConfirmCodeContainer = ({
   integration,
 }: {
@@ -39,69 +38,84 @@ const SignupConfirmCodeContainer = ({
 
   const storedLocalAccount: StoredAccountData | undefined = currentAccount();
 
-  const params = new URLSearchParams(location.search);
   const { finishOAuthFlowHandler, oAuthDataError } = useFinishOAuthFlowHandler(
     authClient,
     integration
   );
 
-  const navigateToSignin = (hasBounced?: boolean) => {
-    // Passing back the 'email' param causes various behaviors in
-    // content-server since it marks the email as "coming from a RP".
-    // Also remove `emailFromContent` since we pass that when coming
-    // from content-server to Backbone, see Signup container component
-    // for more info.
-    params.delete('emailFromContent');
-    params.delete('email');
-    hasBounced && params.set('has_bounced', 'true');
-    hardNavigateToContentServer(`/?${params.toString()}`);
-  };
+  const navigateToSignin = useCallback(
+    (hasBounced?: boolean) => {
+      const params = new URLSearchParams(location.search);
+      // Passing back the 'email' param causes various behaviors in
+      // content-server since it marks the email as "coming from a RP".
+      // Also remove `emailFromContent` since we pass that when coming
+      // from content-server to Backbone, see Signup container component
+      // for more info.
+      params.delete('emailFromContent');
+      params.delete('email');
+      hasBounced && params.set('bounced_email', integration.data.email);
+      hardNavigateToContentServer(`/?${params.toString()}`);
+    },
+    [integration.data.email, location.search]
+  );
+
+  // Previously, we also monitored for invalid token and redirected to signin
+  // when this nebulous error was tripped (for example due to cross-contamination
+  // due to interactions on other tabs, invalidated local storage or expired session token).
+  // Either way the user was likely in the middle of a login flow on another tab or
+  // the tab has been idle for quite some time.
+  // For simplicity sake, we are no longer performing general session status verification
+  // and are only specifically checking for email bounces.
+  const getEmailBounceStatus = useQuery<GetEmailBounceStatusResponse>(
+    EMAIL_BOUNCE_STATUS_QUERY,
+    { variables: { input: integration.data.email }, pollInterval: 10000 }
+  );
+
+  useEffect(() => {
+    const { data } = getEmailBounceStatus;
+    if (data?.emailBounceStatus.hasBounces) {
+      const hasBounced = true;
+      setTimeout(() => navigateToSignin(hasBounced), 2000);
+    }
+  }, [getEmailBounceStatus, navigateToSignin]);
 
   // TODO ***** replace with emailBounceStatus query poll ****
 
-  // Poll for session verification errors
-  const { error: sessionStatusError } = useQuery<GetSessionStatusResponse>(
-    GET_SESSION_STATUS,
-    {
-      pollInterval: 2000,
-    }
-  );
+  // if (sessionStatusError) {
+  //   if (sessionStatusError.message === AuthUiErrors.INVALID_TOKEN.message) {
+  //     // Something has tripped an invalid token error. Note, there are quite a
+  //     // few ways this can happen. One of which is cross contamination due
+  //     // to interactions on other tabs. This error state is a bit nebulous,
+  //     // so let's redirect the user to the main sign in, as it indicates that
+  //     // something invalidated local storage or perhaps their session token has
+  //     // expired and a polling operation picked up on this. Either way, the user
+  //     // is likely in the middle of login flow on another tab, or the tab has been
+  //     // idle for quite some time. See #13806
+  //     navigateToSignin();
+  //     return <LoadingSpinner fullScreen />;
+  //   } else if ('hello') {
+  //     // If the uid is not associated with an account,
+  //     // the user's email may have bounced because it was invalid.
+  //     // If arriving from signup, redirect them to the email first page.
+  //     // Adding the 'hasBounced' param will display an error message on '/'
+  //     const hasBounced = true;
+  //     navigateToSignin(hasBounced);
+  //     return <LoadingSpinner fullScreen />;
 
-  if (sessionStatusError) {
-    if (sessionStatusError.message === AuthUiErrors.INVALID_TOKEN.message) {
-      // Something has tripped an invalid token error. Note, there are quite a
-      // few ways this can happen. One of which is cross contamination due
-      // to interactions on other tabs. This error state is a bit nebulous,
-      // so let's redirect the user to the main sign in, as it indicates that
-      // something invalidated local storage or perhaps their session token has
-      // expired and a polling operation picked up on this. Either way, the user
-      // is likely in the middle of login flow on another tab, or the tab has been
-      // idle for quite some time. See #13806
-      navigateToSignin();
-      return <LoadingSpinner fullScreen />;
-    } else if ('hello') {
-      // If the uid is not associated with an account,
-      // the user's email may have bounced because it was invalid.
-      // If arriving from signup, redirect them to the email first page.
-      // Adding the 'hasBounced' param will display an error message on '/'
-      const hasBounced = true;
-      navigateToSignin(hasBounced);
-      return <LoadingSpinner fullScreen />;
-
-      // TODO in FXA-6488: if this page is instead reached from signin,
-      // redirect to signin_bounced for support info
-    } else if (
-      sessionStatusError.message ===
-      (AuthUiErrors.UNEXPECTED_ERROR.message ||
-        AuthUiErrors.BACKEND_SERVICE_FAILURE.message)
-    ) {
-      // Hide the error from the user if it is an unexpected error.
-      // an error may happen here if the status api is overloaded or
-      // if the user is switching networks.
-    } else {
-      // TODO display localized error message in banner
-    }
-  }
+  //     // TODO in FXA-6488: if this page is instead reached from signin,
+  //     // redirect to signin_bounced for support info
+  //   } else if (
+  //     sessionStatusError.message ===
+  //     (AuthUiErrors.UNEXPECTED_ERROR.message ||
+  //       AuthUiErrors.BACKEND_SERVICE_FAILURE.message)
+  //   ) {
+  //     // Hide the error from the user if it is an unexpected error.
+  //     // an error may happen here if the status api is overloaded or
+  //     // if the user is switching networks.
+  //   } else {
+  //     // TODO display localized error message in banner
+  //   }
+  // }
 
   // TODO: UX for this, FXA-8106
   if (oAuthDataError) {

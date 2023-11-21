@@ -205,7 +205,18 @@ Router = Router.extend({
           return this.showView(View);
         });
       } else {
-        this.createReactOrBackboneViewHandler(routeName, ConfirmSignupCodeView);
+        this.createReactOrBackboneViewHandler(
+          routeName,
+          ConfirmSignupCodeView,
+          {
+            // see comment in fxa-settings/src/pages/Signup/container.tsx for param explanation
+            email: this.user.get('emailFromIndex'),
+            ...(this.user.get('emailFromIndex') && {
+              emailFromContent: 'true',
+            }),
+            ...Url.searchParams(this.window.location.search),
+          }
+        );
       }
     },
     'connect_another_device(/)': createViewHandler(ConnectAnotherDeviceView),

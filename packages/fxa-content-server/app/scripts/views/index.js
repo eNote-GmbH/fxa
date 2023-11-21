@@ -106,7 +106,7 @@ class IndexView extends FormView {
   afterVisible() {
     super.afterVisible();
 
-    if (this._hasEmailBounced() || this.getSearchParam('has_bounced')) {
+    if (this._hasEmailBounced()) {
       this.showValidationError(
         'input[type=email]',
         AuthErrors.toError('SIGNUP_EMAIL_BOUNCE')
@@ -151,7 +151,8 @@ class IndexView extends FormView {
       // screen with that email prefilled.
     } else if (
       this.allowSuggestedAccount(suggestedAccount) &&
-      !this.relier.get('prefillEmail')
+      !this.relier.get('prefillEmail') &&
+      !this._hasEmailBounced()
     ) {
       this.replaceCurrentPage('signin', {
         account: suggestedAccount,
@@ -204,7 +205,14 @@ class IndexView extends FormView {
 
   _hasEmailBounced() {
     const account = this.getAccount('account');
-    return account && account.get('hasBounced');
+
+    if (
+      this.getSearchParam('bounced_email') ||
+      (account && account.get('hasBounced'))
+    ) {
+      return true;
+    }
+    return false;
   }
 
   _isEmailSameAsBouncedEmail() {
@@ -212,7 +220,9 @@ class IndexView extends FormView {
       return false;
     }
 
-    const bouncedEmail = this.getAccount('account').get('email');
+    const bouncedEmail =
+      this.getSearchParam('bounced_email') ||
+      this.getAccount('account').get('email');
 
     return (
       bouncedEmail && bouncedEmail === this.getElementValue('input[type=email]')

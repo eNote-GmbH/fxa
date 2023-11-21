@@ -12,11 +12,6 @@ import {
   OAuthIntegrationData,
 } from '../../../models';
 import { StoredAccountData } from '../../../lib/storage-utils';
-import { SessionVerifiedState } from 'fxa-shared/db/models/auth/session-token';
-
-export interface GetSessionStatusResponse {
-  sessionStatus: { uid: string; state: SessionVerifiedState };
-}
 
 export type LocationState = {
   selectedNewsletterSlugs?: string[];
@@ -63,3 +58,7 @@ export interface ConfirmSignupCodeOAuthIntegration {
 export type ConfirmSignupCodeIntegration =
   | ConfirmSignupCodeOAuthIntegration
   | ConfirmSignupCodeBaseIntegration;
+
+export interface GetEmailBounceStatusResponse {
+  emailBounceStatus: { hasBounces: boolean };
+}

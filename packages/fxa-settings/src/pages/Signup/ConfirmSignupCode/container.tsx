@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useCallback, useEffect } from 'react';
-import { RouteComponentProps, navigate, useLocation } from '@reach/router';
+import { RouteComponentProps, useLocation } from '@reach/router';
 import { currentAccount } from '../../../lib/cache';
 import { useFinishOAuthFlowHandler } from '../../../lib/oauth/hooks';
 import {
@@ -16,11 +16,16 @@ import CardHeader from '../../../components/CardHeader';
 import ConfirmSignupCode from '.';
 import { hardNavigateToContentServer } from 'fxa-react/lib/utils';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { GetEmailBounceStatusResponse, LocationState } from './interfaces';
+import {
+  GetAccountStatusResponse,
+  GetEmailBounceStatusResponse,
+  LocationState,
+} from './interfaces';
 import sentryMetrics from 'fxa-shared/lib/sentry';
 import { StoredAccountData } from '../../../lib/storage-utils';
 import { useQuery } from '@apollo/client';
-import { EMAIL_BOUNCE_STATUS_QUERY } from './gql';
+import { ACCOUNT_STATUS_QUERY, EMAIL_BOUNCE_STATUS_QUERY } from './gql';
+import { AuthUiErrors } from '../../../lib/auth-errors/auth-errors';
 const SignupConfirmCodeContainer = ({
   integration,
 }: {
@@ -55,6 +60,7 @@ const SignupConfirmCodeContainer = ({
       params.delete('email');
       hasBounced && params.set('bounced_email', integration.data.email);
       hardNavigateToContentServer(`/?${params.toString()}`);
+      return <LoadingSpinner fullScreen />;
     },
     [integration.data.email, location.search]
   );
@@ -68,16 +74,40 @@ const SignupConfirmCodeContainer = ({
   // and are only specifically checking for email bounces.
   const getEmailBounceStatus = useQuery<GetEmailBounceStatusResponse>(
     EMAIL_BOUNCE_STATUS_QUERY,
-    { variables: { input: integration.data.email }, pollInterval: 10000 }
+    { variables: { input: integration?.data.email }, pollInterval: 10000 }
+  );
+
+  const getAccountStatus = useQuery<GetAccountStatusResponse>(
+    ACCOUNT_STATUS_QUERY,
+    { variables: { input: { uid: storedLocalAccount?.uid } } }
   );
 
   useEffect(() => {
-    const { data } = getEmailBounceStatus;
-    if (data?.emailBounceStatus.hasBounces) {
-      const hasBounced = true;
-      setTimeout(() => navigateToSignin(hasBounced), 2000);
+    try {
+      const { data: bounceData } = getEmailBounceStatus;
+      const { data: accountStatusData } = getAccountStatus;
+      if (bounceData?.emailBounceStatus.hasBounces) {
+        const hasBounced = true;
+        if (accountStatusData?.accountStatus.exists) {
+          // TODO in
+          // account exists, but email bounced. navigate to signin_bounced for support
+        } else {
+          // account does not exist, must be a new unverified account that was marked for deletion
+          setTimeout(() => navigateToSignin(hasBounced), 2000);
+        }
+      }
+    } catch (error) {
+      if (error.message === AuthUiErrors.INVALID_TOKEN.message) {
+        navigateToSignin();
+      }
     }
-  }, [getEmailBounceStatus, navigateToSignin]);
+  }, [
+    getAccountStatus,
+    getEmailBounceStatus,
+    integration,
+    navigateToSignin,
+    storedLocalAccount,
+  ]);
 
   // TODO ***** replace with emailBounceStatus query poll ****
 
@@ -143,7 +173,10 @@ const SignupConfirmCodeContainer = ({
     return <LoadingSpinner fullScreen />;
   }
 
-  /* Users who reach this page should have account data set in localStorage.
+  const { email, sessionToken } = storedLocalAccount || {};
+
+  if (!integration || !email || !sessionToken) {
+    /* Users who reach this page should have account data set in localStorage.
    * Account data is persisted local storage after creating an (unverified) account
    * and after sign in. Users may also have localStorage set by the browser if
    * they are logged in.
@@ -155,26 +188,23 @@ const SignupConfirmCodeContainer = ({
    * TOOD: when we pull the account.verifySession call into the container component,
    * ensure we're only reading from localStorage once. `sessionToken()` also reads from
    * localStorage. */
-
-  if (!integration || !storedLocalAccount) {
     navigateToSignin();
     return <LoadingSpinner fullScreen />;
+  } else {
+    return (
+      <ConfirmSignupCode
+        {...{
+          email,
+          sessionToken,
+          integration,
+          finishOAuthFlowHandler,
+          newsletterSlugs,
+          keyFetchToken,
+          unwrapBKey,
+        }}
+      />
+    );
   }
-
-  const { email, sessionToken } = storedLocalAccount;
-  return (
-    <ConfirmSignupCode
-      {...{
-        email,
-        sessionToken,
-        integration,
-        finishOAuthFlowHandler,
-        newsletterSlugs,
-        keyFetchToken,
-        unwrapBKey,
-      }}
-    />
-  );
 };
 
 export default SignupConfirmCodeContainer;

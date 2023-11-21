@@ -11,3 +11,11 @@ export const EMAIL_BOUNCE_STATUS_QUERY = gql`
     }
   }
 `;
+
+export const ACCOUNT_STATUS_QUERY = gql`
+  query GetAccountStatus($input: AccountStatusInput!) {
+    accountStatus(input: $input) {
+      exists
+    }
+  }
+`;

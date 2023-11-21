@@ -62,3 +62,12 @@ export type ConfirmSignupCodeIntegration =
 export interface GetEmailBounceStatusResponse {
   emailBounceStatus: { hasBounces: boolean };
 }
+
+export interface AccountStatusInput {
+  uid?: string;
+  token?: string;
+}
+
+export interface GetAccountStatusResponse {
+  accountStatus: { exists: boolean };
+}

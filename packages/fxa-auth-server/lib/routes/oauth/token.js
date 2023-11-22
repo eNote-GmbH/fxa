@@ -493,6 +493,9 @@ module.exports = ({ log, oauthDB, db, mailer, devices }) => {
             break;
           case 'fxa-credentials':
             if (!sessionToken) {
+              log.warn('sessionToken.missing', {
+                grant_type: 'fxa-credentials',
+              });
               throw AuthError.invalidToken();
             }
             req.payload.assertion = await makeAssertionJWT(

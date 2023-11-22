@@ -9,7 +9,6 @@ const ROOT_DIR = '../..';
 const cp = require('child_process');
 const util = require('util');
 const path = require('path');
-const TestServer = require('../test_server');
 
 const execAsync = util.promisify(cp.exec);
 const config = require('../../config').config.getProperties();
@@ -46,17 +45,16 @@ function createRandomEmailAddr(template) {
 
 describe('#integration - scripts/check-users:', async function () {
   this.timeout(30000);
-  let server, db, validClient, invalidClient, filename;
+  let db, validClient, invalidClient, filename;
   before(async () => {
-    server = await TestServer.start(config);
     db = await DB.connect(config);
     validClient = await AuthClient.create(
-      config.publicUrl,
+      'http://127.0.0.1:9000',
       createRandomEmailAddr('valid_pw_hash@ex.com'),
       PASSWORD_VALID
     );
     invalidClient = await AuthClient.create(
-      config.publicUrl,
+      'http://127.0.0.1:9000',
       createRandomEmailAddr('invalid_pw_hash@ex.com'),
       PASSWORD_VALID
     );
@@ -70,7 +68,6 @@ describe('#integration - scripts/check-users:', async function () {
   });
 
   after(async () => {
-    await TestServer.stop(server);
     await db.close();
   });
 

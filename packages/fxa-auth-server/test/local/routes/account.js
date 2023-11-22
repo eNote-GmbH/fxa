@@ -311,6 +311,13 @@ describe('/account/reset', () => {
       assert.equal(mockMetricsContext.validate.callCount, 0);
       assert.equal(mockMetricsContext.setFlowCompleteSignal.callCount, 0);
       assert.equal(mockMetricsContext.propagate.callCount, 2);
+      sinon.assert.calledOnceWithExactly(
+        glean.resetPassword.recoveryKeyCreatePasswordSuccess,
+        mockRequest,
+        {
+          uid,
+        }
+      );
     });
 
     it('should have created session', () => {

@@ -65,7 +65,7 @@ function makeAssertionJWT(config, credentials) {
   return signJWT(
     claims,
     config.oauth.url,
-    config.domain,
+    config.oauthServer.browserid.issuer,
     config.oauth.secretKey,
     60
   );

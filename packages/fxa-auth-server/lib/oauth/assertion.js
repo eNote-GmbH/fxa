@@ -57,7 +57,15 @@ const request = require('request').defaults({
 });
 
 function error(assertion, msg, val) {
-  throw OauthError.invalidAssertion();
+  const err = OauthError.invalidAssertion();
+  if (msg) {
+    if (val) {
+      err.message = `${err.message} (${msg}: "${val}")`;
+    } else {
+      err.message = `${err.message} (${msg})`;
+    }
+  }
+  throw err;
 }
 
 // Verify a BrowserID assertion,

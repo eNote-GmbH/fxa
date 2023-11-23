@@ -260,16 +260,11 @@ async function create(log, error, config, routes, db, translator, statsd) {
     let response = request.response;
     if (response.isBoom) {
       logEndpointErrors(response, log);
-      const original_error = response;
+      log.trace('server.ErrorLog', response);
       response = error.translate(request, response);
       if (config.env !== 'prod') {
         response.backtrace(request.app.traced);
       }
-
-      log.trace('server.ErrorLog', {
-        error: original_error,
-        translated: response,
-      });
     }
     response.header('Timestamp', `${Math.floor(Date.now() / 1000)}`);
     return response;

@@ -14,7 +14,7 @@ test.describe('severity-1 #smoke', () => {
 
     test.beforeEach(async ({ pages: { configPage, login } }, { project }) => {
       test.slow();
-      // Ensure that the feature flag is enabled
+      // Ensure that the feature flag is enabled else skip react tests
       const config = await configPage.getConfig();
       if (config.showReactApp.signUpRoutes !== true) {
         test.skip();
@@ -22,8 +22,6 @@ test.describe('severity-1 #smoke', () => {
       } else {
         email = login.createEmail('signup_react{id}');
       }
-
-      test.skip(project.name === 'production', 'skip for production');
     });
 
     test.afterEach(async ({ target }) => {
@@ -149,22 +147,48 @@ test.describe('severity-1 #smoke', () => {
       await login.checkWebChannelMessage(FirefoxCommand.OAuthLogin);
     });
 
-    test('signup sync', async ({ target }) => {
+    test.only('signup sync', async ({ target }) => {
       test.slow();
       const syncBrowserPages = await newPagesForSync(target);
-      const { signupReact } = syncBrowserPages;
+      const { connectAnotherDevice, login, page, signupReact } =
+        syncBrowserPages;
+
+      const eventDetailStatus = createCustomEventDetail(
+        FirefoxCommand.FxAStatus,
+        {
+          signedInUser: null,
+          capabilities: {
+            choose_what_to_sync: true,
+            multiService: true,
+            engines: ['history'],
+          },
+        }
+      );
+      const eventDetailLinkAccount = createCustomEventDetail(
+        FirefoxCommand.LinkAccount,
+        {
+          ok: true,
+        }
+      );
 
       await signupReact.goto(
         '/',
         new URLSearchParams({
           context: 'fx_desktop_v3',
           service: 'sync',
+          automatedBrowser: 'true',
           action: 'email',
         })
       );
 
+      await login.respondToWebChannelMessage(eventDetailStatus);
+      await login.respondToWebChannelMessage(eventDetailLinkAccount);
+      await login.checkWebChannelMessage('fxaccounts:fxa_status');
+
       await signupReact.fillOutEmailFirst(email);
       await signupReact.fillOutSignupForm(PASSWORD);
+
+      await login.checkWebChannelMessage(FirefoxCommand.LinkAccount);
 
       const code = await target.email.waitForEmail(
         email,
@@ -174,8 +198,34 @@ test.describe('severity-1 #smoke', () => {
 
       await signupReact.fillOutCodeForm(code);
 
-      // TODO Uncomment once sync is working
-      // expect(await connectAnotherDevice.fxaConnected.isVisible()).toBeTruthy();
+      // TODO possibly remove once errors below are resolved
+      // verify local storage is as expected
+      const currentAccountUid = await page.evaluate(() => {
+        return JSON.parse(
+          localStorage.getItem('__fxa_storage.currentAccountUid') || ''
+        );
+      });
+      const accounts = await page.evaluate(() => {
+        return JSON.parse(
+          localStorage.getItem('__fxa_storage.accounts') || '{}'
+        );
+      });
+      const account = accounts[currentAccountUid];
+      expect(currentAccountUid).toBeDefined();
+      expect(accounts).toBeDefined();
+      expect(accounts[currentAccountUid]).toBeDefined();
+      expect(account.email).toBe(email);
+      expect(account.lastLogin).toBeDefined();
+      expect(account.metricsEnabled).toBe(true);
+      expect(account.sessionToken).toBeDefined();
+      expect(account.uid).toBeDefined();
+
+      // TODO resolve these errors
+      // these are failing with an invalid token error on verifySession
+      // on Playwright test only, working when going through sync flow locally
+      expect(await page.getByText(/Invalid token/).isVisible()).toBeFalsy();
+      expect(account.verified).toBe(true);
+      expect(await connectAnotherDevice.fxaConnected.isVisible()).toBeTruthy();
 
       await syncBrowserPages.browser?.close();
     });

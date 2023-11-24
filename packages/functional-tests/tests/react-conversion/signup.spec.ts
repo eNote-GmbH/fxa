@@ -12,7 +12,7 @@ test.describe('severity-1 #smoke', () => {
   test.describe('signup react', () => {
     let email;
 
-    test.beforeEach(async ({ pages: { configPage, login } }, { project }) => {
+    test.beforeEach(async ({ pages: { configPage, login } }) => {
       test.slow();
       // Ensure that the feature flag is enabled
       const config = await configPage.getConfig();
@@ -22,8 +22,6 @@ test.describe('severity-1 #smoke', () => {
       } else {
         email = login.createEmail('signup_react{id}');
       }
-
-      test.skip(project.name === 'production', 'skip for production');
     });
 
     test.afterEach(async ({ target }) => {
@@ -46,6 +44,8 @@ test.describe('severity-1 #smoke', () => {
     }) => {
       await signupReact.goto();
       await signupReact.fillOutEmailFirst(email);
+      await page.waitForURL(/signup/);
+      expect(await page.locator('#root').isEnabled()).toBeTruthy();
       await signupReact.fillOutSignupForm(PASSWORD);
 
       const code = await target.email.waitForEmail(
@@ -72,12 +72,14 @@ test.describe('severity-1 #smoke', () => {
       // wait for navigation, and get search params
       await page.waitForURL(/oauth\//);
       const url = page.url();
-      const params = new URLSearchParams(url.substring(url.indexOf('?') + 1));
+      const params = new URLSearchParams(url);
 
       // reload email-first page with React experiment params
       await signupReact.goto('/', params);
       // fill out email first form
       await signupReact.fillOutEmailFirst(email);
+      await page.waitForURL(/signup/);
+      expect(await page.locator('#root').isEnabled()).toBeTruthy();
       await signupReact.fillOutSignupForm(PASSWORD);
 
       // Get code from email
@@ -110,8 +112,6 @@ test.describe('severity-1 #smoke', () => {
           signedInUser: null,
         }
       );
-
-      const email = login.createEmail();
 
       await relier.goto(
         'context=oauth_webchannel_v1&automatedBrowser=true&forceExperiment=generalizedReactApp&forceExperimentGroup=react'
@@ -149,10 +149,10 @@ test.describe('severity-1 #smoke', () => {
       await login.checkWebChannelMessage(FirefoxCommand.OAuthLogin);
     });
 
-    test('signup sync', async ({ target }) => {
+    test.only('signup sync', async ({ target }) => {
       test.slow();
       const syncBrowserPages = await newPagesForSync(target);
-      const { signupReact } = syncBrowserPages;
+      const { connectAnotherDevice, page, signupReact } = syncBrowserPages;
 
       await signupReact.goto(
         '/',
@@ -164,6 +164,8 @@ test.describe('severity-1 #smoke', () => {
       );
 
       await signupReact.fillOutEmailFirst(email);
+      await page.waitForURL(/signup/);
+      expect(await page.locator('#root').isEnabled()).toBeTruthy();
       await signupReact.fillOutSignupForm(PASSWORD);
 
       const code = await target.email.waitForEmail(
@@ -173,9 +175,11 @@ test.describe('severity-1 #smoke', () => {
       );
 
       await signupReact.fillOutCodeForm(code);
+      // Not sure why there is an error retrieving client info for client ID sync
+      // only happens in test but works when going through the flow locally with yarn firefox
+      expect(await page.getByText(/Invalid token/).isVisible()).toBeFalsy();
 
-      // TODO Uncomment once sync is working
-      // expect(await connectAnotherDevice.fxaConnected.isVisible()).toBeTruthy();
+      expect(await connectAnotherDevice.fxaConnected.isVisible()).toBeTruthy();
 
       await syncBrowserPages.browser?.close();
     });

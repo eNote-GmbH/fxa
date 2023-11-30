@@ -7798,16 +7798,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/paginator@npm:^3.0.6":
-  version: 3.0.7
-  resolution: "@google-cloud/paginator@npm:3.0.7"
-  dependencies:
-    arrify: ^2.0.0
-    extend: ^3.0.2
-  checksum: bdecce8a894a0c7f47f13d0e42b2fa142098e1dd34ce571b7216ad624057214baf9066ecf091501b3770da9d7be20b983eda30185c8c6596192cb748f8a0090c
-  languageName: node
-  linkType: hard
-
 "@google-cloud/paginator@npm:^4.0.0":
   version: 4.0.0
   resolution: "@google-cloud/paginator@npm:4.0.0"
@@ -7818,10 +7808,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/precise-date@npm:^2.0.0":
-  version: 2.0.3
-  resolution: "@google-cloud/precise-date@npm:2.0.3"
-  checksum: 39bb2944a3ab7c6d336bd2d290a13f775aad5a37a03190ada35b35fb938ebe57ae35119d9727e494699ae1ab46d98418cfb1d59b93d7a595a09bddca3301fbe1
+"@google-cloud/paginator@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@google-cloud/paginator@npm:5.0.0"
+  dependencies:
+    arrify: ^2.0.0
+    extend: ^3.0.2
+  checksum: 7b8236ce610bef5c5de62a0ec267b0e4368480397621a692d213c56ffe66b20a8e6d4de0fe0606fd165672c873467ea313493f035a582e674df72c29dd20b7ef
+  languageName: node
+  linkType: hard
+
+"@google-cloud/precise-date@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@google-cloud/precise-date@npm:4.0.0"
+  checksum: 178fef6cbfacb17baa45f2a72ead867e0d061a658e53c7772b6406ed41dac72a4ff09f6ea04ab47856b8ccba47a577771079397d562c2a09429b2005982be5d0
   languageName: node
   linkType: hard
 
@@ -7839,6 +7839,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@google-cloud/projectify@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@google-cloud/projectify@npm:4.0.0"
+  checksum: 973d28414ae200433333a3c315aebb881ced42ea4afe6f3f8520d2fecded75e76c913f5189fea8fb29ce6ca36117c4f44001b3c503eecdd3ac7f02597a98354a
+  languageName: node
+  linkType: hard
+
 "@google-cloud/promisify@npm:^2.0.0":
   version: 2.0.2
   resolution: "@google-cloud/promisify@npm:2.0.2"
@@ -7853,26 +7860,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/pubsub@npm:^2.19.4":
-  version: 2.19.4
-  resolution: "@google-cloud/pubsub@npm:2.19.4"
+"@google-cloud/promisify@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@google-cloud/promisify@npm:4.0.0"
+  checksum: edd189398c5ed5b7b64a373177d77c87d076a248c31b8ae878bb91e2411d89860108bcb948c349f32628973a823bd131beb53ec008fd613a8cb466ef1d89de49
+  languageName: node
+  linkType: hard
+
+"@google-cloud/pubsub@npm:^4.0.7":
+  version: 4.0.7
+  resolution: "@google-cloud/pubsub@npm:4.0.7"
   dependencies:
-    "@google-cloud/paginator": ^3.0.6
-    "@google-cloud/precise-date": ^2.0.0
-    "@google-cloud/projectify": ^2.0.0
-    "@google-cloud/promisify": ^2.0.0
-    "@opentelemetry/api": ^1.0.0
-    "@opentelemetry/semantic-conventions": ^1.0.0
+    "@google-cloud/paginator": ^5.0.0
+    "@google-cloud/precise-date": ^4.0.0
+    "@google-cloud/projectify": ^4.0.0
+    "@google-cloud/promisify": ^4.0.0
+    "@opentelemetry/api": ^1.6.0
+    "@opentelemetry/semantic-conventions": ~1.18.0
     "@types/duplexify": ^3.6.0
     "@types/long": ^4.0.0
     arrify: ^2.0.0
     extend: ^3.0.2
-    google-auth-library: ^7.0.0
-    google-gax: 2.30.3
+    google-auth-library: ^9.0.0
+    google-gax: ^4.0.4
+    heap-js: ^2.2.0
     is-stream-ended: ^0.1.4
     lodash.snakecase: ^4.1.1
     p-defer: ^3.0.0
-  checksum: 60ca8120ca45992495ecafd4efe632c05f9ef74edebed75701c62b99e4a0e2ee508eb5b42a6a58963ad3efd024f14d7c27f99ff15bd68d29ef6804cf72867838
+  checksum: f31f8f3275feb8d2c14594c41e6b5c4a83742408264013f5c1311f4a23b17a62de497ca32b5f0663e94f558d366624f2e4da4f0dc0a0327966270219726d8642
   languageName: node
   linkType: hard
 
@@ -11899,6 +11914,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/api@npm:^1.6.0":
+  version: 1.7.0
+  resolution: "@opentelemetry/api@npm:1.7.0"
+  checksum: 2398cbe65f199c3a7050125b3ad9c835f789bb0a616665e9c7f4475a29ac8334b6a3c15f38db48d345b522180c41c00b04cc174cd0eeffba98eb4874a565fa7e
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/api@npm:~1.4.0":
   version: 1.4.1
   resolution: "@opentelemetry/api@npm:1.4.1"
@@ -13284,6 +13306,13 @@ __metadata:
   version: 1.4.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.4.0"
   checksum: 9e8ac93f048dd62d1ba93f38bf119720aa4da8d6b00f75fddda56c8c87c944d4d81d18438739c167c0133b25dabaa6ac7a3f4245f8ab4994dc25e7605d1faa0e
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/semantic-conventions@npm:~1.18.0":
+  version: 1.18.1
+  resolution: "@opentelemetry/semantic-conventions@npm:1.18.1"
+  checksum: b60c008c01067c0e8f130ab5d61f5207c85b6db08fa926f629c854ab9917ca93fbabd7ae8d1586f9f82e3b29706b0444ded9d6781f7fb7a003eeb27d89af468f
   languageName: node
   linkType: hard
 
@@ -35100,7 +35129,6 @@ fsevents@~2.1.1:
   version: 0.0.0-use.local
   resolution: "fxa-customs-server@workspace:packages/fxa-customs-server"
   dependencies:
-    "@google-cloud/pubsub": ^2.19.4
     "@hapi/hapi": ^20.2.1
     "@hapi/hoek": ^11.0.2
     "@sentry/node": ^7.66.0
@@ -35160,7 +35188,6 @@ fsevents@~2.1.1:
   dependencies:
     "@aws-sdk/client-sqs": ^3.369.0
     "@google-cloud/firestore": ^6.6.0
-    "@google-cloud/pubsub": ^2.19.4
     "@grpc/grpc-js": ^1.1.3
     "@hapi/hoek": ^11.0.2
     "@sentry/node": ^7.66.0
@@ -35812,6 +35839,7 @@ fsevents@~2.1.1:
     "@faker-js/faker": ^8.1.0
     "@fluent/bundle": ^0.18.0
     "@fluent/react": ^0.15.2
+    "@google-cloud/pubsub": ^4.0.7
     "@graphql-codegen/cli": 5.0.0
     "@graphql-codegen/client-preset": ^4.1.0
     "@graphql-codegen/typescript": ^4.0.1
@@ -36063,7 +36091,7 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
-"gcp-metadata@npm:^6.0.0":
+"gcp-metadata@npm:^6.0.0, gcp-metadata@npm:^6.1.0":
   version: 6.1.0
   resolution: "gcp-metadata@npm:6.1.0"
   dependencies:
@@ -36896,6 +36924,20 @@ fsevents@~2.1.1:
     jws: ^4.0.0
     lru-cache: ^6.0.0
   checksum: 696238dba187de6523e81c500e56deae7e899c0090ec488b71fde54c17f95dabe085108b3aab5073e05dab1eb4aafe6bb8df0d1d6c5bd9d6bd9c2fc4fc0613d7
+  languageName: node
+  linkType: hard
+
+"google-auth-library@npm:^9.0.0":
+  version: 9.4.0
+  resolution: "google-auth-library@npm:9.4.0"
+  dependencies:
+    base64-js: ^1.3.0
+    ecdsa-sig-formatter: ^1.0.11
+    gaxios: ^6.0.0
+    gcp-metadata: ^6.1.0
+    gtoken: ^7.0.0
+    jws: ^4.0.0
+  checksum: daca5821220bf4cd40395b364bfe7765646bac727d61aefe5af4c51ad76a2c454eae361b63f451a9590fd99a0c9f035407821b49a571fd14d59310a59aa1a86c
   languageName: node
   linkType: hard
 
@@ -38006,6 +38048,13 @@ fsevents@~2.1.1:
     capital-case: ^1.0.4
     tslib: ^2.0.3
   checksum: 571c83eeb25e8130d172218712f807c0b96d62b020981400bccc1503a7cf14b09b8b10498a962d2739eccf231d950e3848ba7d420b58a6acd2f9283439546cd9
+  languageName: node
+  linkType: hard
+
+"heap-js@npm:^2.2.0":
+  version: 2.3.0
+  resolution: "heap-js@npm:2.3.0"
+  checksum: 04ba26c68ab6f5f8ef8726b806648bd433a5db1eba95510b09ddb46c4c915da944078582f2c136b6aafaf1b07e69a1d9fad5b8e24143aba00b6fd403876a1b46
   languageName: node
   linkType: hard
 

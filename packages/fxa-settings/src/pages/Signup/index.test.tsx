@@ -566,4 +566,113 @@ describe('Signup page', () => {
       expect(GleanMetrics.registration.success).not.toHaveBeenCalled();
     });
   });
+
+  describe('former playwright tests', () => {
+    it('signup with email with leading or trailing whitespace on the email', () => {
+      // TBD: This doesn't work because it's not a valid email, and just results in an error. Maybe
+      // we shouldn't be manipulating the email value, which comes from the query string. The value
+      // should just be passed correctly. Alternatively, we could create a custom validator that allows
+      // emails to have whitespace, and then be careful to trim emails...
+      //
+      // Example implementation
+      // renderWithLocalizationProvider(
+      //   <Subject
+      //     {...{
+      //       queryParams: {
+      //         email: '   foo@bar.com',
+      //         emailFromContent: 'true',
+      //       },
+      //     }}
+      //   />
+      // );
+      // const email = screen.getByTestId('hidden-email');
+      // expect(email.getAttribute('value')).toEqual('foo@bar.com');
+    });
+
+    it('checks coppa is empty', () => {
+      renderWithLocalizationProvider(
+        <Subject
+          {...{
+            queryParams: {
+              email: 'foo@bar.com',
+              emailFromContent: 'true',
+            },
+          }}
+        />
+      );
+
+      const newPasswordInput = screen.getByTestId('new-password-input-field');
+      const verifyPasswordInput = screen.getByTestId(
+        'verify-password-input-field'
+      );
+      const ageInput = screen.getByTestId('age-input-field');
+      const createAccountButton = screen.getByText('Create account');
+
+      fireEvent.change(newPasswordInput, {
+        target: { value: 'bar12345' },
+      });
+      fireEvent.change(verifyPasswordInput, {
+        target: { value: 'bar12345' },
+      });
+      fireEvent.focus(ageInput);
+      fireEvent.blur(ageInput);
+      createAccountButton.click();
+
+      expect(
+        screen.getByText('You must enter your age to sign up')
+      ).toBeInTheDocument();
+      expect(createAccountButton).toBeDisabled();
+
+      // TBD: I noticed that you can enter non-numeric values for age and doing so results in no error, but
+      // the Create account button also doesn't become enabled. I'm not sure if we want to prevent non-numeric
+      // input from being entered into this box or not... The old version does not allow entering non numeric
+      // values.
+      //
+      // fireEvent.change(ageInput, { target: { value: 'aa' } });
+      // expect(
+      //   screen.getByText('You must enter your age to sign up')
+      // ).toBeInTheDocument();
+    });
+
+    it('shows error for non matching passwords', () => {
+      renderWithLocalizationProvider(
+        <Subject
+          {...{
+            queryParams: {
+              email: 'foo@bar.com',
+              emailFromContent: 'true',
+            },
+          }}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('new-password-input-field'), {
+        target: { value: 'bar12345' },
+      });
+      fireEvent.change(screen.getByTestId('verify-password-input-field'), {
+        target: { value: 'bar12346' },
+      });
+      fireEvent.blur(screen.getByTestId('verify-password-input-field'));
+      expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
+    });
+
+    it('signup, verify and sign out of two accounts, all in the same tab, then sign in to the first account', () => {
+      // TBD: This test probably is no longer applicable. It was checking that tabs change  after signing in
+      // and we have decided not to do 'tab syncing' anymore
+    });
+
+    it('signup, open sign-up in second tab, verify in original tab', () => {
+      // TBD: This test probably is no longer applicable. It was checking that tabs change  after signing in
+      // and we have decided not to do 'tab syncing' anymore
+    });
+
+    it('shows sync suggestion for fx desktop', () => {
+      // TBD: The sync suggestion isn't part of the sign up page... A check has been added to the functional tests
+      // to ensure this message is being displayed.
+    });
+
+    it('shows sync suggestion for everyone else', () => {
+      // TBD: I don't see how this maps to any existing test cases...
+    });
+  });
 });

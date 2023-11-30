@@ -273,24 +273,47 @@ describe('sign-up-container', () => {
           client: {} as ApolloClient<any>,
         },
       ]);
+    });
 
+    it('handles invalid email', async () => {
       // In this case want to mimic a bad email value
       jest
         .spyOn(UseValidateModule, 'useValidatedQueryParams')
         .mockImplementation((_params) => {
           return {
             queryParamModel: {
-              email: 123,
+              email: 'invalid',
             } as unknown as ModelDataProvider,
             validationError: {
               property: 'email',
             },
           };
         });
+      await render('loading spinner mock');
+
+      // TBD: This isn't the same behavior as the content server. The content server would display a
+      // message indicating the email was invalid. It seems like we should be doing the same thing...
+      expect(ReactUtils.hardNavigateToContentServer).toBeCalledWith('/');
     });
 
-    it('navigates away on validation error', async () => {
+    it('handles empty email', async () => {
+      // In this case want to mimic a bad email value
+      jest
+        .spyOn(UseValidateModule, 'useValidatedQueryParams')
+        .mockImplementation((_params) => {
+          return {
+            queryParamModel: {
+              email: '',
+            } as unknown as ModelDataProvider,
+            validationError: {
+              property: 'email',
+            },
+          };
+        });
       await render('loading spinner mock');
+
+      // TBD: This isn't the same behavior as the content server. The content server, would display a
+      // message indicating the email was invalid. It seems like we should be doing the same thing...
       expect(ReactUtils.hardNavigateToContentServer).toBeCalledWith('/');
     });
   });

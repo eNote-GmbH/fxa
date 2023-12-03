@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import mozillaLogo from '../images/moz-logo-bw-rgb.svg';
+import mozillaLogo from 'fxa-react/images/moz-logo-bw-rgb.svg';
 import './styles/global.css';
 
 // TODO - Replace these placeholders as part of FXA-8227

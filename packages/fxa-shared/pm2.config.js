@@ -11,7 +11,8 @@ const apps = [];
 if (process.env.CI !== 'true') {
   apps.push({
     name: 'shared-tsc',
-    script: 'yarn tsc --build --watch',
+    script:
+      'tsc --build && concurrently "tsc --build -w" "tsc-alias -w"  "tsc --build tsconfig.cjs.json -w"  "tsc-alias -p tsconfig.cjs.json -w"',
     cwd: __dirname,
     max_restarts: '1',
     env: {

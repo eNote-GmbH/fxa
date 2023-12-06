@@ -73,7 +73,7 @@ const ConfirmResetPassword = ({
         currentPasswordForgotToken
       );
       if (!isValid) {
-        hardNavigateToContentServer('/signin');
+        hardNavigateToContentServer('/');
       } else {
         // TODO: Not sure about this. It works with the flow... but.
         setOriginalTabMarker();

@@ -16,7 +16,7 @@ export const Header = ({ profile, className = 'default' }: HeaderProps) => {
     const { avatar, displayName, email } = profile;
     profileSection = (
       <img
-        className="rounded-full w-8 h-8"
+        className="rounded-full w-10 h-10"
         src={avatar}
         data-testid="avatar"
         alt={displayName || email}
@@ -34,7 +34,7 @@ export const Header = ({ profile, className = 'default' }: HeaderProps) => {
         <img
           src={mozillaLogo}
           alt={l10n.getString('brand-name-mozilla-logo', null, 'Mozilla logo')}
-          className="w-[120px]"
+          className="w-10"
         />
       </div>
       {profileSection}

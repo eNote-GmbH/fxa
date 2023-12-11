@@ -237,33 +237,26 @@ describe('views/index', () => {
           });
         });
 
-        describe('user is in thirdPartyAuth experiment', () => {
-          beforeEach(() => {
-            sinon
-              .stub(view, 'isInThirdPartyAuthExperiment')
-              .callsFake(() => true);
+        it('renders third party auth options when not sync', () => {
+          return view.render().then(() => {
+            assert.lengthOf(view.$(Selectors.FIREFOX_FAMILY_SERVICES), 0);
+            assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.GOOGLE), 1);
+            assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.APPLE), 1);
           });
+        });
 
-          it('renders as expected when not sync', () => {
-            return view.render().then(() => {
-              assert.lengthOf(view.$(Selectors.FIREFOX_FAMILY_SERVICES), 0);
-              assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.GOOGLE), 1);
-              assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.APPLE), 1);
-            });
+        it('does not render third party auth options when sync', () => {
+          relier.set({
+            action: 'email',
+            service: 'sync',
+            serviceName: 'Firefox Sync',
           });
-          it('renders as expected when sync', () => {
-            relier.set({
-              action: 'email',
-              service: 'sync',
-              serviceName: 'Firefox Sync',
-            });
-            sinon.stub(relier, 'isSync').callsFake(() => true);
+          sinon.stub(relier, 'isSync').callsFake(() => true);
 
-            return view.render().then(() => {
-              assert.lengthOf(view.$(Selectors.FIREFOX_FAMILY_SERVICES), 1);
-              assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.GOOGLE), 0);
-              assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.APPLE), 0);
-            });
+          return view.render().then(() => {
+            assert.lengthOf(view.$(Selectors.FIREFOX_FAMILY_SERVICES), 1);
+            assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.GOOGLE), 0);
+            assert.lengthOf(view.$(Selectors.THIRD_PARTY_AUTH.APPLE), 0);
           });
         });
       });

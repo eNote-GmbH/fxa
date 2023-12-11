@@ -140,6 +140,7 @@ export const FormPasswordWithBalloons = ({
 
   const onNewPwdFocus = () => {
     showNewPwdBalloon();
+    setPasswordMatchErrorText('');
     if (!hasNewPwdFocused && onFocusMetricsEvent) {
       onFocusMetricsEvent();
       setHasNewPwdFocused(true);
@@ -152,6 +153,12 @@ export const FormPasswordWithBalloons = ({
     if (getValues('newPassword') !== '' && !errors.newPassword) {
       hideNewPwdBalloon();
     }
+    if (getValues('confirmPassword') !== getValues('newPassword')) {
+      setPasswordMatchErrorText(localizedPasswordMatchError);
+    } else if (!formState.isValid) {
+      // Try to retrigger
+      trigger('confirmPassword');
+    }
   };
 
   const onBlurConfirmPassword = useCallback(() => {
@@ -159,8 +166,11 @@ export const FormPasswordWithBalloons = ({
       isConfirmPwdBalloonVisible &&
       hideConfirmPwdBalloon();
 
-    getValues('confirmPassword') !== getValues('newPassword') &&
+    if (getValues('confirmPassword') !== getValues('newPassword')) {
       setPasswordMatchErrorText(localizedPasswordMatchError);
+    } else if (!formState.isValid) {
+      trigger('newPassword');
+    }
   }, [
     getValues,
     hideConfirmPwdBalloon,
@@ -168,6 +178,8 @@ export const FormPasswordWithBalloons = ({
     localizedPasswordMatchError,
     passwordFormType,
     setPasswordMatchErrorText,
+    formState,
+    trigger,
   ]);
 
   return (

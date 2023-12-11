@@ -2,6 +2,8 @@ import { PurchaseDetails, TermsAndPrivacy } from '@fxa/payments/ui/server';
 
 import { getCartData, getContentfulContent } from '../../_lib/apiClient';
 import { app } from '../../_nestapp/app';
+import NextAuthDemo from '../../components/NextAuthDemo';
+import ClientWrapper from '../../components/ClientWrapper';
 
 interface CheckoutParams {
   offeringId: string;
@@ -39,7 +41,9 @@ export default async function Index({ params }: { params: CheckoutParams }) {
           className="h-[640px] flex items-center justify-center"
           aria-label="Section under construction"
         >
-          Section Under Construction
+          <ClientWrapper>
+            <NextAuthDemo />
+          </ClientWrapper>
         </section>
         <TermsAndPrivacy
           {...cart}

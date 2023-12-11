@@ -18,8 +18,10 @@ describe('models/integrations/oauth-relier', function () {
       scope: 'profile',
     });
     model = new OAuthIntegration(data, oauthData, {
-      scopedKeysEnabled: true,
-      scopedKeysValidation: {},
+      scopedKeys: {
+        enabled: true,
+        validation: {},
+      },
       isPromptNoneEnabled: true,
       isPromptNoneEnabledClientIds: [],
     });
@@ -45,8 +47,10 @@ describe('models/integrations/oauth-relier', function () {
         }),
         new GenericData({}),
         {
-          scopedKeysEnabled: true,
-          scopedKeysValidation: {},
+          scopedKeys: {
+            enabled: true,
+            validation: {},
+          },
           isPromptNoneEnabled: true,
           isPromptNoneEnabledClientIds: [],
         }

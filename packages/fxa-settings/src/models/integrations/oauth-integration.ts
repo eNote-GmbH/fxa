@@ -165,8 +165,10 @@ export class OAuthIntegrationData extends BaseIntegrationData {
 }
 
 export type OAuthIntegrationOptions = {
-  scopedKeysEnabled: boolean;
-  scopedKeysValidation: Record<string, any>;
+  scopedKeys: {
+    enabled: boolean;
+    validation: Record<string, any>;
+  };
   isPromptNoneEnabled: boolean;
   isPromptNoneEnabledClientIds: Array<string>;
 };
@@ -226,7 +228,14 @@ export class OAuthIntegration extends BaseIntegration<OAuthIntegrationFeatures> 
 
   getServiceName() {
     const permissions = this.getPermissions();
-    if (permissions.includes(Constants.OAUTH_OLDSYNC_SCOPE)) {
+    // As a special case for UX purposes, any client requesting access to
+    // the user's sync data must have a display name of "Firefox Sync".
+    // This is also used to check against `integration.isSync()`.
+    if (
+      permissions.some((permission) =>
+        permission.includes(Constants.OAUTH_OLDSYNC_SCOPE)
+      )
+    ) {
       return Constants.RELIER_SYNC_SERVICE_NAME;
     }
 
@@ -256,7 +265,7 @@ export class OAuthIntegration extends BaseIntegration<OAuthIntegrationFeatures> 
   // `isOAuthIntegration(integration) && serviceName === MozServices.FirefoxSync`
   // is the equivalent of this method's check.
   isSync() {
-    return this.clientInfo?.serviceName === Constants.RELIER_SYNC_SERVICE_NAME;
+    return this.getServiceName() === Constants.RELIER_SYNC_SERVICE_NAME;
   }
 
   isTrusted() {
@@ -281,7 +290,7 @@ export class OAuthIntegration extends BaseIntegration<OAuthIntegrationFeatures> 
   }
 
   wantsKeys(): boolean {
-    if (!this.opts.scopedKeysEnabled) {
+    if (!this.opts.scopedKeys.enabled) {
       return false;
     }
     if (this.data.keysJwk == null) {
@@ -291,7 +300,7 @@ export class OAuthIntegration extends BaseIntegration<OAuthIntegrationFeatures> 
       return false;
     }
 
-    const validation = this.opts.scopedKeysValidation;
+    const validation = this.opts.scopedKeys.validation;
     const individualScopes = scopeStrToArray(this.data.scope || '');
 
     let wantsScopeThatHasKeys = false;

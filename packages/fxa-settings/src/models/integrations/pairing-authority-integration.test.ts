@@ -16,8 +16,10 @@ describe('models/integrations/pairing-authority-relier', function () {
     });
     storageData = new GenericData({});
     model = new PairingAuthorityIntegration(data, storageData, {
-      scopedKeysEnabled: true,
-      scopedKeysValidation: {},
+      scopedKeys: {
+        enabled: true,
+        validation: {},
+      },
       isPromptNoneEnabled: true,
       isPromptNoneEnabledClientIds: [],
     });

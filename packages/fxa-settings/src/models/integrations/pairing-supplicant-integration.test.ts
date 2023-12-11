@@ -14,8 +14,10 @@ describe('models/integration/pairing-supplicant-integration', function () {
     data = new GenericData({ scope: 'profile' });
     storageData = new GenericData({});
     model = new PairingSupplicantIntegration(data, storageData, {
-      scopedKeysEnabled: true,
-      scopedKeysValidation: {},
+      scopedKeys: {
+        enabled: true,
+        validation: {},
+      },
       isPromptNoneEnabled: true,
       isPromptNoneEnabledClientIds: [],
     });

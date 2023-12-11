@@ -42,8 +42,10 @@ export interface Config {
   };
   oauth: {
     clientId: string;
-    scopedKeysEnabled: boolean;
-    scopedKeysValidation: Record<string, any>;
+    scopedKeys: {
+      enabled: boolean;
+      validation: Record<string, any>;
+    };
     isPromptNoneEnabled: boolean;
     isPromptNoneEnabledClientIds: string[];
     reactClientIdsEnabled: string[];
@@ -112,7 +114,10 @@ export function getDefault() {
     },
     oauth: {
       clientId: '',
-      scopedKeysEnabled: false,
+      scopedKeys: {
+        enabled: false,
+        validation: {},
+      },
       isPromptNoneEnabled: false,
       isPromptNoneEnabledClientIds: new Array<string>(),
       reactClientIdsEnabled: new Array<string>(),

@@ -5,14 +5,10 @@ import { graphql } from '../../../__generated__/gql';
 
 export const purchaseWithDetailsOfferingContentQuery = graphql(`
   query PurchaseWithDetailsOfferingContent(
-    $skip: Int!
-    $limit: Int!
     $locale: String!
     $stripePlanIds: [String]!
   ) {
     purchaseCollection(
-      skip: $skip
-      limit: $limit
       locale: $locale
       where: {
         OR: [

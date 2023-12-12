@@ -91,8 +91,6 @@ export class ContentfulManager {
     const queryResult = await this.client.query(
       purchaseWithDetailsOfferingContentQuery,
       {
-        skip: 0,
-        limit: 100,
         locale,
         stripePlanIds,
       }

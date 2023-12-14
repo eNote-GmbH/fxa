@@ -17,13 +17,14 @@ export const capabilityServiceByPlanIdsQuery = graphql(`
       locale: $locale
       where: { stripePlanChoices_contains_some: $stripePlanIds }
     ) {
+      total
       items {
         stripePlanChoices
         offering {
-          capabilitiesCollection(skip: $skip, limit: $limit) {
+          capabilitiesCollection(skip: 0, limit: 25) {
             items {
               slug
-              servicesCollection(skip: $skip, limit: $limit) {
+              servicesCollection(skip: 0, limit: 15) {
                 items {
                   oauthClientId
                 }

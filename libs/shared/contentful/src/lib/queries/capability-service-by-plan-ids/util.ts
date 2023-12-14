@@ -11,10 +11,12 @@ import {
 export class CapabilityServiceByPlanIdsResultUtil {
   private purchaseByPlanId: Record<string, CapabilityPurchaseResult> = {};
 
-  constructor(private rawResult: CapabilityServiceByPlanIdsResult) {
-    for (const purchase of rawResult.purchaseCollection.items) {
-      for (const planId of purchase.stripePlanChoices) {
-        this.purchaseByPlanId[planId] = purchase;
+  constructor(rawResults: CapabilityServiceByPlanIdsResult[]) {
+    for (const rawResult of rawResults) {
+      for (const purchase of rawResult.purchaseCollection.items) {
+        for (const planId of purchase.stripePlanChoices) {
+          this.purchaseByPlanId[planId] = purchase;
+        }
       }
     }
   }
@@ -23,9 +25,5 @@ export class CapabilityServiceByPlanIdsResultUtil {
     planId: string
   ): CapabilityOfferingResult | undefined {
     return this.purchaseByPlanId[planId]?.offering;
-  }
-
-  get purchaseCollection() {
-    return this.rawResult.purchaseCollection;
   }
 }

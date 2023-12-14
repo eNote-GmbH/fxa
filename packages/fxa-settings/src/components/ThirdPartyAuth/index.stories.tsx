@@ -8,6 +8,7 @@ import AppLayout from '../AppLayout';
 import { Meta } from '@storybook/react';
 import { Subject } from './mocks';
 import { withLocalization } from 'fxa-react/lib/storybooks';
+import { MOCK_EMAIL } from '../../pages/mocks';
 
 export default {
   title: 'Components/ThirdPartyAuth',
@@ -15,10 +16,13 @@ export default {
   decorators: [withLocalization],
 } as Meta;
 
+const email = MOCK_EMAIL;
+const storeAccountData = () => true;
+
 export const Default = () => {
   return (
     <AppLayout>
-      <Subject showSeparator />
+      <Subject showSeparator {...{ email, storeAccountData }} />
     </AppLayout>
   );
 };
@@ -26,7 +30,7 @@ export const Default = () => {
 export const NoSeparator = () => {
   return (
     <AppLayout>
-      <Subject showSeparator={false} />
+      <Subject showSeparator={false} {...{ email, storeAccountData }} />
     </AppLayout>
   );
 };

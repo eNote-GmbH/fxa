@@ -86,6 +86,9 @@ const Signin = ({
     return true;
   };
 
+  // TODO in FXA-6488
+  const storeAccountData = () => true;
+
   const onSubmit = useCallback(async () => {
     try {
       isPasswordNeeded
@@ -167,7 +170,7 @@ const Signin = ({
           </div>
         </form>
 
-        <ThirdPartyAuth />
+        <ThirdPartyAuth {...{ email, storeAccountData }} />
 
         <TermsPrivacyAgreement {...{ isPocketClient, isMonitorClient }} />
 

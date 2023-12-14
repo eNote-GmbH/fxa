@@ -12,11 +12,20 @@ import { useAccount, useConfig } from '../../models';
 import Storage from '../../lib/storage';
 import { AUTH_PROVIDER } from 'fxa-auth-client/browser';
 import { ReactElement } from 'react-markdown/lib/react-markdown';
+import { useNavigate } from '@reach/router';
+import { StoredAccountData } from '../../lib/storage-utils';
 
 export type ThirdPartyAuthProps = {
+  email: string;
   onContinueWithGoogle?: FormEventHandler<HTMLFormElement>;
   onContinueWithApple?: FormEventHandler<HTMLFormElement>;
+  storeAccountData: (accountData: StoredAccountData) => void;
   showSeparator?: boolean;
+};
+
+type ThirdPartyAuthParams = {
+  code: string;
+  provider?: AUTH_PROVIDER;
 };
 
 /**
@@ -25,38 +34,56 @@ export type ThirdPartyAuthProps = {
  * It handles user sign-in with the respective provider when the buttons are clicked.
  */
 const ThirdPartyAuth = ({
+  email,
   onContinueWithGoogle,
   onContinueWithApple,
+  storeAccountData,
   showSeparator = true,
 }: ThirdPartyAuthProps) => {
   const account = useAccount();
   const config = useConfig();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // TODO: Figure out why `storageData` is not available
     const authParams = Storage.factory('localStorage', window).get(
       'fxa_third_party_params'
     );
+    console.log(authParams);
     if (authParams) {
-      completeSignIn();
+      completeSignIn(authParams);
     }
   });
 
-  async function completeSignIn() {
+  async function completeSignIn(authParams: ThirdPartyAuthParams) {
+    const code = authParams.code;
+    const provider = authParams.provider || AUTH_PROVIDER.GOOGLE;
     try {
-      const authParams = Storage.factory('localStorage', window).get(
-        'fxa_third_party_params'
-      );
-      const code = authParams.code;
-      const provider = authParams.provider || AUTH_PROVIDER.GOOGLE;
-
       // Verify and link the third party account to FxA. Note, this
       // will create a new FxA account if one does not exist.
-      await account.verifyAccountThirdParty(code, provider);
+      // The response contains a session token that can be used
+      // to sign the user in to FxA or to complete an Oauth flow.
+      const updatedAccount = await account.verifyAccountThirdParty(
+        code,
+        provider
+      );
 
-      // TODO: The response from above contains a session token
-      // which can be used to sign the user in to FxA or used
-      // to complete an Oauth flow.
+      const accountData: StoredAccountData = {
+        // TODO: email used for third party auth may be different than initially entered for moz account
+        // we should change this to use the email used for third party auth
+        email,
+        uid: updatedAccount.uid,
+        lastLogin: Date.now(),
+        sessionToken: updatedAccount.sessionToken,
+        verified: true,
+        metricsEnabled: true,
+      };
+
+      // TODO - Sign in or complete oauth flow - probably want to pass
+      // the updated account back up to the parent container
+      storeAccountData(accountData);
+      console.log('trying to redirect to settings');
+      navigate('/settings');
     } catch (error) {
       // Fail silently on errors, this could be some leftover
       // state from a previous attempt.

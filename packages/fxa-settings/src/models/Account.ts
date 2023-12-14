@@ -921,7 +921,8 @@ export class Account implements AccountData {
   ): Promise<{
     uid: hexstring;
     sessionToken: hexstring;
-    verified: boolean;
+    providerUid: hexstring;
+    verificationMethod?: string;
   }> {
     return this.withLoadingStatus(
       this.authClient.verifyAccountThirdParty(code, provider)

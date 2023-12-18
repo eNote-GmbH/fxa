@@ -13,6 +13,7 @@ const { Container } = require('typedi');
 const { AccountEventsManager } = require('../../account-events');
 const { emailsMatch } = require('fxa-shared').email.helpers;
 const otp = require('../utils/otp');
+const { parseSalt } = require('../utils/client-key-stretch');
 
 const BASE_36 = validators.BASE_36;
 
@@ -85,6 +86,40 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
         throw error.cannotLoginWithSecondaryEmail();
       }
       return Promise.resolve(true);
+    },
+
+    /**
+     * Check if the state of the provided accountRecord has a clientSalt that
+     * meets the required client salt version.
+     *
+     * If the incorrect salt version is used on the client side. We need to error
+     * out. This will in turn signal to the client that they must reset their password
+     * using a different salt version.
+     *
+     * @param accountRecord - Account to check
+     */
+    async checkClientSalt(accountRecord) {
+      const requiredVersion = config.clientSalt.requiredVersion;
+
+      // Note that salt can only be null for v1, all other versions will require a salt to be specified
+      // in the database.
+      if (accountRecord.clientSalt == null) {
+        if (requiredVersion !== 1) {
+          throw error.clientSaltChangeRequired(requiredVersion);
+        }
+      } else {
+        const salt = (() => {
+          try {
+            return parseSalt(accountRecord.clientSalt);
+          } catch (error) {
+            throw error.clientSaltChangeRequired(requiredVersion);
+          }
+        })();
+
+        if (salt.version !== requiredVersion) {
+          throw error.clientSaltChangeRequired(requiredVersion);
+        }
+      }
     },
 
     /**
@@ -469,6 +504,7 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
         uid: accountRecord.uid,
         kA: accountRecord.kA,
         wrapKb: wrapKb,
+        clientSalt: accountRecord.clientSalt,
         emailVerified: accountRecord.primaryEmail.isVerified,
         tokenVerificationId: sessionToken.tokenVerificationId,
       });

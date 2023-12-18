@@ -128,6 +128,7 @@ export class AccountHandler {
     request: AuthRequest;
     service?: string;
     userAgentString: string;
+    clientSalt: string;
   }) {
     const {
       authPW,
@@ -138,6 +139,7 @@ export class AccountHandler {
       request,
       service,
       userAgentString,
+      clientSalt,
     } = options;
 
     const { password, verifyHash } = await this.createPassword(
@@ -172,6 +174,7 @@ export class AccountHandler {
       verifyHash: verifyHash,
       verifierSetAt: Date.now(),
       locale,
+      clientSalt,
     });
 
     await request.emitMetricsEvent('account.created', {
@@ -449,6 +452,7 @@ export class AccountHandler {
     const query = request.query;
     const email = form.email;
     const authPW = form.authPW;
+    const clientSalt = form.clientSalt;
     const userAgentString = request.headers['user-agent'];
     const service = form.service || query.service;
     const preVerified = !!form.preVerified;
@@ -485,6 +489,7 @@ export class AccountHandler {
       request,
       service,
       userAgentString,
+      clientSalt,
     });
 
     const sessionToken = await this.createSessionToken({
@@ -525,7 +530,7 @@ export class AccountHandler {
 
   async accountStub(request: AuthRequest) {
     this.log.begin('Account.stub', request);
-    const { email, clientId } = request.payload as any;
+    const { email, clientId, clientSalt } = request.payload as any;
     await this.customs.check(request, email, 'accountCreate');
 
     if (this.OAUTH_DISABLE_NEW_CONNECTIONS_FOR_CLIENTS.has(clientId)) {
@@ -564,6 +569,7 @@ export class AccountHandler {
       verifyHash: Buffer.alloc(32).toString('hex'),
       verifierSetAt: 0,
       locale: request.app.acceptLanguage,
+      clientSalt,
     });
 
     const access = await generateAccessToken({
@@ -588,7 +594,11 @@ export class AccountHandler {
     };
   }
 
-  async setPasswordOnStubAccount(account: any, authPW: string) {
+  async setPasswordOnStubAccount(
+    account: any,
+    authPW: string,
+    clientSalt: string
+  ) {
     // Only set a password on an unverified stub account.
     if (account.verifierSetAt !== 0) {
       throw error.unauthorized('token already used');
@@ -607,6 +617,7 @@ export class AccountHandler {
         wrapWrapKb,
         verifierVersion: password.version,
         keysHaveChanged: true,
+        clientSalt,
       }
     );
     await this.db.resetAccountTokens(uid);
@@ -616,6 +627,7 @@ export class AccountHandler {
     this.log.begin('Account.finishSetup', request);
     const form = request.payload as any;
     const authPW = form.authPW;
+    const clientSalt = form.clientSalt;
     let uid;
     try {
       const payload = (await jwt.verify(form.token, {
@@ -625,7 +637,7 @@ export class AccountHandler {
       uid = payload.uid;
       form.uid = payload.uid;
       const account = await this.db.account(uid);
-      await this.setPasswordOnStubAccount(account, authPW);
+      await this.setPasswordOnStubAccount(account, authPW, clientSalt);
       await this.signupUtils.verifyAccount(request, account, {});
       const sessionToken = await this.createSessionToken({
         account,
@@ -662,7 +674,7 @@ export class AccountHandler {
     this.log.begin('Account.set_password', request);
 
     const form = request.payload as any;
-    const { authPW, metricsContext } = form;
+    const { authPW, metricsContext, clientSalt } = form;
     const { query } = request;
     const auth = request.auth;
     const { user: uid } = auth.credentials;
@@ -676,7 +688,7 @@ export class AccountHandler {
     response.uid = uid;
 
     try {
-      await this.setPasswordOnStubAccount(account, authPW);
+      await this.setPasswordOnStubAccount(account, authPW, clientSalt);
 
       const { emailCode: tokenVerificationId } = account;
       const sessionToken = await this.createSessionToken({
@@ -780,6 +792,11 @@ export class AccountHandler {
         email,
         originalLoginEmail
       );
+
+      // If the salt is out of date, throw an error signaling that
+      // the client should start use a different salt version.
+      await this.signinUtils.checkClientSalt(accountRecord);
+
       password = new this.Password(
         authPW,
         accountRecord.authSalt,
@@ -1293,6 +1310,7 @@ export class AccountHandler {
       authPW,
       sessionToken: hasSessionToken,
       recoveryKeyId,
+      clientSalt,
     } = request.payload as any;
     let wrapKb = (request.payload as any).wrapKb;
     let account: any,
@@ -1347,6 +1365,7 @@ export class AccountHandler {
         wrapWrapKb,
         verifierVersion: password.version,
         keysHaveChanged,
+        clientSalt,
       });
       await this.db.resetAccountTokens(accountResetToken.uid);
       // Notify various interested parties about this password reset.
@@ -1512,6 +1531,26 @@ export class AccountHandler {
     await createKeyFetchToken();
     await recordSecurityEvent();
     return createResponse();
+  }
+
+  async getSalt(request: AuthRequest) {
+    this.log.begin('Account.verifySalt', request);
+
+    const email = (request.payload as any).email;
+    const { accountRecord } = await this.signinUtils.checkCustomsAndLoadAccount(
+      request,
+      email
+    );
+    if (accountRecord.disabledAt) {
+      throw error.cannotLoginWithEmail();
+    }
+    if (accountRecord.verifierSetAt <= 0) {
+      throw error.cannotLoginNoPasswordSet();
+    }
+    if (accountRecord.verifierSetAt <= 0) {
+      throw error.cannotLoginNoPasswordSet();
+    }
+    return { salt: accountRecord.clientSalt };
   }
 
   async destroy(request: AuthRequest) {
@@ -1739,6 +1778,9 @@ export const accountRoutes = (
           }),
           payload: isA.object({
             email: validators.email().required().description(DESCRIPTION.email),
+            clientSalt: validators.clientSalt.description(
+              DESCRIPTION.clientSalt
+            ),
             authPW: validators.authPW.description(DESCRIPTION.authPW),
             service: validators.service.description(DESCRIPTION.service),
             redirectTo: validators
@@ -1783,7 +1825,12 @@ export const accountRoutes = (
         validate: {
           payload: isA.object({
             email: validators.email().required(),
-            clientId: validators.clientId.required(),
+            clientId: validators.clientId
+              .required()
+              .description(DESCRIPTION.clientId),
+            clientSalt: validators.clientSalt.description(
+              DESCRIPTION.clientSalt
+            ),
             metricsContext: METRICS_CONTEXT_SCHEMA,
           }),
         },
@@ -1798,7 +1845,10 @@ export const accountRoutes = (
         validate: {
           payload: isA.object({
             token: validators.jwt,
-            authPW: validators.authPW,
+            authPW: validators.authPW.description(DESCRIPTION.authPW),
+            clientSalt: validators.clientSalt.description(
+              DESCRIPTION.clientSalt
+            ),
           }),
         },
       },
@@ -1824,6 +1874,9 @@ export const accountRoutes = (
           }),
           payload: isA.object({
             authPW: validators.authPW.description(DESCRIPTION.authPW),
+            clientSalt: validators.clientSalt.description(
+              DESCRIPTION.clientSalt
+            ),
             metricsContext: METRICS_CONTEXT_SCHEMA,
             service: validators.service.description(DESCRIPTION.service),
           }),
@@ -1872,6 +1925,9 @@ export const accountRoutes = (
           payload: isA.object({
             email: validators.email().required().description(DESCRIPTION.email),
             authPW: validators.authPW.description(DESCRIPTION.authPW),
+            clientSalt: validators.clientSalt.description(
+              DESCRIPTION.clientSalt
+            ),
             service: validators.service.description(DESCRIPTION.service),
             redirectTo: validators
               .redirectTo(config.smtp.redirectDomain)
@@ -2046,6 +2102,9 @@ export const accountRoutes = (
             .object({
               authPW: validators.authPW.description(DESCRIPTION.authPW),
               wrapKb: validators.wrapKb.optional(),
+              clientSalt: validators.clientSalt.description(
+                DESCRIPTION.clientSalt
+              ),
               recoveryKeyId: validators.recoveryKeyId.optional(),
               sessionToken: isA
                 .boolean()
@@ -2074,6 +2133,19 @@ export const accountRoutes = (
         },
       },
       handler: (request: AuthRequest) => accountHandler.destroy(request),
+    },
+    {
+      method: 'POST',
+      path: '/account/client_salt',
+      options: {
+        ...ACCOUNT_DOCS.ACCOUNT_CLIENT_SALT,
+        validate: {
+          payload: isA.object({
+            email: validators.email().description(DESCRIPTION.email),
+          }),
+        },
+      },
+      handler: (request: AuthRequest) => accountHandler.getSalt(request),
     },
     {
       method: 'GET',

@@ -111,7 +111,7 @@ function mockFirefoxModule() {
 }
 
 function mockCryptoModule() {
-  jest.spyOn(CryptoModule, 'getCredentials').mockResolvedValue({
+  jest.spyOn(CryptoModule, 'getCredentialsV2').mockResolvedValue({
     authPW: 'apw123',
     unwrapBKey: 'ubk123',
   });
@@ -397,9 +397,9 @@ describe('sign-up-container', () => {
       expect(handlerResult?.data?.SignUp?.sessionToken).toEqual('st123');
     });
 
-    it('handles error fetching credentials', async () => {
+    it('handles error creating credentials', async () => {
       jest
-        .spyOn(CryptoModule, 'getCredentials')
+        .spyOn(CryptoModule, 'getCredentialsV2')
         .mockImplementation(async () => {
           throw new Error('BOOM');
         });

@@ -38,7 +38,7 @@ module.exports = (config) => {
       return pbkdf2
         .derive(
           Buffer.from(password),
-          hkdf.KWE('quickStretch', email),
+          hkdf.KW(`quickStretch:${email}`),
           1000,
           32
         )

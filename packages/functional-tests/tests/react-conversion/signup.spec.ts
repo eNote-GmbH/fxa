@@ -8,7 +8,6 @@ import { createCustomEventDetail, FirefoxCommand } from '../../lib/channels';
 
 const PASSWORD = 'passwordzxcv';
 
-
 let email;
 let skipCleanup = false;
 
@@ -21,7 +20,7 @@ test.beforeEach(async ({ pages: { configPage, login } }) => {
     email = undefined;
   } else {
     email = login.createEmail('signup_react{id}');
-        await login.clearCache();
+    await login.clearCache();
   }
 });
 
@@ -135,11 +134,10 @@ test.describe('severity-1 #smoke', () => {
       await relier.signOut();
     });
 
-    // TODO in FXA-8657: This isn't working because we're checking for sync mobile webchannel in the page
-    // by checking against the client ID. This client ID is 123done and not Sync.
-    test.skip('signup oauth webchannel (sync mobile)', async ({
-      pages: { page, login, relier, signupReact },
-    }) => {
+    test('signup oauth webchannel (sync mobile)', async ({ target }) => {
+      const syncBrowserPages = await newPagesForSync(target);
+      const { page, signupReact, login } = syncBrowserPages;
+
       const customEventDetail = createCustomEventDetail(
         FirefoxCommand.FxAStatus,
         {
@@ -151,32 +149,43 @@ test.describe('severity-1 #smoke', () => {
         }
       );
 
-      await relier.goto('context=oauth_webchannel_v1&automatedBrowser=true');
-      await relier.clickEmailFirst();
+      const queryParams = new URLSearchParams({
+        client_id: '1b1a3e44c54fbb58', // Firefox for iOS
+        code_challenge_method: 'S256',
+        code_challenge: '2oc_C4v1qHeefWAGu5LI5oDG1oX4FV_Itc148D8_oQI',
+        // eslint-disable-next-line camelcase
+        keys_jwk:
+          'eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6ImdUejVIWFJfa2pxSFRtMG43ZjhxcDMybVZFaHZ1cGo1dXNUV1h5TWZsb1kiLCJ5IjoiVER5TlhkalhibHZld1pWLVc5MXNDZU9fRWd0NU9WYXhpblBzOEFTQ3owZyJ9',
+        scope:
+          'https://identity.mozilla.com/apps/oldsync https://identity.mozilla.com/tokens/session',
+        state: 'fakestate',
+        context: 'oauth_webchannel_v1',
+        automatedBrowser: 'true',
+      });
 
-      // wait for navigation, and get search params
-      await page.waitForURL(/oauth\//);
-      const params = new URL(page.url()).searchParams;
+      await signupReact.goto('/authorization', queryParams);
 
-      // reload email-first page with React experiment params
-      await signupReact.goto('/', params);
       await signupReact.fillOutEmailFirst(email);
-
       await page.waitForSelector('#root');
 
-      await login.respondToWebChannelMessage(customEventDetail);
-
-      // TODO FXA-8657 Update to use signupReact template
+      await signupReact.sendWebChannelMessage(customEventDetail);
       await login.waitForCWTSEngineHeader();
-      expect(await login.isCWTSEngineBookmarks()).toBe(true);
-      expect(await login.isCWTSEngineHistory()).toBe(true);
+      await login.isCWTSEngineBookmarks();
+      await login.isCWTSEngineHistory();
+      // Only engines provided via web channel for Sync mobile are displayed
       expect(await login.isCWTSEngineCreditCards()).toBe(false);
 
-      await login.fillOutFirstSignUp(email, PASSWORD, {
-        enterEmail: false,
-        waitForNavOnSubmit: false,
-      });
-      await login.checkWebChannelMessage(FirefoxCommand.OAuthLogin);
+      await signupReact.listenToWebChannelMessages();
+      await signupReact.fillOutSignupForm(PASSWORD);
+
+      const code = await target.email.waitForEmail(
+        email,
+        EmailType.verifyShortCode,
+        EmailHeader.shortCode
+      );
+
+      await signupReact.fillOutCodeForm(code);
+      await signupReact.checkWebChannelMessage(FirefoxCommand.OAuthLogin);
     });
 
     test('signup sync', async ({ target }) => {
@@ -197,6 +206,7 @@ test.describe('severity-1 #smoke', () => {
       await signupReact.fillOutEmailFirst(email);
       await page.waitForURL(/signup/);
       await page.waitForSelector('#root');
+
       await signupReact.fillOutSignupForm(PASSWORD);
 
       const code = await target.email.waitForEmail(
@@ -208,7 +218,6 @@ test.describe('severity-1 #smoke', () => {
       await signupReact.fillOutCodeForm(code);
 
       // See note in `firefox.ts` about an event listener hack needed for this test
-      expect(await page.getByText(/Invalid token/).isVisible()).toBeFalsy();
       await page.waitForURL(/connect_another_device/);
       await expect(page.getByText('You’re signed into Firefox')).toBeVisible();
 

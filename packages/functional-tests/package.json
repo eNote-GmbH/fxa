@@ -12,7 +12,7 @@
     "format": "prettier --write --config ../../_dev/.prettierrc '**'"
   },
   "devDependencies": {
-    "@playwright/test": "^1.34.1",
+    "@playwright/test": "^1.40.0",
     "@types/upng-js": "^2",
     "fxa-auth-client": "workspace:*",
     "fxa-content-server": "workspace:*",

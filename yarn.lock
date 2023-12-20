@@ -13369,19 +13369,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.34.1":
-  version: 1.34.1
-  resolution: "@playwright/test@npm:1.34.1"
+"@playwright/test@npm:^1.40.0":
+  version: 1.40.1
+  resolution: "@playwright/test@npm:1.40.1"
   dependencies:
-    "@types/node": "*"
-    fsevents: 2.3.2
-    playwright-core: 1.34.1
-  dependenciesMeta:
-    fsevents:
-      optional: true
+    playwright: 1.40.1
   bin:
     playwright: cli.js
-  checksum: 1eb5788739f32544b5d77bcee30245196193152cb2a12baa92b200e4ffd270c28ec60806f58497c5192035282ef120ed0eeed06f0131d9ac8310ff1851bb1b21
+  checksum: ae094e6cb809365c0707ee2b184e42d2a2542569ada020d2d44ca5866066941262bd9a67af185f86c2fb0133c9b712ea8cb73e2959a289e4261c5fd17077283c
   languageName: node
   linkType: hard
 
@@ -34596,7 +34591,7 @@ fsevents@~2.1.1:
   version: 0.0.0-use.local
   resolution: "functional-tests@workspace:packages/functional-tests"
   dependencies:
-    "@playwright/test": ^1.34.1
+    "@playwright/test": ^1.40.0
     "@types/upng-js": ^2
     fxa-auth-client: "workspace:*"
     fxa-content-server: "workspace:*"
@@ -50334,12 +50329,27 @@ fsevents@~2.1.1:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.34.1":
-  version: 1.34.1
-  resolution: "playwright-core@npm:1.34.1"
+"playwright-core@npm:1.40.1":
+  version: 1.40.1
+  resolution: "playwright-core@npm:1.40.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 84d92fb9b86e3c225b16b6886bf858eb5059b4e60fa1205ff23336e56a06dcb2eac62650992dede72f406c8e70a7b6a5303e511f9b4bc0b85022ede356a01ee0
+  languageName: node
+  linkType: hard
+
+"playwright@npm:1.40.1":
+  version: 1.40.1
+  resolution: "playwright@npm:1.40.1"
+  dependencies:
+    fsevents: 2.3.2
+    playwright-core: 1.40.1
+  dependenciesMeta:
+    fsevents:
+      optional: true
   bin:
     playwright: cli.js
-  checksum: d4c9c213b4d234b8c923146d46203c826bf9f168639cf35d47a5b9bc720d2f5f3b9d9b0fdad6919c42a8228fc6910e7db2228dca922cdf8f6177f17de03a8f92
+  checksum: 9e36791c1b4a649c104aa365fdd9d049924eeb518c5967c0e921aa38b9b00994aa6ee54784d6c2af194b3b494b6f69772673081ef53c6c4a4b2065af9955c4ba
   languageName: node
   linkType: hard
 

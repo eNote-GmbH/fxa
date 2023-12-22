@@ -1325,6 +1325,12 @@ export class Account implements AccountData {
     currentAccount(currentAccount(getStoredAccountData(data)));
     sessionToken(data.sessionToken);
     const cache = this.apolloClient.cache;
+
+    cache.writeQuery({
+      query: GET_LOCAL_SIGNED_IN_STATUS,
+      data: { isSignedIn: true },
+    });
+
     cache.modify({
       id: cache.identify({ __typename: 'Account' }),
       fields: {

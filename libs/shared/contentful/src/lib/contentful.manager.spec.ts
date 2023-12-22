@@ -6,6 +6,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ContentfulClient } from './contentful.client';
 import { ContentfulManager } from './contentful.manager';
 import {
+  CapabilityPurchaseResultFactory,
+  CapabilityServiceByPlanIdsQueryFactory,
+  CapabilityServiceByPlanIdsResultUtil,
   EligibilityContentByPlanIdsQueryFactory,
   EligibilityContentByPlanIdsResultUtil,
   ServicesWithCapabilitiesQueryFactory,
@@ -53,6 +56,37 @@ describe('ContentfulManager', () => {
         result.offeringForPlanId(planId)?.linkedFrom.subGroupCollection.items
       ).toHaveLength(1);
       expect(result.offeringForPlanId(planId)).toBeDefined();
+    });
+  });
+
+  describe('getPurchaseDetailsForCapabilityServiceByPlanId', () => {
+    it('should return empty result', async () => {
+      const queryData = CapabilityServiceByPlanIdsQueryFactory({
+        purchaseCollection: { items: [], total: 0 },
+      });
+      mockClient.query = jest.fn().mockResolvedValue(queryData);
+      const result =
+        await manager.getPurchaseDetailsForCapabilityServiceByPlanIds(['test']);
+      expect(result).toBeInstanceOf(CapabilityServiceByPlanIdsResultUtil);
+      expect(result.capabilityOfferingForPlanId('test')).toBeUndefined();
+    });
+
+    it('should return successfully with subgroups and offering', async () => {
+      const planId = 'test';
+      const purchaseResult = [
+        CapabilityPurchaseResultFactory({ stripePlanChoices: [planId] }),
+      ];
+      const queryData = CapabilityServiceByPlanIdsQueryFactory({
+        purchaseCollection: {
+          items: purchaseResult,
+          total: purchaseResult.length,
+        },
+      });
+      mockClient.query = jest.fn().mockResolvedValue(queryData);
+      const result =
+        await manager.getPurchaseDetailsForCapabilityServiceByPlanIds(['test']);
+      expect(result).toBeInstanceOf(CapabilityServiceByPlanIdsResultUtil);
+      expect(result.capabilityOfferingForPlanId(planId)).toBeDefined();
     });
   });
 

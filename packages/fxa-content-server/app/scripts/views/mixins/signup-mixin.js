@@ -34,6 +34,7 @@ export default {
         const options = {
           resume: this.getStringifiedResumeToken(account),
           verificationMethod: 'email-otp',
+          atLeast18AtReg: this.atLeast18AtReg,
         };
 
         return this.user.signUpAccount(account, password, this.relier, options);

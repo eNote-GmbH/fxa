@@ -128,6 +128,7 @@ export class AccountHandler {
     request: AuthRequest;
     service?: string;
     userAgentString: string;
+    atLeast18AtReg: boolean | null;
   }) {
     const {
       authPW,
@@ -138,6 +139,7 @@ export class AccountHandler {
       request,
       service,
       userAgentString,
+      atLeast18AtReg,
     } = options;
 
     const { password, verifyHash } = await this.createPassword(
@@ -172,6 +174,7 @@ export class AccountHandler {
       verifyHash: verifyHash,
       verifierSetAt: Date.now(),
       locale,
+      atLeast18AtReg: atLeast18AtReg,
     });
 
     await request.emitMetricsEvent('account.created', {
@@ -453,6 +456,7 @@ export class AccountHandler {
     const service = form.service || query.service;
     const preVerified = !!form.preVerified;
     const verificationMethod = form.verificationMethod;
+    const atLeast18AtReg = form.atLeast18AtReg;
 
     request.validateMetricsContext();
     if (this.OAUTH_DISABLE_NEW_CONNECTIONS_FOR_CLIENTS.has(service)) {
@@ -485,6 +489,7 @@ export class AccountHandler {
       request,
       service,
       userAgentString,
+      atLeast18AtReg,
     });
 
     const sessionToken = await this.createSessionToken({
@@ -1757,6 +1762,10 @@ export const accountRoutes = (
             ...(!(config as any).isProduction && {
               preVerified: isA.boolean(),
             }),
+            atLeast18AtReg: isA
+              .boolean()
+              .optional()
+              .description(DESCRIPTION.atLeast18AtReg),
           }),
         },
         response: {

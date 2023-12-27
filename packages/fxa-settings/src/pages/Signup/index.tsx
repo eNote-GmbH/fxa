@@ -198,9 +198,12 @@ export const Signup = ({
       }
       setBeginSignupLoading(true);
 
+      const atLeast18AtReg = Numer(age) >= 18;
+
       const { data, error } = await beginSignupHandler(
         queryParamModel.email,
-        newPassword
+        newPassword,
+        atLeast18AtReg
       );
 
       if (data) {

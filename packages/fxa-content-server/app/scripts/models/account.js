@@ -716,6 +716,7 @@ const Account = Backbone.Model.extend(
           metricsContext: this._metrics.getFlowEventMetadata(),
           resume: options.resume,
           verificationMethod: options.verificationMethod,
+          atLeast18AtReg: options.atLeast18AtReg,
         })
         .then((updatedSessionData) => {
           this.set(updatedSessionData);
@@ -1113,7 +1114,11 @@ const Account = Backbone.Model.extend(
     },
 
     createPassword(email, password) {
-      return this._fxaClient.createPassword(this.get('sessionToken'), email, password);
+      return this._fxaClient.createPassword(
+        this.get('sessionToken'),
+        email,
+        password
+      );
     },
 
     /**

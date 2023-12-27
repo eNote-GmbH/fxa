@@ -67,6 +67,7 @@ export interface Accounts {
   ecosystemAnonId: string | null;
   disabledAt: number | null;
   metricsOptOutAt: number | null;
+  atLeast18AtReg: boolean | null;
 }
 
 export interface Carts {

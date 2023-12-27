@@ -485,6 +485,7 @@ export abstract class StripeHelper {
         ) {
           Sentry.withScope((scope) => {
             scope.setContext('allAbbrevPlans', {
+              acceptLanguage,
               nonMatchingPlans: validPlansMapped.nonMatchingPlans,
             });
             Sentry.captureMessage(

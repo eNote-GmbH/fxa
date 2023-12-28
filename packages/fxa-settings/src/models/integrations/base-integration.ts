@@ -3,13 +3,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { MozServices } from '../../lib/types';
+import { OAuthIntegration } from './oauth-integration';
+import { PairingSupplicantIntegration } from './pairing-supplicant-integration';
+import {
+  SyncBasicIntegration,
+  SyncIntegrationFeatures,
+} from './sync-basic-integration';
+import { SyncDesktopV3Integration } from './sync-desktop-v3-integration';
 
 export enum IntegrationType {
   OAuth = 'OAuth',
   PairingAuthority = 'PairingAuthority', // TODO
   PairingSupplicant = 'PairingSupplicant', // TODO
   SyncBasic = 'SyncBasic',
-  SyncDesktop = 'SyncDesktop',
+  SyncDesktopV3 = 'SyncDesktopV3',
+  SyncDesktopOAuth = 'SyncDesktopOAuth',
   Web = 'Web', // default
 }
 
@@ -68,6 +76,7 @@ export interface RelierAccount {
   isDefault(): unknown;
 }
 
+// TODO: probably move this to another file
 export abstract class Integration<
   T extends IntegrationFeatures = IntegrationFeatures
 > {
@@ -95,12 +104,14 @@ export abstract class Integration<
     this.features = { ...this.features, ...features } as T;
   }
 
-  // TODO: do we need this/isSync?
-  isOAuth(): boolean {
+  isOAuth(): this is OAuthIntegration | PairingSupplicantIntegration {
     return false;
   }
 
-  isSync(): boolean {
+  isSync(): this is
+    | SyncBasicIntegration<SyncIntegrationFeatures>
+    | OAuthIntegration
+    | SyncDesktopV3Integration {
     return false;
   }
 

@@ -12,7 +12,7 @@ import {
   PairingSupplicantIntegration,
   RelierClientInfo,
   RelierSubscriptionInfo,
-  SyncDesktopIntegration,
+  SyncDesktopV3Integration,
 } from '../../models/integrations';
 import { StorageData, UrlHashData, UrlQueryData } from '../model-data';
 import { IntegrationFactory, DefaultIntegrationFlags } from '../integrations';
@@ -29,7 +29,7 @@ type IntegrationFlagOverrides = {
 
 type FactoryCallCounts = {
   initIntegration?: number;
-  initSyncDesktopIntegration?: number;
+  initSyncDesktopV3Integration?: number;
   initOAuthIntegration?: number;
   initClientInfo?: number;
 };
@@ -169,13 +169,13 @@ describe('lib/integrations/integration-factory', () => {
     const CONTEXT = 'fx_desktop_v3';
     const COUNTRY = 'RO';
     const SYNC_SERVICE = 'sync';
-    let integration: SyncDesktopIntegration;
+    let integration: SyncDesktopV3Integration;
 
     beforeAll(async () => {
-      integration = await setup<SyncDesktopIntegration>(
+      integration = await setup<SyncDesktopV3Integration>(
         { isServiceSync: true, isV3DesktopContext: true },
-        { initIntegration: 1, initSyncDesktopIntegration: 1 },
-        (i: Integration) => i instanceof SyncDesktopIntegration
+        { initIntegration: 1, initSyncDesktopV3Integration: 1 },
+        (i: Integration) => i instanceof SyncDesktopV3Integration
       );
     });
 
@@ -184,7 +184,7 @@ describe('lib/integrations/integration-factory', () => {
     });
 
     it('has correct state', () => {
-      expect(integration.type).toEqual(IntegrationType.SyncDesktop);
+      expect(integration.type).toEqual(IntegrationType.SyncDesktopV3);
       expect(integration.isOAuth()).toBeFalsy();
       expect(integration.isSync()).toBeTruthy();
       expect(integration.wantsKeys()).toBeTruthy();

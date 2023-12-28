@@ -8,12 +8,13 @@ import {
   PairingSupplicantIntegration,
   Integration,
   SyncBasicIntegration,
-  SyncDesktopIntegration,
+  SyncDesktopV3Integration,
   WebIntegration,
   RelierClientInfo,
   RelierSubscriptionInfo,
 } from '../../models/integrations';
 import {
+  GenericData,
   ModelDataStore,
   StorageData,
   UrlHashData,
@@ -24,6 +25,7 @@ import { ReachRouterWindow } from '../window';
 import { IntegrationFlags } from './interfaces';
 import { DefaultIntegrationFlags } from '.';
 import config from '../config';
+import { SyncDesktopOAuthIntegration } from '../../models/integrations/sync-desktop-oauth-integration';
 
 function getClientRedirect(
   clientRedirectUris: string[] | undefined,
@@ -102,7 +104,7 @@ export class IntegrationFactory {
     } else if (flags.isOAuth()) {
       return this.createOAuthIntegration(data, storageData);
     } else if (flags.isV3DesktopContext()) {
-      return this.createSyncDesktopIntegration(data);
+      return this.createSyncDesktopV3Integration(data);
     } else if (flags.isServiceSync()) {
       return this.createSyncBasicIntegration(data);
     } else {
@@ -162,8 +164,8 @@ export class IntegrationFactory {
     return integration;
   }
 
-  private createSyncDesktopIntegration(data: ModelDataStore) {
-    const integration = new SyncDesktopIntegration(data);
+  private createSyncDesktopV3Integration(data: ModelDataStore) {
+    const integration = new SyncDesktopV3Integration(data);
     this.initIntegration(integration);
     return integration;
   }

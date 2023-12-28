@@ -50,6 +50,12 @@ const ResetPassword = ({
 
   const serviceName = integration.getServiceName();
 
+  console.log('integration', integration);
+  // @ts-ignore
+  console.log('integration.data', integration.data);
+  // @ts-ignore
+  console.log('integration.data.hello', integration.data.hello);
+
   useEffect(() => {
     GleanMetrics.resetPassword.view();
   }, []);

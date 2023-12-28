@@ -32,7 +32,10 @@ export class DefaultIntegrationFlags implements IntegrationFlags {
   }
 
   isDevicePairingAsSupplicant() {
-    return DEVICE_PAIRING_SUPPLICANT_PATHNAME_REGEXP.test(this.pathname);
+    return (
+      this.isOAuthWebChannelContext() &&
+      DEVICE_PAIRING_SUPPLICANT_PATHNAME_REGEXP.test(this.pathname)
+    );
   }
 
   isOAuth() {
@@ -42,7 +45,6 @@ export class DefaultIntegrationFlags implements IntegrationFlags {
     const isOAuthVerificationDifferentBrowser =
       this._isOAuthVerificationDifferentBrowser();
     const isOAuthPath = /oauth/.test(this.pathname);
-
     return (
       !!clientId ||
       isOAuthVerificationSameBrowser ||
@@ -53,6 +55,16 @@ export class DefaultIntegrationFlags implements IntegrationFlags {
 
   isV3DesktopContext() {
     return this.searchParam('context') === Constants.FX_DESKTOP_V3_CONTEXT;
+  }
+
+  /* Sync mobile and Sync FF Desktop 123+ use this context (pairing flow TBD).
+   * However, Sync mobile provides a `client_id` and OAuth data through query
+   * parameters and use the OAuth integration. Sync Desktop can be accessed
+   * through a link on the index page or through the browser and receives
+   * required OAuth data through a web channel message.
+   */
+  isOAuthWebChannelContext() {
+    return this.searchParam('context') === Constants.OAUTH_WEBCHANNEL_CONTEXT;
   }
 
   isOAuthSuccessFlow() {

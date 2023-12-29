@@ -158,7 +158,7 @@ export const GleanMetrics: Pick<
     // Starting with glean.js v2, accessing localStorage during
     // initialization could cause an error
     try {
-      if (config.enabled) {
+      if (config.enabled && !gleanEnabled) {
         Glean.initialize(config.applicationId, config.uploadEnabled, {
           appDisplayVersion: config.appDisplayVersion,
           channel: config.channel,

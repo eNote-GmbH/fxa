@@ -364,7 +364,7 @@ describe('#integration - remote change email', function () {
         });
     });
 
-    it('can login', () => {
+    it.only('can login', () => {
       // Verify account can still login with new primary email
       return Client.login(config.publicUrl, secondEmail, password)
         .then(() => {

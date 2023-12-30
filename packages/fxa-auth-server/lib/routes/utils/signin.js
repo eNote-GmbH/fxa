@@ -54,6 +54,9 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
       }
       const verifyHash = await password.verifyHash();
       const match = await db.checkPassword(accountRecord.uid, verifyHash);
+
+      console.log('!!! db.checkPassword', match, verifyHash);
+
       if (match) {
         return match;
       }
@@ -73,6 +76,7 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
       // that the user typed into the login form.  This might differ from the address
       // used for calculating the password hash, which is provided in `email` param.
       if (!originalLoginEmail) {
+        console.log('!!! not original email case');
         originalLoginEmail = email;
       }
       // Logging in with a secondary email address is not currently supported.
@@ -82,7 +86,14 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
           accountRecord.primaryEmail.normalizedEmail
         )
       ) {
+        console.log(
+          '!!! emails do not match',
+          originalLoginEmail,
+          accountRecord.primaryEmail.normalizedEmail
+        );
         throw error.cannotLoginWithSecondaryEmail();
+      } else {
+        console.log('!!! emails do match', originalLoginEmail, accountRecord.primaryEmail.normalizedEmail);
       }
       return Promise.resolve(true);
     },

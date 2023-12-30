@@ -235,6 +235,8 @@ AppError.unknownAccount = function (email) {
 };
 
 AppError.incorrectPassword = function (dbEmail, requestEmail) {
+
+  console.log('!!! incorrectPassword', dbEmail, requestEmail);
   if (dbEmail !== requestEmail) {
     return new AppError(
       {

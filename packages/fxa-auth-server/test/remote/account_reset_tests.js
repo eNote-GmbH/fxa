@@ -41,9 +41,13 @@ describe('#integration - remote account reset', function () {
     assert.throws(() => {
       client.resetPassword(newPassword);
     });
+
+    console.log('!!! resetPassword');
     const response = await resetPassword(client, code, newPassword, {
       sessionToken: false,
     });
+
+    console.log('!!! resetPassword response', response);
     assert(!response.sessionToken, 'session token is not in response');
     assert(!response.keyFetchToken, 'keyFetchToken token is not in response');
     assert(!response.verified, 'verified is not in response');
@@ -53,6 +57,7 @@ describe('#integration - remote account reset', function () {
     const query = url.parse(link, true).query;
     assert.ok(query.email, 'email is in the link');
 
+    console.log('!!! login with new password');
     // make sure we can still login after password reset
     // eslint-disable-next-line require-atomic-updates
     client = await Client.login(config.publicUrl, email, newPassword, {

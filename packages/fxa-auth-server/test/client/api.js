@@ -70,6 +70,9 @@ module.exports = (config) => {
         delete headers['accept-language'];
       }
       this.emit('startRequest', options);
+
+      console.log('!!! request', options);
+
       request(options, (err, res, body) => {
         if (res && res.headers.timestamp) {
           // Record time skew
@@ -79,6 +82,7 @@ module.exports = (config) => {
 
         this.emit('endRequest', options, err, res);
         if (err || body.error || res.statusCode !== 200) {
+          console.log('!!! response err', res.statusCode, err || body);
           return reject(err || body);
         }
 
@@ -97,6 +101,7 @@ module.exports = (config) => {
           }
         }
 
+        console.log('!!! response success', body);
         resolve(body);
       });
     });
@@ -156,6 +161,38 @@ module.exports = (config) => {
       {
         email: email,
         authPW: authPW.toString('hex'),
+        preVerified: options.preVerified || undefined,
+        service: options.service || undefined,
+        redirectTo: options.redirectTo || undefined,
+        resume: options.resume || undefined,
+        device: options.device || undefined,
+        metricsContext: options.metricsContext || undefined,
+        style: options.style || undefined,
+        verificationMethod: options.verificationMethod || undefined,
+      },
+      {
+        'accept-language': options.lang,
+      }
+    );
+  };
+
+  ClientApi.prototype.accountCreateV2 = function (
+    email,
+    authPW,
+    authPW2,
+    clientSalt,
+    options = {}
+  ) {
+    const url = `${this.baseURL}/account/create${getQueryString(options)}`;
+    return this.doRequest(
+      'POST',
+      url,
+      null,
+      {
+        email: email,
+        authPW: authPW.toString('hex'),
+        authPW2: authPW2.toString('hex'),
+        clientSalt: clientSalt,
         preVerified: options.preVerified || undefined,
         service: options.service || undefined,
         redirectTo: options.redirectTo || undefined,
@@ -358,6 +395,16 @@ module.exports = (config) => {
 
     return tokens.AccountResetToken.fromHex(accountResetTokenHex).then(
       (token) => {
+        const payload = {
+          authPW: authPW.toString('hex'),
+          sessionToken: options.sessionToken,
+        };
+
+        if (options.v2 === true) {
+          payload.authPW2 = options.authPW2.toString('hex');
+          payload.clientSalt = options.clientSalt;
+        }
+
         return this.doRequest(
           'POST',
           `${this.baseURL}/account/reset${qs}`,

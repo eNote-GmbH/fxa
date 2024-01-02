@@ -66,10 +66,11 @@ export const ReactGALog = {
         plan_name: planName,
         product_name: productName,
       } = plan;
+      const planPrice: number = amount! / 100;
 
       let planOptions: PlanOptionsProps = {
         currency: currencyCode,
-        value: amount,
+        value: planPrice,
         payment_type: paymentType,
         items: [
           {
@@ -77,7 +78,7 @@ export const ReactGALog = {
             item_name: planName,
             item_brand: productName,
             item_variant: interval,
-            price: amount,
+            price: planPrice,
             discount,
           },
         ],

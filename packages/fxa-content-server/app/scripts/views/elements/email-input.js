@@ -25,6 +25,8 @@ export default {
       throw AuthErrors.toError('EMAIL_REQUIRED');
     } else if (Vat.email().validate(value).error) {
       throw AuthErrors.toError('INVALID_EMAIL');
+    } else if (Vat.emailMask().validate(value).error) {
+      throw AuthErrors.toError('EMAIL_MASK_NEW_ACCOUNT');
     }
   },
 };

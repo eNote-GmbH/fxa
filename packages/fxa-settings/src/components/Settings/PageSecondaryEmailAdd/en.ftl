@@ -8,3 +8,4 @@ add-secondary-email-enter-address =
   .label = Enter email address
 add-secondary-email-cancel-button = Cancel
 add-secondary-email-save-button = Save
+add-secondary-email-mask = Email masks can’t be used as a secondary email

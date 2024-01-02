@@ -40,6 +40,15 @@ const SignUpPasswordView = FormView.extend({
     'click #use-different': preventDefaultThen('useDifferentAccount'),
   }),
 
+  _isEmailRelayDomain(email) {
+    // Checks to see if the email is a Firefox Relay email mask. Current masks are
+    // @mozmail.com
+    // @relay.firefox.com
+    // @<any sub>.mozmail.com
+    const relayMail = /@([a-zA-Z0-9.-]+\.)?(mozmail|relay\.firefox)\.(com)$/i;
+    return relayMail.test(email);
+  },
+
   useDifferentAccount() {
     // a user who came from an OAuth relier and was
     // directed directly to /signin will not be able

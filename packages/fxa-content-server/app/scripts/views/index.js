@@ -202,6 +202,15 @@ class IndexView extends FormView {
     return firefoxMail.test(email);
   }
 
+  _isEmailRelayDomain(email) {
+    // Checks to see if the email is a Firefox Relay email mask. Current masks are
+    // @mozmail.com
+    // @relay.firefox.com
+    // @<any sub>.mozmail.com
+    const relayMail = /@([a-zA-Z0-9.-]+\.)?(mozmail|relay\.firefox)\.(com)$/i;
+    return relayMail.test(email);
+  }
+
   _hasEmailBounced() {
     const account = this.getAccount('account');
 
@@ -264,6 +273,15 @@ class IndexView extends FormView {
       .then(() => this.user.checkAccountStatus(account))
       .then(({ exists, hasPassword, hasLinkedAccount }) => {
         const nextEndpoint = exists ? 'signin' : 'signup';
+
+        // If a Relay email mask is being used for a new account, show an error
+        if (nextEndpoint === 'signup' && this._isEmailRelayDomain(email)) {
+          this.showValidationError(
+            EMAIL_SELECTOR,
+            AuthErrors.toError('EMAIL_MASK_NEW_ACCOUNT')
+          );
+          return;
+        }
 
         // Temporary hack for React work that allows us to pass the entered `email` as
         // a param. When 'signup' and 'signin' flows are both finished and we're ready,

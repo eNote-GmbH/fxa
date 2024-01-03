@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
 import { GraphQLError } from 'graphql';
 import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
@@ -12,6 +12,7 @@ import { Request } from 'express';
 
 import { CommonPiiActions } from '../../sentry/pii-filter-actions';
 import { SentryPiiFilter, SqsMessageFilter } from '../../sentry/pii-filters';
+import { bool } from 'joi';
 const piiFilter = new SentryPiiFilter([
   CommonPiiActions.breadthFilter,
   CommonPiiActions.depthFilter,
@@ -35,6 +36,8 @@ export interface ExtraContext {
 
 /**
  * Determine if an error is an ApolloError.
+ * Prior to GQL 16.8 and apollo-server 4.9.3, we used ApolloError from apollo-server.
+ * Now, we populate fields on GraphQL error to mimic the previous state of ApolloError.
  */
 export function isApolloError(err: Error): boolean {
   if (err instanceof GraphQLError) {
@@ -44,6 +47,22 @@ export function isApolloError(err: Error): boolean {
     }
   }
   return false;
+}
+
+export function isOriginallyHttpError(
+  error: Error & { originalError?: { status: number } }
+): boolean {
+  if (error?.originalError?.status && error?.originalError?.status >= 400) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Determine if an error is an UnauthorizedException.
+ */
+export function isUnauthorizedException(error: Error): boolean {
+  return error instanceof UnauthorizedException;
 }
 
 /**
@@ -120,6 +139,7 @@ export function reportRequestException(
       scope.setContext(ctx.name, ctx.fieldData);
     }
 
+    console.log('!!! capturing sentry exception', exception);
     Sentry.captureException(exception);
     exception.reported = true;
   });

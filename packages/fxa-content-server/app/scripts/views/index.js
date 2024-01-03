@@ -174,6 +174,10 @@ class IndexView extends FormView {
       return false;
     }
 
+    if (this._isEmailRelayDomain(this._getEmail())) {
+      return false;
+    }
+
     return super.isValidEnd.call(this);
   }
 
@@ -188,6 +192,11 @@ class IndexView extends FormView {
         EMAIL_SELECTOR,
         AuthErrors.toError('DIFFERENT_EMAIL_REQUIRED_FIREFOX_DOMAIN')
       );
+    } else if (this._isEmailRelayDomain(this._getEmail())) {
+      this.showValidationError(
+        EMAIL_SELECTOR,
+        AuthErrors.toError('EMAIL_MASK_NEW_ACCOUNT')
+      );
     }
   }
 
@@ -201,6 +210,14 @@ class IndexView extends FormView {
     // the added 'i' disallows uppercase letters
     const firefoxMail = new RegExp('@firefox(\\.com)?$', 'i');
     return firefoxMail.test(email);
+  }
+
+  _isEmailRelayDomain(email) {
+    // "@mozmail" or "@mozmail.com" email addresses are not valid
+    // at this time, therefore block the attempt.
+    // the added 'i' disallows uppercase letters
+    const relayMail = new RegExp('@mozmail(\\.com)?$', 'i');
+    return relayMail.test(email);
   }
 
   _hasEmailBounced() {

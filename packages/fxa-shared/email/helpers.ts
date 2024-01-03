@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Mozmail.com is the Firefox Relay email mask, we prohibit creating accounts with it
-const emailMaskRegex = /mozmail\.com$/;
+const emailMaskRegex = new RegExp('@mozmail(\\.com)?$', 'i');
 
 export function normalizeEmail(originalEmail: string): string {
   return originalEmail.toLowerCase();

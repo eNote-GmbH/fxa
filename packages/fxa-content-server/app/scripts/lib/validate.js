@@ -8,7 +8,7 @@ import _ from 'underscore';
 import Constants from './constants';
 import Newsletters from './newsletters';
 import OAuthPrompt from './oauth-prompt';
-import { isEmailValid, isEmailMask } from 'fxa-shared/email/helpers';
+import { isEmailValid } from 'fxa-shared/email/helpers';
 
 const UNBLOCK_CODE_LENGTH = Constants.UNBLOCK_CODE_LENGTH;
 
@@ -51,14 +51,6 @@ var Validate = {
    * @return {Boolean} true if email is valid, false otw.
    */
   isEmailValid,
-
-  /**
-   * Check if an email address is an email mask.
-   *
-   * @param {String} email
-   * @return {Boolean} true if email is mask, false otw.
-   */
-  isEmailMask,
 
   /**
    * Check if an email verification code is valid

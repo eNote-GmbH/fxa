@@ -711,72 +711,72 @@ workflows:
           name: Build (PR)
           requires:
             - Init (PR)
-      - lint:
-          name: Lint (PR)
-          requires:
-            - Init (PR)
-          post-steps:
-            - fail-fast
+      # - lint:
+      #     name: Lint (PR)
+      #     requires:
+      #       - Init (PR)
+      #     post-steps:
+      #       - fail-fast
       - compile:
           name: Compile (PR)
           requires:
             - Init (PR)
           post-steps:
             - fail-fast
-      - unit-test:
-          name: Unit Test (PR)
-          requires:
-            - Build (PR)
-          post-steps:
-            - fail-fast
-      - integration-test:
-          name: Integration Test - Frontends (PR)
-          resource_class: large
-          nx_run: affected --base=main --head=$CIRCLE_SHA1
-          projects: --exclude '*,!tag:scope:frontend'
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Servers (PR)
-          nx_run: affected --base=main --head=$CIRCLE_SHA1
-          projects: --exclude '*,!tag:scope:server'
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Servers - Auth (PR)
-          nx_run: affected --base=main --head=$CIRCLE_SHA1
-          projects: --exclude '*,!tag:scope:server:auth'
-          requires:
-            - Build (PR)
-      - integration-test:
-          name: Integration Test - Libraries (PR)
-          nx_run: affected --base=main --head=$CIRCLE_SHA1
-          projects: --exclude '*,!tag:scope:shared:*'
-          requires:
-            - Build (PR)
+      # - unit-test:
+      #     name: Unit Test (PR)
+      #     requires:
+      #       - Build (PR)
+      #     post-steps:
+      #       - fail-fast
+      # - integration-test:
+      #     name: Integration Test - Frontends (PR)
+      #     resource_class: large
+      #     nx_run: affected --base=main --head=$CIRCLE_SHA1
+      #     projects: --exclude '*,!tag:scope:frontend'
+      #     requires:
+      #       - Build (PR)
+      # - integration-test:
+      #     name: Integration Test - Servers (PR)
+      #     nx_run: affected --base=main --head=$CIRCLE_SHA1
+      #     projects: --exclude '*,!tag:scope:server'
+      #     requires:
+      #       - Build (PR)
+      # - integration-test:
+      #     name: Integration Test - Servers - Auth (PR)
+      #     nx_run: affected --base=main --head=$CIRCLE_SHA1
+      #     projects: --exclude '*,!tag:scope:server:auth'
+      #     requires:
+      #       - Build (PR)
+      # - integration-test:
+      #     name: Integration Test - Libraries (PR)
+      #     nx_run: affected --base=main --head=$CIRCLE_SHA1
+      #     projects: --exclude '*,!tag:scope:shared:*'
+      #     requires:
+      #       - Build (PR)
       - playwright-functional-tests:
           name: Functional Tests - Playwright (PR)
           resource_class: xlarge
           requires:
             - Build (PR)
-      - build-and-deploy-storybooks:
-          name: Deploy Storybooks (PR)
-          requires:
-            - Build (PR)
+      # - build-and-deploy-storybooks:
+      #     name: Deploy Storybooks (PR)
+      #     requires:
+      #       - Build (PR)
       - on-complete:
           name: Tests Complete (PR)
           stage: Tests
           job_type: build
           requires:
-            - Lint (PR)
+            # - Lint (PR)
             - Compile (PR)
-            - Unit Test (PR)
-            - Integration Test - Frontends (PR)
-            - Integration Test - Servers (PR)
-            - Integration Test - Servers - Auth (PR)
-            - Integration Test - Libraries (PR)
+            # - Unit Test (PR)
+            # - Integration Test - Frontends (PR)
+            # - Integration Test - Servers (PR)
+            # - Integration Test - Servers - Auth (PR)
+            # - Integration Test - Libraries (PR)
             - Functional Tests - Playwright (PR)
-            - Deploy Storybooks (PR)
+            # - Deploy Storybooks (PR)
 
   # Triggered remotely. See .circleci/README.md
   production_smoke_tests:

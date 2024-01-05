@@ -24,13 +24,14 @@ export class CloudTaskHandler {
     return {};
   }
 }
+export const accountDeleteCloudTaskPath = '/cloud-tasks/accounts/delete';
 
 export const cloudTaskRoutes = (config: ConfigType) => {
   const cloudTaskHandler = new CloudTaskHandler(config);
   const routes = [
     {
       method: 'POST',
-      path: '/cloud-tasks/accounts/delete',
+      path: accountDeleteCloudTaskPath,
       options: {
         auth: {
           mode: 'required',

@@ -2,7 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { CloudTasksClient } from '@google-cloud/tasks';
 import { Container } from 'typedi';
+import { ConfigType } from '../config';
 import DB from './db/index';
 import OAuthDb from './oauth/db';
 import { AppleIAP } from './payments/iap/apple-app-store/apple-iap';
@@ -11,11 +13,18 @@ import { PayPalHelper } from './payments/paypal/helper';
 import { StripeHelper } from './payments/stripe';
 import push from './push';
 import pushboxApi from './pushbox';
-import { AuthLogger } from './types';
+import { AppConfig, AuthLogger } from './types';
+/*
+import {
+  uid as uidValidator,
+  customerId as customerIdValidator,
+} from './routes/validators';
+//*/
+import { accountDeleteCloudTaskPath } from './routes/cloud-tasks';
 
 type FxaDbDeleteAccount = Pick<
   Awaited<ReturnType<ReturnType<typeof DB>['connect']>>,
-  'deleteAccount'
+  'deleteAccount' | 'accountRecord'
 >;
 type OAuthDbDeleteAccount = Pick<typeof OAuthDb, 'removeTokensAndCodes'>;
 type PushDeleteAccount = Pick<
@@ -27,6 +36,37 @@ type PushboxDeleteAccount = Pick<
   'deleteAccount'
 >;
 
+type DeleteTask = {
+  uid: string;
+  customerId?: string;
+};
+type EnqueueByUidParam = {
+  uid: string;
+  reason: string;
+};
+type EnqueueByEmailParam = {
+  email: string;
+  reason: string;
+};
+
+/*
+const isValidDeleteTask = (deleteTask: DeleteTask) => {
+  const uidValidationResult = uidValidator.validate(deleteTask.uid);
+  const customerIdValidationResult = customerIdValidator.validate(
+    deleteTask.customerId
+  );
+
+  return !uidValidationResult.error && !customerIdValidationResult.error;
+};
+//*/
+
+const isEnqueueByUidParam = (
+  x: EnqueueByUidParam | EnqueueByEmailParam
+): x is EnqueueByUidParam => (x as EnqueueByUidParam).uid !== undefined;
+const isEnqueueByEmailParam = (
+  x: EnqueueByUidParam | EnqueueByEmailParam
+): x is EnqueueByEmailParam => (x as EnqueueByEmailParam).email !== undefined;
+
 export class AccountDeleteManager {
   private fxaDb: FxaDbDeleteAccount;
   private oauthDb: OAuthDbDeleteAccount;
@@ -37,6 +77,10 @@ export class AccountDeleteManager {
   private appleIap?: AppleIAP;
   private playBilling?: PlayBilling;
   private log: AuthLogger;
+  private config: ConfigType;
+  private cloudTasksClient: CloudTasksClient;
+  private queueName;
+  private taskUrl;
 
   constructor({
     fxaDb,
@@ -67,5 +111,67 @@ export class AccountDeleteManager {
       this.playBilling = Container.get(PlayBilling);
     }
     this.log = Container.get(AuthLogger);
+    this.config = Container.get(AppConfig);
+    const tasksConfig = this.config.cloudTasks;
+
+    this.cloudTasksClient = new CloudTasksClient({
+      projectId: tasksConfig.projectId,
+      keyFilename: tasksConfig.credentials.keyFilename ?? undefined,
+    });
+    this.queueName = `projects/${tasksConfig.projectId}/locations/${tasksConfig.locationId}/queues/${tasksConfig.deleteAccounts.queueName}`;
+    this.taskUrl = `${this.config.publicUrl}/v${this.config.apiVersion}${accountDeleteCloudTaskPath}`;
+  }
+
+  public async enqueue(options: EnqueueByUidParam | EnqueueByEmailParam) {
+    if (isEnqueueByUidParam(options)) {
+      return this.enqueueByUid(options);
+    }
+
+    if (isEnqueueByEmailParam(options)) {
+      return this.enqueueByEmail(options);
+    }
+
+    throw new Error(
+      `Failed to enqueue account delete cloud task with ${options}.`
+    );
+  }
+
+  private async enqueueByUid(options: EnqueueByUidParam) {
+    const customer = await this.stripeHelper?.fetchCustomer(options.uid);
+    const task: DeleteTask = {
+      uid: options.uid,
+      customerId: customer?.id ?? undefined,
+    };
+    return this.enqueueTask(task);
+  }
+
+  private async enqueueByEmail(options: EnqueueByEmailParam) {
+    const account = await this.fxaDb.accountRecord(options.email);
+    const customer = await this.stripeHelper?.fetchCustomer(account.uid);
+    const task: DeleteTask = {
+      uid: account.uid,
+      customerId: customer?.id ?? undefined,
+    };
+    return this.enqueueTask(task);
+  }
+
+  private async enqueueTask(task: DeleteTask) {
+    const taskResult = await this.cloudTasksClient.createTask({
+      parent: this.queueName,
+      task: {
+        httpRequest: {
+          url: this.taskUrl,
+          httpMethod: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: Buffer.from(JSON.stringify(task)).toString('base64'),
+          oidcToken: {
+            audience: this.config.cloudTasks.oidc.aud,
+            serviceAccountEmail:
+              this.config.cloudTasks.oidc.serviceAccountEmail,
+          },
+        },
+      },
+    });
+    return taskResult[0].name;
   }
 }

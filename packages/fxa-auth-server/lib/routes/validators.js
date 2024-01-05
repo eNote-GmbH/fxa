@@ -633,8 +633,12 @@ module.exports.subscriptionsPlanWithProductConfigValidator = isA.object({
     .required(),
 });
 
+module.exports.customerId = isA
+  .string()
+  .optional()
+  .description(DESCRIPTIONS.customerId);
 module.exports.subscriptionsCustomerValidator = isA.object({
-  customerId: isA.string().optional().description(DESCRIPTIONS.customerId),
+  customerId: module.exports.customerId,
   billing_name: isA
     .alternatives(isA.string(), isA.any().allow(null))
     .optional()
@@ -789,7 +793,7 @@ module.exports.subscriptionsStripeCustomerValidator = isA
 
 module.exports.subscriptionsMozillaSubscriptionsValidator = isA
   .object({
-    customerId: isA.string().optional().description(DESCRIPTIONS.customerId),
+    customerId: module.exports.customerId,
     billing_name: isA
       .alternatives(isA.string(), isA.any().allow(null))
       .optional()

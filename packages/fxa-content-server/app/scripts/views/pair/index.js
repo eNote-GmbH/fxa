@@ -20,6 +20,8 @@ class PairIndexView extends FormView {
     ...FormView.prototype.events,
     'click #get-fx-mobile': 'downloadLinkEngagement',
     'click #pair-not-now': 'pairNotNowHandler',
+    'click #have-firefox-toggle-button': 'showHaveFirefoxActions',
+    'click #download-firefox-toggle-button': 'showDownloadFirefoxActions',
   };
 
   submit() {
@@ -59,6 +61,8 @@ class PairIndexView extends FormView {
     context.set({
       graphicId,
       showQrCode,
+      haveFirefox: true,
+      downloadFirefox: false,
     });
   }
 
@@ -70,6 +74,20 @@ class PairIndexView extends FormView {
     this.metrics.logEvent('screen.pair.notnow.engage');
     return true;
   }
+
+  // TODO: handle button style change on click
+  // TODO: add aria-pressed attribute
+  showHaveFirefoxActions() {
+    this.$('#pair-have-firefox').show();
+    this.$('#pair-download-firefox').hide();
+  }
+
+  showDownloadFirefoxActions() {
+    this.$('#pair-download-firefox').show();
+    this.$('#pair-have-firefox').hide();
+  }
+
+  _haveFirefox() {}
 }
 
 Cocktail.mixin(

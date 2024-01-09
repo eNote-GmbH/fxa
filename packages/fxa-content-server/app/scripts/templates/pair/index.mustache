@@ -13,22 +13,24 @@
 
     {{#showQrCode}}
 
-    {{! Add toggle button between "Have Firefox" and "Download Firefox"  }}
+    {{! TODO: Move styles out }}
+    {{! TODO: Style action states }}
+    <div class="mt-5 flex justify-between p-1 border-solid border-1 border-black bg-grey-50 rounded-lg font-bold">
+        <button id="have-firefox-toggle-button" type="button" class="w-1/2 bg-white text-blue-500 rounded p-2 active:bg-blue-500 active:text-white">{{#t}}Have Firefox{{/t}}</button>
+        <button id="download-firefox-toggle-button" type="button" class="w-1/2 rounded p-2 active:bg-blue-500 active:text-white">{{#t}}Download Firefox{{/t}}</button>
+    </div>
 
-    {{! Below options are shown depending on user selection - this might need to be a mixin? }}
-
-
-
-    {{^haveFirefox}}
-      <div class="mt-5 mb-5">{{#unsafeTranslate}}Already have Firefox on your phone or tablet? <br />Sync your device now.{{/unsafeTranslate}}</div>
+    <div id="pair-have-firefox">
+      <div class="my-5 px-5">{{#unsafeTranslate}}Already have Firefox on your phone or tablet? <br />Sync your device now.{{/unsafeTranslate}}</div>
       {{! Replace image with sync devices image from figma }}
       <div class="bg-image-sync-devices" role="img" aria-label=""></div>
-    {{/haveFirefox}}
+    </div>
 
-    {{#haveFirefox}}
-      <p class="my-5 px-16">{{#unsafeTranslate}}If you don’t have Firefox on your phone or tablet, scan the QR code to download it now. Then, select <strong>Sync device</strong>.{{/unsafeTranslate}}</p>
+    <div id="pair-download-firefox" hidden>
+      <p class="my-5 px-5">{{#unsafeTranslate}}If you don’t have Firefox on your phone or tablet, scan the QR code to download it now. Then, select <strong>Sync device</strong>.{{/unsafeTranslate}}</p>
       <div class="bg-image-cad-qr-code" role="img" aria-label="{{#t}}QR code{{/t}}"></div>
-    {{/haveFirefox}}
+    </div>
+
     {{! Validate if "Sync device" button should be shown for both "Have Firefox" and "Download Firefox" }}
     <form novalidate class="mt-5">
       <div class="flex">

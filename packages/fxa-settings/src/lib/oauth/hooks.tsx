@@ -12,16 +12,14 @@ import {
 import { createEncryptedBundle } from '../crypto/scoped-keys';
 import { Constants } from '../constants';
 
+type OAuthCode = {
+  code: string;
+  state: string;
+  redirect: string;
+};
+
 // TODO: Do we need this or can we rely on `@bind` methods? FXA-8106
-const checkOAuthData = (
-  integration: OAuthIntegration,
-  wantsRedirect: boolean
-): Error | null => {
-  // Ensure a redirect was provided. Without this info, we can't relay the oauth code
-  // and state on a redirect!
-  if (wantsRedirect && !integration.data.redirectUri) {
-    return new OAuthErrorInvalidRedirectUri();
-  }
+const checkOAuthData = (integration: OAuthIntegration): Error | null => {
   if (!integration.data.clientId) {
     return new OAuthErrorInvalidRelierClientId();
   }
@@ -98,7 +96,7 @@ async function constructOAuthCode(
     opts.access_type = integration.data.accessType;
   }
 
-  const result = await authClient.createOAuthCode(
+  const result: OAuthCode = await authClient.createOAuthCode(
     sessionToken,
     integration.data.clientId,
     integration.data.state,
@@ -117,16 +115,9 @@ async function constructOAuthCode(
  * @param oauthCode
  * @returns
  */
-function constructOAuthRedirectUrl(
-  oauthCode: {
-    code: string;
-    state: string;
-    redirect: string;
-  },
-  redirectUri: string
-) {
+function constructOAuthRedirectUrl(oauthCode: OAuthCode, redirectUri?: string) {
   // Update the state of the redirect URI
-  let constructedRedirectUri = new URL(redirectUri);
+  let constructedRedirectUri = new URL(redirectUri || oauthCode.redirect);
   if (oauthCode.code) {
     constructedRedirectUri.searchParams.set('code', oauthCode.code);
   }
@@ -236,12 +227,12 @@ export function useFinishOAuthFlowHandler(
    *
    * ¹This was the case when reset password had an OAuth redirect - we only called
    * `checkOAuthData` if `integration.data.service` was _not_ present in the URL. We can
-   * revisit this with the reset PW redesign - for now check if !isSyncMobileWebChannel.
+   * revisit this with the reset PW redesign.
    *
    * P.S. we can't return early regardless because `useCallback` can't be set conditionally.
    */
   if (isOAuthIntegration(integration)) {
-    const oAuthDataError = checkOAuthData(integration, !isSyncMobileWebChannel);
+    const oAuthDataError = checkOAuthData(integration);
     return { oAuthDataError, finishOAuthFlowHandler };
   }
   return { oAuthDataError: null, finishOAuthFlowHandler };
@@ -267,13 +258,6 @@ export class OAuthErrorInvalidOAuthCodeResult extends Error {
 }
 
 export class OAuthErrorInvalidRelierState extends Error {
-  public readonly errno = 1001;
-  constructor() {
-    super('UNEXPECTED_ERROR');
-  }
-}
-
-export class OAuthErrorInvalidRedirectUri extends Error {
   public readonly errno = 1001;
   constructor() {
     super('UNEXPECTED_ERROR');

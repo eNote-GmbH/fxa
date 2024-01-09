@@ -13,24 +13,29 @@
 
     {{#showQrCode}}
 
-    {{! Add toggle between "Have Firefox" and "Download Firefox"  }}
+    {{! Add toggle button between "Have Firefox" and "Download Firefox"  }}
 
     {{! Below options are shown depending on user selection - this might need to be a mixin? }}
-  
-    {{! #haveFirefox }}
-      <div class="mt-9 mb-5">{{#unsafeTranslate}}Already have Firefox on your phone or tablet? <br />Sync your device now.{{/unsafeTranslate}}</div>
-      {{! Replace image with sync devices image from figma }}
-      <div class="bg-image-cad" role="img" aria-label=""></div>
-    {{! /haveFirefox }}
 
-    {{! ^haveFirefox }}
+    <div class="mt-5 flex justify-between p-1 border-solid border-1 border-black bg-grey-50 rounded-lg font-bold">
+      <button type="button" aria-pressed="true" class="w-1/2 bg-white text-blue-500 rounded p-2">{{#t}}Have Firefox{{/t}}</button>
+      <button type="button" aria-pressed="false" class="w-1/2 rounded p-2">{{#t}}Download Firefox{{/t}}</button>
+    </div>
+
+    {{^haveFirefox}}
+      <div class="mt-5 mb-5">{{#unsafeTranslate}}Already have Firefox on your phone or tablet? <br />Sync your device now.{{/unsafeTranslate}}</div>
+      {{! Replace image with sync devices image from figma }}
+      <div class="bg-image-sync-devices" role="img" aria-label=""></div>
+    {{/haveFirefox}}
+
+    {{#haveFirefox}}
       <p class="my-5 px-16">{{#unsafeTranslate}}If you don’t have Firefox on your phone or tablet, scan the QR code to download it now. Then, select <strong>Sync device</strong>.{{/unsafeTranslate}}</p>
       <div class="bg-image-cad-qr-code" role="img" aria-label="{{#t}}QR code{{/t}}"></div>
-    {{! /haveFirefox }}
+    {{/haveFirefox}}
     {{! Validate if "Sync device" button should be shown for both "Have Firefox" and "Download Firefox" }}
     <form novalidate class="mt-5">
       <div class="flex">
-        <button id="start-pairing" class="cta-primary cta-xl" type="submit">{{#t}}Sync your device{{/t}}</button>
+        <button id="start-pairing" class="cta-primary cta-xl" type="submit">{{#t}}Sync device{{/t}}</button>
       </div>
     </form>
     <p class="mt-5 text-sm"><a id="pair-not-now" class="link-blue" href="/settings">{{#t}}Not now{{/t}}</a></p>

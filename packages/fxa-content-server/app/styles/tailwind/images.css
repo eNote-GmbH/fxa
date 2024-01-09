@@ -41,3 +41,8 @@
   @apply mt-9 mb-5 bg-center bg-no-repeat bg-contain h-36;
   background-image: inline('../images/graphic_hearts_broken.svg');
 }
+
+.bg-image-sync-devices {
+  @apply mt-9 mb-5 bg-center bg-no-repeat bg-contain h-36;
+  background-image: inline('../images/graphic_sync_devices.svg');
+}

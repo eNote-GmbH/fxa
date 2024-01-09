@@ -17,10 +17,7 @@
 
     {{! Below options are shown depending on user selection - this might need to be a mixin? }}
 
-    <div class="mt-5 flex justify-between p-1 border-solid border-1 border-black bg-grey-50 rounded-lg font-bold">
-      <button type="button" aria-pressed="true" class="w-1/2 bg-white text-blue-500 rounded p-2">{{#t}}Have Firefox{{/t}}</button>
-      <button type="button" aria-pressed="false" class="w-1/2 rounded p-2">{{#t}}Download Firefox{{/t}}</button>
-    </div>
+
 
     {{^haveFirefox}}
       <div class="mt-5 mb-5">{{#unsafeTranslate}}Already have Firefox on your phone or tablet? <br />Sync your device now.{{/unsafeTranslate}}</div>

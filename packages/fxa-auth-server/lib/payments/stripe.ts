@@ -3402,6 +3402,17 @@ export class StripeHelper extends StripeHelperBase {
           {}
       : {};
   }
+
+  async removeFirestoreCustomer(uid: string) {
+    console.log('gets called');
+    try {
+      return await this.stripeFirestore.removeCustomerRecursive(uid);
+    } catch (error) {
+      console.log('lands up in here');
+      Sentry.captureException(error);
+      return [];
+    }
+  }
 }
 
 /**

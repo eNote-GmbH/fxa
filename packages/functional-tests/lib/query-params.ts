@@ -4,8 +4,15 @@
 
 // This file contains query params that don't reflect states that can be reached from 123done.
 
-export const syncMobileOAuthQueryParams = new URLSearchParams({
+// Minimum needed for OAuth Sync integration
+export const syncMobileBasicQueryParams = new URLSearchParams({
   client_id: '1b1a3e44c54fbb58', // Firefox for iOS
+  context: 'oauth_webchannel_v1',
+});
+
+// Minimum needed to complete OAuth flow
+export const syncMobileOAuthQueryParams = new URLSearchParams({
+  ...Object.fromEntries(syncMobileBasicQueryParams.entries()),
   code_challenge_method: 'S256',
   code_challenge: '2oc_C4v1qHeefWAGu5LI5oDG1oX4FV_Itc148D8_oQI',
   // eslint-disable-next-line camelcase
@@ -14,6 +21,5 @@ export const syncMobileOAuthQueryParams = new URLSearchParams({
   scope:
     'https://identity.mozilla.com/apps/oldsync https://identity.mozilla.com/tokens/session',
   state: 'fakestate',
-  context: 'oauth_webchannel_v1',
   automatedBrowser: 'true',
 });

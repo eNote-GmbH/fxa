@@ -170,13 +170,17 @@ describe('views/pair/index', () => {
       sinon.stub(view, 'showDownloadFirefoxQrCode').callsFake(() => true);
       return view.render().then(() => {
         const heading = view.$('#pair-header');
-        assert.strictEqual(heading.text(), 'Connect Firefox on another device');
+        assert.strictEqual(
+          heading.text(),
+          'Connect Firefox on your mobile device'
+        );
 
         const pairButton = view.$('#start-pairing');
         assert.equal(pairButton.length, 1);
 
+        // Download link is no longer supported by marketing and should not be shown
         const downloadLink = view.$('#get-fx-mobile');
-        assert.equal(downloadLink.length, 1);
+        assert.equal(downloadLink.length, 0);
 
         const qrCode = view.$el.find('.bg-image-cad-qr-code');
         assert.equal(qrCode.length, 1);

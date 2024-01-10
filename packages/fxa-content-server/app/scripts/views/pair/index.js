@@ -78,11 +78,29 @@ class PairIndexView extends FormView {
   // TODO: handle button style change on click
   // TODO: add aria-pressed attribute
   showHaveFirefoxActions() {
+    this.$('#have-firefox-toggle-button').attr({ 'aria-pressed': true });
+    this.$('#download-firefox-toggle-button').attr({
+      'aria-pressed': false,
+    });
+    this.$('#have-firefox-toggle-button').addClass('bg-white text-blue-500');
+    this.$('#download-firefox-toggle-button').removeClass(
+      'bg-white text-blue-500'
+    );
     this.$('#pair-have-firefox').show();
     this.$('#pair-download-firefox').hide();
   }
 
   showDownloadFirefoxActions() {
+    this.$('#have-firefox-toggle-button').attr({
+      'aria-pressed': false,
+    });
+    this.$('#download-firefox-toggle-button').attr({
+      'aria-pressed': true,
+    });
+    this.$('#have-firefox-toggle-button').removeClass('bg-white text-blue-500');
+    this.$('#download-firefox-toggle-button').addClass(
+      'bg-white text-blue-500'
+    );
     this.$('#pair-download-firefox').show();
     this.$('#pair-have-firefox').hide();
   }

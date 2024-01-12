@@ -43,7 +43,7 @@ function hexString(bytes) {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
-const makeRoutes = function (options = {}, requireMocks) {
+const makeRoutes = function (options = {}, requireMocks = {}) {
   Container.set(CapabilityService, options.capabilityService || sinon.fake);
   const config = options.config || {};
   config.oauth = config.oauth || {};
@@ -114,10 +114,10 @@ const makeRoutes = function (options = {}, requireMocks) {
 
   // We have to do some redirection with proxyquire because dependency
   // injection changes the class
-  const AccountDeleteManagerMock = proxyquire(
-    '../../../lib/account-delete',
-    requireMocks || {}
-  );
+  const AccountDeleteManagerMock = proxyquire('../../../lib/account-delete', {
+    'fxa-shared/db/models/auth':
+      requireMocks['fxa-shared/db/models/auth'] || {},
+  });
   Container.set(
     AccountDeleteManager,
     new AccountDeleteManagerMock.AccountDeleteManager({
@@ -1376,7 +1376,7 @@ describe('/account/stub', () => {
     };
   }
 
-  it('#integration - creates an account', () => {
+  it('creates an account', () => {
     const { route, mockRequest, uid } = setup();
     return runTest(route, mockRequest, (response) => {
       assert.equal(response.uid, uid);

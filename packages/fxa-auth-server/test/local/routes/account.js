@@ -111,9 +111,25 @@ const makeRoutes = function (options = {}, requireMocks) {
     removePublicAndCanGrantTokens: () => {},
     ...(options.oauth || {}),
   };
+
+  // We have to do some redirection with proxyquire because dependency
+  // injection changes the class
+  const AccountDeleteManagerMock = proxyquire(
+    '../../../lib/account-delete',
+    requireMocks || {}
+  );
   Container.set(
     AccountDeleteManager,
-    new AccountDeleteManager({ fxaDb: db, oauthDb, push, pushbox })
+    new AccountDeleteManagerMock.AccountDeleteManager({
+      fxaDb: db,
+      oauthDb,
+      push,
+      pushbox,
+      customs,
+      config,
+      Password,
+      signinUtils,
+    })
   );
 
   return accountRoutes(
@@ -221,6 +237,10 @@ describe('/account/reset', () => {
     glean.resetPassword.accountReset.reset();
     glean.resetPassword.createNewSuccess.reset();
     glean.resetPassword.recoveryKeyCreatePasswordSuccess.reset();
+  });
+
+  afterEach(() => {
+    Container.reset();
   });
 
   describe('reset account with account recovery key', () => {
@@ -588,6 +608,7 @@ describe('deleteAccountIfUnverified', () => {
   });
   afterEach(() => {
     sinon.restore();
+    Container.reset();
   });
   it('should delete an unverified account with no linked Stripe account', async () => {
     const mockStripeHelper = {
@@ -679,6 +700,7 @@ describe('/account/create', () => {
   afterEach(() => {
     glean.registration.accountCreated.reset();
     glean.registration.confirmationEmailSent.reset();
+    Container.reset();
   });
 
   function setup(extraConfig) {
@@ -3768,7 +3790,8 @@ describe('/account/destroy', () => {
     mockStripeHelper,
     mockPaypalHelper,
     mockAuthModels,
-    mockPushbox;
+    mockPushbox,
+    mockCustoms;
 
   beforeEach(async () => {
     mockDB = {
@@ -3802,6 +3825,11 @@ describe('/account/destroy', () => {
       return;
     });
     mockPushbox = { deleteAccount: sinon.fake.resolves() };
+    mockCustoms = { check: sinon.fake.resolves() };
+  });
+
+  afterEach(() => {
+    Container.reset();
   });
 
   function buildRoute(subscriptionsEnabled = true) {
@@ -3824,6 +3852,7 @@ describe('/account/destroy', () => {
         db: mockDB,
         log: mockLog,
         push: mockPush,
+        customs: mockCustoms,
         stripeHelper: mockStripeHelper,
         pushbox: mockPushbox,
       },

@@ -2,10 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  deleteAllPayPalBAs,
-  getAllPayPalBAByUid,
-} from 'fxa-shared/db/models/auth';
-import {
   AppStoreSubscription,
   PlayStoreSubscription,
 } from 'fxa-shared/dto/auth/payments/iap-subscription';
@@ -14,7 +10,6 @@ import TopEmailDomains from 'fxa-shared/email/topEmailDomains';
 import { tryResolveIpv4, tryResolveMx } from 'fxa-shared/email/validateEmail';
 import ScopeSet from 'fxa-shared/oauth/scopes';
 import { WebSubscription } from 'fxa-shared/subscriptions/types';
-import * as Sentry from '@sentry/node';
 import isA from 'joi';
 import Stripe from 'stripe';
 import { Container } from 'typedi';
@@ -1516,133 +1511,8 @@ export class AccountHandler {
   }
 
   async destroy(request: AuthRequest) {
-    this.log.begin('Account.destroy', request);
-
-    const { authPW, email: emailAddress } = request.payload as any;
-
-    await this.customs.check(request, emailAddress, 'accountDestroy');
-
-    let accountRecord;
-    try {
-      accountRecord = await this.db.accountRecord(emailAddress);
-    } catch (err) {
-      if (err.errno === error.ERRNO.ACCOUNT_UNKNOWN) {
-        await this.customs.flag(request.app.clientAddress, {
-          email: emailAddress,
-          errno: err.errno,
-        });
-      }
-
-      throw err;
-    }
-
-    const sessionToken = request.auth && request.auth.credentials;
-    const hasTotpToken = await this.otpUtils.hasTotpToken(accountRecord);
-
-    // Someone tried to delete an account with TOTP but did not specify a session.
-    // This shouldn't happen in practice, but just in case we throw unverified session.
-    if (!sessionToken && hasTotpToken) {
-      throw error.unverifiedSession();
-    }
-
-    // If TOTP is enabled, ensure that the session has the correct assurance level before
-    // deleting account.
-    if (
-      sessionToken &&
-      hasTotpToken &&
-      (sessionToken.tokenVerificationId ||
-        (sessionToken.authenticatorAssuranceLevel as number) <= 1)
-    ) {
-      throw error.unverifiedSession();
-    }
-
-    // In other scenarios, fall back to the default behavior and let the user
-    // delete the account. If they have a password set, we verify it here. Users
-    // that don't have a password set will be able to delete their account without
-    // this step.
-    if (accountRecord.verifierSetAt > 0) {
-      const password = new this.Password(
-        authPW,
-        accountRecord.authSalt,
-        accountRecord.verifierVersion
-      );
-
-      const isMatchingPassword = await this.signinUtils.checkPassword(
-        accountRecord,
-        password,
-        request.app.clientAddress
-      );
-      if (!isMatchingPassword) {
-        throw error.incorrectPassword(accountRecord.email, emailAddress);
-      }
-    }
-
-    const { uid } = accountRecord;
-
-    if (this.config.subscriptions?.enabled && this.stripeHelper) {
-      try {
-        await this.stripeHelper.removeCustomer(uid, accountRecord.email);
-      } catch (err) {
-        if (err.message === 'Customer not available') {
-          // if Stripe didn't know about the customer, no problem.
-          // This should not stop the user from deleting their account.
-          // See https://github.com/mozilla/fxa/issues/2900
-          // https://github.com/mozilla/fxa/issues/2896
-        } else {
-          throw err;
-        }
-      }
-      if (this.paypalHelper) {
-        const agreementIds = await getAllPayPalBAByUid(uid);
-        // Only cancelled and expired are terminal states, any others
-        // should be canceled to ensure they can't be used again.
-        const activeIds = agreementIds.filter((ba: any) =>
-          ['active', 'pending', 'suspended'].includes(ba.status.toLowerCase())
-        );
-        await Promise.all(
-          activeIds.map((ba) =>
-            (this.paypalHelper as PayPalHelper).cancelBillingAgreement(
-              ba.billingAgreementId
-            )
-          )
-        );
-        await deleteAllPayPalBAs(uid);
-      }
-    }
-
-    // We fetch the devices to notify before deleteAccount()
-    // because obviously we can't retrieve the devices list after!
-    const devices = await this.db.devices(uid);
-
-    await this.db.deleteAccount(accountRecord);
-    this.log.info('accountDeleted.byRequest', { ...accountRecord });
-
-    await this.oauth.removeTokensAndCodes(uid);
-
-    // No need to await and block the other notifications.  The pushbox records
-    // will be deleted once they expire even if they were not successfully
-    // deleted here.
-    this.pushbox.deleteAccount(uid).catch((err: Error) => {
-      Sentry.withScope((scope) => {
-        scope.setContext('pushboxDeleteAccount', { uid });
-        Sentry.captureException(err);
-      });
-    });
-
-    try {
-      await this.push.notifyAccountDestroyed(uid, devices);
-    } catch (err) {
-      // Ignore notification errors since this account no longer exists
-    }
-
-    await Promise.all([
-      this.log.notifyAttachedServices('delete', request, { uid }),
-      request.emitMetricsEvent('account.deleted', { uid }),
-    ]);
-
-    return {};
+    return this.accountDeleteManager.destroy(request);
   }
-
   async getAccount(request: AuthRequest) {
     this.log.begin('Account.get', request);
 

@@ -167,16 +167,6 @@ async function run(config) {
     Container.get(AppleIAP);
   }
 
-  // The AccountDeleteManager is dependent on some of the object set into
-  // Container above.
-  const accountDeleteManager = new AccountDeleteManager({
-    fxaDb: database,
-    oauthDb,
-    push,
-    pushbox,
-  });
-  Container.set(AccountDeleteManager, accountDeleteManager);
-
   const profile = new Profile(log, config, error, statsd);
   Container.set(ProfileClient, profile);
   const bounces = require('../lib/bounces')(config, database);
@@ -203,6 +193,30 @@ async function run(config) {
     config
   );
   const glean = gleanMetrics(config);
+
+  const cadReminders = require('../lib/cad-reminders')(config, log);
+  const signinUtils = require('../lib/routes/utils/signin')(
+    log,
+    config,
+    customs,
+    database,
+    senders.email, // Same as "mailers"
+    cadReminders,
+    glean
+  );
+  // The AccountDeleteManager is dependent on some of the object set into
+  // Container above.
+  const accountDeleteManager = new AccountDeleteManager({
+    fxaDb: database,
+    oauthDb,
+    push,
+    pushbox,
+    customs,
+    config,
+    Password,
+    signinUtils,
+  });
+  Container.set(AccountDeleteManager, accountDeleteManager);
 
   const routes = require('../lib/routes')(
     log,

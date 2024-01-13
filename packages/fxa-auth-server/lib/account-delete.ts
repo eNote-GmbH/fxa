@@ -13,7 +13,7 @@ import { PayPalHelper } from './payments/paypal/helper';
 import { StripeHelper } from './payments/stripe';
 import push from './push';
 import pushboxApi from './pushbox';
-import { AppConfig, AuthLogger } from './types';
+import { AccountDeleteReasons, AppConfig, AuthLogger } from './types';
 /*
 import {
   uid as uidValidator,
@@ -21,11 +21,6 @@ import {
 } from './routes/validators';
 //*/
 import { accountDeleteCloudTaskPath } from './routes/cloud-tasks';
-
-export const AccountDeleteReasons = [
-  'fxa_unverified_account_delete',
-  'fxa_user_requested_account_delete',
-] as const;
 
 type FxaDbDeleteAccount = Pick<
   Awaited<ReturnType<ReturnType<typeof DB>['connect']>>,

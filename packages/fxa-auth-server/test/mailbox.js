@@ -20,17 +20,16 @@ module.exports = function (host, port, printLogs) {
     }
   }
 
-  function waitForCode(email) {
-    return waitForEmail(email).then((emailData) => {
-      const code =
-        emailData.headers['x-verify-code'] ||
-        emailData.headers['x-recovery-code'] ||
-        emailData.headers['x-verify-short-code'];
-      if (!code) {
-        throw new Error('email did not contain a verification code');
-      }
-      return code;
-    });
+  async function waitForCode(email) {
+    const emailData = await waitForEmail(email);
+    const code =
+      emailData.headers['x-verify-code'] ||
+      emailData.headers['x-recovery-code'] ||
+      emailData.headers['x-verify-short-code'];
+    if (!code) {
+      throw new Error('email did not contain a verification code');
+    }
+    return code;
   }
 
   function loop(name, tries, cb) {

@@ -70,6 +70,9 @@ module.exports = (config) => {
         delete headers['accept-language'];
       }
       this.emit('startRequest', options);
+
+      // console.log('!!! request', options)
+
       request(options, (err, res, body) => {
         if (res && res.headers.timestamp) {
           // Record time skew
@@ -79,6 +82,7 @@ module.exports = (config) => {
 
         this.emit('endRequest', options, err, res);
         if (err || body.error || res.statusCode !== 200) {
+          // console.log('!!! response err', {statusCode: res.statusCode, err: err || body });
           return reject(err || body);
         }
 
@@ -96,7 +100,7 @@ module.exports = (config) => {
             );
           }
         }
-
+        // console.log('!!! response success', {body});
         resolve(body);
       });
     });
@@ -169,6 +173,51 @@ module.exports = (config) => {
         'accept-language': options.lang,
       }
     );
+  };
+
+  ClientApi.prototype.accountCreateV2 = async function (
+    email,
+    authPW,
+    authPW2,
+    wrapKb,
+    wrapKb2,
+    clientSalt,
+    options = {}
+  ) {
+    const url = `${this.baseURL}/account/create${getQueryString(options)}`;
+
+    const result = await this.doRequest(
+      'POST',
+      url,
+      null,
+      {
+        email: email,
+        authPW: authPW.toString('hex'),
+        authPW2: authPW2.toString('hex'),
+        wrapKb: wrapKb.toString('hex'),
+        wrapKb2: wrapKb2.toString('hex'),
+        clientSalt,
+        preVerified: options.preVerified || undefined,
+        service: options.service || undefined,
+        redirectTo: options.redirectTo || undefined,
+        resume: options.resume || undefined,
+        device: options.device || undefined,
+        metricsContext: options.metricsContext || undefined,
+        style: options.style || undefined,
+        verificationMethod: options.verificationMethod || undefined,
+      },
+      {
+        'accept-language': options.lang,
+      }
+    );
+    return result;
+  };
+
+  ClientApi.prototype.getCredentialsStatus = function (email) {
+    const url = `${this.baseURL}/account/credentials/status`;
+    return this.doRequest('POST', url, null, {
+      email: email,
+    });
   };
 
   ClientApi.prototype.accountLogin = function (email, authPW, options) {
@@ -372,6 +421,45 @@ module.exports = (config) => {
     );
   };
 
+  ClientApi.prototype.accountResetV2 = function (
+    accountResetTokenHex,
+    authPW,
+    authPW2,
+    wrapKb,
+    wrapKb2,
+    clientSalt,
+    headers,
+    options = {}
+  ) {
+    const qs = getQueryString(options);
+
+    // Default behavior is to request sessionToken
+    if (options.sessionToken === undefined) {
+      options.sessionToken = true;
+    }
+
+    return tokens.AccountResetToken.fromHex(accountResetTokenHex).then(
+      (token) => {
+        const payload = {
+          authPW: authPW.toString('hex'),
+          authPW2: authPW2.toString('hex'),
+          wrapKb: wrapKb.toString('hex'),
+          wrapKb2: wrapKb2.toString('hex'),
+          clientSalt: clientSalt.toString(),
+          sessionToken: options.sessionToken,
+        };
+
+        return this.doRequest(
+          'POST',
+          `${this.baseURL}/account/reset${qs}`,
+          token,
+          payload,
+          headers
+        );
+      }
+    );
+  };
+
   ClientApi.prototype.accountResetWithRecoveryKey = function (
     accountResetTokenHex,
     authPW,
@@ -391,6 +479,40 @@ module.exports = (config) => {
           {
             authPW: authPW.toString('hex'),
             wrapKb,
+            sessionToken: true,
+            recoveryKeyId,
+          },
+          headers
+        );
+      }
+    );
+  };
+
+  ClientApi.prototype.accountResetWithRecoveryKeyV2 = function (
+    accountResetTokenHex,
+    authPW,
+    authPW2,
+    wrapKb,
+    wrapKb2,
+    clientSalt,
+    recoveryKeyId,
+    headers,
+    options = {}
+  ) {
+    const qs = getQueryString(options);
+
+    return tokens.AccountResetToken.fromHex(accountResetTokenHex).then(
+      (token) => {
+        return this.doRequest(
+          'POST',
+          `${this.baseURL}/account/reset${qs}`,
+          token,
+          {
+            authPW: authPW.toString('hex'),
+            authPW2: authPW2.toString('hex'),
+            wrapKb,
+            wrapKb2,
+            clientSalt,
             sessionToken: true,
             recoveryKeyId,
           },
@@ -586,6 +708,25 @@ module.exports = (config) => {
     );
   };
 
+  ClientApi.prototype.passwordChangeStartV2 = function (
+    email,
+    oldAuthPW,
+    oldAuthPW2,
+    headers
+  ) {
+    return this.doRequest(
+      'POST',
+      `${this.baseURL}/password/change/start`,
+      null,
+      {
+        email: email,
+        oldAuthPW: oldAuthPW.toString('hex'),
+        oldAuthPW2: oldAuthPW2.toString('hex'),
+      },
+      headers
+    );
+  };
+
   ClientApi.prototype.passwordChangeFinish = function (
     passwordChangeTokenHex,
     authPW,
@@ -615,6 +756,47 @@ module.exports = (config) => {
           headers
         );
       }
+    );
+  };
+
+  ClientApi.prototype.passwordChangeFinishV2 = async function (
+    passwordChangeTokenHex,
+    authPW,
+    authPW2,
+    wrapKb,
+    wrapKb2,
+    clientSalt,
+    headers,
+    sessionToken
+  ) {
+    const options = {};
+
+    const token = await tokens.PasswordChangeToken.fromHex(
+      passwordChangeTokenHex
+    );
+
+    const requestData = {
+      authPW: authPW.toString('hex'),
+      authPW2: authPW2.toString('hex'),
+      wrapKb: wrapKb.toString('hex'),
+      wrapKb2: wrapKb2.toString('hex'),
+      clientSalt,
+    };
+
+    options.keys = true;
+
+    if (sessionToken) {
+      // Support legacy clients and new clients
+      options.keys = true;
+      requestData.sessionToken = sessionToken;
+    }
+
+    return await this.doRequest(
+      'POST',
+      `${this.baseURL}/password/change/finish${getQueryString(options)}`,
+      token,
+      requestData,
+      headers
     );
   };
 

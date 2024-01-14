@@ -201,6 +201,8 @@ module.exports = function (
           uaFormFactor: ua.formFactor,
         });
 
+
+
         if (
           !sessionToken.mustVerify &&
           (requestHelper.wantsKeys(request) || verificationMethod)

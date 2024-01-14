@@ -70,7 +70,7 @@ DB.connect(config).then(async (db) => {
     mailer
   );
   signinUtils.checkPassword = function () {
-    return Promise.resolve(true);
+    return Promise.resolve({ match: true, v1: true, v2: false });
   };
 
   // Bypass TOTP checks.

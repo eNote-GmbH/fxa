@@ -163,7 +163,7 @@ module.exports = (config, log, Token, UnblockCode = null) => {
 
   DB.prototype.checkPassword = async function (uid, verifyHash) {
     log.trace('DB.checkPassword', { uid, verifyHash });
-    return Account.checkPassword(uid, verifyHash);
+    return Account.checkPasswordV2(uid, verifyHash);
   };
 
   DB.prototype.accountExists = async function (email) {
@@ -224,7 +224,9 @@ module.exports = (config, log, Token, UnblockCode = null) => {
     log.trace('DB.keyFetchToken', { id });
     const data = await RawKeyFetchToken.findByTokenId(id);
     if (!data) {
-      throw error.invalidToken('The authentication token could not be found');
+      throw error.invalidToken(
+        'The authentication token could not be found'
+      );
     }
     return KeyFetchToken.fromId(id, data);
   };
@@ -233,7 +235,9 @@ module.exports = (config, log, Token, UnblockCode = null) => {
     log.trace('DB.keyFetchTokenWithVerificationStatus', { id });
     const data = await RawKeyFetchToken.findByTokenId(id, true);
     if (!data) {
-      throw error.invalidToken('The authentication token could not be found');
+      throw error.invalidToken(
+        'The authentication token could not be found'
+      );
     }
     return KeyFetchToken.fromId(id, data);
   };
@@ -242,7 +246,9 @@ module.exports = (config, log, Token, UnblockCode = null) => {
     log.trace('DB.accountResetToken', { id });
     const data = await RawAccountResetToken.findByTokenId(id);
     if (!data) {
-      throw error.invalidToken('The authentication token could not be found');
+      throw error.invalidToken(
+        'The authentication token could not be found'
+      );
     }
     return AccountResetToken.fromHex(data.tokenData, data);
   };
@@ -251,7 +257,9 @@ module.exports = (config, log, Token, UnblockCode = null) => {
     log.trace('DB.passwordForgotToken', { id });
     const data = await RawPasswordForgotToken.findByTokenId(id);
     if (!data) {
-      throw error.invalidToken('The authentication token could not be found');
+      throw error.invalidToken(
+        'The authentication token could not be found'
+      );
     }
     return PasswordForgotToken.fromHex(data.tokenData, data);
   };
@@ -260,7 +268,9 @@ module.exports = (config, log, Token, UnblockCode = null) => {
     log.trace('DB.passwordChangeToken', { id });
     const data = await RawPasswordChangeToken.findByTokenId(id);
     if (!data) {
-      throw error.invalidToken('The authentication token could not be found');
+      throw error.invalidToken(
+        'The authentication token could not be found'
+      );
     }
     return PasswordChangeToken.fromHex(data.tokenData, data);
   };
@@ -325,7 +335,9 @@ module.exports = (config, log, Token, UnblockCode = null) => {
     log.trace('DB.sessionToken', { id });
     const data = await RawSessionToken.findByTokenId(id);
     if (!data) {
-      throw error.invalidToken('The authentication token could not be found');
+      throw error.invalidToken(
+        'The authentication token could not be found'
+      );
     }
     return SessionToken.fromHex(data.tokenData, data);
   };
@@ -762,16 +774,22 @@ module.exports = (config, log, Token, UnblockCode = null) => {
   DB.prototype.createPassword = async function (
     uid,
     authSalt,
+    clientSalt,
     verifyHash,
+    verifyHash2,
     wrapWrapKb,
+    wrapWrapKb2,
     verifierVersion
   ) {
     log.trace('DB.createPassword', { uid });
     return Account.createPassword(
       uid,
       authSalt,
+      clientSalt,
       verifyHash,
+      verifyHash2,
       wrapWrapKb,
+      wrapWrapKb2,
       verifierVersion
     );
   };

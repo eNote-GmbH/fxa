@@ -151,7 +151,7 @@ class AccountsEventsServerEvent {
     };
 
     // this is similar to how FxA currently logs with mozlog: https://github.com/mozilla/fxa/blob/4c5c702a7fcbf6f8c6b1f175e9172cdd21471eac/packages/fxa-auth-server/lib/log.js#L289
-    _logger.info(GLEAN_EVENT_MOZLOG_TYPE, ping);
+    _logger.trace(GLEAN_EVENT_MOZLOG_TYPE, ping);
   }
 }
 

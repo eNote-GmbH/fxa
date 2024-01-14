@@ -53,15 +53,22 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
         throw error.mustResetAccount(accountRecord.email);
       }
       const verifyHash = await password.verifyHash();
+
       const match = await db.checkPassword(accountRecord.uid, verifyHash);
-      if (match) {
-        return match;
+
+      if (match.v2) {
+        password.clientVersion = 2;
+        return true;
+      }
+      if (match.v1) {
+        password.clientVersion = 1;
+        return true;
       }
       await customs.flag(clientAddress, {
         email: accountRecord.email,
         errno: error.ERRNO.INCORRECT_PASSWORD,
       });
-      return match;
+      return false;
     },
 
     /**
@@ -464,7 +471,8 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
     },
 
     async createKeyFetchToken(request, accountRecord, password, sessionToken) {
-      const wrapKb = await password.unwrap(accountRecord.wrapWrapKb);
+      const wrapWrapKb = password.clientVersion === 2 ? accountRecord.wrapWrapKb2 : accountRecord.wrapWrapKb;
+      const wrapKb = await password.unwrap(wrapWrapKb);
       const keyFetchToken = await db.createKeyFetchToken({
         uid: accountRecord.uid,
         kA: accountRecord.kA,
@@ -494,6 +502,8 @@ module.exports = (log, config, customs, db, mailer, cadReminders, glean) => {
           verificationReason: 'signup',
         };
       }
+
+
       if (sessionToken.mustVerify && !sessionToken.tokenVerified) {
         return {
           verified: false,

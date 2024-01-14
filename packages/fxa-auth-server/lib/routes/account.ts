@@ -4,6 +4,7 @@
 import {
   deleteAllPayPalBAs,
   getAllPayPalBAByUid,
+  Account
 } from 'fxa-shared/db/models/auth';
 import {
   AppStoreSubscription,
@@ -124,6 +125,10 @@ export class AccountHandler {
 
   private async createAccount(options: {
     authPW: string;
+    authPW2?: string;
+    wrapKb?: string;
+    wrapKb2?: string;
+    clientSalt?: string;
     authSalt: string;
     email: string;
     emailCode: string;
@@ -134,6 +139,10 @@ export class AccountHandler {
   }) {
     const {
       authPW,
+      authPW2,
+      wrapKb,
+      wrapKb2,
+      clientSalt,
       authSalt,
       email,
       emailCode,
@@ -148,6 +157,27 @@ export class AccountHandler {
       authSalt
     );
 
+    // Handle authPW2 credentials
+    let password2 = undefined;
+    let verifyHash2 = undefined;
+    let wrapWrapKb = await random.hex(32);
+    let wrapWrapKb2 = undefined;
+    if (authPW2) {
+      password2 = new this.Password(
+        authPW2,
+        authSalt,
+        this.config.verifierVersion
+      );
+      verifyHash2 = await password2.verifyHash();
+      wrapWrapKb2 = await password2.wrap(wrapKb2);
+
+      // When version 2 credentials are supplied, the wrapKb will also be supplied.
+      // This is necessary to the same kB values are produced for both passwords.
+      wrapWrapKb = await password.wrap(wrapKb);
+    }
+
+    const kA = await random.hex(32);
+
     const locale = request.app.acceptLanguage;
     if (!locale) {
       // We're seeing a surprising number of accounts created
@@ -159,20 +189,22 @@ export class AccountHandler {
       });
     }
 
-    const hexes = await random.hex(32, 32);
     const account = await this.db.createAccount({
       uid: uuid.v4({}, Buffer.alloc(16)).toString('hex'),
       createdAt: Date.now(),
       email: email,
       emailCode: emailCode,
       emailVerified: preVerified,
-      kA: hexes[0],
-      wrapWrapKb: hexes[1],
+      kA,
+      wrapWrapKb,
+      wrapWrapKb2,
       accountResetToken: null,
       passwordForgotToken: null,
       authSalt: authSalt,
+      clientSalt: clientSalt,
       verifierVersion: password.version,
       verifyHash: verifyHash,
+      verifyHash2: verifyHash2,
       verifierSetAt: Date.now(),
       locale,
     });
@@ -180,9 +212,16 @@ export class AccountHandler {
     await request.emitMetricsEvent('account.created', {
       uid: account.uid,
     });
+    if (authPW2) {
+      await request.emitMetricsEvent('account.password.v2.created', {
+        uid: account.uid,
+      });
+    }
+
     this.glean.registration.accountCreated(request, {
       uid: account.uid,
     });
+    // TBD: Need glean event for v2 accountCreated?
 
     const geoData = request.app.geo;
     const country = geoData.location && geoData.location.country;
@@ -208,7 +247,7 @@ export class AccountHandler {
       uid: account.uid,
       userAgent: userAgentString,
     });
-    return { password, account };
+    return { password, password2, account };
   }
 
   private setMetricsFlowCompleteSignal(request: AuthRequest, service?: string) {
@@ -355,7 +394,6 @@ export class AccountHandler {
       );
     } catch (err) {
       this.log.error('mailer.sendVerifyCode.1', { err });
-
       if (tokenVerificationId) {
         // Log possible email bounce, used for confirming verification rates
         this.log.error('account.create.confirm.error', {
@@ -376,10 +414,11 @@ export class AccountHandler {
     password: any;
     request: AuthRequest;
     tokenVerificationId: any;
+    v2?: boolean;
   }) {
-    const { request, account, password, tokenVerificationId } = options;
+    const { request, account, password, tokenVerificationId, v2 } = options;
     if (requestHelper.wantsKeys(request)) {
-      const wrapKb = await password.unwrap(account.wrapWrapKb);
+      const wrapKb = await password.unwrap(v2 ? account.wrapWrapKb2 : account.wrapWrapKb);
       const keyFetchToken = await this.db.createKeyFetchToken({
         uid: account.uid,
         kA: account.kA,
@@ -396,11 +435,17 @@ export class AccountHandler {
   private accountCreateResponse(options: {
     account: any;
     keyFetchToken: any;
+    keyFetchToken2: any;
     sessionToken: any;
     verificationMethod: any;
   }) {
-    const { account, sessionToken, keyFetchToken, verificationMethod } =
-      options;
+    const {
+      account,
+      sessionToken,
+      keyFetchToken,
+      keyFetchToken2,
+      verificationMethod,
+    } = options;
     const response: Record<string, any> = {
       uid: account.uid,
       sessionToken: sessionToken.data,
@@ -409,6 +454,10 @@ export class AccountHandler {
 
     if (keyFetchToken) {
       response.keyFetchToken = keyFetchToken.data;
+    }
+
+    if (keyFetchToken2) {
+      response.keyFetchToken2 = keyFetchToken2.data;
     }
 
     if (verificationMethod) {
@@ -452,6 +501,10 @@ export class AccountHandler {
     const query = request.query;
     const email = form.email;
     const authPW = form.authPW;
+    const wrapKb = form.wrapKb;
+    const authPW2 = form.authPW2;
+    const wrapKb2 = form.wrapKb2;
+    const clientSalt = form.clientSalt;
     const userAgentString = request.headers['user-agent'];
     const service = form.service || query.service;
     const preVerified = !!form.preVerified;
@@ -479,8 +532,12 @@ export class AccountHandler {
 
     this.setMetricsFlowCompleteSignal(request, service);
 
-    const { account, password } = await this.createAccount({
+    const { account, password, password2 } = await this.createAccount({
       authPW,
+      authPW2,
+      wrapKb,
+      wrapKb2,
+      clientSalt,
       authSalt,
       email,
       emailCode,
@@ -511,6 +568,17 @@ export class AccountHandler {
       tokenVerificationId,
     });
 
+    let keyFetchToken2;
+    if (password2) {
+      keyFetchToken2 = await this.createKeyFetchToken({
+        account,
+        password: password2,
+        request,
+        tokenVerificationId,
+        v2: true
+      })
+    }
+
     await this.db.securityEvent({
       ipAddr: request.app.clientAddress,
       name: 'account.create',
@@ -521,6 +589,7 @@ export class AccountHandler {
     return this.accountCreateResponse({
       account,
       keyFetchToken,
+      keyFetchToken2,
       sessionToken,
       verificationMethod,
     });
@@ -562,11 +631,14 @@ export class AccountHandler {
       emailVerified: false,
       kA,
       wrapWrapKb,
+      wrapWrapKb2: null,
       authSalt,
       verifierVersion: this.config.verifierVersion,
       verifyHash: Buffer.alloc(32).toString('hex'),
+      verifyHash2: null,
       verifierSetAt: 0,
       locale: request.app.acceptLanguage,
+      clientSalt: null,
     });
 
     const access = await generateAccessToken({
@@ -591,23 +663,67 @@ export class AccountHandler {
     };
   }
 
-  async setPasswordOnStubAccount(account: any, authPW: string) {
+  async setPasswordOnStubAccount({
+    account,
+    authPW,
+    authPW2,
+    wrapKb,
+    wrapKb2,
+    clientSalt,
+  }: {
+    account: Account;
+    authPW: string;
+    authPW2: string;
+    wrapKb: string;
+    wrapKb2: string;
+    clientSalt: string;
+  }) {
     // Only set a password on an unverified stub account.
     if (account.verifierSetAt !== 0) {
       throw error.unauthorized('token already used');
     }
+    const { authSalt, uid } = account;
 
-    const { authSalt, uid, wrapWrapKb } = account;
-    const { password, verifyHash } = await this.createPassword(
+    const password = new this.Password(
       authPW,
-      authSalt
+      authSalt,
+      this.config.verifierVersion
     );
+
+    const verifyHash = await password.verifyHash();
+    const wrapWrapKb = account.wrapWrapKb;
+    const wrapWrapKb2 = account.wrapWrapKb2;
+
+    let verifyHash2 = undefined;
+    if (authPW2) {
+      const password2 = new this.Password(
+        authPW2,
+        authSalt,
+        this.config.verifierVersion,
+        2
+      );
+      verifyHash2 = await password2.verifyHash();
+
+      // In V2 we will supply wrapKb and wrapKb2 and run sanity checks here.
+      // If wrapWrapKb drifts from what the client expects, it means we will
+      // corrupt the key, and a user won't be able to decrypt their data.
+      if ((await password2.wrap(wrapKb2)) !== wrapWrapKb2) {
+        throw new Error('Shift detected in wrapWrapKb2! Aborting operation.');
+      }
+      if ((await password.wrap(wrapKb)) !== wrapWrapKb) {
+        throw new Error('Shift detected in wrapWrapKb! Aborting operation.');
+      }
+    }
+
     await this.db.resetAccount(
       { uid },
       {
         authSalt,
+        clientSalt,
         verifyHash,
+        verifyHash2,
         wrapWrapKb,
+        wrapWrapKb2,
         verifierVersion: password.version,
         keysHaveChanged: true,
       }
@@ -617,17 +733,24 @@ export class AccountHandler {
   async finishSetup(request: AuthRequest) {
     this.log.begin('Account.finishSetup', request);
     const form = request.payload as any;
-    const authPW = form.authPW;
+    const { authPW, authPW2, wrapKb, wrapKb2, clientSalt, token } = form;
     let uid;
     try {
-      const payload = (await jwt.verify(form.token, {
+      const payload = (await jwt.verify(token, {
         typ: 'fin+JWT',
         ignoreExpiration: true,
       })) as any;
       uid = payload.uid;
       form.uid = payload.uid;
       const account = await this.db.account(uid);
-      await this.setPasswordOnStubAccount(account, authPW);
+      await this.setPasswordOnStubAccount({
+        account,
+        authPW,
+        authPW2,
+        wrapKb,
+        wrapKb2,
+        clientSalt,
+      });
       await this.signupUtils.verifyAccount(request, account, {});
       const sessionToken = await this.createSessionToken({
         account,
@@ -664,7 +787,7 @@ export class AccountHandler {
     this.log.begin('Account.set_password', request);
 
     const form = request.payload as any;
-    const { authPW, metricsContext } = form;
+    const { authPW, authPW2, wrapKb, wrapKb2, clientSalt, metricsContext } = form;
     const { query } = request;
     const auth = request.auth;
     const { user: uid } = auth.credentials;
@@ -678,7 +801,14 @@ export class AccountHandler {
     response.uid = uid;
 
     try {
-      await this.setPasswordOnStubAccount(account, authPW);
+      await this.setPasswordOnStubAccount({
+        account,
+        authPW,
+        authPW2,
+        wrapKb,
+        wrapKb2,
+        clientSalt,
+      });
 
       const { emailCode: tokenVerificationId } = account;
       const sessionToken = await this.createSessionToken({
@@ -747,6 +877,7 @@ export class AccountHandler {
       passwordChangeRequired: any,
       sessionToken: any,
       keyFetchToken: any,
+      keyFetchToken2: any,
       didSigninUnblock: any;
     let securityEventRecency = Infinity,
       securityEventVerified = false;
@@ -1090,12 +1221,22 @@ export class AccountHandler {
 
     const createKeyFetchToken = async () => {
       if (requestHelper.wantsKeys(request)) {
-        keyFetchToken = await this.signinUtils.createKeyFetchToken(
-          request,
-          accountRecord,
-          password,
-          sessionToken
-        );
+        if (password.clientVersion === 2) {
+          keyFetchToken2 = await this.signinUtils.createKeyFetchToken(
+            request,
+            accountRecord,
+            password,
+            sessionToken
+          )
+        }
+        else {
+          keyFetchToken = await this.signinUtils.createKeyFetchToken(
+            request,
+            accountRecord,
+            password,
+            sessionToken
+          );
+        }
       }
     };
 
@@ -1110,6 +1251,11 @@ export class AccountHandler {
       if (keyFetchToken) {
         response.keyFetchToken = keyFetchToken.data;
       }
+
+      if (keyFetchToken2) {
+        response.keyFetchToken2 = keyFetchToken2.data;
+      }
+
       if (passwordChangeRequired) {
         response.verified = false;
         response.verificationReason = 'change_password';
@@ -1290,19 +1436,27 @@ export class AccountHandler {
 
   async reset(request: AuthRequest) {
     this.log.begin('Account.reset', request);
+
     const accountResetToken = request.auth.credentials;
     const {
       authPW,
+      authPW2,
+      clientSalt,
       sessionToken: hasSessionToken,
       recoveryKeyId,
+      wrapKb2,
     } = request.payload as any;
     let wrapKb = (request.payload as any).wrapKb;
     let account: any,
       sessionToken: any,
       keyFetchToken: any,
+      keyFetchToken2: any,
       verifyHash: any,
+      verifyHash2: any,
       wrapWrapKb: any,
+      wrapWrapKb2: any,
       password: any,
+      password2: any,
       hasTotpToken = false,
       tokenVerificationId: any;
 
@@ -1329,15 +1483,40 @@ export class AccountHandler {
         this.config.verifierVersion
       );
       verifyHash = await password.verifyHash();
+
+      if (authPW2) {
+        password2 = new this.Password(
+          authPW2,
+          authSalt,
+          this.config.verifierVersion,
+          2
+        );
+        verifyHash2 = await password2.verifyHash();
+      }
+
       if (recoveryKeyId) {
         // We have the previous kB, just re-wrap it with the new password.
+        if (authPW2) {
+          wrapWrapKb2 = await password2.wrap(wrapKb2);
+        }
         wrapWrapKb = await password.wrap(wrapKb);
         keysHaveChanged = false;
-      } else {
-        // We need to regenerate kB and wrap it with the new password.
-        wrapWrapKb = await random.hex(32);
-        wrapKb = await password.unwrap(wrapWrapKb);
-        keysHaveChanged = true;
+      }
+      else {
+        if (authPW2) {
+          // For v2 credentials, the client will supply a new wrapKbs. This is to ensure
+          // that both wrapKb and wrapKb2 can derive the same kB. It is up to the client
+          // to ensure this!
+          wrapWrapKb = await password.wrap(wrapKb);
+          wrapWrapKb2 = await password2.wrap(wrapKb2);
+          keysHaveChanged = true;
+        }
+        else {
+          // We need to regenerate kB and wrap it with the new password.
+          wrapWrapKb = await random.hex(32);
+          wrapKb = await password.unwrap(wrapWrapKb);
+          keysHaveChanged = true;
+        }
       }
       // db.resetAccount() deletes all the devices saved in the account,
       // so grab the list to notify before we call it.
@@ -1345,8 +1524,11 @@ export class AccountHandler {
       // Reset the account, and delete any other outstanding account-related tokens.
       await this.db.resetAccount(accountResetToken, {
         authSalt,
+        clientSalt,
         verifyHash,
+        verifyHash2,
         wrapWrapKb,
+        wrapWrapKb2,
         verifierVersion: password.version,
         keysHaveChanged,
       });
@@ -1459,6 +1641,17 @@ export class AccountHandler {
           emailVerified: account.primaryEmail.isVerified,
           tokenVerificationId,
         });
+
+        if (authPW2) {
+          keyFetchToken2 = await this.db.createKeyFetchToken({
+            uid: account.uid,
+            kA: account.kA,
+            wrapKb: wrapKb2,
+            emailVerified: account.primaryEmail.isVerified,
+            tokenVerificationId,
+          });
+        }
+
         return await request.propagateMetricsContext(
           accountResetToken,
           keyFetchToken
@@ -1490,7 +1683,12 @@ export class AccountHandler {
       };
 
       if (requestHelper.wantsKeys(request)) {
-        response.keyFetchToken = keyFetchToken.data;
+        if (keyFetchToken) {
+          response.keyFetchToken = keyFetchToken.data;
+        }
+        if (keyFetchToken2) {
+          response.keyFetchToken2 = keyFetchToken.data2;
+        }
       }
 
       const verificationMethod = hasTotpToken ? 'totp-2fa' : undefined;
@@ -1513,6 +1711,33 @@ export class AccountHandler {
     await createKeyFetchToken();
     await recordSecurityEvent();
     return createResponse();
+  }
+
+  async getCredentialsStatus(request: AuthRequest) {
+    this.log.begin('Account.getCredentialsStatus', request);
+
+    const email = (request.payload as any).email;
+    await this.customs.check(request, email, 'getCredentialsStatus');
+    const { accountRecord } = await this.signinUtils.checkCustomsAndLoadAccount(
+      request,
+      email,
+      true
+    );
+
+    if (accountRecord.disabledAt) {
+      throw error.cannotLoginWithEmail();
+    }
+
+    if (accountRecord.verifierSetAt <= 0) {
+      throw error.cannotLoginWithEmail();
+    }
+
+    const response = {
+      currentVersion: accountRecord.clientSalt ? 'v2' :'v1',
+      clientSalt: accountRecord.clientSalt || '',
+      upgradeNeeded: !accountRecord.verifyHash2 || !accountRecord.wrapWrapKb2
+    }
+    return response;
   }
 
   async destroy(request: AuthRequest) {
@@ -1741,6 +1966,18 @@ export const accountRoutes = (
           payload: isA.object({
             email: validators.email().required().description(DESCRIPTION.email),
             authPW: validators.authPW.description(DESCRIPTION.authPW),
+            authPW2: validators.authPW2
+            .optional()
+            .description(DESCRIPTION.authPW2),
+            wrapKb: validators.wrapKb
+              .optional()
+              .description(DESCRIPTION.wrapKb),
+            wrapKb2: validators.wrapKb
+              .optional()
+              .description(DESCRIPTION.wrapKb2),
+            clientSalt: validators.clientSalt
+              .optional()
+              .description(DESCRIPTION.clientSalt),
             service: validators.service.description(DESCRIPTION.service),
             redirectTo: validators
               .redirectTo(config.smtp.redirectDomain)
@@ -1760,13 +1997,15 @@ export const accountRoutes = (
             ...(!(config as any).isProduction && {
               preVerified: isA.boolean(),
             }),
-          }),
+          })
+          .and('authPW2', 'wrapKb', 'wrapKb2', 'clientSalt'),
         },
         response: {
           schema: isA.object({
             uid: isA.string().regex(HEX_STRING).required(),
             sessionToken: isA.string().regex(HEX_STRING).required(),
             keyFetchToken: isA.string().regex(HEX_STRING).optional(),
+            keyFetchToken2: isA.string().regex(HEX_STRING).optional(),
             authAt: isA.number().integer().description(DESCRIPTION.authAt),
             verificationMethod: validators.verificationMethod
               .optional()
@@ -1774,7 +2013,15 @@ export const accountRoutes = (
           }),
         },
       },
-      handler: (request: AuthRequest) => accountHandler.accountCreate(request),
+      handler: (request: AuthRequest) => {
+
+        try {
+          return accountHandler.accountCreate(request)
+        }
+        catch (err) {
+          throw new Error('blah', err);
+        }
+      }
     },
     {
       method: 'POST',
@@ -1797,10 +2044,24 @@ export const accountRoutes = (
       options: {
         ...ACCOUNT_DOCS.ACCOUNT_FINISH_SETUP_POST,
         validate: {
-          payload: isA.object({
-            token: validators.jwt,
-            authPW: validators.authPW,
-          }),
+          payload: isA
+            .object({
+              token: validators.jwt,
+              authPW: validators.authPW.description(DESCRIPTION.authPW),
+              wrapKb: validators.wrapKb
+                .optional()
+                .description(DESCRIPTION.wrapKb),
+              authPW2: validators.authPW2
+                .optional()
+                .description(DESCRIPTION.authPW2),
+              wrapKb2: validators.wrapKb
+                .optional()
+                .description(DESCRIPTION.wrapKb2),
+              clientSalt: validators.clientSalt
+                .optional()
+                .description(DESCRIPTION.clientSalt),
+            })
+            .and('authPW2', 'wrapKb2', 'clientSalt'),
         },
       },
       handler: (request: AuthRequest) => accountHandler.finishSetup(request),
@@ -1823,11 +2084,25 @@ export const accountRoutes = (
               .default(true)
               .description(DESCRIPTION.sendVerifyEmail),
           }),
-          payload: isA.object({
-            authPW: validators.authPW.description(DESCRIPTION.authPW),
-            metricsContext: METRICS_CONTEXT_SCHEMA,
-            service: validators.service.description(DESCRIPTION.service),
-          }),
+          payload: isA
+            .object({
+              authPW: validators.authPW.description(DESCRIPTION.authPW),
+              authPW2: validators.authPW
+                .optional()
+                .description(DESCRIPTION.authPW2),
+              wrapKb: validators.wrapKb
+                .optional()
+                .description(DESCRIPTION.wrapKb),
+              wrapKb2: validators.wrapKb
+                .optional()
+                .description(DESCRIPTION.wrapKb2),
+              clientSalt: validators.clientSalt
+                .optional()
+                .description(DESCRIPTION.clientSalt),
+              metricsContext: METRICS_CONTEXT_SCHEMA,
+              service: validators.service.description(DESCRIPTION.service),
+            })
+            .and('authPW2', 'wrapKb', 'wrapKb2', 'clientSalt'),
         },
         response: {
           schema: isA.object({
@@ -1901,6 +2176,7 @@ export const accountRoutes = (
             uid: isA.string().regex(HEX_STRING).required(),
             sessionToken: isA.string().regex(HEX_STRING).required(),
             keyFetchToken: isA.string().regex(HEX_STRING).optional(),
+            keyFetchToken2: isA.string().regex(HEX_STRING).optional(),
             verificationMethod: isA
               .string()
               .optional()
@@ -2046,17 +2322,46 @@ export const accountRoutes = (
           payload: isA
             .object({
               authPW: validators.authPW.description(DESCRIPTION.authPW),
-              wrapKb: validators.wrapKb.optional(),
-              recoveryKeyId: validators.recoveryKeyId.optional(),
+              authPW2: validators.authPW
+                .optional()
+                .description(DESCRIPTION.authPW),
+              wrapKb: validators.wrapKb
+                .optional()
+                .description(DESCRIPTION.wrapKb),
+              wrapKb2: validators.wrapKb
+                .optional()
+                .description(DESCRIPTION.wrapKb2),
+              clientSalt: validators.clientSalt
+                .optional()
+                .description(DESCRIPTION.clientSalt),
+              recoveryKeyId: validators.recoveryKeyId
+                .optional()
+                .description(DESCRIPTION.recoveryKeyId),
               sessionToken: isA
                 .boolean()
                 .optional()
                 .description(DESCRIPTION.sessionToken),
+            }).custom((value, helper) => {
+              if (value.authPW2 && !value.wrapKb) {
+                return helper.error('any.invalid')
+              }
+              if (value.authPW2 && !value.wrapKb2) {
+                return helper.error('any.invalid')
+              }
+              if (value.authPW2 && !value.clientSalt) {
+                return helper.error('any.invalid')
+              }
+              if (!value.authPW2 && value.recoveryKeyId && !value.wrapKb) {
+                return helper.error('any.invalid')
+              }
+              if (!value.authPW2 && value.wrapKb && !value.recoveryKeyId) {
+                return helper.error('any.invalid')
+              }
+              return value;
             })
-            .and('wrapKb', 'recoveryKeyId'),
         },
       },
-      handler: (request: AuthRequest) => accountHandler.reset(request),
+      handler: async (request: AuthRequest) =>  accountHandler.reset(request),
     },
     {
       method: 'POST',
@@ -2075,6 +2380,26 @@ export const accountRoutes = (
         },
       },
       handler: (request: AuthRequest) => accountHandler.destroy(request),
+    },
+    {
+      method: 'POST',
+      path: '/account/credentials/status',
+      options: {
+        ...ACCOUNT_DOCS.ACCOUNT_CLIENT_SALT,
+        validate: {
+          payload: isA.object({
+            email: validators.email().description(DESCRIPTION.email),
+          }),
+        },
+        response: {
+          schema: isA.object({
+            currentVersion: isA.string().allow('v1','v2'),
+            clientSalt: validators.clientSalt,
+            upgradeNeeded: isA.boolean()
+          })
+        }
+      },
+      handler: (request: AuthRequest) => accountHandler.getCredentialsStatus(request),
     },
     {
       method: 'GET',

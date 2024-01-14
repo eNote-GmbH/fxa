@@ -63,6 +63,8 @@ function logEndpointErrors(response, log) {
       endpointLog.method = response.attempt.method;
     }
     log.error('server.EndpointError', endpointLog);
+
+    console.log('!!! server.EndpointError', response);
   }
 }
 

@@ -201,8 +201,11 @@ export class StripeFirestore extends StripeFirestoreBase {
       );
       return bulkWriterResults;
     } catch (error) {
-      const errors = bulkWriterErrors.length ? bulkWriterErrors : [error];
-      throw new FirestoreBulkWriterMultiError(errors);
+      if (error instanceof BulkWriterError) {
+        throw new FirestoreBulkWriterMultiError([error, ...bulkWriterErrors]);
+      } else {
+        throw error;
+      }
     }
   }
 }

@@ -33,6 +33,7 @@ export class SubscriptionUpdater {
    * A converter to move customers from one plan to another
    * @param planIdMap A mapping where keys are source plan IDs and values are destination plan IDs, subscriptions with a matching source plan IDs will be moved to the destination plan ID
    * @param prorationBehavior Stripe proration behavior for the move
+   * @param prorationDate Stripe proration date
    * @param batchSize Number of subscriptions to fetch from Firestore at a time
    * @param outputFile A CSV file to output a report of affected subscriptions to
    * @param stripeHelper An instance of StripeHelper
@@ -43,6 +44,7 @@ export class SubscriptionUpdater {
   constructor(
     private planIdMap: Record<string, string>,
     private prorationBehavior: Stripe.SubscriptionUpdateParams['proration_behavior'],
+    private prorationDate: Stripe.SubscriptionUpdateParams['proration_date'],
     private batchSize: number,
     private outputFile: string,
     private stripeHelper: StripeHelper,
@@ -200,6 +202,7 @@ export class SubscriptionUpdater {
     await this.enqueueRequest(() =>
       this.stripe.subscriptions.update(subscription.id, {
         proration_behavior: this.prorationBehavior,
+        proration_date: this.prorationDate,
         items: updatedItems,
         metadata: {
           previous_plan_id: subscription.items.data[0].plan.id,

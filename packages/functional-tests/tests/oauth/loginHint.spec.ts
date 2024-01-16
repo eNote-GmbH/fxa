@@ -18,7 +18,7 @@ test.describe('severity-2 #smoke', () => {
       expect(error).toContain('Valid email required');
     });
 
-    test.only('login_hint specified by relier, not registered', async ({
+    test('login_hint specified by relier, not registered', async ({
       page,
       pages: { login, relier },
       target,

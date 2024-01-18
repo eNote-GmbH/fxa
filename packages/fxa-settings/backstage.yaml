@@ -1,0 +1,26 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: fxa-settings
+  description: Settings Page front-end for Mozilla Accounts.
+  annotations:
+    circleci.com/project-slug: github/mozilla/fxa
+  tags:
+    - typescript
+    - node
+    - react
+  links:
+    - url: https://accounts.firefox.com/settings
+      title: Production Settings Page for Mozilla Accounts
+      type: website
+    - url: https://accounts.stage.mozaws.net/settings
+      title: Stage Settings Page for Mozilla Accounts
+      type: website
+spec:
+  type: website
+  lifecycle: production
+  owner: fxa-team
+  system: mozilla-accounts
+  consumesApis:
+    - fxa-graphql-api

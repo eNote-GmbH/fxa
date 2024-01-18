@@ -229,18 +229,22 @@ const AuthAndAccountSetupRoutes = ({
 
   return (
     <Router>
-      <WebChannelExample path="/web_channel_example/*" />
-
-      <CannotCreateAccount path="/cannot_create_account/*" />
-      <Clear path="/clear/*" />
-      <CookiesDisabled path="/cookies_disabled/*" />
-
+      {/* Legal */}
       <Legal path="/legal/*" />
       <LegalTerms path="/legal/terms/*" />
       <LegalTerms path="/:locale/legal/terms/*" />
       <LegalPrivacy path="/legal/privacy/*" />
       <LegalPrivacy path="/:locale/legal/privacy/*" />
 
+      {/* Other */}
+      <Clear path="/clear/*" />
+      <CookiesDisabled path="/cookies_disabled/*" />
+      <WebChannelExample path="/web_channel_example/*" />
+
+      {/* Post verify */}
+      <ThirdPartyAuthCallback path="/post_verify/third_party_auth/callback/*" />
+
+      {/* Reset password */}
       <ResetPassword path="/reset_password/*" {...{ integration }} />
       <ConfirmResetPassword
         path="/confirm_reset_password/*"
@@ -250,7 +254,6 @@ const AuthAndAccountSetupRoutes = ({
         path="/complete_reset_password/*"
         {...{ integration }}
       />
-
       <LinkValidator
         path="/account_recovery_confirm_key/*"
         linkType={LinkType['reset-password']}
@@ -270,39 +273,20 @@ const AuthAndAccountSetupRoutes = ({
           />
         )}
       </LinkValidator>
-
       <AccountRecoveryResetPasswordContainer
         path="/account_recovery_reset_password/*"
         {...{ integration }}
       />
-
-      <SigninReported path="/signin_reported/*" />
-      <SigninBounced email={localAccount?.email} path="/signin_bounced/*" />
-
       <ResetPasswordConfirmed
         path="/reset_password_verified/*"
         {...{ isSignedIn, serviceName }}
       />
-
       <ResetPasswordWithRecoveryKeyVerified
         path="/reset_password_with_recovery_key_verified/*"
         {...{ integration, isSignedIn }}
       />
 
-      <PrimaryEmailVerified
-        path="/primary_email_verified/*"
-        {...{ isSignedIn, serviceName }}
-      />
-
-      <SignupConfirmed
-        path="/signup_verified/*"
-        {...{ isSignedIn, serviceName }}
-      />
-      <SignupConfirmed
-        path="/signup_confirmed/*"
-        {...{ isSignedIn, serviceName }}
-      />
-
+      {/* Signin */}
       <SigninConfirmed
         path="/signin_verified/*"
         {...{ isSignedIn, serviceName }}
@@ -311,20 +295,33 @@ const AuthAndAccountSetupRoutes = ({
         path="/signin_confirmed/*"
         {...{ isSignedIn, serviceName }}
       />
+      <SigninReported path="/signin_reported/*" />
+      <SigninBounced email={localAccount?.email} path="/signin_bounced/*" />
 
+      {/* Signup */}
       <SignupContainer path="/signup/*" {...{ integration, serviceName }} />
       <SignupContainer
         path="/oauth/signup/*"
         {...{ integration, serviceName }}
       />
-
+      <CannotCreateAccount path="/cannot_create_account/*" />
+      <SignupConfirmed
+        path="/signup_verified/*"
+        {...{ isSignedIn, serviceName }}
+      />
+      <SignupConfirmed
+        path="/signup_confirmed/*"
+        {...{ isSignedIn, serviceName }}
+      />
       <Confirm path="/confirm/*" {...{ sessionTokenId }} />
       <ConfirmSignupCodeContainer
         path="/confirm_signup_code/*"
         {...{ integration }}
       />
-
-      <ThirdPartyAuthCallback path="/post_verify/third_party_auth/callback/*" />
+      <PrimaryEmailVerified
+        path="/primary_email_verified/*"
+        {...{ isSignedIn, serviceName }}
+      />
     </Router>
   );
 };

@@ -27,4 +27,4 @@ spec:
     - api:fxa-graphql
     - api:fxa-auth
   dependsOn:
-    - fxa-profile-server
+    - component:fxa-profile-server

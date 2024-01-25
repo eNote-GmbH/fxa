@@ -17,7 +17,6 @@ import {
   hardNavigateToContentServer,
 } from 'fxa-react/lib/utils';
 import {
-  useAccount,
   useAlertBar,
   useFtlMsgResolver,
   useSession,

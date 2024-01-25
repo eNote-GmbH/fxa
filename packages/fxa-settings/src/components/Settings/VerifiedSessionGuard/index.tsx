@@ -16,7 +16,19 @@ export const VerifiedSessionGuard = ({
   onError: (error: ApolloError) => void;
   children?: React.ReactNode;
 }) => {
-  return useSession().verified ? (
+  const session = useSession();
+
+  const [isVerified, setIsVerified] = React.useState(false);
+
+  React.useEffect(() => {
+    if (session.verified) {
+      setIsVerified(true);
+      return;
+    }
+    session.isSessionVerified().then(setIsVerified);
+  }, [session]);
+
+  return isVerified ? (
     <>{children}</>
   ) : (
     <ModalVerifySession {...{ onDismiss, onError }} />

@@ -21,7 +21,6 @@ import firefox from '../lib/channels/firefox';
 import Storage from '../lib/storage';
 import random from '../lib/random';
 import { AuthUiErrorNos, AuthUiErrors } from '../lib/auth-errors/auth-errors';
-import { GET_SESSION_VERIFIED } from './Session';
 import { LinkedAccountProviderIds, MozServices } from '../lib/types';
 import { GET_LOCAL_SIGNED_IN_STATUS } from '../components/App/gql';
 
@@ -881,41 +880,6 @@ export class Account implements AccountData {
     );
   }
 
-  async sendVerificationCode() {
-    await this.withLoadingStatus(
-      this.authClient.sessionResendVerifyCode(sessionToken()!)
-    );
-  }
-
-  async verifySession(
-    code: string,
-    options: {
-      service?: string;
-      scopes?: string[];
-      marketingOptIn?: boolean;
-      newsletters?: string[];
-    } = {}
-  ) {
-    await this.withLoadingStatus(
-      this.authClient.sessionVerifyCode(sessionToken()!, code, options)
-    );
-    this.apolloClient.cache.modify({
-      fields: {
-        session: () => {
-          return { verified: true };
-        },
-      },
-    });
-    // TODO: Move this to ConfirmSignupCode container component
-    // If we can use GQL here when we do that, also be sure to add
-    // the operation name to the auth list in `lib/gql.ts`.
-    // Look @ in FXA-7626 or FXA-7184
-    this.apolloClient.cache.writeQuery({
-      query: GET_LOCAL_SIGNED_IN_STATUS,
-      data: { isSignedIn: true },
-    });
-  }
-
   async verifyAccountThirdParty(
     code: string,
     provider: AUTH_PROVIDER = AUTH_PROVIDER.GOOGLE,
@@ -937,20 +901,6 @@ export class Account implements AccountData {
       )
     );
     return linkedAccount;
-  }
-
-  // TODO: Move this method to the Session model - this method was temporarily added to the Account model
-  // because the useSession hook can currently only be used behind a VerifiedSessionGuard and will error
-  // if used in a unverified page.
-  async isSessionVerified() {
-    const query = GET_SESSION_VERIFIED;
-    const { data } = await this.apolloClient.query({
-      fetchPolicy: 'network-only',
-      query,
-    });
-    const { session } = data;
-    const sessionStatus: boolean = session.verified;
-    return sessionStatus;
   }
 
   async replaceRecoveryCodes() {

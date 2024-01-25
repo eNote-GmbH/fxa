@@ -45,7 +45,7 @@ export const ModalVerifySession = ({
   const verifySession = useCallback(
     async (code: string) => {
       try {
-        await account.verifySession(code);
+        await session.verifySession(code);
       } catch (e) {
         if (e.errno === AuthUiErrors.INVALID_EXPIRED_SIGNUP_CODE.errno) {
           const errorText = l10n.getString(
@@ -60,12 +60,12 @@ export const ModalVerifySession = ({
         return;
       }
     },
-    [account, l10n, setErrorText, onError]
+    [session, l10n, setErrorText, onError]
   );
 
   useEffect(() => {
     if (!session.verified) {
-      account.sendVerificationCode();
+      session.sendVerificationCode();
     } else if (onCompleted) {
       onCompleted();
     }

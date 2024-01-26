@@ -61,7 +61,7 @@ const ConfirmationDialogContent = ({
       >
         <h4 id={headerId}>Want to keep using {productName}?</h4>
       </Localized>
-      {(Provider.isPaypal(payment_provider) || !last4) && (
+      {Provider.isPaypal(payment_provider) || !last4 ? (
         <Localized
           id="reactivate-confirm-without-payment-method-copy"
           vars={{
@@ -77,8 +77,7 @@ const ConfirmationDialogContent = ({
             {getLocalizedDateString(periodEndDate)}.
           </p>
         </Localized>
-      )}
-      {last4 && (
+      ) : (
         <Localized
           id="reactivate-confirm-copy"
           vars={{

@@ -147,8 +147,8 @@ export const Confirm = ({
   // navigate to the next screen.
   useInterval(async () => {
     try {
-      const sessionStatus = await session.isSessionVerified();
-      if (sessionStatus) {
+      const sessionVerified = await session.isSessionVerified();
+      if (sessionVerified) {
         navigateToNextScreen();
         setIsPolling(null);
       }

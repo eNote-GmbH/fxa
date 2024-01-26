@@ -74,7 +74,7 @@ export class Session implements SessionData {
     } = {}
   ) {
     await this.withLoadingStatus(
-      this.authClient.sessionVerifyCode(this.token!, code, options)
+      this.authClient.sessionVerifyCode(sessionToken()!, code, options)
     );
     this.verified = true;
     this.apolloClient.cache.modify({

@@ -15,6 +15,7 @@ import {
   useAccount,
   isOAuthIntegration,
   useFtlMsgResolver,
+  useSession,
 } from '../../../models';
 import WarningMessage from '../../../components/WarningMessage';
 import LinkRememberPassword from '../../../components/LinkRememberPassword';
@@ -73,6 +74,7 @@ const CompleteResetPassword = ({
     state: CompleteResetPasswordLocationState;
   };
   const ftlMsgResolver = useFtlMsgResolver();
+  const session = useSession();
 
   const { handleSubmit, register, getValues, errors, formState, trigger } =
     useForm<CompleteResetPasswordFormData>({
@@ -222,14 +224,13 @@ const CompleteResetPassword = ({
         );
 
         /* NOTE: Session check/totp check must come after completeResetPassword since those
-         * require session tokens that we retrieve in PW reset. We will want to refactor this
-         * later but there's a `mustVerify` check getting in the way (see Account.ts comment).
+         * require session tokens that we retrieve in PW reset.
          *
          * We may also want to consider putting a different error message in place for when
          * PW reset succeeds, but one of these fails. At the moment, the try/catch in Account
          * just returns false for these if the request fails. */
         const [sessionIsVerified] = await Promise.all([
-          account.isSessionVerifiedAuthClient(),
+          session.isSessionVerified(),
           account.hasTotpAuthClient(),
         ]);
 
@@ -288,6 +289,7 @@ const CompleteResetPassword = ({
       alertSuccessAndNavigate,
       ftlMsgResolver,
       setLinkStatus,
+      session,
     ]
   );
 

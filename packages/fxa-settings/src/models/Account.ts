@@ -909,25 +909,6 @@ export class Account implements AccountData {
     );
   }
 
-  /* TODO in FXA-7626: Remove this and use GQL instead. We can't check for verified sessions
-   * unless you've already got one (oof) in at least the PW reset flow due to
-   * sessionToken.mustVerify which was added here: https://github.com/mozilla/fxa/pull/7512
-   * The unverified session token returned by a password reset contains `mustVerify`
-   * which causes the 'Must verify' error to be thrown and a redirect to occur */
-  async isSessionVerifiedAuthClient() {
-    try {
-      const { state } = await this.withLoadingStatus(
-        this.authClient.sessionStatus(sessionToken()!)
-      );
-      return state === 'verified';
-    } catch (e) {
-      // Proceed as if the user does not have a verified session,
-      // since they likely will not at this stage (password reset)
-      return false;
-    }
-  }
-
-  // TODO: Same as isSessionVerifiedAuthClient
   async hasTotpAuthClient() {
     try {
       const { verified } = await this.withLoadingStatus(

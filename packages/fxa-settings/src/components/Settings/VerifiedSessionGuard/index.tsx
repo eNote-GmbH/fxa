@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ApolloError } from '@apollo/client';
 import { useSession } from '../../../models';
 import ModalVerifySession from '../ModalVerifySession';
@@ -18,9 +18,9 @@ export const VerifiedSessionGuard = ({
 }) => {
   const session = useSession();
 
-  const [isVerified, setIsVerified] = React.useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (session.verified) {
       setIsVerified(true);
       return;

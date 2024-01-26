@@ -10,7 +10,7 @@ import { logViewEvent, usePageViewEvent } from '../../../lib/metrics';
 import { viewName } from '.';
 import { REACT_ENTRYPOINT } from '../../../constants';
 import { Session, AppContext } from '../../../models';
-import { mockAppContext } from '../../../models/mocks';
+import { mockAppContext, mockSession } from '../../../models/mocks';
 import {
   MOCK_AUTH_ERROR,
   MOCK_SIGNUP_CODE,
@@ -291,9 +291,7 @@ describe('Resending a new code from ConfirmSignupCode page', () => {
   });
 
   it('displays a success banner when successful', async () => {
-    session = {
-      sendVerificationCode: jest.fn().mockResolvedValue(true),
-    } as unknown as Session;
+    session = mockSession(true, false);
 
     renderWithSession({ session });
 

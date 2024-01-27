@@ -6,7 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { CustomsModule } from 'fxa-shared/nestjs/customs/customs.module';
 import { CustomsService } from 'fxa-shared/nestjs/customs/customs.service';
 
-import { AuthClientFactory } from '../backend/auth-client.service';
+import { AuthClientFactory, AuthClientFactoryV2 } from '../backend/auth-client.service';
 import { BackendModule } from '../backend/backend.module';
 import { GqlCustomsGuard } from './gql-customs.guard';
 import { SessionTokenStrategy } from './session-token.strategy';
@@ -19,6 +19,7 @@ import { SessionTokenStrategy } from './session-token.strategy';
   ],
   providers: [
     AuthClientFactory,
+    AuthClientFactoryV2,
     CustomsService,
     SessionTokenStrategy,
     GqlCustomsGuard,

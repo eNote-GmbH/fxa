@@ -15,6 +15,7 @@ export const AuthClientFactory: Provider = {
     const authServerConfig = config.get(
       'authServer'
     ) as AppConfig['authServer'];
+
     return new AuthClient(authServerConfig.url);
   },
   inject: [ConfigService],

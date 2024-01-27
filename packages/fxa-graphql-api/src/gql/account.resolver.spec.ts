@@ -547,6 +547,41 @@ describe('#integration - AccountResolver', () => {
           keyFetchToken: 'keyFetchToken',
         });
       });
+
+      it('succeeds for v2', async () => {
+        const headers = new Headers({
+          'x-forwarded-for': '123.123.123.123',
+        });
+        const now = Date.now();
+        authClient.accountResetAuthPW = jest.fn().mockResolvedValue({
+          clientMutationId: 'testid',
+          uid: 'uid',
+          verified: true,
+          sessionToken: 'sessionToken',
+          authAt: now,
+          keyFetchTokenVersion2: 'keyFetchToken',
+        });
+        const result = await resolver.accountReset(headers, {
+          newPasswordAuthPW: '0101'.repeat(8),
+          accountResetToken: '2121'.repeat(8),
+          newPasswordV2: {
+            wrapKb: '1212'.repeat(8),
+            authPWVersion2: '2323'.repeat(8),
+            wrapKbVersion2: '3434'.repeat(8),
+            clientSalt: 'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef'
+          },
+          options: {},
+        });
+        expect(authClient.accountResetAuthPW).toBeCalledTimes(1);
+        expect(result).toStrictEqual({
+          clientMutationId: 'testid',
+          uid: 'uid',
+          verified: true,
+          sessionToken: 'sessionToken',
+          authAt: now,
+          keyFetchTokenVersion2: 'keyFetchToken',
+        });
+      });
     });
 
     describe('signUp', () => {
@@ -577,6 +612,46 @@ describe('#integration - AccountResolver', () => {
         );
         expect(result).toStrictEqual(mockRespPayload);
       });
+
+      it('calls auth-client and proxy the result with V2 password', async () => {
+        const now = Date.now();
+        const headers = new Headers();
+        const mockRespPayload = {
+          clientMutationId: 'testid',
+          uid: '1337',
+          sessionToken: '2048',
+          verified: true,
+          authAt: now,
+        };
+        authClient.signUpWithAuthPW = jest
+          .fn()
+          .mockResolvedValue(mockRespPayload);
+        const result = await resolver.SignUp(headers, {
+          authPW: '00000000',
+          email: 'testo@example.xyz',
+          passwordV2: {
+            wrapKb: '1234'.repeat(8),
+            authPWVersion2: '1234'.repeat(8),
+            wrapKbVersion2: '1234'.repeat(8),
+            clientSalt: 'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef'
+          },
+          options: { service: 'testo-co' },
+        });
+        expect(authClient.signUpWithAuthPW).toBeCalledTimes(1);
+        expect(authClient.signUpWithAuthPW).toBeCalledWith(
+          'testo@example.xyz',
+          '00000000',
+          {
+            wrapKb: '1234'.repeat(8),
+            authPWVersion2: '1234'.repeat(8),
+            wrapKbVersion2: '1234'.repeat(8),
+            clientSalt: 'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef'
+          },
+          { service: 'testo-co' },
+          headers
+        );
+        expect(result).toStrictEqual(mockRespPayload);
+      });
     });
 
     describe('finishSetup', () => {
@@ -599,6 +674,42 @@ describe('#integration - AccountResolver', () => {
         expect(authClient.finishSetupWithAuthPW).toBeCalledWith(
           'jwttothemax',
           '00000000',
+          headers
+        );
+        expect(result).toStrictEqual(mockRespPayload);
+      });
+
+      it('calls auth-client and proxy the result with V2 password', async () => {
+        const headers = new Headers();
+        const mockRespPayload = {
+          clientMutationId: 'testid',
+          uid: '1337',
+          sessionToken: '2048',
+          verified: true,
+        };
+        authClient.finishSetupWithAuthPW = jest
+          .fn()
+          .mockResolvedValue(mockRespPayload);
+        const result = await resolver.finishSetup(headers, {
+          token: 'jwttothemax',
+          authPW: '00000000',
+          passwordV2: {
+            wrapKb: '1234'.repeat(8),
+            authPWVersion2: '1234'.repeat(8),
+            wrapKbVersion2: '1234'.repeat(8),
+            clientSalt: 'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef'
+          }
+        });
+        expect(authClient.finishSetupWithAuthPW).toBeCalledTimes(1);
+        expect(authClient.finishSetupWithAuthPW).toBeCalledWith(
+          'jwttothemax',
+          '00000000',
+          {
+            wrapKb: '1234'.repeat(8),
+            authPWVersion2: '1234'.repeat(8),
+            wrapKbVersion2: '1234'.repeat(8),
+            clientSalt: 'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef'
+          },
           headers
         );
         expect(result).toStrictEqual(mockRespPayload);
@@ -702,41 +813,6 @@ describe('#integration - AccountResolver', () => {
         expect(authClient.verifyCode).toBeCalledTimes(1);
         expect(result).toStrictEqual({
           clientMutationId: 'testid',
-        });
-      });
-    });
-
-    describe('changePassword', () => {
-      it('succeeds', async () => {
-        authClient.passwordChangeWithAuthPW = jest.fn().mockResolvedValue({
-          uid: 'cooltokenyo',
-          sessionToken: '000000',
-          verified: true,
-          authAt: 1,
-          unwrapBKey: '000000',
-          keyFetchToken: '000000',
-        });
-        const result = await resolver.passwordChange({
-          clientMutationId: 'testid',
-          email: 'asdf@asdf.com',
-          oldPasswordAuthPW: 'oldPasswordAuthPW',
-          newPasswordAuthPW: 'newPasswordAuthPW',
-          oldUnwrapBKey: 'oldUnwrapBKey',
-          newUnwrapBKey: 'newUnwrapBKey',
-          options: {
-            keys: true,
-            sessionToken: '000000',
-          },
-        });
-        expect(authClient.passwordChangeWithAuthPW).toBeCalledTimes(1);
-        expect(result).toStrictEqual({
-          clientMutationId: 'testid',
-          uid: 'cooltokenyo',
-          sessionToken: '000000',
-          verified: true,
-          authAt: 1,
-          unwrapBKey: '000000',
-          keyFetchToken: '000000',
         });
       });
     });

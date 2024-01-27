@@ -80,7 +80,11 @@ export class LoginPage extends BaseLayout {
 
   async getFxaClient(target) {
     const AUTH_SERVER_ROOT = target.authServerUrl;
-    return new AuthClient(AUTH_SERVER_ROOT);
+    const keyStretchVersion = parseInt(process.env.KEY_STRETCH_VERSION || '1');
+    if (!(keyStretchVersion === 1 || keyStretchVersion === 2)) {
+      throw new Error('Invalid env, KEY_STRETCH_VERSION');
+    }
+    return new AuthClient(AUTH_SERVER_ROOT, { keyStretchVersion });
   }
 
   get passwordHeader() {

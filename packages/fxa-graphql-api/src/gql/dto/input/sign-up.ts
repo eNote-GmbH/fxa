@@ -31,6 +31,21 @@ export class SignUpOptionsInput {
 }
 
 @InputType()
+export class SignUpInputPasswordV2 {
+  @Field()
+  public wrapKb!: string;
+
+  @Field()
+  public authPWVersion2!: string;
+
+  @Field()
+  public wrapKbVersion2!: string;
+
+  @Field()
+  public clientSalt!: string;
+}
+
+@InputType()
 export class SignUpInput {
   @Field({
     description: 'A unique identifier for the client performing the mutation.',
@@ -43,6 +58,9 @@ export class SignUpInput {
 
   @Field()
   public email!: string;
+
+  @Field({ nullable: true })
+  public passwordV2?: SignUpInputPasswordV2;
 
   @Field()
   public options!: SignUpOptionsInput;

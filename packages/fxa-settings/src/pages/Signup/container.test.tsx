@@ -115,7 +115,15 @@ function mockCryptoModule() {
     authPW: 'apw123',
     unwrapBKey: 'ubk123',
   });
+
+  jest.spyOn(CryptoModule, 'getCredentialsV2').mockResolvedValue({
+    clientSalt: 'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef',
+    authPW: 'apwV2123',
+    unwrapBKey: 'ubkV2123',
+  });
 }
+
+
 
 function mockReachRouterModule() {
   jest.spyOn(ReachRouterModule, 'useNavigate').mockReturnValue(function () {

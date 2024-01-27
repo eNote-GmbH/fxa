@@ -4,6 +4,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthClientFactory, AuthClientService } from './auth-client.service';
+import { AuthClientFactoryV2, AuthClientServiceV2 } from './auth-client.service';
 import { ProfileClientService } from './profile-client.service';
 import { LegalService } from './legal.service';
 import { SubscriptionService } from './subscription.service';
@@ -12,6 +13,7 @@ import { ClientInfoService } from './clientInfo.service';
 @Module({
   providers: [
     AuthClientFactory,
+    AuthClientFactoryV2,
     ProfileClientService,
     LegalService,
     SubscriptionService,
@@ -19,6 +21,7 @@ import { ClientInfoService } from './clientInfo.service';
   ],
   exports: [
     AuthClientService,
+    AuthClientServiceV2,
     ProfileClientService,
     LegalService,
     SubscriptionService,

@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import * as crypto from './crypto';
+import { Credentials } from './crypto';
+import { PasswordV2UpgradeError } from './error';
 import * as hawk from './hawk';
+import { SaltVersion, createSaltV2 } from './salt';
 
 enum ERRORS {
   INVALID_TIMESTAMP = 111,
@@ -24,6 +27,24 @@ export enum AUTH_PROVIDER {
 }
 
 export type BoolString = 'true' | 'false' | 'yes' | 'no';
+
+export type CredentialsV1 = Credentials;
+
+export type CredentialsV2 = Credentials & {
+  clientSalt: string;
+};
+
+export type CredentialSet = {
+  upgradeNeeded: boolean;
+  v1: CredentialsV1;
+  v2?: CredentialsV2;
+};
+
+export type CredentialStatus = {
+  upgradeNeeded: boolean;
+  currentVersion?: 'v1' | 'v2';
+  clientSalt?: string;
+};
 
 export type SignUpOptions = {
   keys?: boolean;
@@ -57,6 +78,7 @@ export type SignInOptions = {
   verificationMethod?: string;
   unblockCode?: string;
   metricsContext?: MetricsContext;
+  postPasswordUpgrade?: boolean;
 };
 
 export type SignedInAccountData = {
@@ -69,6 +91,15 @@ export type SignedInAccountData = {
   verificationMethod?: string;
   verificationReason?: string;
   unwrapBKey?: hexstring;
+};
+
+export type PasswordChangePayload = {
+  authPW: string;
+  wrapKb: string;
+  sessionToken?: string;
+  wrapKbVersion2?: string;
+  authPWVersion2?: string;
+  clientSalt?: string;
 };
 
 export type SessionReauthOptions = SignInOptions;
@@ -167,23 +198,38 @@ export class AuthClientError extends Error {
   }
 }
 
+export type AuthClientOptions = {
+  timeout?: number;
+  keyStretchVersion?: SaltVersion;
+};
+
 export default class AuthClient {
   static VERSION = 'v1';
   private uri: string;
   private localtimeOffsetMsec: number;
   private timeout: number;
+  private keyStretchVersion: SaltVersion;
 
-  constructor(authServerUri: string, options: { timeout?: number } = {}) {
+  constructor(
+    authServerUri: string,
+    options: { timeout?: number; keyStretchVersion?: SaltVersion } = {}
+  ) {
+    if (options?.keyStretchVersion == null) {
+      // TODO: Remove, just in place to fail fast during dev.
+      throw new Error('options.keyStretchVersion must be provided!');
+    }
+
     if (new RegExp(`/${AuthClient.VERSION}$`).test(authServerUri)) {
       this.uri = authServerUri;
     } else {
       this.uri = `${authServerUri}/${AuthClient.VERSION}`;
     }
+    this.keyStretchVersion = options.keyStretchVersion || 1;
     this.localtimeOffsetMsec = 0;
     this.timeout = options.timeout || 30000;
   }
 
-  static async create(authServerUri: string) {
+  static async create(authServerUri: string, options?: AuthClientOptions) {
     if (typeof TextEncoder === 'undefined') {
       await import(
         // @ts-ignore
@@ -191,7 +237,7 @@ export default class AuthClient {
       );
     }
     await crypto.checkWebCrypto();
-    return new AuthClient(authServerUri);
+    return new AuthClient(authServerUri, options);
   }
 
   private url(path: string) {
@@ -224,6 +270,7 @@ export default class AuthClient {
     if (!response.ok) {
       throw new AuthClientError('Unknown error', result, 999, response.status);
     }
+
     return result;
   }
 
@@ -295,6 +342,14 @@ export default class AuthClient {
   }
 
   /**
+   * Allows us to toggle the key stretch version.
+   * @param version
+   */
+  setKeyStretchVersion(version: 1 | 2) {
+    this.keyStretchVersion = version;
+  }
+
+  /**
    * Used for sign up on clients with direct access to the plaintext password.
    */
   async signUp(
@@ -302,15 +357,32 @@ export default class AuthClient {
     password: string,
     options: SignUpOptions = {}
   ): Promise<SignedUpAccountData> {
-    const credentials = await crypto.getCredentials(email, password);
+    const credentialsV1 = await crypto.getCredentials(email, password);
+
+    let credentialsV2 = undefined;
+    if (this.keyStretchVersion === 2) {
+      const clientSalt = await createSaltV2();
+      credentialsV2 = await crypto.getCredentialsV2({ password, clientSalt });
+    }
+
+    const v2Payload = await this.getPayloadV2({
+      v1: credentialsV1,
+      v2: credentialsV2,
+    });
+
     const accountData = (await this.signUpWithAuthPW(
       email,
-      credentials.authPW,
+      credentialsV1.authPW,
+      v2Payload,
       options,
       langHeader(options.lang)
     )) as SignedUpAccountData;
     if (options.keys) {
-      accountData.unwrapBKey = credentials.unwrapBKey;
+      if (credentialsV2) {
+        accountData.unwrapBKey = credentialsV2.unwrapBKey;
+      } else {
+        accountData.unwrapBKey = credentialsV1.unwrapBKey;
+      }
     }
     return accountData;
   }
@@ -323,6 +395,14 @@ export default class AuthClient {
   async signUpWithAuthPW(
     email: string,
     authPW: string,
+    v2:
+      | {
+          wrapKb: string;
+          authPWVersion2: string;
+          wrapKbVersion2: string;
+          clientSalt: string;
+        }
+      | {},
     options: SignUpOptions,
     headers: Headers = new Headers()
   ): Promise<Omit<SignedUpAccountData, 'unwrapBKey'>> {
@@ -330,6 +410,7 @@ export default class AuthClient {
     const payload = {
       email,
       authPW,
+      ...v2,
       ...payloadOptions(options),
     };
     const accountData = await this.request(
@@ -338,6 +419,14 @@ export default class AuthClient {
       payload,
       headers
     );
+
+    if (v2) {
+      if (accountData.keyFetchTokenVersion2) {
+        accountData.keyFetchToken = accountData.keyFetchTokenVersion2;
+        delete accountData.keyFetchTokenVersion2;
+      }
+    }
+
     return accountData;
   }
 
@@ -350,16 +439,54 @@ export default class AuthClient {
     password: string,
     options: SignInOptions = {}
   ): Promise<SignedInAccountData> {
-    const credentials = await crypto.getCredentials(email, password);
+    let credentials = await this.getCredentialSet({ email, password });
+
     try {
-      const accountData = (await this.signInWithAuthPW(
-        email,
-        credentials.authPW,
-        options
-      )) as SignedInAccountData;
-      if (options.keys) {
-        accountData.unwrapBKey = credentials.unwrapBKey;
+      let accountData: SignedInAccountData;
+      if (this.keyStretchVersion === 2) {
+        if (credentials.upgradeNeeded) {
+          // This condition indicates an upgrade already was attempted but did not take hold.
+          // If this state occurs, it means something went wrong, and an error should occur.
+          // If an error is not raised, we might end up in an infinite recursive loop!
+          if (options.postPasswordUpgrade === true) {
+            throw new PasswordV2UpgradeError();
+          }
+
+          // Try to upgrade the password, and sign in.
+          await this.passwordChange(email, password, password, options);
+          return await this.signIn(email, password, {
+            ...options,
+            postPasswordUpgrade: true,
+          });
+        } else if (credentials.v2) {
+          // Already using V2! Just sign in.
+          accountData = await this.signInWithAuthPW(
+            email,
+            credentials.v2.authPW,
+            options
+          );
+        } else {
+          throw new Error(
+            'Invalid state credentials.v2 not provided, and no upgraded needed.'
+          );
+        }
+      } else {
+        accountData = await this.signInWithAuthPW(
+          email,
+          credentials.v1.authPW,
+          options
+        );
       }
+
+      // Relay unwrapBKeys
+      if (options.keys) {
+        if (credentials.v2) {
+          accountData.unwrapBKey = credentials.v2.unwrapBKey;
+        } else {
+          accountData.unwrapBKey = credentials.v1.unwrapBKey;
+        }
+      }
+
       return accountData;
     } catch (error: any) {
       if (
@@ -370,7 +497,6 @@ export default class AuthClient {
       ) {
         options.skipCaseError = true;
         options.originalLoginEmail = email;
-
         return this.signIn(error.email, password, options);
       } else {
         throw error;
@@ -401,6 +527,12 @@ export default class AuthClient {
       payload,
       headers
     );
+
+    if (accountData.keyFetchTokenVersion2) {
+      accountData.keyFetchToken = accountData.keyFetchTokenVersion2;
+      delete accountData.keyFetchTokenVersion2;
+    }
+
     return accountData;
   }
 
@@ -546,10 +678,19 @@ export default class AuthClient {
     } = {},
     headers: Headers = new Headers()
   ) {
-    const credentials = await crypto.getCredentials(email, newPassword);
+    const credentials = await this.getCredentialSet({
+      email,
+      password: newPassword,
+    });
+
+    // Important! This does not take kB, so the encrypted data will become
+    // inaccessible after this operation. A new kB will be created!
+    let v2Payload = await this.getPayloadV2(credentials);
+
     const payloadOptions = ({ keys, ...rest }: any) => rest;
     const payload = {
-      authPW: credentials.authPW,
+      authPW: credentials.v1.authPW,
+      ...v2Payload,
       ...payloadOptions(options),
     };
     const accountData = await this.hawkRequest(
@@ -561,15 +702,25 @@ export default class AuthClient {
       headers
     );
     if (options.keys && accountData.keyFetchToken) {
-      accountData.unwrapBKey = credentials.unwrapBKey;
+      accountData.unwrapBKey = credentials.v1.unwrapBKey;
+      accountData.unwrapBKeyVersion2 = credentials.v2?.unwrapBKey;
     }
     return accountData;
   }
 
   async accountResetAuthPW(
-    newPasswordAuthPW: string,
+    authPW: string,
     accountResetToken: hexstring,
+    v2Payload:
+      | {
+          wrapKb: string;
+          authPWVersion2: string;
+          wrapKbVersion2: string;
+          clientSalt: string;
+        }
+      | {},
     options: {
+      // This option won't work in gql
       keys?: boolean;
       sessionToken?: boolean;
     } = {},
@@ -577,7 +728,8 @@ export default class AuthClient {
   ) {
     const payloadOptions = ({ keys, ...rest }: any) => rest;
     const payload = {
-      authPW: newPasswordAuthPW,
+      authPW,
+      ...v2Payload,
       ...payloadOptions(options),
     };
     return await this.hawkRequest(
@@ -599,8 +751,12 @@ export default class AuthClient {
     sessionToken: hexstring;
     verified: boolean;
   }> {
-    const credentials = await crypto.getCredentials(email, newPassword);
-    return this.finishSetupWithAuthPW(token, credentials.authPW);
+    const credentials = await this.getCredentialSet({
+      email,
+      password: newPassword,
+    });
+    const v2Payload = await this.getPayloadV2(credentials);
+    return this.finishSetupWithAuthPW(token, credentials.v1.authPW, v2Payload);
   }
 
   /**
@@ -612,11 +768,20 @@ export default class AuthClient {
   async finishSetupWithAuthPW(
     token: string,
     authPW: string,
+    v2Payload:
+      | {
+          wrapKb: string;
+          authPWVersion2: string;
+          wrapKbVersion2: string;
+          clientSalt: string;
+        }
+      | {},
     headers: Headers = new Headers()
   ) {
     const payload = {
       token,
       authPW,
+      ...v2Payload,
     };
     return await this.request(
       'POST',
@@ -882,6 +1047,12 @@ export default class AuthClient {
     newPasswordAuthPW: string,
     oldUnwrapBKey: string,
     newUnwrapBKey: string,
+    v2?: {
+      oldPasswordAuthPW: string;
+      newPasswordAuthPW: string;
+      oldUnwrapBKey: string;
+      newUnwrapBKey: string;
+    },
     options: {
       keys?: boolean;
       sessionToken?: hexstring;
@@ -909,21 +1080,56 @@ export default class AuthClient {
       ? (await hawk.deriveHawkCredentials(options.sessionToken, 'sessionToken'))
           .id
       : undefined;
-    const payload = {
+
+    let payload: PasswordChangePayload = {
       wrapKb,
       authPW: newPasswordAuthPW,
       sessionToken,
     };
-    const accountData = await this.hawkRequest(
-      'POST',
-      pathWithKeys('/password/change/finish', options.keys),
+
+    if (this.keyStretchVersion === 2 && v2) {
+      const status = await this.getCredentialStatusV2(email);
+      const clientSalt = status.clientSalt || createSaltV2();
+      // Important! Passing kB, ensures kB remains constant even after password upgrade.
+      const newKeys = await crypto.getKeysV2({
+        kB: keys.kB,
+        v1: {
+          authPW: newPasswordAuthPW,
+          unwrapBKey: newUnwrapBKey,
+        },
+        v2: {
+          authPW: v2.newPasswordAuthPW,
+          unwrapBKey: v2.newPasswordAuthPW,
+        },
+      });
+
+      if (newKeys.wrapKb !== wrapKb) {
+        throw new Error('Sanity check failed. wrapKb should not drift!');
+      }
+
+      payload = {
+        ...payload,
+        authPWVersion2: v2.newPasswordAuthPW,
+        wrapKbVersion2: newKeys.wrapKbVersion2,
+        clientSalt: clientSalt,
+      };
+
+      if (newKeys.wrapKb !== wrapKb) {
+        throw new Error('Sanity check failed. wrapKb should not drift!');
+      }
+    }
+
+    const accountData = await this.passwordChangeFinish(
       passwordData.passwordChangeToken,
-      tokenType.passwordChangeToken,
-      payload
+      payload,
+      options
     );
+
     if (options.keys && accountData.keyFetchToken) {
       accountData.unwrapBKey = newUnwrapBKey;
+      accountData.unwrapBKeyVersion2 = v2?.newUnwrapBKey;
     }
+
     return accountData;
   }
 
@@ -935,14 +1141,7 @@ export default class AuthClient {
       keys?: boolean;
       sessionToken?: hexstring;
     } = {}
-  ): Promise<{
-    uid: hexstring;
-    sessionToken: hexstring;
-    verified: boolean;
-    authAt: number;
-    unwrapBKey?: hexstring;
-    keyFetchToken?: hexstring;
-  }> {
+  ): Promise<SignedInAccountData> {
     const oldCredentials = await this.passwordChangeStart(email, oldPassword);
     const keys = await this.accountKeys(
       oldCredentials.keyFetchToken,
@@ -957,20 +1156,50 @@ export default class AuthClient {
       ? (await hawk.deriveHawkCredentials(options.sessionToken, 'sessionToken'))
           .id
       : undefined;
-    const payload = {
-      wrapKb,
+
+    let payload: PasswordChangePayload = {
       authPW: newCredentials.authPW,
+      wrapKb,
       sessionToken,
     };
-    const accountData = await this.hawkRequest(
-      'POST',
-      pathWithKeys('/password/change/finish', options.keys),
+
+    let unwrapBKeyVersion2: string | undefined;
+    if (this.keyStretchVersion === 2) {
+      const status = await this.getCredentialStatusV2(email);
+      const clientSalt = status.clientSalt || createSaltV2();
+      const newCredentialsV2 = await crypto.getCredentialsV2({
+        password: newPassword,
+        clientSalt: clientSalt,
+      });
+
+      // Important! Passing kB, ensures kB remains constant even after password upgrade.
+      const newKeys = await crypto.getKeysV2({
+        kB: keys.kB,
+        v1: newCredentials,
+        v2: newCredentialsV2,
+      });
+
+      if (newKeys.wrapKb !== wrapKb) {
+        throw new Error('Sanity check failed. wrapKb should not drift!');
+      }
+
+      unwrapBKeyVersion2 = newCredentialsV2.unwrapBKey;
+      payload = {
+        ...payload,
+        authPWVersion2: newCredentialsV2.authPW,
+        wrapKbVersion2: newKeys.wrapKbVersion2,
+        clientSalt: clientSalt,
+      };
+    }
+
+    const accountData = await this.passwordChangeFinish(
       oldCredentials.passwordChangeToken,
-      tokenType.passwordChangeToken,
-      payload
+      payload,
+      options
     );
     if (options.keys && accountData.keyFetchToken) {
       accountData.unwrapBKey = newCredentials.unwrapBKey;
+      accountData.unwrapBKeyVersion2 = unwrapBKeyVersion2;
     }
     return accountData;
   }
@@ -1014,11 +1243,30 @@ export default class AuthClient {
       ) {
         options.skipCaseError = true;
 
-        return this.passwordChangeStart(error.email, oldPassword, options);
+        return await this.passwordChangeStart(
+          error.email,
+          oldPassword,
+          options
+        );
       } else {
         throw error;
       }
     }
+  }
+
+  protected async passwordChangeFinish(
+    passwordChangeToken: string,
+    payload: PasswordChangePayload,
+    options: { keys?: boolean }
+  ) {
+    const response = await this.hawkRequest(
+      'POST',
+      pathWithKeys('/password/change/finish', options.keys),
+      passwordChangeToken,
+      tokenType.passwordChangeToken,
+      payload
+    );
+    return response;
   }
 
   async createPassword(
@@ -1319,11 +1567,30 @@ export default class AuthClient {
       sessionToken?: boolean;
     } = {}
   ) {
-    const credentials = await crypto.getCredentials(email, newPassword);
-    const newWrapKb = crypto.unwrapKB(keys.kB, credentials.unwrapBKey);
+    const credentials = await this.getCredentialSet({
+      email,
+      password: newPassword,
+    });
+    const newWrapKb = crypto.unwrapKB(keys.kB, credentials.v1.unwrapBKey);
+
+    // We have scenario where a user with v1 credentials is trying to do a reset. Go ahead
+    // and give them v2 credentials.
+    if (!credentials.v2) {
+      const clientSalt = createSaltV2();
+      credentials.v2 = await crypto.getCredentialsV2({
+        password: newPassword,
+        clientSalt,
+      });
+    }
+
+    let v2Payload = await this.getPayloadV2({
+      ...keys,
+      ...credentials,
+    });
     const payload = {
+      ...v2Payload,
       wrapKb: newWrapKb,
-      authPW: credentials.authPW,
+      authPW: credentials.v1.authPW,
       sessionToken: options.sessionToken,
       recoveryKeyId,
     };
@@ -1335,7 +1602,8 @@ export default class AuthClient {
       payload
     );
     if (options.keys && accountData.keyFetchToken) {
-      accountData.unwrapBKey = credentials.unwrapBKey;
+      accountData.unwrapBKey = credentials.v1.unwrapBKey;
+      accountData.unwrapBKeyVersion2 = credentials.v2?.unwrapBKey;
     }
     return accountData;
   }
@@ -1484,5 +1752,104 @@ export default class AuthClient {
 
   async sendPushLoginRequest(sessionToken: string) {
     return this.sessionPost('/session/verify/send_push', sessionToken, {});
+  }
+
+  protected async getPayloadV2({
+    kB,
+    v1,
+    v2,
+  }: {
+    kB?: string;
+    v1: {
+      authPW: string;
+      unwrapBKey: string;
+    };
+    v2?: {
+      clientSalt: string;
+      authPW: string;
+      unwrapBKey: string;
+    };
+  }) {
+    if (this.keyStretchVersion === 2) {
+      if (!v2) {
+        throw new Error('Using key stretch version 2 requires v2 credentials.');
+      }
+
+      // By passing in kB, we ensure wrapKbVersion2 will produce the same value
+      const { wrapKb, wrapKbVersion2 } = await crypto.getKeysV2({ kB, v1, v2 });
+
+      // Normalize response for rest call
+      return {
+        wrapKb,
+        wrapKbVersion2,
+        authPWVersion2: v2.authPW,
+        clientSalt: v2.clientSalt,
+      };
+    }
+    return {};
+  }
+
+  protected async getCredentialSet({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }): Promise<CredentialSet> {
+    const credentialsV1 = await crypto.getCredentials(email, password);
+
+    if (this.keyStretchVersion === 2) {
+      // Try to determine V2 credentials
+      const status = await this.getCredentialStatusV2(email);
+
+      // Signal an upgrade is required. Status doesn't exist, or an internal state
+      // indicates an upgrade is needed.
+      if (
+        status != null &&
+        status.clientSalt != null &&
+        status.upgradeNeeded === false
+      ) {
+        const clientSalt = status.clientSalt;
+        const credentialsV2 = await crypto.getCredentialsV2({
+          password,
+          clientSalt,
+        });
+
+        // V2 credentials exist and don't need upgrading.
+        return {
+          upgradeNeeded: false,
+          v1: credentialsV1,
+          v2: credentialsV2,
+        };
+      } else {
+        // V2 credentials either don't exist, or require an upgrade.
+        return {
+          upgradeNeeded: true,
+          v1: credentialsV1,
+        };
+      }
+    }
+
+    // In V1 mode, no upgraded needed...
+    return {
+      upgradeNeeded: false,
+      v1: credentialsV1,
+    };
+  }
+
+  public async getCredentialStatusV2(email: string): Promise<CredentialStatus> {
+    try {
+      const result = await this.request('POST', '/account/credentials/status', {
+        email,
+      });
+      return result;
+    } catch (error) {
+      if (error.errno === 102) {
+        return {
+          upgradeNeeded: false,
+        };
+      }
+      throw error;
+    }
   }
 }

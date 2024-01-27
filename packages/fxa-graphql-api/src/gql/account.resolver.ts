@@ -34,7 +34,7 @@ import {
 
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { GqlCustomsGuard } from '../auth/gql-customs.guard';
-import { AuthClientService } from '../backend/auth-client.service';
+import { AuthClientService, AuthClientServiceV2 } from '../backend/auth-client.service';
 import { ProfileClientService } from '../backend/profile-client.service';
 import { AppConfig } from '../config';
 import { GqlSessionToken, GqlUserId, GqlXHeaders } from '../decorators';
@@ -58,7 +58,6 @@ import {
   AccountResetInput,
   AccountStatusInput,
   RecoveryKeyBundleInput,
-  PasswordChangeInput,
 } from './dto/input';
 import { DeleteAvatarInput } from './dto/input/delete-avatar';
 import { MetricsOptInput } from './dto/input/metrics-opt';
@@ -77,7 +76,6 @@ import {
   AccountResetPayload,
   AccountStatusPayload,
   RecoveryKeyBundlePayload,
-  PasswordChangePayload,
 } from './dto/payload';
 import { SignedInAccountPayload } from './dto/payload/signed-in-account';
 import { SignedUpAccountPayload } from './dto/payload/signed-up-account';
@@ -110,6 +108,7 @@ export class AccountResolver {
 
   constructor(
     @Inject(AuthClientService) private authAPI: AuthClient,
+    @Inject(AuthClientServiceV2) private authApiV2: AuthClient,
     private profileAPI: ProfileClientService,
     private log: MozLoggerService,
     private configService: ConfigService<AppConfig>
@@ -147,23 +146,6 @@ export class AccountResolver {
       info.returnType
     );
     return simplified.fields.hasOwnProperty('securityEvents');
-  }
-
-  @Mutation((returns) => BasicPayload, {
-    description:
-      'Creates a new password for a user and overrides encryption keys',
-  })
-  @UseGuards(GqlAuthGuard, GqlCustomsGuard)
-  @CatchGatewayError
-  public async createPassword(
-    @GqlSessionToken() token: string,
-    @Args('input', { type: () => CreatePassword })
-    input: CreatePassword
-  ): Promise<BasicPayload> {
-    await this.authAPI.createPassword(token, input.email, input.password);
-    return {
-      clientMutationId: input.clientMutationId,
-    };
   }
 
   @Mutation((returns) => CreateTotpPayload, {
@@ -518,9 +500,12 @@ export class AccountResolver {
     @Args('input', { type: () => AccountResetInput })
     input: AccountResetInput
   ): Promise<AccountResetPayload> {
+    // Switch the API instance we used based on the payload.
+    // const authAPI = input.newPasswordV2 ? this.authApiV2 : this.authAPI;
     const result = await this.authAPI.accountResetAuthPW(
       input.newPasswordAuthPW,
       input.accountResetToken,
+      input.newPasswordV2 || {},
       input.options,
       headers
     );
@@ -539,9 +524,12 @@ export class AccountResolver {
     @Args('input', { type: () => SignUpInput })
     input: SignUpInput
   ): Promise<SignedUpAccountPayload> {
+    // Switch the API instance we used based on the payload.
+    // const authAPI = input.passwordV2 ? this.authApiV2 : this.authAPI;
     const result = await this.authAPI.signUpWithAuthPW(
       input.email,
       input.authPW,
+      input.passwordV2 || {},
       input.options,
       headers
     );
@@ -560,9 +548,11 @@ export class AccountResolver {
     @Args('input', { type: () => FinishSetupInput })
     input: FinishSetupInput
   ): Promise<FinishedSetupAccountPayload> {
+    // const authAPI = input.passwordV2 ? this.authApiV2 : this.authAPI;
     const result = await this.authAPI.finishSetupWithAuthPW(
       input.token,
       input.authPW,
+      input.passwordV2 || {},
       headers
     );
     return {
@@ -580,6 +570,7 @@ export class AccountResolver {
     @Args('input', { type: () => SignInInput })
     input: SignInInput
   ): Promise<SignedInAccountPayload> {
+    // const authAPI = input.authPWVersion === 2 ? this.authApiV2 : this.authAPI;
     const result = await this.authAPI.signInWithAuthPW(
       input.email,
       input.authPW,
@@ -681,29 +672,7 @@ export class AccountResolver {
     return { recoveryData };
   }
 
-  @Mutation((returns) => PasswordChangePayload, {
-    description:
-      "Change a user's password. The client is required to compute authPW since we don't send the clear password to our server.",
-  })
-  @CatchGatewayError
-  public async passwordChange(
-    @Args('input', { type: () => PasswordChangeInput })
-    input: PasswordChangeInput
-  ): Promise<PasswordChangePayload> {
-    const result = await this.authAPI.passwordChangeWithAuthPW(
-      input.email,
-      input.oldPasswordAuthPW,
-      input.newPasswordAuthPW,
-      input.oldUnwrapBKey,
-      input.newUnwrapBKey,
-      input.options
-    );
 
-    return {
-      clientMutationId: input.clientMutationId,
-      ...result,
-    };
-  }
 
   @ResolveField()
   public accountCreated(@Parent() account: Account) {

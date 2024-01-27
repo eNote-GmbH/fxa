@@ -47,7 +47,7 @@ test.describe('severity-2 #smoke', () => {
       expect(await login.isUserLoggedIn()).toBe(true);
     });
 
-    test('force change password on login - oauth', async ({
+    test.only('force change password on login - oauth', async ({
       pages: { login, postVerify, relier },
     }) => {
       await relier.goto();

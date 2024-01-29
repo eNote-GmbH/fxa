@@ -22,3 +22,4 @@ export const MOCK_AVATAR_NON_DEFAULT = {
   url: 'http://placekitten.com/512/512',
 };
 export const MOCK_AVATAR_DEFAULT = { id: null, url: null };
+export const MOCK_HEXSTRING_32 = '152e8ef9975a0f3356e062dfe09d3f23';

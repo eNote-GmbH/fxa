@@ -144,20 +144,51 @@ Router = Router.extend({
         }
       );
     },
-    'complete_signin(/)': createViewHandler(CompleteSignUpView, {
+    // NOTE - complete_signin must be maintained for backwards compatibility with FF <122
+    // With the react conversion, we should only land on the /complete_signin view
+    // from signin to sync from version of Firefox <122, when clicking on "resend verification"
+    // from Sync Settings. As the link provided by older versions of Firefox do not include React param,
+    // the backbone version will be served unless React signin routes are fully turned on in prod
+    // or if we use createReactViewHandler instead of createReactOrBackboneViewHandler.
+    //
+    // To force the react version of complete_signin (for testing), you will need to (temporarily):
+    // - use commented out createReactViewHandler instead of createReactOrBackboneViewHandler
+    // - set forceGlobally default in auth server config to true
+    // - use fxa-dev-launcher with an older version of Firefox (e.g., ESR which currently is on FF 115)
+    //   to test sync with localhost
+    // - create and confirm a new account, then sign out
+    // - sign in to Sync - do NOT enter emailed confirmation code
+    // - in Firefox hamburger menu, click finish "Finish account setup" then "resend verification"
+    // - Check email, follow confirmation link - expect to be signed into Sync even if confirmed from second browser
+    //
+    // 'complete_signin(/)': function () {
+    //   this.createReactViewHandler('complete_signin', {
+    //     ...Url.searchParams(this.window.location.search),
+    //   });
+    // },
+    'complete_signin(/)': function () {
+      this.createReactOrBackboneViewHandler(
+        'complete_signin',
+        CompleteSignUpView,
+        {
+          ...Url.searchParams(this.window.location.search),
+        },
+        {
+          type: VerificationReasons.SIGN_IN,
+        }
+      );
+    },
+    // We will not be porting the Confirm view to React, see FXA-9054
+    'confirm(/)': createViewHandler(ConfirmView, {
       type: VerificationReasons.SIGN_IN,
     }),
-    'confirm(/)': function () {
-      this.createReactOrBackboneViewHandler('confirm', ConfirmView, null, {
-        type: VerificationReasons.SIGN_UP,
-      });
-    },
     'confirm_reset_password(/)': function () {
       this.createReactOrBackboneViewHandler(
         'confirm_reset_password',
         ConfirmResetPasswordView
       );
     },
+    // We will not be porting the Confirm view to React, see FXA-9054
     'confirm_signin(/)': createViewHandler(ConfirmView, {
       type: VerificationReasons.SIGN_IN,
     }),
@@ -554,8 +585,8 @@ Router = Router.extend({
 
   createReactOrBackboneViewHandler(
     routeName,
-    ViewOrPath,
-    additionalParams,
+    ViewOrPath, // for backbone
+    additionalParams, // for react
     backboneViewOptions
   ) {
     const showReactApp = this.showReactApp(routeName);

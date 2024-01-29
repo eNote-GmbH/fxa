@@ -4,3 +4,5 @@
 error-label = Error:
 # This is a message that is shown to users along with a "Loading" spinner while the site tries to check their signin
 validating-signin = Validating sign-in…
+# Shown above an error banner (e.g., invalid confirmation code, unexpected error)
+complete-signin-error-header = Confirmation error

@@ -2,87 +2,103 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { useState } from 'react';
-import { useNavigate, RouteComponentProps } from '@reach/router';
-import { SigninLinkDamaged } from '../../../components/LinkDamaged';
-import { LinkExpiredSignin } from '../../../components/LinkExpiredSignin';
-import LinkUsed from '../../../components/LinkUsed';
+import React, { useEffect, useState } from 'react';
+import { RouteComponentProps, useLocation } from '@reach/router';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { usePageViewEvent } from '../../../lib/metrics';
-import { FtlMsg } from 'fxa-react/lib/utils';
-import { LinkStatus } from '../../../lib/types';
-import { REACT_ENTRYPOINT } from '../../../constants';
+import { FtlMsg, hardNavigateToContentServer } from 'fxa-react/lib/utils';
 import AppLayout from '../../../components/AppLayout';
-
-// We will probably grab `isSignedIn` off of the Account model in the long run.
-// and email from validated query params
-export type CompleteSigninProps = {
-  email: string;
-  brokerNextAction?: Function;
-  isForPrimaryEmail: boolean;
-  linkStatus: LinkStatus;
-};
+import { useValidatedQueryParams } from '../../../lib/hooks/useValidate';
+import { CompleteSigninQueryParams } from '../../../models/pages/signin';
+import { SigninLinkDamaged } from '../../../components/LinkDamaged';
+import { useAuthClient, useFtlMsgResolver } from '../../../models';
+import {
+  AuthUiErrorNos,
+  AuthUiErrors,
+  getLocalizedErrorMessage,
+} from '../../../lib/auth-errors/auth-errors';
+import Banner, { BannerType } from '../../../components/Banner';
+import CardHeader from '../../../components/CardHeader';
+import LinkExternal from 'fxa-react/components/LinkExternal';
 
 export const viewName = 'complete-signin';
 
-const CompleteSignin = ({
-  email,
-  brokerNextAction,
-  isForPrimaryEmail,
-  linkStatus,
-}: CompleteSigninProps & RouteComponentProps) => {
-  usePageViewEvent(viewName, REACT_ENTRYPOINT);
-  const navigate = useNavigate();
-  const [error, setError] = useState<string>();
-  // there is no valid view in the `complete_signin` mustache. It completes your signin,
-  // and then redirects you according to the broker method. The default is to `signin_verified`.
-  // I think it makes sense to keep this logic in this page (as opposed to housing it a level up,
-  // in the router), so I'm opting to show a "progress" animation  until we're redirected or hit an error
-  if (linkStatus === 'valid') {
-    try {
-      // TO-DO:
-      // do all the stuff to complete signin!
-      brokerNextAction ? brokerNextAction() : navigate('/signin_verified');
-    } catch (error) {
-      setError(error);
-      // TO-DO:
-      // Update the UI from the original template to use the Alert Bar.
-    }
-  }
+const CompleteSignin = (_: RouteComponentProps) => {
+  // TODO - log email link click, but don't need to log page view (there might not really be a page to view?)
+  // this.logViewEvent('verification.clicked');
 
-  if (linkStatus === LinkStatus.damaged) {
+  const { queryParamModel, validationError } = useValidatedQueryParams(
+    CompleteSigninQueryParams
+  );
+
+  const authClient = useAuthClient();
+  const ftlMsgResolver = useFtlMsgResolver();
+  const location = useLocation();
+
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    (async () => {
+      if (!validationError) {
+        const { uid, code } = queryParamModel;
+
+        try {
+          await authClient.verifyCode(uid, code);
+          reportSuccessAndNavigate();
+        } catch (err) {
+          // if we have a localized error message
+          if (err.errno && AuthUiErrorNos[err.errno]) {
+            const localizedErrorMessage = getLocalizedErrorMessage(
+              ftlMsgResolver,
+              err
+            );
+            setError(localizedErrorMessage);
+          } else {
+            const localizedErrorMessage = getLocalizedErrorMessage(
+              ftlMsgResolver,
+              AuthUiErrors.UNEXPECTED_ERROR
+            );
+            setError(localizedErrorMessage);
+          }
+        }
+      }
+    })();
+  });
+
+  const reportSuccessAndNavigate = () => {
+    // log metrics 'verification.success';
+    // notify 'verification.success';
+    // log metrics 'signin.success';
+
+    // We always navigate to connect_another_device because this flow is only for legacy Sync
+    // TODO: replace with navigate once ConnectAnotherDevice is converted to React
+    hardNavigateToContentServer(`/connect_another_device?${location.search}`);
+  };
+
+  if (validationError) {
     return <SigninLinkDamaged />;
   }
-  if (linkStatus === LinkStatus.expired) {
-    return <LinkExpiredSignin {...{ email, viewName }} />;
+  if (error) {
+    return (
+      <AppLayout>
+        <CardHeader
+          headingText="Confirmation error"
+          headingTextFtlId="complete-signin-error-header"
+        />
+        <Banner type={BannerType.error} additionalClassNames="-mb-2">
+          {error}
+        </Banner>
+      </AppLayout>
+    );
+  } else {
+    return (
+      <AppLayout>
+        <FtlMsg id="validating-signin">
+          <p className="text-base">Validating sign-in…</p>
+        </FtlMsg>
+        <LoadingSpinner className="flex justify-center mt-6" />
+      </AppLayout>
+    );
   }
-  if (linkStatus === LinkStatus.used) {
-    return <LinkUsed {...{ isForPrimaryEmail }} />;
-  }
-
-  return (
-    <AppLayout>
-      {linkStatus === 'valid' && (
-        <div className="flex-col justify-center align-middle">
-          {error ? (
-            <p className="text-sm">
-              <span className="text-red-600 uppercase">
-                <FtlMsg id="error-label">Error:</FtlMsg>
-              </span>{' '}
-              {error}
-            </p>
-          ) : (
-            <>
-              <FtlMsg id="validating-signin">
-                <p className="text-base">Validating sign-in…</p>
-              </FtlMsg>
-              <LoadingSpinner fullScreen />
-            </>
-          )}
-        </div>
-      )}
-    </AppLayout>
-  );
 };
 
 export default CompleteSignin;

@@ -542,6 +542,13 @@ export class PayPalHelper {
   }
 
   /**
+   * Get maximum allowed refund period
+   */
+  public getMaximumRefundDate(date: Date = new Date()) {
+    return Math.floor(date.setDate(date.getDay() - 180) / 1000);
+  }
+
+  /**
    * Given the transaction ID, refund the transaction in full.
    * Use the Stripe Invoice ID as the idempotency key since we
    * expect one refund per invoice.

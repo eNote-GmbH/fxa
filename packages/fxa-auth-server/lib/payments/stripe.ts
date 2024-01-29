@@ -1492,6 +1492,25 @@ export class StripeHelper extends StripeHelperBase {
     }
   }
 
+  async fetchPaidInvoices(
+    customerId: string,
+    created: Stripe.InvoiceListParams['created'],
+    paymentProvider?: 'paypal' | 'stripe'
+  ) {
+    const collection_method =
+      paymentProvider === 'paypal'
+        ? 'send_invoice'
+        : paymentProvider === 'stripe'
+        ? 'charge_automatically'
+        : undefined;
+    return this.stripe.invoices.list({
+      customer: customerId,
+      collection_method,
+      status: 'paid',
+      created,
+    });
+  }
+
   /**
    * Updates the invoice to uncollectible
    */

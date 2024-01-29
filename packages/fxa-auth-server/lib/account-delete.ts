@@ -22,6 +22,7 @@ import {
 import { ConfigType } from '../config';
 import * as Sentry from '@sentry/node';
 import { StripeFirestoreMultiError } from './payments/stripe-firestore';
+import { RefundType } from '@fxa/payments/paypal';
 
 type FxaDbDeleteAccount = Pick<
   Awaited<ReturnType<ReturnType<typeof DB>['connect']>>,
@@ -243,12 +244,71 @@ export class AccountDeleteManager {
   }
 
   /**
+   * Refund PayPal invoices for uid
+   */
+  private async refundPayPal(uid: string) {
+    this.log.debug('AccountDeleteManager.refundPayPal', { uid });
+    if (
+      !(
+        this.config.subscriptions?.enabled &&
+        this.stripeHelper &&
+        this.paypalHelper
+      )
+    ) {
+      return;
+    }
+
+    const customer = await this.stripeHelper?.fetchCustomer(uid);
+    if (!customer?.id) {
+      this.log.error('AccountDeleteManager.refundPayPal', {
+        msg: 'Could not find customer',
+        uid,
+      });
+      return;
+    }
+
+    try {
+      const createdDate = this.paypalHelper.getMaximumRefundDate();
+      const paidInvoices = await this.stripeHelper.fetchPaidInvoices(
+        customer.id,
+        { gte: createdDate },
+        'paypal'
+      );
+      for (const invoice of paidInvoices.data) {
+        const transactionId =
+          this.stripeHelper.getInvoicePaypalTransactionId(invoice);
+        if (!transactionId) {
+          this.log.error('AccountDeleteManager.refundPayPal', {
+            msg: 'Missing transactionId',
+            uid,
+          });
+          continue;
+        }
+        await this.paypalHelper.issueRefund(
+          invoice,
+          transactionId,
+          RefundType.Full
+        );
+        this.log.debug('AccountDeleteManager.refundPayPal.success', {
+          uid,
+          transactionId,
+          invoiceId: invoice.id,
+        });
+      }
+    } catch (error) {
+      this.log.error('AccountDeleteManager.refundPayPal', { error, uid });
+      throw error;
+    }
+  }
+  /**
    * Delete the account's subscriptions from Stripe and PayPal.
    * This will cancel any active subscriptions and remove the customer.
    *
    * @param accountRecord
    */
   public async deleteSubscriptions(uid: string) {
+    await this.refundPayPal(uid);
+
     if (this.config.subscriptions?.enabled && this.stripeHelper) {
       try {
         await this.stripeHelper.removeCustomer(uid);

@@ -615,4 +615,23 @@ export class PayPalHelper {
       message: 'PayPal refund transaction unsuccessful',
     });
   }
+
+  public async refundInvoices(invoices: Stripe.Invoice[]) {
+    for (const invoice of invoices) {
+      const transactionId =
+        this.stripeHelper.getInvoicePaypalTransactionId(invoice);
+      if (!transactionId) {
+        this.log.error('PayPalHelper.refundInvoices', {
+          msg: 'Missing transactionId',
+          invoiceId: invoice.id,
+        });
+        continue;
+      }
+      await this.issueRefund(invoice, transactionId, RefundType.Full);
+      this.log.debug('PayPalHelper.refundInvoices.success', {
+        transactionId,
+        invoiceId: invoice.id,
+      });
+    }
+  }
 }

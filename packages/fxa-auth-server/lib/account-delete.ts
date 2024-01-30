@@ -22,7 +22,6 @@ import {
 import { ConfigType } from '../config';
 import * as Sentry from '@sentry/node';
 import { StripeFirestoreMultiError } from './payments/stripe-firestore';
-import { RefundType } from '@fxa/payments/paypal';
 
 type FxaDbDeleteAccount = Pick<
   Awaited<ReturnType<ReturnType<typeof DB>['connect']>>,
@@ -243,74 +242,61 @@ export class AccountDeleteManager {
     });
   }
 
-  /**
-   * Refund PayPal invoices for uid
-   */
-  private async refundPayPal(uid: string) {
-    this.log.debug('AccountDeleteManager.refundPayPal', { uid });
-    if (
-      !(
-        this.config.subscriptions?.enabled &&
-        this.stripeHelper &&
-        this.paypalHelper
-      )
-    ) {
+  public async refundSubscriptions(
+    uid: string,
+    deleteReason: ReasonForDeletion
+  ) {
+    // Currently only support auto refund of invoices for unverified accounts
+    if (deleteReason !== 'fxa_unverified_account_delete') {
       return;
     }
 
-    const customer = await this.stripeHelper?.fetchCustomer(uid);
-    if (!customer?.id) {
-      this.log.error('AccountDeleteManager.refundPayPal', {
-        msg: 'Could not find customer',
+    const currentDate = new Date();
+    const createdDate = new Date(
+      currentDate.setDate(currentDate.getDate() - 180)
+    );
+    const invoices =
+      await this.stripeHelper?.fetchInvoicesForActiveSubscriptions(
         uid,
-      });
+        createdDate
+      );
+
+    if (!invoices?.length) {
+      // Log message and return
       return;
     }
 
-    try {
-      const createdDate = this.paypalHelper.getMaximumRefundDate();
-      const paidInvoices = await this.stripeHelper.fetchPaidInvoices(
-        customer.id,
-        { gte: createdDate },
-        'paypal'
-      );
-      for (const invoice of paidInvoices.data) {
-        const transactionId =
-          this.stripeHelper.getInvoicePaypalTransactionId(invoice);
-        if (!transactionId) {
-          this.log.error('AccountDeleteManager.refundPayPal', {
-            msg: 'Missing transactionId',
-            uid,
-          });
-          continue;
-        }
-        await this.paypalHelper.issueRefund(
-          invoice,
-          transactionId,
-          RefundType.Full
-        );
-        this.log.debug('AccountDeleteManager.refundPayPal.success', {
-          uid,
-          transactionId,
-          invoiceId: invoice.id,
-        });
-      }
-    } catch (error) {
-      this.log.error('AccountDeleteManager.refundPayPal', { error, uid });
-      throw error;
+    const payPalInvoices = invoices.filter(
+      (invoice) => invoice.collection_method === 'send_invoice'
+    );
+    const stripeInvoices = invoices.filter(
+      (invoice) => invoice.collection_method === 'charge_automatically'
+    );
+
+    if (stripeInvoices.length) {
+      // this.stripeHelper.issueRefundsForInvoices();
+    }
+
+    if (payPalInvoices.length) {
+      await this.paypalHelper?.refundInvoices(payPalInvoices);
     }
   }
+
   /**
    * Delete the account's subscriptions from Stripe and PayPal.
    * This will cancel any active subscriptions and remove the customer.
    *
-   * @param accountRecord
+   * @param uid - Account UID
+   * @param deleteReason -- @@TODO temporary default deleteReason, remove if necessary
    */
-  public async deleteSubscriptions(uid: string) {
-    await this.refundPayPal(uid);
-
+  public async deleteSubscriptions(
+    uid: string,
+    deleteReason: ReasonForDeletion = 'fxa_user_requested_account_delete'
+  ) {
     if (this.config.subscriptions?.enabled && this.stripeHelper) {
       try {
+        // Before removing the Stripe Customer, refund the subscriptions if necessary
+        await this.refundSubscriptions(uid, deleteReason);
         await this.stripeHelper.removeCustomer(uid);
       } catch (err) {
         if (err.message === 'Customer not available') {

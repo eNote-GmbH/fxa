@@ -2534,6 +2534,48 @@ describe('#integration - StripeHelper', () => {
     });
   });
 
+  describe('refundInvoices', () => {
+    it('refunds invoice with charge unexpanded', async () => {
+      sandbox.stub(stripeHelper.stripe.refunds, 'create').resolves({});
+      await stripeHelper.refundInvoices([
+        {
+          ...paidInvoice,
+          collection_method: 'charge_automatically',
+        },
+      ]);
+      sinon.assert.calledOnceWithExactly(stripeHelper.stripe.refunds.create, {
+        charge: paidInvoice.charge,
+      });
+    });
+
+    it('refunds invoice with charge expanded', async () => {
+      sandbox.stub(stripeHelper.stripe.refunds, 'create').resolves({});
+      await stripeHelper.refundInvoices([
+        {
+          ...paidInvoice,
+          collection_method: 'charge_automatically',
+          charge: {
+            id: paidInvoice.charge,
+          },
+        },
+      ]);
+      sinon.assert.calledOnceWithExactly(stripeHelper.stripe.refunds.create, {
+        charge: paidInvoice.charge,
+      });
+    });
+
+    it('does not refund invoice from PayPal', async () => {
+      sandbox.stub(stripeHelper.stripe.refunds, 'create').resolves({});
+      await stripeHelper.refundInvoices([
+        {
+          ...paidInvoice,
+          collection_method: 'send_invoice',
+        },
+      ]);
+      sinon.assert.notCalled(stripeHelper.stripe.refunds.create);
+    });
+  });
+
   describe('updateInvoiceWithPaypalTransactionId', () => {
     it('works successfully', async () => {
       sandbox.stub(stripeHelper.stripe.invoices, 'update').resolves({});

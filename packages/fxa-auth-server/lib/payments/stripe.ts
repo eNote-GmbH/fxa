@@ -1201,17 +1201,25 @@ export class StripeHelper extends StripeHelperBase {
     });
   }
 
-  async refundInvoice(invoice: Stripe.Invoice) {
-    if (invoice.collection_method !== 'charge_automatically') {
-      throw new Error('Paypal invoices cannot be refunded via Stripe');
+  /**
+   * Attempts to refund all of the invoices passed, provided they're created via Stripe
+   * This will invisibly do nothing if the invoice is not billed through Stripe, so be mindful
+   * if using it elsewhere and need confirmation of a refund.
+   */
+  async refundInvoices(invoices: Stripe.Invoice[]) {
+    const stripeInvoices = invoices.filter(
+      (invoice) => invoice.collection_method === 'charge_automatically'
+    );
+    for (const invoice of stripeInvoices) {
+      const chargeId =
+        typeof invoice.charge === 'string'
+          ? invoice.charge
+          : invoice.charge?.id;
+
+      await this.stripe.refunds.create({
+        charge: chargeId,
+      });
     }
-
-    const chargeId =
-      typeof invoice.charge === 'string' ? invoice.charge : invoice.charge?.id;
-
-    await this.stripe.refunds.create({
-      charge: chargeId,
-    });
   }
 
   /**

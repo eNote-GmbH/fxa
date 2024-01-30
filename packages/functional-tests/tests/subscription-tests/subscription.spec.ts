@@ -177,10 +177,10 @@ test.describe('severity-2 #smoke', () => {
         expect(page.url()).toContain('&flow_begin_time=');
       });
 
-      /* Disabling test - to fix in FXA-8447
       test('New user checkout URL to have RP-provided flow params, acquisition params & verify funnel metrics', async ({
         pages: { settings, relier, page, subscribe },
       }, { project }) => {
+        test.fixme(true, 'Fix required as of 2023/10/09 (see FXA-8447).');
         test.skip(
           project.name === 'production',
           'test plan not yet available in prod'
@@ -234,7 +234,6 @@ test.describe('severity-2 #smoke', () => {
         });
         expect(actualEventTypes).toMatchObject(expectedEventTypes);
       });
-    */
     });
   });
 });

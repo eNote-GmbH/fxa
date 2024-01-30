@@ -617,7 +617,10 @@ export class PayPalHelper {
   }
 
   public async refundInvoices(invoices: Stripe.Invoice[]) {
-    for (const invoice of invoices) {
+    const payPalInvoices = invoices.filter(
+      (invoice) => invoice.collection_method === 'send_invoice'
+    );
+    for (const invoice of payPalInvoices) {
       const transactionId =
         this.stripeHelper.getInvoicePaypalTransactionId(invoice);
       if (!transactionId) {
@@ -625,6 +628,11 @@ export class PayPalHelper {
           msg: 'Missing transactionId',
           invoiceId: invoice.id,
         });
+        continue;
+      }
+      const refundTransactionId =
+        this.stripeHelper.getInvoicePaypalRefundTransactionId(invoice);
+      if (refundTransactionId) {
         continue;
       }
       await this.issueRefund(invoice, transactionId, RefundType.Full);

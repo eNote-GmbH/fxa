@@ -1249,6 +1249,13 @@ export class StripeHelper extends StripeHelperBase {
   /**
    * Returns the Paypal transaction id for the invoice if one exists.
    */
+  getInvoicePaypalRefundTransactionId(invoice: Stripe.Invoice) {
+    return invoice.metadata?.paypalRefundTransactionId;
+  }
+
+  /**
+   * Returns the Paypal transaction id for the invoice if one exists.
+   */
   getInvoicePaypalTransactionId(invoice: Stripe.Invoice) {
     return invoice.metadata?.paypalTransactionId;
   }
@@ -1492,25 +1499,6 @@ export class StripeHelper extends StripeHelperBase {
     }
   }
 
-  async fetchPaidInvoices(
-    customerId: string,
-    created: Stripe.InvoiceListParams['created'],
-    paymentProvider?: 'paypal' | 'stripe'
-  ) {
-    const collection_method =
-      paymentProvider === 'paypal'
-        ? 'send_invoice'
-        : paymentProvider === 'stripe'
-        ? 'charge_automatically'
-        : undefined;
-    return this.stripe.invoices.list({
-      customer: customerId,
-      collection_method,
-      status: 'paid',
-      created,
-    });
-  }
-
   /**
    * Updates the invoice to uncollectible
    */
@@ -1738,7 +1726,8 @@ export class StripeHelper extends StripeHelperBase {
 
   async fetchInvoicesForActiveSubscriptions(
     uid: string,
-    earliestCreatedDate: Date
+    earliestCreatedDate: Date,
+    status: Stripe.InvoiceListParams.Status
   ) {
     const accountCustomer = await getAccountCustomerByUid(uid);
     if (accountCustomer && accountCustomer.stripeCustomerId) {
@@ -1748,14 +1737,13 @@ export class StripeHelper extends StripeHelperBase {
       ]);
       const subscriptions = customer?.subscriptions?.data;
       if (subscriptions) {
-        // Only refund active subscriptions
         const activeSubscriptionIds = subscriptions.map((sub) => sub.id);
-
-        const date = Math.floor(earliestCreatedDate.getTime() / 1000);
-        const invoices = await this.fetchPaidInvoices(
-          accountCustomer.stripeCustomerId,
-          { gte: date }
-        );
+        const created = Math.floor(earliestCreatedDate.getTime() / 1000);
+        const invoices = await this.stripe.invoices.list({
+          customer: accountCustomer.stripeCustomerId,
+          status,
+          created: { gte: created },
+        });
 
         return invoices.data.filter((invoice) => {
           if (!invoice?.subscription) {

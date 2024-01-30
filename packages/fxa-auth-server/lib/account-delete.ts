@@ -244,7 +244,8 @@ export class AccountDeleteManager {
 
   public async refundSubscriptions(
     uid: string,
-    deleteReason: ReasonForDeletion
+    deleteReason: ReasonForDeletion,
+    refundPeriod: number
   ) {
     // Currently only support auto refund of invoices for unverified accounts
     if (deleteReason !== 'fxa_unverified_account_delete') {
@@ -253,12 +254,13 @@ export class AccountDeleteManager {
 
     const currentDate = new Date();
     const createdDate = new Date(
-      currentDate.setDate(currentDate.getDate() - 180)
+      currentDate.setDate(currentDate.getDate() - refundPeriod)
     );
     const invoices =
       await this.stripeHelper?.fetchInvoicesForActiveSubscriptions(
         uid,
-        createdDate
+        createdDate,
+        'paid'
       );
 
     if (!invoices?.length) {
@@ -266,20 +268,9 @@ export class AccountDeleteManager {
       return;
     }
 
-    const payPalInvoices = invoices.filter(
-      (invoice) => invoice.collection_method === 'send_invoice'
-    );
-    const stripeInvoices = invoices.filter(
-      (invoice) => invoice.collection_method === 'charge_automatically'
-    );
-
-    if (stripeInvoices.length) {
-      // this.stripeHelper.issueRefundsForInvoices();
-    }
-
-    if (payPalInvoices.length) {
-      await this.paypalHelper?.refundInvoices(payPalInvoices);
-    }
+    // Attempt Stripe and PayPal refunds
+    // await this.stripeHelper?.refundInvoices(invoices);
+    await this.paypalHelper?.refundInvoices(invoices);
   }
 
   /**
@@ -288,15 +279,17 @@ export class AccountDeleteManager {
    *
    * @param uid - Account UID
    * @param deleteReason -- @@TODO temporary default deleteReason, remove if necessary
+   * @param refundPeriod -- @@TODO temporary default to 30. Remove if not necessary
    */
   public async deleteSubscriptions(
     uid: string,
-    deleteReason: ReasonForDeletion = 'fxa_user_requested_account_delete'
+    deleteReason: ReasonForDeletion = 'fxa_user_requested_account_delete',
+    refundPeriod = 30
   ) {
     if (this.config.subscriptions?.enabled && this.stripeHelper) {
       try {
         // Before removing the Stripe Customer, refund the subscriptions if necessary
-        await this.refundSubscriptions(uid, deleteReason);
+        await this.refundSubscriptions(uid, deleteReason, refundPeriod);
         await this.stripeHelper.removeCustomer(uid);
       } catch (err) {
         if (err.message === 'Customer not available') {

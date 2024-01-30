@@ -1201,6 +1201,19 @@ export class StripeHelper extends StripeHelperBase {
     });
   }
 
+  async refundInvoice(invoice: Stripe.Invoice) {
+    if (invoice.collection_method !== 'charge_automatically') {
+      throw new Error('Paypal invoices cannot be refunded via Stripe');
+    }
+
+    const chargeId =
+      typeof invoice.charge === 'string' ? invoice.charge : invoice.charge?.id;
+
+    await this.stripe.refunds.create({
+      charge: chargeId,
+    });
+  }
+
   /**
    * Updates invoice metadata with the PayPal Transaction ID.
    */

@@ -269,6 +269,12 @@ export class AccountDeleteManager {
     }
 
     // Attempt Stripe and PayPal refunds
+    const stripeInvoices = invoices.filter(
+      (invoice) => invoice.collection_method === 'charge_automatically'
+    );
+    for (const invoice of stripeInvoices) {
+      await this.stripeHelper?.refundInvoice(invoice);
+    }
     // await this.stripeHelper?.refundInvoices(invoices);
     await this.paypalHelper?.refundInvoices(invoices);
   }

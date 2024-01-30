@@ -9,12 +9,8 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('severity-2 #smoke', () => {
   test.describe('subscription test with cc and paypal', () => {
-    let metricsObserver: MetricsObserver;
-
-    test.beforeEach(({ pages: { subscribe } }) => {
+    test.beforeEach(() => {
       test.slow();
-      metricsObserver = new MetricsObserver(subscribe);
-      metricsObserver.startTracking();
     });
 
     test('subscribe with credit card and login to product', async ({
@@ -44,6 +40,10 @@ test.describe('severity-2 #smoke', () => {
         project.name === 'production',
         'no real payment method available in prod'
       );
+
+      let metricsObserver = new MetricsObserver(subscribe);
+      metricsObserver.startTracking();
+
       await relier.goto();
       await relier.clickSubscribe();
       await subscribe.setConfirmPaymentCheckbox();
@@ -94,12 +94,8 @@ test.describe('severity-2 #smoke', () => {
   });
 
   test.describe('Flow, acquisition and new user checkout funnel metrics', () => {
-    let metricsObserver: MetricsObserver;
-
-    test.beforeEach(({ pages: { subscribe } }) => {
+    test.beforeEach(() => {
       test.slow();
-      metricsObserver = new MetricsObserver(subscribe);
-      metricsObserver.startTracking();
     });
 
     test.describe('severity-2', () => {
@@ -185,6 +181,10 @@ test.describe('severity-2 #smoke', () => {
           project.name === 'production',
           'test plan not yet available in prod'
         );
+
+        let metricsObserver = new MetricsObserver(subscribe);
+        metricsObserver.startTracking();
+
         await settings.goto();
         await settings.signOut();
         await relier.goto();

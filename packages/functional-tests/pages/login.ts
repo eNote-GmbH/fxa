@@ -237,8 +237,10 @@ export class LoginPage extends BaseLayout {
     });
   }
 
-  async cannotCreateAccountHeader() {
-    return this.page.locator(selectors.COPPA_HEADER).isVisible();
+  async waitForCannotCreateAccountHeader() {
+    await this.page.waitForSelector(selectors.COPPA_HEADER, {
+      timeout: 3000,
+    });
   }
 
   async waitForSignUpCodeHeader() {

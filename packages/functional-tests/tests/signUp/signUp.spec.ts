@@ -101,6 +101,7 @@ test.describe('severity-2 #smoke', () => {
 
       // Verify navigated to the cannot create account page
       await page.waitForURL(/cannot_create_account/);
+      await login.waitForCannotCreateAccountHeader();
     });
 
     test('sign up with non matching passwords', async ({

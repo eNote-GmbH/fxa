@@ -1653,6 +1653,30 @@ export class StripeHelper extends StripeHelperBase {
   }
 
   /**
+   * Fetch invoices created after a given date, for customerId and subscriptions
+   */
+  async getInvoicesForSubscriptions(
+    customerId: string,
+    subscriptions: string[],
+    createdDate: Date
+  ) {
+    const date = Math.floor(createdDate.getTime() / 1000);
+    const invoices = await this.fetchPaidInvoices(customerId, { gte: date });
+
+    return invoices.data.filter((invoice) => {
+      if (!invoice?.subscription) {
+        return false;
+      }
+
+      const subscriptionId =
+        typeof invoice.subscription === 'string'
+          ? invoice.subscription
+          : invoice.subscription.id;
+      return subscriptions.includes(subscriptionId);
+    });
+  }
+
+  /**
    * Returns whether or not any of the invoices for the customer are open (payment
    * has not been processed) and have any payment attempts.
    */
@@ -1741,12 +1765,38 @@ export class StripeHelper extends StripeHelperBase {
    * - delete the stripe customer to delete
    * - remove the cache entry
    */
-  async removeCustomer(uid: string) {
+  async removeCustomer(uid: string, earliestRefundDate?: Date) {
     const accountCustomer = await getAccountCustomerByUid(uid);
     if (accountCustomer && accountCustomer.stripeCustomerId) {
       const customer = await this.fetchCustomer(accountCustomer.uid, [
         'invoice_settings.default_payment_method',
+        'subscriptions',
       ]);
+      const subscriptions = customer?.subscriptions?.data;
+      if (subscriptions) {
+        // Only refund active subscriptions
+        const activeSubscriptionIds = subscriptions.map((sub) => sub.id);
+
+        // If earliestRefundDate is not provided, default to 30 days
+        const currentDate = new Date();
+        const date =
+          earliestRefundDate ||
+          new Date(currentDate.setDate(currentDate.getDate() - 30));
+
+        // Get all Invoices to be refunded for all subscriptions
+        // eslint-disable-next-line
+        const invoicesToRefund = await this.getInvoicesForSubscriptions(
+          accountCustomer.stripeCustomerId,
+          activeSubscriptionIds,
+          date
+        );
+
+        // Get PayPal and or Stripe invoices
+        // This is possible, but not likely, since customers are able ask Support to help with a PaymentMethod change.
+        // But I think no active subscriptions are allowed. Will need to confirm that though.
+        // const payPalInvoices = invoicesToRefund.filter((invoice) => invoice.collection_method === 'send_invoice');
+        // const stripeInvoices = invoicesToRefund.filter((invoice) => invoice.collection_method === 'charge_automatically');
+      }
       if (customer && customer.invoice_settings.default_payment_method) {
         // detach the customer's payment method so we maybe won't get webhooks about it
         await this.stripe.paymentMethods.detach(

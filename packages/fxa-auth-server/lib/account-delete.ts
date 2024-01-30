@@ -245,22 +245,21 @@ export class AccountDeleteManager {
   public async refundSubscriptions(
     uid: string,
     deleteReason: ReasonForDeletion,
-    refundPeriod: number
+    refundPeriod?: number
   ) {
     // Currently only support auto refund of invoices for unverified accounts
     if (deleteReason !== 'fxa_unverified_account_delete') {
       return;
     }
 
-    const currentDate = new Date();
-    const createdDate = new Date(
-      currentDate.setDate(currentDate.getDate() - refundPeriod)
-    );
+    const createdDate = refundPeriod
+      ? new Date(new Date().setDate(new Date().getDate() - refundPeriod))
+      : undefined;
     const invoices =
       await this.stripeHelper?.fetchInvoicesForActiveSubscriptions(
         uid,
-        createdDate,
-        'paid'
+        'paid',
+        createdDate
       );
 
     if (!invoices?.length) {
@@ -270,7 +269,6 @@ export class AccountDeleteManager {
 
     // Attempt Stripe and PayPal refunds
     await this.stripeHelper?.refundInvoices(invoices);
-    // await this.stripeHelper?.refundInvoices(invoices);
     await this.paypalHelper?.refundInvoices(invoices);
   }
 
@@ -285,7 +283,7 @@ export class AccountDeleteManager {
   public async deleteSubscriptions(
     uid: string,
     deleteReason: ReasonForDeletion = 'fxa_user_requested_account_delete',
-    refundPeriod = 30
+    refundPeriod?: number
   ) {
     if (this.config.subscriptions?.enabled && this.stripeHelper) {
       try {

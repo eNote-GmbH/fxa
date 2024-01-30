@@ -1747,8 +1747,8 @@ export class StripeHelper extends StripeHelperBase {
 
   async fetchInvoicesForActiveSubscriptions(
     uid: string,
-    earliestCreatedDate: Date,
-    status: Stripe.InvoiceListParams.Status
+    status: Stripe.InvoiceListParams.Status,
+    earliestCreatedDate?: Date
   ) {
     const accountCustomer = await getAccountCustomerByUid(uid);
     if (accountCustomer && accountCustomer.stripeCustomerId) {
@@ -1759,11 +1759,13 @@ export class StripeHelper extends StripeHelperBase {
       const subscriptions = customer?.subscriptions?.data;
       if (subscriptions) {
         const activeSubscriptionIds = subscriptions.map((sub) => sub.id);
-        const created = Math.floor(earliestCreatedDate.getTime() / 1000);
+        const created = earliestCreatedDate
+          ? { gte: Math.floor(earliestCreatedDate.getTime() / 1000) }
+          : undefined;
         const invoices = await this.stripe.invoices.list({
           customer: accountCustomer.stripeCustomerId,
           status,
-          created: { gte: created },
+          created,
         });
 
         return invoices.data.filter((invoice) => {

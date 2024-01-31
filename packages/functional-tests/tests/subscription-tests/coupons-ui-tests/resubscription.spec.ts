@@ -13,7 +13,6 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('resubscribe successfully with the same coupon after canceling for stripe', async ({
-      page,
       pages: { relier, subscribe, login, settings, subscriptionManagement },
     }, { project }) => {
       test.skip(
@@ -65,7 +64,6 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('resubscribe successfully with the same coupon after canceling for paypal', async ({
-      page,
       pages: { relier, subscribe, login, settings, subscriptionManagement },
     }, { project }) => {
       test.skip(
@@ -115,7 +113,6 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('update mode of payment for stripe', async ({
-      page,
       pages: { relier, subscribe, login, settings, subscriptionManagement },
     }, { project }) => {
       test.skip(
@@ -148,8 +145,7 @@ test.describe('severity-2 #smoke', () => {
       expect(await subscriptionManagement.getCardInfo()).toContain('4444');
     });
 
-    //Disable as paypal sandbox is taking a long time to load
-    /*test('update mode of payment for paypal', async ({
+    test('update mode of payment for paypal', async ({
       page,
       pages: { relier, subscribe, login, settings, subscriptionManagement },
     }, { project }) => {
@@ -193,7 +189,9 @@ test.describe('severity-2 #smoke', () => {
       await page.waitForTimeout(2000);
 
       //Verify that the payment info is updated
-      expect(await subscriptionManagement.checkPaypalAccount()).toContain('Visa');
-    });*/
+      expect(await subscriptionManagement.checkPaypalAccount()).toContain(
+        'Visa'
+      );
+    });
   });
 });

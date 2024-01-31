@@ -4079,6 +4079,95 @@ describe('#integration - StripeHelper', () => {
     });
   });
 
+  describe('fetchInvoicesForActiveSubscriptions', () => {
+    it('returns empty array if no stripe customer', async () => {
+      const notexistUid = chance.guid({ version: 4 }).replace(/-/g, '');
+      const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
+        notexistUid,
+        'paid'
+      );
+      assert.deepEqual(result, []);
+    });
+
+    it('returns empty array if customer has no active subscriptions', async () => {
+      sandbox.stub(stripeHelper, 'fetchCustomer').resolves({});
+      const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
+        existingUid,
+        'paid'
+      );
+      assert.deepEqual(result, []);
+    });
+
+    it('fetches invoices no older than earliestCreatedDate', async () => {
+      sandbox.stub(stripeHelper, 'fetchCustomer').resolves({
+        subscriptions: { data: [] },
+      });
+      sandbox.stub(stripeHelper.stripe.invoices, 'list').resolves({ data: [] });
+      const expectedDateTime = 1706667661086;
+      const expectedDate = new Date(expectedDateTime);
+
+      const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
+        existingUid,
+        'paid',
+        expectedDate
+      );
+
+      assert.deepEqual(result, []);
+      sinon.assert.calledOnceWithExactly(stripeHelper.stripe.invoices.list, {
+        customer: existingCustomer.stripeCustomerId,
+        status: 'paid',
+        created: { gte: Math.floor(expectedDateTime / 1000) },
+      });
+    });
+
+    it('returns only invoices of active subscriptions', async () => {
+      const expectedExpanded = {
+        id: 'idExpanded',
+        subscription: {
+          id: 'subIdExpanded',
+        },
+      };
+      const expectedString = {
+        id: 'idString',
+        subscription: 'idSub',
+      };
+      sandbox.stub(stripeHelper, 'fetchCustomer').resolves({
+        subscriptions: {
+          data: [
+            {
+              id: 'idNull',
+            },
+            {
+              id: 'subIdExpanded',
+            },
+            {
+              id: 'idSub',
+            },
+          ],
+        },
+      });
+      sandbox.stub(stripeHelper.stripe.invoices, 'list').resolves({
+        data: [
+          {
+            id: 'idNull',
+            subscription: null,
+          },
+          {
+            ...expectedExpanded,
+          },
+          {
+            ...expectedString,
+          },
+        ],
+      });
+      const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
+        existingUid,
+        'paid'
+      );
+      assert.deepEqual(result, [expectedExpanded, expectedString]);
+    });
+  });
+
   describe('removeCustomer', () => {
     let stripeCustomerDel;
     const email = 'test@example.com';

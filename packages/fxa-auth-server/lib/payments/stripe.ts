@@ -1762,7 +1762,6 @@ export class StripeHelper extends StripeHelperBase {
     const accountCustomer = await getAccountCustomerByUid(uid);
     if (accountCustomer && accountCustomer.stripeCustomerId) {
       const customer = await this.fetchCustomer(accountCustomer.uid, [
-        'invoice_settings.default_payment_method',
         'subscriptions',
       ]);
       const subscriptions = customer?.subscriptions?.data;

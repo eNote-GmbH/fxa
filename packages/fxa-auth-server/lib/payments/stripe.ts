@@ -1227,6 +1227,12 @@ export class StripeHelper extends StripeHelperBase {
           currency: invoice.currency,
         });
       } catch (error) {
+        if (
+          error.type === 'StripeInvalidRequestError' &&
+          (error as any).code === 'charge_already_refunded'
+        ) {
+          continue;
+        }
         this.log.error('StripeHelper.refundInvoices', {
           error,
           invoiceId: invoice.id,

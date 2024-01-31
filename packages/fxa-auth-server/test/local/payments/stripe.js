@@ -4081,7 +4081,7 @@ describe('#integration - StripeHelper', () => {
 
   describe('fetchInvoicesForActiveSubscriptions', () => {
     it('returns empty array if no stripe customer', async () => {
-      const notexistUid = chance.guid({ version: 4 }).replace(/-/g, '');
+      const notexistUid = '192499bcb0cf4da2bf1b37f1a37f3b88';
       const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
         notexistUid,
         'paid'

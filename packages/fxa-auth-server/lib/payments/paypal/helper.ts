@@ -616,7 +616,13 @@ export class PayPalHelper {
     });
   }
 
+  /**
+   * Attempts to refund all of the invoices passed, provided they're created via PayPal
+   * This will invisibly do nothing if the invoice is not billed through PayPal, so be mindful
+   * if using it elsewhere and need confirmation of a refund.
+   */
   public async refundInvoices(invoices: Stripe.Invoice[]) {
+    const refundResults = [];
     const payPalInvoices = invoices.filter(
       (invoice) => invoice.collection_method === 'send_invoice'
     );
@@ -640,6 +646,14 @@ export class PayPalHelper {
         transactionId,
         invoiceId: invoice.id,
       });
+      refundResults.push({
+        invoiceId: invoice.id,
+        priceId: this.stripeHelper.getPriceIdFromInvoice(invoice),
+        total: invoice.total,
+        currency: invoice.currency,
+      });
     }
+
+    return refundResults;
   }
 }

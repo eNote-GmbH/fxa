@@ -1207,6 +1207,7 @@ export class StripeHelper extends StripeHelperBase {
    * if using it elsewhere and need confirmation of a refund.
    */
   async refundInvoices(invoices: Stripe.Invoice[]) {
+    const refundResults = [];
     const stripeInvoices = invoices.filter(
       (invoice) => invoice.collection_method === 'charge_automatically'
     );
@@ -1219,7 +1220,15 @@ export class StripeHelper extends StripeHelperBase {
       await this.stripe.refunds.create({
         charge: chargeId,
       });
+      refundResults.push({
+        invoiceId: invoice.id,
+        priceId: this.getPriceIdFromInvoice(invoice),
+        total: invoice.total,
+        currency: invoice.currency,
+      });
     }
+
+    return refundResults;
   }
 
   /**
@@ -2493,6 +2502,15 @@ export class StripeHelper extends StripeHelperBase {
       signature,
       this.webhookSecret
     );
+  }
+
+  /**
+   * Get PriceId of subscription from invoice
+   */
+  getPriceIdFromInvoice(invoice: Stripe.Invoice) {
+    return invoice.lines.data.find(
+      (invoiceLine) => invoiceLine.type === 'subscription'
+    )?.price?.id;
   }
 
   /**

@@ -268,8 +268,20 @@ export class AccountDeleteManager {
     }
 
     // Attempt Stripe and PayPal refunds
-    await this.stripeHelper?.refundInvoices(invoices);
-    await this.paypalHelper?.refundInvoices(invoices);
+    const refundResults = await Promise.all([
+      this.stripeHelper?.refundInvoices(invoices),
+      this.paypalHelper?.refundInvoices(invoices),
+    ]);
+    refundResults.forEach((results) =>
+      results?.forEach((result) =>
+        this.log.info('AccountDeleteManager.refundSubscriptions', {
+          invoiceId: result.invoiceId,
+          priceId: result.priceId,
+          total: result.total,
+          currency: result.currency,
+        })
+      )
+    );
   }
 
   /**

@@ -169,6 +169,8 @@ function throwPaypalCodeError(err: PayPalClientError) {
   );
 }
 
+const MAX_REFUND_DAYS = 180;
+
 export class PayPalHelper {
   private log: Logger;
   private client: PayPalClient;
@@ -542,13 +544,6 @@ export class PayPalHelper {
   }
 
   /**
-   * Get maximum allowed refund period
-   */
-  public getMaximumRefundDate(date: Date = new Date()) {
-    return Math.floor(date.setDate(date.getDay() - 180) / 1000);
-  }
-
-  /**
    * Given the transaction ID, refund the transaction in full.
    * Use the Stripe Invoice ID as the idempotency key since we
    * expect one refund per invoice.
@@ -623,9 +618,15 @@ export class PayPalHelper {
    */
   public async refundInvoices(invoices: Stripe.Invoice[]) {
     const refundResults = [];
-    const payPalInvoices = invoices.filter(
-      (invoice) => invoice.collection_method === 'send_invoice'
-    );
+    const payPalInvoices = invoices.filter((invoice) => {
+      const minCreated = Math.floor(
+        new Date().setDate(new Date().getDate() - MAX_REFUND_DAYS) / 1000
+      );
+      return (
+        invoice.collection_method === 'send_invoice' &&
+        invoice.created > minCreated
+      );
+    });
     for (const invoice of payPalInvoices) {
       const transactionId =
         this.stripeHelper.getInvoicePaypalTransactionId(invoice);

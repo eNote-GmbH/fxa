@@ -484,6 +484,107 @@ describe('PayPalHelper', () => {
     });
   });
 
+  describe('refundInvoices', () => {
+    const validInvoice = {
+      id: 'id1',
+      collection_method: 'send_invoice',
+      created: Date.now(),
+    };
+    it('returns empty array if no payPalInvoices exist', async () => {
+      const result = await paypalHelper.refundInvoices([
+        { collection_method: 'notpaypal' },
+      ]);
+      assert.deepEqual(result, []);
+    });
+
+    it('returns empty array on empty array input', async () => {
+      const result = await paypalHelper.refundInvoices([]);
+      assert.deepEqual(result, []);
+    });
+
+    it('returns empty array on created date older than 180 days', async () => {
+      const result = await paypalHelper.refundInvoices([
+        {
+          collection_method: 'send_invoice',
+          created: Math.floor(
+            new Date().setDate(new Date().getDate() - 200) / 1000
+          ),
+        },
+      ]);
+      assert.deepEqual(result, []);
+    });
+
+    it('logs error and continues if transactionId is missing', async () => {
+      paypalHelper.log = { error: sinon.fake.returns({}) };
+      mockStripeHelper.getInvoicePaypalTransactionId =
+        sinon.fake.returns(undefined);
+      const result = await paypalHelper.refundInvoices([validInvoice]);
+      assert.deepEqual(result, []);
+      sinon.assert.calledOnceWithExactly(
+        paypalHelper.log.error,
+        'PayPalHelper.refundInvoices',
+        {
+          msg: 'Missing transactionId',
+          invoiceId: 'id1',
+        }
+      );
+    });
+
+    it('continues if refundTransactionId exists', async () => {
+      mockStripeHelper.getInvoicePaypalTransactionId = sinon.fake.returns(123);
+      mockStripeHelper.getInvoicePaypalRefundTransactionId =
+        sinon.fake.returns(123);
+      const result = await paypalHelper.refundInvoices([validInvoice]);
+      assert.deepEqual(result, []);
+      sinon.assert.calledOnce(mockStripeHelper.getInvoicePaypalTransactionId);
+      sinon.assert.calledOnce(
+        mockStripeHelper.getInvoicePaypalRefundTransactionId
+      );
+    });
+
+    it('rejects on error', async () => {
+      const expectedError = new Error('Helper error');
+      mockStripeHelper.getInvoicePaypalTransactionId =
+        sinon.fake.throws(expectedError);
+      try {
+        await paypalHelper.refundInvoices([validInvoice]);
+        assert.fail('Should throw error on failure');
+      } catch (error) {
+        assert.deepEqual(error, expectedError);
+      }
+    });
+
+    it('returns refund results on success', async () => {
+      const expectedInvoiceResults = {
+        invoiceId: validInvoice.id,
+        priceId: 'priceId1',
+        total: 400,
+        currency: 'usd',
+      };
+      paypalHelper.log = { debug: sinon.fake.returns({}) };
+      mockStripeHelper.getInvoicePaypalTransactionId =
+        sinon.fake.returns('123');
+      mockStripeHelper.getInvoicePaypalRefundTransactionId =
+        sinon.fake.returns(undefined);
+      mockStripeHelper.getPriceIdFromInvoice = sinon.fake.returns(
+        expectedInvoiceResults.priceId
+      );
+      paypalHelper.issueRefund = sinon.fake.resolves();
+      const result = await paypalHelper.refundInvoices([
+        { ...validInvoice, ...expectedInvoiceResults },
+      ]);
+      assert.deepEqual(result, [expectedInvoiceResults]);
+      sinon.assert.calledOnceWithExactly(
+        paypalHelper.log.debug,
+        'PayPalHelper.refundInvoices.success',
+        {
+          transactionId: '123',
+          invoiceId: 'id1',
+        }
+      );
+    });
+  });
+
   describe('cancelBillingAgreement', () => {
     it('cancels an agreement', async () => {
       paypalHelper.client.doRequest = sinon.fake.resolves(

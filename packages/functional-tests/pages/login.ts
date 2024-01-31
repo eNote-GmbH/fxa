@@ -235,10 +235,10 @@ export class LoginPage extends BaseLayout {
     await this.submit();
   }
 
-  async waitForEmailHeader() {
-    await this.page.waitForSelector(selectors.EMAIL_HEADER, {
-      timeout: 2000,
-    });
+  async waitForEmailHeaderIsVisible(): Promise<boolean> {
+    const emailHeader = this.page.locator(selectors.EMAIL_HEADER);
+    await emailHeader.waitFor({ state: 'visible', timeout: 2000 });
+    return emailHeader.isVisible();
   }
 
   async cannotCreateAccountHeader() {

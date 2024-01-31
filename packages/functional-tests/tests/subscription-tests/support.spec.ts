@@ -15,7 +15,7 @@ test.describe('severity-1 #smoke', () => {
       await page.goto(`${target.contentServerUrl}/support`, {
         waitUntil: 'load',
       });
-      await login.waitForEmailHeader();
+      expect(await login.waitForEmailHeaderIsVisible()).toBe(true);
     });
   });
 

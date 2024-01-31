@@ -23,7 +23,6 @@ import { emailsMatch } from 'fxa-shared/email/helpers';
 const PERSISTENT = {
   accountResetToken: undefined,
   alertText: undefined,
-  atLeast18AtReg: undefined,
   displayName: undefined,
   email: undefined,
   grantedPermissions: undefined,

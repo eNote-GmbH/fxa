@@ -1207,7 +1207,6 @@ export class StripeHelper extends StripeHelperBase {
    * if using it elsewhere and need confirmation of a refund.
    */
   async refundInvoices(invoices: Stripe.Invoice[]) {
-    const refundResults = [];
     const stripeInvoices = invoices.filter(
       (invoice) => invoice.collection_method === 'charge_automatically'
     );
@@ -1217,18 +1216,35 @@ export class StripeHelper extends StripeHelperBase {
           ? invoice.charge
           : invoice.charge?.id;
 
-      await this.stripe.refunds.create({
-        charge: chargeId,
-      });
-      refundResults.push({
-        invoiceId: invoice.id,
-        priceId: this.getPriceIdFromInvoice(invoice),
-        total: invoice.total,
-        currency: invoice.currency,
-      });
+      try {
+        await this.stripe.refunds.create({
+          charge: chargeId,
+        });
+        this.log.info('refundInvoices', {
+          invoiceId: invoice.id,
+          priceId: this.getPriceIdFromInvoice(invoice),
+          total: invoice.total,
+          currency: invoice.currency,
+        });
+      } catch (error) {
+        this.log.error('StripeHelper.refundInvoices', {
+          error,
+          invoiceId: invoice.id,
+        });
+        if (
+          [
+            'StripeRateLimitError',
+            'StripeAPIError',
+            'StripeConnectionError',
+            'StripeAuthenticationError',
+          ].includes(error.type)
+        ) {
+          throw error;
+        }
+      }
     }
 
-    return refundResults;
+    return;
   }
 
   /**
@@ -1755,39 +1771,34 @@ export class StripeHelper extends StripeHelperBase {
   }
 
   async fetchInvoicesForActiveSubscriptions(
-    uid: string,
+    customerId: string,
     status: Stripe.InvoiceListParams.Status,
     earliestCreatedDate?: Date
   ) {
-    const accountCustomer = await getAccountCustomerByUid(uid);
-    if (accountCustomer && accountCustomer.stripeCustomerId) {
-      const customer = await this.fetchCustomer(accountCustomer.uid, [
-        'subscriptions',
-      ]);
-      const subscriptions = customer?.subscriptions?.data;
-      if (subscriptions) {
-        const activeSubscriptionIds = subscriptions.map((sub) => sub.id);
-        const created = earliestCreatedDate
-          ? { gte: Math.floor(earliestCreatedDate.getTime() / 1000) }
-          : undefined;
-        const invoices = await this.stripe.invoices.list({
-          customer: accountCustomer.stripeCustomerId,
-          status,
-          created,
-        });
+    const customer = await this.fetchCustomer(customerId, ['subscriptions']);
+    const subscriptions = customer?.subscriptions?.data;
+    if (subscriptions) {
+      const activeSubscriptionIds = subscriptions.map((sub) => sub.id);
+      const created = earliestCreatedDate
+        ? { gte: Math.floor(earliestCreatedDate.getTime() / 1000) }
+        : undefined;
+      const invoices = await this.stripe.invoices.list({
+        customer: customerId,
+        status,
+        created,
+      });
 
-        return invoices.data.filter((invoice) => {
-          if (!invoice?.subscription) {
-            return false;
-          }
+      return invoices.data.filter((invoice) => {
+        if (!invoice?.subscription) {
+          return false;
+        }
 
-          const subscriptionId =
-            typeof invoice.subscription === 'string'
-              ? invoice.subscription
-              : invoice.subscription.id;
-          return activeSubscriptionIds.includes(subscriptionId);
-        });
-      }
+        const subscriptionId =
+          typeof invoice.subscription === 'string'
+            ? invoice.subscription
+            : invoice.subscription.id;
+        return activeSubscriptionIds.includes(subscriptionId);
+      });
     }
 
     return [];

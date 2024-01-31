@@ -617,44 +617,52 @@ export class PayPalHelper {
    * if using it elsewhere and need confirmation of a refund.
    */
   public async refundInvoices(invoices: Stripe.Invoice[]) {
-    const refundResults = [];
-    const payPalInvoices = invoices.filter((invoice) => {
-      const minCreated = Math.floor(
-        new Date().setDate(new Date().getDate() - MAX_REFUND_DAYS) / 1000
-      );
-      return (
-        invoice.collection_method === 'send_invoice' &&
-        invoice.created > minCreated
-      );
+    this.log.debug('PayPalHelper.refundInvoices', {
+      numberOfInvoices: invoices.length,
     });
+    const minCreated = Math.floor(
+      new Date().setDate(new Date().getDate() - MAX_REFUND_DAYS) / 1000
+    );
+    const payPalInvoices = invoices.filter(
+      (invoice) => invoice.collection_method === 'send_invoice'
+    );
+
     for (const invoice of payPalInvoices) {
-      const transactionId =
-        this.stripeHelper.getInvoicePaypalTransactionId(invoice);
-      if (!transactionId) {
+      this.log.debug('PayPalHelper.refundInvoices', { invoiceId: invoice.id });
+      try {
+        if (invoice.created > minCreated) {
+          throw new Error('Invoice created outside of maximum refund period');
+        }
+        const transactionId =
+          this.stripeHelper.getInvoicePaypalTransactionId(invoice);
+        if (!transactionId) {
+          throw new Error('Missing transactionId');
+        }
+        const refundTransactionId =
+          this.stripeHelper.getInvoicePaypalRefundTransactionId(invoice);
+        if (refundTransactionId) {
+          throw new Error('Invoice already refunded with PayPal');
+        }
+
+        await this.issueRefund(invoice, transactionId, RefundType.Full);
+
+        this.log.info('refundInvoices', {
+          invoiceId: invoice.id,
+          priceId: this.stripeHelper.getPriceIdFromInvoice(invoice),
+          total: invoice.total,
+          currency: invoice.currency,
+        });
+      } catch (error) {
         this.log.error('PayPalHelper.refundInvoices', {
-          msg: 'Missing transactionId',
+          error,
           invoiceId: invoice.id,
         });
-        continue;
+        if (!(error instanceof RefusedError)) {
+          throw error;
+        }
       }
-      const refundTransactionId =
-        this.stripeHelper.getInvoicePaypalRefundTransactionId(invoice);
-      if (refundTransactionId) {
-        continue;
-      }
-      await this.issueRefund(invoice, transactionId, RefundType.Full);
-      this.log.debug('PayPalHelper.refundInvoices.success', {
-        transactionId,
-        invoiceId: invoice.id,
-      });
-      refundResults.push({
-        invoiceId: invoice.id,
-        priceId: this.stripeHelper.getPriceIdFromInvoice(invoice),
-        total: invoice.total,
-        currency: invoice.currency,
-      });
     }
 
-    return refundResults;
+    return;
   }
 }

@@ -1861,7 +1861,7 @@ export class AccountHandler {
       }
     };
 
-    await this.accountDeleteManager.deleteAccount(uid, { notify });
+    await this.accountDeleteManager.deleteAccount(uid, '', { notify });
 
     return {};
   }

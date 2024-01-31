@@ -184,18 +184,22 @@ export class AccountDeleteManager {
    * @param uid string
    * @param options AccountDeleteOptions optional object with an optional `notify` function that will be called after the account's removed from MySQL.
    */
-  public async deleteAccount(uid: string, options?: AccountDeleteOptions) {
+  public async deleteAccount(
+    uid: string,
+    customerId?: string,
+    options?: AccountDeleteOptions
+  ) {
     await this.deleteAccountFromDb(uid, options);
     await this.deleteOAuthTokens(uid);
     // see comment in the function on why we are not awaiting
     this.deletePushboxRecords(uid);
 
-    await this.deleteSubscriptions(uid);
+    await this.deleteSubscriptions(uid, customerId);
     await this.deleteFirestoreCustomer(uid);
   }
 
-  public async cleanupAccount(uid: string) {
-    await this.deleteSubscriptions(uid);
+  public async cleanupAccount(uid: string, customerId?: string) {
+    await this.deleteSubscriptions(uid, customerId);
     await this.deleteFirestoreCustomer(uid);
     await this.deleteOAuthTokens(uid);
   }
@@ -243,12 +247,16 @@ export class AccountDeleteManager {
   }
 
   public async refundSubscriptions(
-    uid: string,
     deleteReason: ReasonForDeletion,
+    customerId?: string,
     refundPeriod?: number
   ) {
+    this.log.debug('AccountDeleteManager.refundSubscriptions.start', {
+      customerId,
+    });
+
     // Currently only support auto refund of invoices for unverified accounts
-    if (deleteReason !== 'fxa_unverified_account_delete') {
+    if (deleteReason !== 'fxa_unverified_account_delete' || !customerId) {
       return;
     }
 
@@ -257,31 +265,29 @@ export class AccountDeleteManager {
       : undefined;
     const invoices =
       await this.stripeHelper?.fetchInvoicesForActiveSubscriptions(
-        uid,
+        customerId,
         'paid',
         createdDate
       );
 
     if (!invoices?.length) {
-      // Log message and return
       return;
     }
+    this.log.debug('AccountDeleteManager.refundSubscriptions', {
+      customerId,
+      invoicesToRefund: invoices.length,
+    });
 
     // Attempt Stripe and PayPal refunds
-    const refundResults = await Promise.all([
+    const results = await Promise.allSettled([
       this.stripeHelper?.refundInvoices(invoices),
       this.paypalHelper?.refundInvoices(invoices),
     ]);
-    refundResults.forEach((results) =>
-      results?.forEach((result) =>
-        this.log.info('AccountDeleteManager.refundSubscriptions', {
-          invoiceId: result.invoiceId,
-          priceId: result.priceId,
-          total: result.total,
-          currency: result.currency,
-        })
-      )
-    );
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        throw result.reason;
+      }
+    });
   }
 
   /**
@@ -294,13 +300,14 @@ export class AccountDeleteManager {
    */
   public async deleteSubscriptions(
     uid: string,
+    customerId?: string,
     deleteReason: ReasonForDeletion = 'fxa_user_requested_account_delete',
     refundPeriod?: number
   ) {
     if (this.config.subscriptions?.enabled && this.stripeHelper) {
       try {
         // Before removing the Stripe Customer, refund the subscriptions if necessary
-        await this.refundSubscriptions(uid, deleteReason, refundPeriod);
+        await this.refundSubscriptions(deleteReason, customerId, refundPeriod);
         await this.stripeHelper.removeCustomer(uid);
       } catch (err) {
         if (err.message === 'Customer not available') {

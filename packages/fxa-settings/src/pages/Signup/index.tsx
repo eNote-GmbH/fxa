@@ -222,7 +222,10 @@ export const Signup = ({
         const getOfferedSyncEngines = () =>
           getSyncEngineIds(offeredSyncEngineConfigs || []);
 
-        if (isSyncDesktopV3Integration(integration)) {
+        if (
+          isSyncDesktopV3Integration(integration) ||
+          (isOAuthIntegration(integration) && integration.isSync())
+        ) {
           await firefox.fxaLogin({
             email,
             keyFetchToken: data.SignUp.keyFetchToken,

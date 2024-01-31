@@ -41,7 +41,7 @@ test.describe('severity-2 #smoke', () => {
         'no real payment method available in prod'
       );
 
-      let metricsObserver = new MetricsObserver(subscribe);
+      const metricsObserver = new MetricsObserver(subscribe);
       metricsObserver.startTracking();
 
       await relier.goto();
@@ -179,7 +179,7 @@ test.describe('severity-2 #smoke', () => {
         'test plan not yet available in prod'
       );
 
-      let metricsObserver = new MetricsObserver(subscribe);
+      const metricsObserver = new MetricsObserver(subscribe);
       metricsObserver.startTracking();
 
       await settings.goto();
@@ -187,9 +187,8 @@ test.describe('severity-2 #smoke', () => {
       await relier.goto();
 
       const subscribeUrl = await relier.getUrl();
-      if (!subscribeUrl) {
-        fail('Subscribe button has no href.');
-      }
+      expect(subscribeUrl, 'Subscribe button has no href.').toBeTruthy();
+
       const rpSearchParamsBefore = relier.getRpSearchParams(subscribeUrl);
       const rpFlowParamsBefore = relier.getRpFlowParams(rpSearchParamsBefore);
       const acquisitionParamsBefore =

@@ -16,7 +16,7 @@ test.describe('severity-2 #smoke', () => {
       );
       test.slow();
 
-      let metricsObserver = new MetricsObserver(subscribe);
+      const metricsObserver = new MetricsObserver(subscribe);
       metricsObserver.startTracking();
 
       await relier.goto();

@@ -257,6 +257,14 @@ const GET_RECOVERY_BUNDLE = gql`
   }
 `;
 
+const PASSWORD_FORGOT_SEND_CODE = gql`
+  mutation passwordForgotSendCode($input: PasswordForgotSendCodeInput!) {
+    passwordForgotSendCode(input: $input) {
+      passwordForgotToken
+    }
+  }
+`;
+
 export function getNextAvatar(
   existingId?: string,
   existingUrl?: string,
@@ -569,27 +577,43 @@ export class Account implements AccountData {
     service?: string,
     redirectTo?: string
   ): Promise<PasswordForgotSendCodePayload> {
-    let options: {
-      service?: string;
-      resume?: string;
-      redirectTo?: string;
-    } = {
-      resume: 'e30=', // base64 json for {}
-    };
+    try {
+      if (service && service === MozServices.FirefoxSync) {
+        service = 'sync';
+      }
 
-    // Important! Only set service when it's Firefox Sync
-    if (service && service === MozServices.FirefoxSync) {
-      options.service = 'sync';
-    } else {
-      options.service = service;
+      const result = await this.apolloClient.mutate({
+        mutation: PASSWORD_FORGOT_SEND_CODE,
+        variables: {
+          input: {
+            email,
+            // Only include the `service` option if the service is Sync.
+            // This becomes a query param (service=sync) on the email link.
+            // We need to modify this in FXA-7657 to send the `client_id` param
+            // when we work on the OAuth flow.
+            service,
+            redirectTo,
+            resume: 'e30=',
+          },
+        },
+      });
+      return result.data.passwordForgotSendCode;
+    } catch (err) {
+      const graphQlError = (err as ApolloError)?.graphQLErrors?.[0];
+      const errno = graphQlError?.extensions?.errno as number | undefined;
+
+      if (typeof errno === 'number' && errno === AuthUiErrors.THROTTLED.errno) {
+        const throttledErrorWithRetryAfter = {
+          ...AuthUiErrorNos[errno],
+          retryAfter: graphQlError?.extensions?.retryAfter,
+          retryAfterLocalized: graphQlError?.extensions?.retryAfterLocalized,
+        };
+        throw throttledErrorWithRetryAfter;
+      } else if (typeof errno === 'number' && AuthUiErrorNos[errno]) {
+        throw AuthUiErrorNos[errno];
+      }
+      throw AuthUiErrors.UNEXPECTED_ERROR;
     }
-
-    if (redirectTo) {
-      options.redirectTo = redirectTo;
-    }
-
-    const result = await this.authClient.passwordForgotSendCode(email, options);
-    return result;
   }
 
   async resetPasswordStatus(passwordForgotToken: string): Promise<boolean> {

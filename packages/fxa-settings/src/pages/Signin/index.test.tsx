@@ -15,6 +15,7 @@ import { MOCK_EMAIL, MOCK_PASSWORD, MOCK_SESSION_TOKEN } from '../mocks';
 import { MozServices } from '../../lib/types';
 import * as utils from 'fxa-react/lib/utils';
 import { storeAccountData } from '../../lib/storage-utils';
+import VerificationMethods from '../../constants/verification-methods';
 // import { getFtlBundle, testAllL10n } from 'fxa-react/lib/test-utils';
 // import { FluentBundle } from '@fluent/bundle';
 jest.mock('../../lib/metrics', () => ({
@@ -66,6 +67,14 @@ jest.mock('@reach/router', () => ({
 function submit() {
   fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 }
+function enterPasswordAndSubmit() {
+  fireEvent.input(screen.getByLabelText('Password'), {
+    target: { value: MOCK_PASSWORD },
+  });
+  submit();
+}
+
+/* Element rendered or not rendered functions */
 function signInHeaderRendered(service: MozServices = MozServices.Default) {
   screen.getByRole('heading', {
     name: 'Sign in',
@@ -180,11 +189,7 @@ describe('Signin', () => {
             renderWithLocalizationProvider(
               <Subject {...{ beginSigninHandler }} />
             );
-
-            fireEvent.input(screen.getByLabelText('Password'), {
-              target: { value: MOCK_PASSWORD },
-            });
-            submit();
+            enterPasswordAndSubmit();
             await waitFor(() => {
               expect(beginSigninHandler).toHaveBeenCalledWith(
                 MOCK_EMAIL,
@@ -196,8 +201,21 @@ describe('Signin', () => {
             expect(storeAccountData).toHaveBeenCalled();
           });
 
-          // TODO in follow up, with container component tests
-          // it('navigates to /signin_totp_code when conditions are met', async () => {});
+          it('navigates to /signin_totp_code when conditions are met', async () => {
+            const beginSigninHandler = jest.fn().mockReturnValueOnce({
+              ...BEGIN_SIGNIN_HANDLER_RESPONSE,
+              verified: false,
+              verificationMethod: VerificationMethods.TOTP_2FA,
+            });
+            renderWithLocalizationProvider(
+              <Subject {...{ beginSigninHandler }} />
+            );
+
+            enterPasswordAndSubmit();
+            await waitFor(() => {
+              expect(mockNavigate).toHaveBeenCalledWith('/signin_totp_code');
+            });
+          });
           // it('navigates to /confirm_signup_code when conditions are met', async () => {});
           // it('navigates to /signin_token_code when conditions are met', async () => {});
           // it('navigates to /settings', async () => {});

@@ -10,6 +10,14 @@ const logger = require('./log')(
   'configure-sentry'
 );
 const { version } = require('../package.json');
+const { ERRNO } = require('./error');
+
+// Maintain list of errors that should not be sent to Sentry
+const IGNORED_ERROR_NUMBERS = [
+  ERRNO.BOUNCE_HARD,
+  ERRNO.BOUNCE_SOFT,
+  ERRNO.BOUNCE_COMPLAINT,
+];
 
 /**
  * Initialize sentry & otel
@@ -40,6 +48,14 @@ const URIENCODEDFILTERED = encodeURIComponent(FILTERED);
  * @param {Sentry.Event} event
  */
 function filterSentryEvent(event, hint) {
+  // If we encounter a WError, we likely want to filter it out. These errors are
+  // intentionally relayed to the client, and don't constitute unexpected errors.
+  // Note, that these might arrive here from our reportSentryError function, or
+  // some other instrumentation that has captured the error.
+  if (hint?.originalException != null && ignoreErrors(hint.originalException)) {
+    return null;
+  }
+
   if (event.breadcrumbs) {
     for (const bc of event.breadcrumbs) {
       if (bc.message) {
@@ -71,7 +87,43 @@ function filterSentryEvent(event, hint) {
   if (event.tags && event.tags.url) {
     event.tags.url = event.tags.url.replace(TOKENREGEX, FILTERED);
   }
+
   return event;
+  // return event;
+}
+
+/**
+ * Prevents errors from being captured in sentry.
+ *
+ * @param {Error} error An error with an error number. Note that errors of type vError will
+ *                use the underlying jse_cause error if possible.
+ */
+function ignoreErrors(error) {
+  if (!error) {
+    return;
+  }
+
+  // Prefer jse_cause, but fallback to top level error if needed
+  const statusCode =
+    determineStatusCode(error.jse_cause) || determineStatusCode(error);
+
+  const errno = error.jse_cause?.errno || error.errno;
+
+  // Ignore non 500 status codes and specific error numbers
+  return statusCode < 500 || IGNORED_ERROR_NUMBERS.includes(errno);
+}
+
+/**
+ * Given an error tries to determine the HTTP status code associated with the error.
+ * @param {*} error
+ * @returns
+ */
+function determineStatusCode(error) {
+  if (!error) {
+    return;
+  }
+
+  return error.statusCode || error.output?.statusCode || error.code;
 }
 
 /**

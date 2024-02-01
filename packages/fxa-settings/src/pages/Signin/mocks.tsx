@@ -17,6 +17,7 @@ import {
 } from '../mocks';
 import {
   BeginSigninHandler,
+  BeginSigninResponse,
   CachedSigninHandler,
   SigninIntegration,
   SigninProps,
@@ -54,6 +55,30 @@ export const BEGIN_SIGNIN_HANDLER_RESPONSE = {
     },
   },
 };
+
+export function createBeginSigninHandlerResponse({
+  uid = MOCK_UID,
+  sessionToken = MOCK_SESSION_TOKEN,
+  authAt = MOCK_AUTH_AT,
+  metricsEnabled = true,
+  verified = true,
+  verificationMethod = MOCK_VERIFICATION.verificationMethod,
+  verificationReason = MOCK_VERIFICATION.verificationReason,
+}: Partial<BeginSigninResponse['signIn']> = {}): { data: BeginSigninResponse } {
+  return {
+    data: {
+      signIn: {
+        uid,
+        sessionToken,
+        authAt,
+        metricsEnabled,
+        verified,
+        verificationMethod,
+        verificationReason,
+      },
+    },
+  };
+}
 
 export const CACHED_SIGNIN_HANDLER_RESPONSE = {
   data: {

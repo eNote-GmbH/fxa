@@ -9,6 +9,7 @@ import GleanMetrics from '../../lib/glean';
 import {
   BEGIN_SIGNIN_HANDLER_RESPONSE,
   CACHED_SIGNIN_HANDLER_RESPONSE,
+  createBeginSigninHandlerResponse,
   Subject,
 } from './mocks';
 import { MOCK_EMAIL, MOCK_PASSWORD, MOCK_SESSION_TOKEN } from '../mocks';
@@ -202,11 +203,12 @@ describe('Signin', () => {
           });
 
           it('navigates to /signin_totp_code when conditions are met', async () => {
-            const beginSigninHandler = jest.fn().mockReturnValueOnce({
-              ...BEGIN_SIGNIN_HANDLER_RESPONSE,
-              verified: false,
-              verificationMethod: VerificationMethods.TOTP_2FA,
-            });
+            const beginSigninHandler = jest.fn().mockReturnValueOnce(
+              createBeginSigninHandlerResponse({
+                verified: false,
+                verificationMethod: VerificationMethods.TOTP_2FA,
+              })
+            );
             renderWithLocalizationProvider(
               <Subject {...{ beginSigninHandler }} />
             );

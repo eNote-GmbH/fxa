@@ -116,11 +116,6 @@ const Signin = ({
       // Note, all navigations are missing query params. Add these when working on
       // subsequent tickets.
       if (!verified) {
-        console.log(
-          'verificationReason, verificationMethod',
-          verificationReason,
-          verificationMethod
-        );
         // TODO: Does force password change ever reach here, or can we move
         // CHANGE_PASSWORD checks to another page?
         if (

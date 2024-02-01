@@ -161,23 +161,23 @@ Router = Router.extend({
     // - in Firefox hamburger menu, click finish "Finish account setup" then "resend verification"
     // - Check email, follow confirmation link - expect to be signed into Sync even if confirmed from second browser
     //
-    // 'complete_signin(/)': function () {
-    //   this.createReactViewHandler('complete_signin', {
-    //     ...Url.searchParams(this.window.location.search),
-    //   });
-    // },
     'complete_signin(/)': function () {
-      this.createReactOrBackboneViewHandler(
-        'complete_signin',
-        CompleteSignUpView,
-        {
-          ...Url.searchParams(this.window.location.search),
-        },
-        {
-          type: VerificationReasons.SIGN_IN,
-        }
-      );
+      this.createReactViewHandler('complete_signin', {
+        ...Url.searchParams(this.window.location.search),
+      });
     },
+    // 'complete_signin(/)': function () {
+    //   this.createReactOrBackboneViewHandler(
+    //     'complete_signin',
+    //     CompleteSignUpView,
+    //     {
+    //       ...Url.searchParams(this.window.location.search),
+    //     },
+    //     {
+    //       type: VerificationReasons.SIGN_IN,
+    //     }
+    //   );
+    // },
     // We will not be porting the Confirm view to React, see FXA-9054
     'confirm(/)': createViewHandler(ConfirmView, {
       type: VerificationReasons.SIGN_IN,

@@ -7,7 +7,6 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithLocalizationProvider } from 'fxa-react/lib/test-utils/localizationProvider';
 import GleanMetrics from '../../lib/glean';
 import {
-  BEGIN_SIGNIN_HANDLER_RESPONSE,
   CACHED_SIGNIN_HANDLER_RESPONSE,
   createBeginSigninHandlerResponse,
   Subject,
@@ -17,6 +16,7 @@ import { MozServices } from '../../lib/types';
 import * as utils from 'fxa-react/lib/utils';
 import { storeAccountData } from '../../lib/storage-utils';
 import VerificationMethods from '../../constants/verification-methods';
+import VerificationReasons from '../../constants/verification-reasons';
 // import { getFtlBundle, testAllL10n } from 'fxa-react/lib/test-utils';
 // import { FluentBundle } from '@fluent/bundle';
 jest.mock('../../lib/metrics', () => ({
@@ -186,7 +186,7 @@ describe('Signin', () => {
           it('submits and emits metrics', async () => {
             const beginSigninHandler = jest
               .fn()
-              .mockReturnValueOnce(BEGIN_SIGNIN_HANDLER_RESPONSE);
+              .mockReturnValueOnce(createBeginSigninHandlerResponse());
             renderWithLocalizationProvider(
               <Subject {...{ beginSigninHandler }} />
             );
@@ -218,9 +218,47 @@ describe('Signin', () => {
               expect(mockNavigate).toHaveBeenCalledWith('/signin_totp_code');
             });
           });
-          // it('navigates to /confirm_signup_code when conditions are met', async () => {});
-          // it('navigates to /signin_token_code when conditions are met', async () => {});
-          // it('navigates to /settings', async () => {});
+          it('navigates to /confirm_signup_code when conditions are met', async () => {
+            const beginSigninHandler = jest.fn().mockReturnValueOnce(
+              createBeginSigninHandlerResponse({
+                verified: false,
+                verificationReason: VerificationReasons.SIGN_UP,
+              })
+            );
+            renderWithLocalizationProvider(
+              <Subject {...{ beginSigninHandler }} />
+            );
+            enterPasswordAndSubmit();
+            await waitFor(() => {
+              expect(mockNavigate).toHaveBeenCalledWith('/confirm_signup_code');
+            });
+          });
+          it('navigates to /signin_token_code when conditions are met', async () => {
+            const beginSigninHandler = jest.fn().mockReturnValueOnce(
+              createBeginSigninHandlerResponse({
+                verified: false,
+              })
+            );
+            renderWithLocalizationProvider(
+              <Subject {...{ beginSigninHandler }} />
+            );
+            enterPasswordAndSubmit();
+            await waitFor(() => {
+              expect(mockNavigate).toHaveBeenCalledWith('/signin_token_code');
+            });
+          });
+          it('navigates to /settings', async () => {
+            const beginSigninHandler = jest
+              .fn()
+              .mockReturnValueOnce(createBeginSigninHandlerResponse());
+            renderWithLocalizationProvider(
+              <Subject {...{ beginSigninHandler }} />
+            );
+            enterPasswordAndSubmit();
+            await waitFor(() => {
+              expect(mockNavigate).toHaveBeenCalledWith('/settings');
+            });
+          });
         });
         // describe('errored submission', () => {
         //   it('shows error due to incorrect password', async () => {});

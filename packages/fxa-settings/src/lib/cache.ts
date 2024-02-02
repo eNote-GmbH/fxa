@@ -82,8 +82,10 @@ export function discardSessionToken() {
     // TODO: do we need to discard other values? See
     // content-server's discardSessionToken
     const account = currentAccount();
-    account!.sessionToken = undefined;
-    currentAccount(account);
+    if (account) {
+      account.sessionToken = undefined;
+      currentAccount(account);
+    }
   } catch (e) {
     // noop
   }

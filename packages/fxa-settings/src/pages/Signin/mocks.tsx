@@ -18,7 +18,6 @@ import {
 import {
   BeginSigninHandler,
   BeginSigninResponse,
-  BeginSigninResult,
   BeginSigninResultHandlerError,
   CachedSigninHandler,
   CachedSigninHandlerError,

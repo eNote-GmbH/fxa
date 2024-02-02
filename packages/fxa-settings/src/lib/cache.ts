@@ -85,7 +85,7 @@ export function discardSessionToken() {
     account!.sessionToken = undefined;
     currentAccount(account);
   } catch (e) {
-    return null;
+    // noop
   }
 }
 

@@ -77,6 +77,18 @@ export function sessionToken(newToken?: hexstring) {
   }
 }
 
+export function discardSessionToken() {
+  try {
+    // TODO: do we need to discard other values? See
+    // content-server's discardSessionToken
+    const account = currentAccount();
+    account!.sessionToken = undefined;
+    currentAccount(account);
+  } catch (e) {
+    return null;
+  }
+}
+
 export function clearSignedInAccountUid() {
   const all = accounts() || {};
   const uid = storage.get('currentAccountUid') as hexstring;

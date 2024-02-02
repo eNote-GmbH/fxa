@@ -18,11 +18,18 @@ import {
 import {
   BeginSigninHandler,
   BeginSigninResponse,
+  BeginSigninResult,
+  BeginSigninResultHandlerError,
   CachedSigninHandler,
+  CachedSigninHandlerError,
   SigninIntegration,
   SigninProps,
 } from './interfaces';
 import { LocationProvider } from '@reach/router';
+import {
+  AuthUiErrorNos,
+  AuthUiErrors,
+} from '../../lib/auth-errors/auth-errors';
 
 export function createMockSigninWebIntegration(): SigninIntegration {
   return {
@@ -43,20 +50,7 @@ const MOCK_VERIFICATION = {
   verificationReason: VerificationReasons.SIGN_IN,
 };
 
-export const BEGIN_SIGNIN_HANDLER_RESPONSE = {
-  data: {
-    signIn: {
-      uid: MOCK_UID,
-      sessionToken: MOCK_SESSION_TOKEN,
-      authAt: MOCK_AUTH_AT,
-      metricsEnabled: true,
-      verified: true,
-      ...MOCK_VERIFICATION,
-    },
-  },
-};
-
-export function createBeginSigninHandlerResponse({
+export function createBeginSigninResponse({
   uid = MOCK_UID,
   sessionToken = MOCK_SESSION_TOKEN,
   authAt = MOCK_AUTH_AT,
@@ -80,6 +74,40 @@ export function createBeginSigninHandlerResponse({
   };
 }
 
+export function createBeginSigninResponseError({
+  errno = AuthUiErrors.INCORRECT_PASSWORD.errno!,
+  verificationMethod,
+  verificationReason,
+}: Partial<BeginSigninResultHandlerError> = {}): {
+  error: BeginSigninResultHandlerError;
+} {
+  const message = AuthUiErrorNos[errno].message;
+  return {
+    error: {
+      errno,
+      verificationMethod,
+      verificationReason,
+      message,
+      ftlId: 'fake-id',
+    },
+  };
+}
+
+export function createCachedSigninResponseError({
+  errno = AuthUiErrors.SESSION_EXPIRED.errno!,
+} = {}): {
+  error: CachedSigninHandlerError;
+} {
+  const message = AuthUiErrorNos[errno].message;
+  return {
+    error: {
+      errno,
+      message,
+      ftlId: 'fake-id',
+    },
+  };
+}
+
 export const CACHED_SIGNIN_HANDLER_RESPONSE = {
   data: {
     verified: true,
@@ -90,7 +118,7 @@ export const CACHED_SIGNIN_HANDLER_RESPONSE = {
 };
 
 export const mockBeginSigninHandler: BeginSigninHandler = () =>
-  Promise.resolve(BEGIN_SIGNIN_HANDLER_RESPONSE);
+  Promise.resolve(createBeginSigninResponse());
 
 export const mockCachedSigninHandler: CachedSigninHandler = () =>
   Promise.resolve(CACHED_SIGNIN_HANDLER_RESPONSE);

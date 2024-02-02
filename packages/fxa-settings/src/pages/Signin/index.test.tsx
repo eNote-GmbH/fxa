@@ -8,7 +8,9 @@ import { renderWithLocalizationProvider } from 'fxa-react/lib/test-utils/localiz
 import GleanMetrics from '../../lib/glean';
 import {
   CACHED_SIGNIN_HANDLER_RESPONSE,
-  createBeginSigninHandlerResponse,
+  createBeginSigninResponse,
+  createBeginSigninResponseError,
+  createCachedSigninResponseError,
   Subject,
 } from './mocks';
 import { MOCK_EMAIL, MOCK_PASSWORD, MOCK_SESSION_TOKEN } from '../mocks';
@@ -17,6 +19,8 @@ import * as utils from 'fxa-react/lib/utils';
 import { storeAccountData } from '../../lib/storage-utils';
 import VerificationMethods from '../../constants/verification-methods';
 import VerificationReasons from '../../constants/verification-reasons';
+import { SigninProps } from './interfaces';
+import { AuthUiErrors } from '../../lib/auth-errors/auth-errors';
 // import { getFtlBundle, testAllL10n } from 'fxa-react/lib/test-utils';
 // import { FluentBundle } from '@fluent/bundle';
 jest.mock('../../lib/metrics', () => ({
@@ -74,6 +78,9 @@ function enterPasswordAndSubmit() {
   });
   submit();
 }
+const render = (props: Partial<SigninProps> = {}) => {
+  renderWithLocalizationProvider(<Subject {...props} />);
+};
 
 /* Element rendered or not rendered functions */
 function signInHeaderRendered(service: MozServices = MozServices.Default) {
@@ -137,7 +144,7 @@ describe('Signin', () => {
   describe('missing sessionToken', () => {
     describe('user has a password', () => {
       it('renders as expected', () => {
-        renderWithLocalizationProvider(<Subject />);
+        render();
 
         expect(GleanMetrics.login.view).toHaveBeenCalledTimes(1);
         screen.getByRole('heading', {
@@ -153,7 +160,7 @@ describe('Signin', () => {
       });
 
       it('emits an event on forgot password link click', async () => {
-        renderWithLocalizationProvider(<Subject />);
+        render();
         fireEvent.click(screen.getByText('Forgot password?'));
         await waitFor(() => {
           expect(GleanMetrics.login.forgotPassword).toBeCalledTimes(1);
@@ -163,9 +170,7 @@ describe('Signin', () => {
       describe('signInWithPassword', () => {
         it('renders tooltip on empty field submission, clears onchange', async () => {
           const beginSigninHandler = jest.fn();
-          renderWithLocalizationProvider(
-            <Subject {...{ beginSigninHandler }} />
-          );
+          render({ beginSigninHandler });
           submit();
           await waitFor(() => {
             screen.getByText('Valid password required');
@@ -186,10 +191,8 @@ describe('Signin', () => {
           it('submits and emits metrics', async () => {
             const beginSigninHandler = jest
               .fn()
-              .mockReturnValueOnce(createBeginSigninHandlerResponse());
-            renderWithLocalizationProvider(
-              <Subject {...{ beginSigninHandler }} />
-            );
+              .mockReturnValueOnce(createBeginSigninResponse());
+            render({ beginSigninHandler });
             enterPasswordAndSubmit();
             await waitFor(() => {
               expect(beginSigninHandler).toHaveBeenCalledWith(
@@ -204,14 +207,12 @@ describe('Signin', () => {
 
           it('navigates to /signin_totp_code when conditions are met', async () => {
             const beginSigninHandler = jest.fn().mockReturnValueOnce(
-              createBeginSigninHandlerResponse({
+              createBeginSigninResponse({
                 verified: false,
                 verificationMethod: VerificationMethods.TOTP_2FA,
               })
             );
-            renderWithLocalizationProvider(
-              <Subject {...{ beginSigninHandler }} />
-            );
+            render({ beginSigninHandler });
 
             enterPasswordAndSubmit();
             await waitFor(() => {
@@ -220,14 +221,13 @@ describe('Signin', () => {
           });
           it('navigates to /confirm_signup_code when conditions are met', async () => {
             const beginSigninHandler = jest.fn().mockReturnValueOnce(
-              createBeginSigninHandlerResponse({
+              createBeginSigninResponse({
                 verified: false,
                 verificationReason: VerificationReasons.SIGN_UP,
               })
             );
-            renderWithLocalizationProvider(
-              <Subject {...{ beginSigninHandler }} />
-            );
+            render({ beginSigninHandler });
+
             enterPasswordAndSubmit();
             await waitFor(() => {
               expect(mockNavigate).toHaveBeenCalledWith('/confirm_signup_code');
@@ -235,13 +235,12 @@ describe('Signin', () => {
           });
           it('navigates to /signin_token_code when conditions are met', async () => {
             const beginSigninHandler = jest.fn().mockReturnValueOnce(
-              createBeginSigninHandlerResponse({
+              createBeginSigninResponse({
                 verified: false,
               })
             );
-            renderWithLocalizationProvider(
-              <Subject {...{ beginSigninHandler }} />
-            );
+            render({ beginSigninHandler });
+
             enterPasswordAndSubmit();
             await waitFor(() => {
               expect(mockNavigate).toHaveBeenCalledWith('/signin_token_code');
@@ -250,27 +249,62 @@ describe('Signin', () => {
           it('navigates to /settings', async () => {
             const beginSigninHandler = jest
               .fn()
-              .mockReturnValueOnce(createBeginSigninHandlerResponse());
-            renderWithLocalizationProvider(
-              <Subject {...{ beginSigninHandler }} />
-            );
+              .mockReturnValueOnce(createBeginSigninResponse());
+            render({ beginSigninHandler });
+
             enterPasswordAndSubmit();
             await waitFor(() => {
               expect(mockNavigate).toHaveBeenCalledWith('/settings');
             });
           });
         });
-        // describe('errored submission', () => {
-        //   it('shows error due to incorrect password', async () => {});
-        //   it('handles error due to throttled or request blocked', async () => {});
-        //   it('handles error due to hard bounce or email complaint', async () => {});
-        //   it('handles error due to TOTP required or insufficent ARC value', async () => {});
+        describe('errored submission', () => {
+          it('shows error due to incorrect password', async () => {
+            const beginSigninHandler = jest
+              .fn()
+              .mockReturnValueOnce(createBeginSigninResponseError());
+            render({ beginSigninHandler });
+
+            enterPasswordAndSubmit();
+            await waitFor(() => {
+              screen.getByText('Incorrect password');
+            });
+          });
+        });
+        // it('handles error due to throttled or request blocked', async () => {
+        // TODO with FXA-9030
         // });
+        it('handles error due to hard bounce or email complaint', async () => {
+          const beginSigninHandler = jest.fn().mockReturnValueOnce(
+            createBeginSigninResponseError({
+              errno: AuthUiErrors.EMAIL_HARD_BOUNCE.errno,
+            })
+          );
+          render({ beginSigninHandler });
+
+          enterPasswordAndSubmit();
+          await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/signin_bounced');
+          });
+        });
+        it('handles error due to TOTP required or insufficent ARC value', async () => {
+          const beginSigninHandler = jest.fn().mockReturnValueOnce(
+            createBeginSigninResponseError({
+              errno: AuthUiErrors.TOTP_REQUIRED.errno,
+            })
+          );
+          render({ beginSigninHandler });
+
+          enterPasswordAndSubmit();
+          await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/inline_totp_setup');
+          });
+        });
       });
     });
     describe('user does not have a password', () => {
       it('renders as expected without linked account', () => {
-        renderWithLocalizationProvider(<Subject hasPassword={false} />);
+        render({ hasPassword: false });
 
         signInHeaderRendered();
         avatarAndEmailRendered();
@@ -283,9 +317,7 @@ describe('Signin', () => {
         passwordInputNotRendered();
       });
       it('renders as expected with linked account', () => {
-        renderWithLocalizationProvider(
-          <Subject hasPassword={false} hasLinkedAccount />
-        );
+        render({ hasPassword: false, hasLinkedAccount: true });
         signInHeaderRendered();
         avatarAndEmailRendered();
         thirdPartyAuthRendered();
@@ -304,9 +336,7 @@ describe('Signin', () => {
   });
   describe('with sessionToken', () => {
     it('renders as expected', () => {
-      renderWithLocalizationProvider(
-        <Subject sessionToken={MOCK_SESSION_TOKEN} />
-      );
+      render({ sessionToken: MOCK_SESSION_TOKEN });
 
       expect(GleanMetrics.cachedLogin.view).toHaveBeenCalledTimes(1);
       signInHeaderRendered();
@@ -321,9 +351,8 @@ describe('Signin', () => {
     });
 
     it('emits an event on forgot password link click', async () => {
-      renderWithLocalizationProvider(
-        <Subject sessionToken={MOCK_SESSION_TOKEN} />
-      );
+      render({ sessionToken: MOCK_SESSION_TOKEN });
+
       fireEvent.click(screen.getByText('Forgot password?'));
       await waitFor(() => {
         expect(GleanMetrics.cachedLogin.forgotPassword).toBeCalledTimes(1);
@@ -335,12 +364,7 @@ describe('Signin', () => {
         const cachedSigninHandler = jest
           .fn()
           .mockReturnValueOnce(CACHED_SIGNIN_HANDLER_RESPONSE);
-        renderWithLocalizationProvider(
-          <Subject
-            {...{ cachedSigninHandler }}
-            sessionToken={MOCK_SESSION_TOKEN}
-          />
-        );
+        render({ sessionToken: MOCK_SESSION_TOKEN, cachedSigninHandler });
 
         submit();
         await waitFor(() => {
@@ -350,10 +374,37 @@ describe('Signin', () => {
         expect(GleanMetrics.cachedLogin.success).toHaveBeenCalledTimes(1);
       });
     });
-  });
 
-  describe('errored submission', () => {
-    it('requires password if cached credentials have expired', () => {});
+    describe('errored submission', () => {
+      it('requires password if cached credentials have expired', async () => {
+        const cachedSigninHandler = jest
+          .fn()
+          .mockReturnValueOnce(createCachedSigninResponseError());
+        render({ sessionToken: MOCK_SESSION_TOKEN, cachedSigninHandler });
+
+        submit();
+        await waitFor(() => {
+          expect(cachedSigninHandler).toHaveBeenCalledWith(MOCK_SESSION_TOKEN);
+          screen.getByText('Session expired. Sign in to continue.');
+          passwordInputRendered();
+        });
+      });
+      it('displays other errors', async () => {
+        const unexpectedError = AuthUiErrors.UNEXPECTED_ERROR;
+        const cachedSigninHandler = jest.fn().mockReturnValueOnce(
+          createCachedSigninResponseError({
+            errno: unexpectedError.errno,
+          })
+        );
+        render({ sessionToken: MOCK_SESSION_TOKEN, cachedSigninHandler });
+
+        submit();
+        await waitFor(() => {
+          screen.getByText(unexpectedError.message);
+          passwordInputNotRendered();
+        });
+      });
+    });
   });
 
   describe('hardNavigateToContentServer', () => {
@@ -369,7 +420,7 @@ describe('Signin', () => {
     });
 
     it('allows users to use a different account', async () => {
-      renderWithLocalizationProvider(<Subject />);
+      render();
 
       await waitFor(() => {
         fireEvent.click(

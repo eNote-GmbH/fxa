@@ -18,6 +18,7 @@ import {
 import {
   BeginSigninHandler,
   CachedSigninHandler,
+  SendUnblockEmailHandler,
   SigninIntegration,
   SigninProps,
 } from './interfaces';
@@ -64,11 +65,19 @@ export const CACHED_SIGNIN_HANDLER_RESPONSE = {
   },
 };
 
+// TODO fill in mock data
+export const SEND_UNBLOCK_EMAIL_HANDLER_RESPONSE = {
+  response: {},
+};
+
 export const mockBeginSigninHandler: BeginSigninHandler = () =>
   Promise.resolve(BEGIN_SIGNIN_HANDLER_RESPONSE);
 
 export const mockCachedSigninHandler: CachedSigninHandler = () =>
   Promise.resolve(CACHED_SIGNIN_HANDLER_RESPONSE);
+
+export const mockSendUnblockEmailHandler: SendUnblockEmailHandler = () =>
+  Promise.resolve(SEND_UNBLOCK_EMAIL_HANDLER_RESPONSE);
 
 export const Subject = ({
   integration = createMockSigninWebIntegration(),
@@ -81,6 +90,7 @@ export const Subject = ({
   email = MOCK_EMAIL,
   beginSigninHandler = mockBeginSigninHandler,
   cachedSigninHandler = mockCachedSigninHandler,
+  sendUnblockEmailHandler = mockSendUnblockEmailHandler,
   ...props // overrides
 }: Partial<SigninProps> = {}) => (
   <LocationProvider>
@@ -93,6 +103,7 @@ export const Subject = ({
         hasLinkedAccount,
         beginSigninHandler,
         cachedSigninHandler,
+        sendUnblockEmailHandler,
         hasPassword,
         avatarData,
         avatarLoading,

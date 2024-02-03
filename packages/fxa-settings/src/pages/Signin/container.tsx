@@ -258,6 +258,12 @@ const SigninContainer = ({
     [authClient]
   );
 
+  const sendUnblockEmailHandler = async (email: string) => {
+    // TODO convert to gql
+    const response = await authClient.sendUnblockCode(email);
+    return response;
+  };
+
   // TODO: if validationError is 'email', in content-server we show "Bad request email param"
   // For now, just redirect to index-first, until FXA-8289 is done
   if (!email || validationError) {
@@ -278,6 +284,7 @@ const SigninContainer = ({
         email,
         beginSigninHandler,
         cachedSigninHandler,
+        sendUnblockEmailHandler,
         sessionToken,
         hasLinkedAccount,
         hasPassword,

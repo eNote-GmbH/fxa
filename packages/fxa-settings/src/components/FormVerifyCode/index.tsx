@@ -13,6 +13,7 @@ import { useFtlMsgResolver } from '../../models';
 export type FormAttributes = {
   inputLabelText: string;
   inputFtlId: string;
+  inputMode?: 'text' | 'tel' | 'email' | 'numeric';
   pattern: string;
   maxLength: number;
   submitButtonText: string;
@@ -91,14 +92,14 @@ const FormVerifyCode = ({
   return (
     <form
       noValidate
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-4 my-6"
       onSubmit={handleSubmit(onSubmit)}
     >
       {/* Using `type="text" inputmode="numeric"` shows the numeric pad on mobile and strips out whitespace on desktop. */}
       <InputText
         name="code"
         type="text"
-        inputMode="numeric"
+        inputMode={formAttributes.inputMode || 'numeric'}
         label={localizedLabel}
         onChange={
           setClearMessages

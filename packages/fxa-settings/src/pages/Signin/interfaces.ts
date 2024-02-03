@@ -32,6 +32,7 @@ export interface SigninProps {
   email: string;
   beginSigninHandler: BeginSigninHandler;
   cachedSigninHandler: CachedSigninHandler;
+  sendUnblockEmailHandler: SendUnblockEmailHandler;
   sessionToken?: hexstring;
   hasLinkedAccount: boolean;
   hasPassword: boolean;
@@ -72,12 +73,6 @@ export type CachedSigninHandler = (
   sessionToken: hexstring
 ) => Promise<CachedSigninHandlerResponse>;
 
-export interface RecoveryEmailStatusResponse {
-  verified: boolean;
-  sessionVerified: boolean;
-  emailVerified: boolean;
-}
-
 export interface CachedSigninHandlerResponse {
   data:
     | ({
@@ -88,7 +83,22 @@ export interface CachedSigninHandlerResponse {
   error?: { errno: number; ftlId: string; message: string };
 }
 
+export interface RecoveryEmailStatusResponse {
+  verified: boolean;
+  sessionVerified: boolean;
+  emailVerified: boolean;
+}
+
 export interface SigninFormData {
   email: string;
   password: string;
+}
+
+export type SendUnblockEmailHandler = (
+  email: string
+) => Promise<SendUnblockEmailHandlerResponse>;
+
+// TODO fill in expected response
+export interface SendUnblockEmailHandlerResponse {
+  response: any;
 }

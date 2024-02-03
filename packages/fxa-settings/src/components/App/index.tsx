@@ -62,6 +62,7 @@ import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
 import SignupContainer from '../../pages/Signup/container';
 import ThirdPartyAuthCallback from '../../pages/PostVerify/ThirdPartyAuthCallback';
 import WebChannelExample from '../../pages/WebChannelExample';
+import SigninUnblockContainer from '../../pages/Signin/SigninUnblock/container';
 
 const Settings = lazy(() => import('../Settings'));
 
@@ -299,6 +300,7 @@ const AuthAndAccountSetupRoutes = ({
         path="/signin_verified/*"
         {...{ isSignedIn, serviceName }}
       />
+      <SigninUnblockContainer path="/signin_unblock/*" />
 
       {/* Signup */}
       <CannotCreateAccount path="/cannot_create_account/*" />

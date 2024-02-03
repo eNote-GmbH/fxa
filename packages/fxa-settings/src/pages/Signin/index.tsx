@@ -31,7 +31,10 @@ import {
 import { StoredAccountData, storeAccountData } from '../../lib/storage-utils';
 import { useForm } from 'react-hook-form';
 import Banner, { BannerType } from '../../components/Banner';
-import { AuthUiErrors } from '../../lib/auth-errors/auth-errors';
+import {
+  AuthUiErrors,
+  getLocalizedErrorMessage,
+} from '../../lib/auth-errors/auth-errors';
 import VerificationMethods from '../../constants/verification-methods';
 import VerificationReasons from '../../constants/verification-reasons';
 
@@ -50,6 +53,7 @@ const Signin = ({
   hasLinkedAccount,
   beginSigninHandler,
   cachedSigninHandler,
+  sendUnblockEmailHandler,
   hasPassword,
   avatarData,
   avatarLoading,
@@ -198,42 +202,40 @@ const Signin = ({
       }
       if (error) {
         const { message, ftlId, errno } = error;
+        console.log(error);
 
         if (
           errno === AuthUiErrors.PASSWORD_REQUIRED.errno ||
           errno === AuthUiErrors.INCORRECT_PASSWORD.errno
         ) {
+          setBannerErrorText('');
           setPasswordTooltipErrorText(ftlMsgResolver.getMsg(ftlId, message));
         } else {
           switch (errno) {
             case AuthUiErrors.THROTTLED.errno:
             case AuthUiErrors.REQUEST_BLOCKED.errno:
-              if (
-                error.verificationReason === VerificationReasons.SIGN_IN &&
-                error.verificationMethod === VerificationMethods.EMAIL_CAPTCHA
-              ) {
-                // TODO: This is a copy-and-paste from content-server.
-                // Check the comment and send the unblock email. FXA-9030
-                //
+              try {
+                await sendUnblockEmailHandler(email);
+              } catch (error) {
                 // Sending the unblock email could itself be rate limited.
                 // If it is, the error should be displayed on this screen
                 // and the user shouldn't even have the chance to continue.
-                // return account.sendUnblockEmail().then(() => {
-                //   return this.navigate('signin_unblock', {
-                //     account: account,
-                //     lastPage: this.currentPage,
-                //     password: password,
-                //   });
-                // });
-              } else {
-                // TODO: This is a copy-and-paste from content-server.
-                // Check if we should display the error message on this screen
-                // and/or what the behavior is. FXA-9030
-                //
-                // Signin is blocked and cannot be unblocked, show the
-                // error at another level.
-                // return Promise.reject(err);
+                const localizedErrorMessage = getLocalizedErrorMessage(
+                  ftlMsgResolver,
+                  error
+                );
+                setBannerErrorText(localizedErrorMessage);
+                // if signin is blocked and cannot be unblocked,
+                // show the error at another level
+                // TODO in FXA-9030 - determine how to know if unblock not possible
+                // and what the error behaviour should be
+                // in backbone, signin can only be unblocked if:
+                // VerificationReasons.SIGN_IN && VerificationMethods.EMAIL_CAPTCHA
+                // do we need to support this?
+                break;
               }
+              // navigate only if sending the unblock code email is successful
+              navigate('signin_unblock', { state: { ...{ email, password } } });
               break;
             case AuthUiErrors.EMAIL_HARD_BOUNCE.errno:
             case AuthUiErrors.EMAIL_SENT_COMPLAINT.errno:
@@ -246,13 +248,20 @@ const Signin = ({
               navigate('/inline_totp_setup');
               break;
             default:
+              setBannerErrorText(ftlMsgResolver.getMsg(ftlId, message));
               break;
           }
-          setBannerErrorText(ftlMsgResolver.getMsg(ftlId, message));
         }
       }
     },
-    [beginSigninHandler, email, ftlMsgResolver, navigate, navigationHandler]
+    [
+      beginSigninHandler,
+      email,
+      ftlMsgResolver,
+      navigate,
+      navigationHandler,
+      sendUnblockEmailHandler,
+    ]
   );
 
   const onSubmit = useCallback(
@@ -399,7 +408,7 @@ const Signin = ({
           </a>
         </FtlMsg>
         {!hasLinkedAccountAndNoPassword && (
-          <FtlMsg id="signin-forgot-password">
+          <FtlMsg id="signin-forgot-password-link">
             <Link
               // TODO, pass params?
               to="/reset_password"

@@ -94,16 +94,30 @@ export function mockSession(
     verified,
     token: 'deadc0de',
   } as Session;
-  session.destroy = isError
-    ? jest.fn().mockRejectedValue(new Error())
-    : jest.fn().mockResolvedValue(true);
-  session.sendVerificationCode = isError
-    ? jest.fn().mockRejectedValue(new Error())
-    : jest.fn().mockResolvedValue(true);
-  session.verifySession = isError
-    ? jest.fn().mockRejectedValue(new Error())
-    : jest.fn().mockResolvedValue(true);
-  session.isSessionVerified = jest.fn().mockResolvedValue(session.verified);
+  if (typeof jest !== 'undefined') {
+    session.destroy = isError
+      ? jest.fn().mockRejectedValue(new Error())
+      : jest.fn().mockResolvedValue(true);
+    session.sendVerificationCode = isError
+      ? jest.fn().mockRejectedValue(new Error())
+      : jest.fn().mockResolvedValue(true);
+    session.verifySession = isError
+      ? jest.fn().mockRejectedValue(new Error())
+      : jest.fn().mockResolvedValue(true);
+    session.isSessionVerified = jest.fn().mockResolvedValue(session.verified);
+  } else {
+    session.destroy = isError
+      ? () => Promise.reject(new Error())
+      : () => Promise.resolve();
+    session.sendVerificationCode = isError
+      ? () => Promise.reject(new Error())
+      : () => Promise.resolve();
+    session.verifySession = isError
+      ? () => Promise.reject(new Error())
+      : () => Promise.resolve();
+    session.isSessionVerified = () => Promise.resolve(session.verified);
+  }
+
   return session;
 }
 
@@ -150,7 +164,7 @@ export function mockAppContext(context?: AppContextValue) {
   return Object.assign(
     {
       account: MOCK_ACCOUNT,
-      session: mockSession(true, false),
+      session: mockSession(),
       config: getDefault(),
     },
     context

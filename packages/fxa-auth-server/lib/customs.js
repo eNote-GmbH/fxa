@@ -34,10 +34,28 @@ class CustomsClient {
       return;
     }
 
+    const method = endpoint.replaceAll('/', '');
+    const startTime = Date.now();
+
     try {
       const response = await this.axiosInstance.post(endpoint, requestData);
+
+      if (this.statsd) {
+        this.statsd.timing(
+          `${serviceName}.${method}.success`,
+          Date.now() - startTime
+        );
+      }
+
       return response.data;
     } catch (err) {
+      if (this.statsd) {
+        this.statsd.timing(
+          `${serviceName}.${method}.failure`,
+          Date.now() - startTime
+        );
+      }
+
       if (err.errno > -1 || (err.statusCode && err.statusCode < 500)) {
         throw err;
       } else {

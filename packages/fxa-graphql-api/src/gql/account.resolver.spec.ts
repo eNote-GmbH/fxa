@@ -760,6 +760,96 @@ describe('#integration - AccountResolver', () => {
       });
     });
 
+    describe('credentialSet', () => {
+      it('calls auth-client and proxy the result', async () => {
+        const headers = new Headers();
+        const mockRespPayload = {
+          version: 'v2',
+          upgradeNeeded: false,
+          clientSalt:
+            'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef',
+        };
+        authClient.getCredentialStatusV2 = jest
+          .fn()
+          .mockResolvedValue(mockRespPayload);
+
+        const result = await resolver.credentialStatus(
+          headers,
+          'testo@example.xyz'
+        );
+
+        expect(authClient.getCredentialStatusV2).toBeCalledTimes(1);
+        expect(authClient.getCredentialStatusV2).toBeCalledWith(
+          'testo@example.xyz',
+          headers
+        );
+        expect(result).toStrictEqual(mockRespPayload);
+      });
+    });
+
+    describe('password start', () => {
+      it('calls auth-client and proxies result', async () => {
+        const headers = new Headers();
+        const mockRespPayload = {
+          keyFetchToken: '123456789abcdef',
+          passwordChangeToken: '23456789abcdef1',
+        };
+        authClient.passwordChangeStartWithAuthPW = jest
+          .fn()
+          .mockResolvedValue(mockRespPayload);
+
+        const result = await resolver.passwordChangeStart(headers, {
+          email: 'foo@moz.com',
+          oldAuthPW: '3456789abcdef12',
+        });
+
+        expect(authClient.passwordChangeStartWithAuthPW).toBeCalledTimes(1);
+        expect(authClient.passwordChangeStartWithAuthPW).toBeCalledWith(
+          'foo@moz.com',
+          '3456789abcdef12',
+          headers
+        );
+        expect(result).toStrictEqual(mockRespPayload);
+      });
+    });
+
+    describe('password finish', () => {
+      it('calls auth-client and proxies result', async () => {
+        const headers = new Headers();
+        const mockRespPayload = {
+          keyFetchToken: '123456789abcdef',
+          passwordChangeToken: '23456789abcdef1',
+        };
+        authClient.passwordChangeStartWithAuthPW = jest
+          .fn()
+          .mockResolvedValue(mockRespPayload);
+
+        const result = await resolver.passwordChangeFinish(headers, {
+          passwordChangeToken: 'passwordChangeToken',
+          authPW: '3456789abcdef12',
+          wrapKb: '',
+          wrapKbVersion2: '',
+          authPWVersion2: '',
+          clientSalt:
+            'identity.mozilla.com/picl/v1/quickStretchV2:0123456789abcdef0123456789abcdef',
+          keys: true,
+        });
+
+        expect(authClient.passwordChangeFinish).toBeCalledTimes(1);
+        expect(authClient.passwordChangeFinish).toBeCalledWith(
+          '23456789abcdef1',
+          '3456789abcdef12',
+          headers
+        );
+        expect(result).toStrictEqual(mockRespPayload);
+      });
+    });
+
+    describe('wrapped keys', () => {
+      it('calls auth-client and proxies result', async () => {});
+    });
+
+
     describe('accountStatus', () => {
       it('returns true with valid session token', async () => {
         const result = await resolver.accountStatus({

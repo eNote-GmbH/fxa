@@ -17,6 +17,10 @@ import { ResetPasswordReactPage } from '../../pages/resetPasswordReact';
 import { RecoveryKeyPage } from '../../pages/settings/recoveryKey';
 import { ChangePasswordPage } from '../../pages/settings/changePassword';
 
+// Disable this check for these tests. We are holding assertion in shared functions due
+// to how test permutations work, and these setup falsely trips this rule.
+/* eslint-disable playwright/expect-expect */
+
 /**
  * These tests represent various permutations between interacting with V1 and V2
  * key stretched passwords. We need to ensure that operations are interchangeable!

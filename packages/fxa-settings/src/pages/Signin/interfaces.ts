@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import internal from 'stream';
 import VerificationMethods from '../../constants/verification-methods';
 import VerificationReasons from '../../constants/verification-reasons';
 import { AccountAvatar } from '../../lib/interfaces';
@@ -91,4 +92,37 @@ export interface CachedSigninHandlerResponse {
 export interface SigninFormData {
   email: string;
   password: string;
+}
+
+export interface CredentialStatusResponse {
+  credentialStatus: {
+    upgradeNeeded: boolean;
+    version?: string;
+    clientSalt?: string;
+  };
+}
+
+export interface PasswordChangeStartResponse {
+  passwordChangeStart: {
+    keyFetchToken: string;
+    passwordChangeToken: string;
+  };
+}
+
+export interface PasswordChangeFinishResponse {
+  passwordChangeFinish: {
+    uid: string;
+    sessionToken: string;
+    verified: boolean;
+    authAt: number;
+    keyFetchToken: string;
+    keyFetchToken2?: string;
+  };
+}
+
+export interface GetAccountKeysResponse {
+  wrappedAccountKeys: {
+    kA: string;
+    wrapKB: string;
+  };
 }

@@ -4204,6 +4204,39 @@ describe('#integration - StripeHelper', () => {
           'pm9001'
         );
       });
+
+      it('deletes everything and updates metadata', async () => {
+        const uid = chance.guid({ version: 4 }).replace(/-/g, '');
+        const customerId = 'cus_1234456sdf';
+        sandbox.stub(stripeHelper, 'fetchCustomer').resolves({
+          invoice_settings: { default_payment_method: { id: 'pm9001' } },
+          subscriptions: {
+            data: [{ id: 'sub_123', status: 'active' }],
+          },
+        });
+        sandbox.stub(stripeHelper.stripe.subscriptions, 'update').resolves();
+        sandbox.stub(stripeHelper.stripe.paymentMethods, 'detach').resolves();
+        const testAccount = await createAccountCustomer(uid, customerId, {
+          cancellation_reason: 'test',
+        });
+        await stripeHelper.removeCustomer(testAccount.uid, email);
+        assert(stripeCustomerDel.calledOnce);
+        assert((await getAccountCustomerByUid(uid)) === undefined);
+        sinon.assert.calledOnceWithExactly(stripeHelper.fetchCustomer, uid, [
+          'invoice_settings.default_payment_method',
+        ]);
+        sinon.assert.calledOnceWithExactly(
+          stripeHelper.stripe.subscriptions.update,
+          'sub_123',
+          {
+            cancellation_reason: 'test',
+          }
+        );
+        sinon.assert.calledOnceWithExactly(
+          stripeHelper.stripe.paymentMethods.detach,
+          'pm9001'
+        );
+      });
     });
 
     describe('when customer is not found', () => {

@@ -63,6 +63,7 @@ import SignupConfirmed from '../../pages/Signup/SignupConfirmed';
 import SignupContainer from '../../pages/Signup/container';
 import ThirdPartyAuthCallback from '../../pages/PostVerify/ThirdPartyAuthCallback';
 import WebChannelExample from '../../pages/WebChannelExample';
+import SigninTokenCodeContainer from '../../pages/Signin/SigninTokenCode/container';
 
 const Settings = lazy(() => import('../Settings'));
 
@@ -297,6 +298,10 @@ const AuthAndAccountSetupRoutes = ({
         {...{ isSignedIn, serviceName }}
       />
       <SigninReported path="/signin_reported/*" />
+      <SigninTokenCodeContainer
+        path="/signin_token_code/*"
+        {...{ integration }}
+      />
       <SigninConfirmed
         path="/signin_verified/*"
         {...{ isSignedIn, serviceName }}

@@ -15,7 +15,7 @@ import { SigninQueryParams } from '../../models/pages/signin';
 import { useCallback, useEffect, useState } from 'react';
 import firefox from '../../lib/channels/firefox';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
-import { currentAccount, discardSessionToken } from '../../lib/cache';
+import { cache, currentAccount, discardSessionToken } from '../../lib/cache';
 import { useMutation, useQuery } from '@apollo/client';
 import { AVATAR_QUERY, BEGIN_SIGNIN_MUTATION } from './gql';
 import { hardNavigateToContentServer } from 'fxa-react/lib/utils';
@@ -215,6 +215,21 @@ const SigninContainer = ({
         }: { authenticationMethods: AuthenticationMethods[] } =
           await authClient.accountProfile(sessionToken);
 
+        const totpIsActive = authenticationMethods.includes(
+          AuthenticationMethods.OTP
+        );
+        if (totpIsActive) {
+          // Cache this for /signin_token_code and /settings
+          cache.modify({
+            id: cache.identify({ __typename: 'Account' }),
+            fields: {
+              totp() {
+                return { exists: true, verified: true };
+              },
+            },
+          });
+        }
+
         // after accountProfile data is retrieved we must check verified status
         const {
           verified,
@@ -224,9 +239,7 @@ const SigninContainer = ({
           sessionToken
         );
 
-        const verificationMethod = authenticationMethods.includes(
-          AuthenticationMethods.OTP
-        )
+        const verificationMethod = totpIsActive
           ? VerificationMethods.TOTP_2FA
           : VerificationMethods.EMAIL_OTP;
 

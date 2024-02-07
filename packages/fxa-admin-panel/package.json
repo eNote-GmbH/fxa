@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
+    "@nestjs/cli": "^10.3.2",
     "@rescripts/cli": "0.0.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@types/chance": "^1.1.2",
@@ -77,6 +78,7 @@
     "fxa-shared": "workspace:*",
     "jest": "27.5.1",
     "jest-watch-typeahead": "0.6.5",
+    "persistgraphql": "^0.3.11",
     "pm2": "^5.3.0",
     "postcss-import": "^15.1.0",
     "prettier": "^2.3.1",

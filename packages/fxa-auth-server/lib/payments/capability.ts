@@ -863,6 +863,9 @@ export class CapabilityService {
     try {
       const clientsFromContentful = await this.capabilityManager.getClients();
 
+      clientsFromContentful.sort((a, b) => (a.clientId > b.clientId ? 1 : -1));
+      clientsFromStripe.sort((a, b) => (a.clientId > b.clientId ? 1 : -1));
+
       if (isEqual(clientsFromContentful, clientsFromStripe))
         return clientsFromContentful;
 

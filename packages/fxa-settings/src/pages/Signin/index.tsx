@@ -189,6 +189,8 @@ const Signin = ({
           sessionToken: data.signIn.sessionToken,
           verified: data.signIn.verified,
           metricsEnabled: data.signIn.metricsEnabled,
+          verificationMethod: data.signIn.verificationMethod,
+          verificationReason: data.signIn.verificationReason,
         };
 
         storeAccountData(accountData);

@@ -57,6 +57,8 @@ export interface StoredAccountData {
   verified?: boolean;
   alertText?: string;
   displayName?: string;
+  verificationMethod?: string;
+  verificationReason?: string;
 }
 
 /**

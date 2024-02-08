@@ -30,10 +30,24 @@ import {
   servicesWithCapabilitiesQuery,
 } from './queries/services-with-capabilities';
 import { DeepNonNullable } from './types';
+import { StatsD } from 'hot-shots';
+import { Container } from 'typedi';
 
 @Injectable()
 export class ContentfulManager {
-  constructor(private client: ContentfulClient) {}
+  private statsd: StatsD | null;
+  constructor(private client: ContentfulClient) {
+    this.statsd = Container.has(StatsD) ? Container.get(StatsD) : null;
+    if (this.statsd) {
+      this.client.on('response', (response) => {
+        this.statsd?.timing('contentful_request', response.elapsed, undefined, {
+          method: response.method,
+          error: response.error ? 'true' : 'false',
+          cache: `${response.cache}`,
+        });
+      });
+    }
+  }
 
   async getPurchaseDetailsForCapabilityServiceByPlanIds(
     stripePlanIds: string[]

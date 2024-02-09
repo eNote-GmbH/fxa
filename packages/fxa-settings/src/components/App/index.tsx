@@ -42,7 +42,6 @@ import CannotCreateAccount from '../../pages/CannotCreateAccount';
 import Clear from '../../pages/Clear';
 import CookiesDisabled from '../../pages/CookiesDisabled';
 import CompleteResetPasswordContainer from '../../pages/ResetPassword/CompleteResetPassword/container';
-import Confirm from 'fxa-settings/src/pages/Signup/Confirm';
 import ConfirmResetPassword from '../../pages/ResetPassword/ConfirmResetPassword';
 import ConfirmSignupCodeContainer from '../../pages/Signup/ConfirmSignupCode/container';
 import Legal from '../../pages/Legal';
@@ -302,7 +301,6 @@ const AuthAndAccountSetupRoutes = ({
 
       {/* Signup */}
       <CannotCreateAccount path="/cannot_create_account/*" />
-      <Confirm path="/confirm/*" {...{ sessionTokenId }} />
       <ConfirmSignupCodeContainer
         path="/confirm_signup_code/*"
         {...{ integration }}

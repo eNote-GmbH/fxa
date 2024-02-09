@@ -228,7 +228,16 @@ Router = Router.extend({
         }),
       });
     },
-    'force_auth(/)': createViewHandler(ForceAuthView),
+    'force_auth(/)': function () {
+      this.createReactOrBackboneViewHandler('force_auth', ForceAuthView, {
+        // see comment in fxa-settings/src/pages/Signup/container.tsx for param explanation
+        email: this.user.get('emailFromIndex'),
+        ...(this.user.get('emailFromIndex') && {
+          emailStatusChecked: 'true',
+        }),
+        ...Url.searchParams(this.window.location.search),
+      });
+    },
     'inline_totp_setup(/)': createViewHandler(InlineTotpSetupView),
     'inline_recovery_setup(/)': createViewHandler(InlineRecoverySetupView),
     'legal(/)': function () {

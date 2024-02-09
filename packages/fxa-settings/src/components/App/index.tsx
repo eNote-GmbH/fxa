@@ -326,6 +326,7 @@ const AuthAndAccountSetupRoutes = ({
         path="/signup_verified/*"
         {...{ isSignedIn, serviceName }}
       />
+      <SigninContainer path="/force_auth/*" {...{ integration, serviceName }} />
     </Router>
   );
 };

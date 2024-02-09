@@ -5,7 +5,7 @@
 import crypto from 'crypto';
 import ip from 'ip';
 import { BaseAuthModel, Proc } from './base-auth';
-import { uuidTransformer, intBoolTransformer } from '../../transformers';
+import { uuidTransformer } from '../../transformers';
 import { convertError } from '../../mysql';
 
 const EVENT_NAMES = {
@@ -87,7 +87,8 @@ export class SecurityEvent extends BaseAuthModel {
         tokenId ? uuidTransformer.to(tokenId) : null,
         EVENT_NAMES[name],
         ipAddrHmac,
-        Date.now()
+        Date.now(),
+        ipAddr
       );
     } catch (e) {
       console.error(e);

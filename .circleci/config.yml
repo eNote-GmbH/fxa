@@ -362,6 +362,7 @@ commands:
           name: Save Build Workspace
           root: /home/circleci/project
           paths:
+            - .nx/cache
             - node_modules/.cache/nx
             - packages/**/dist
             - packages/**/public

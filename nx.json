@@ -18,7 +18,7 @@
         "{projectRoot}/test/**/*.ftl",
         "{projectRoot}/test/**/client.json"
       ],
-      "cache": true,
+      "cache": true
     },
     "build-storybook": {
       "dependsOn": ["build"],
@@ -66,7 +66,7 @@
         "{workspaceRoot}/external/l10n/**/*.@(ftl|po|js|json|sh|py|json)",
         "{workspaceRoot}/external/legal-docs/**/*.@(md|json)"
       ],
-      "cache": true,
+      "cache": true
     },
     "restart": {
       "dependsOn": ["build", "^restart"],

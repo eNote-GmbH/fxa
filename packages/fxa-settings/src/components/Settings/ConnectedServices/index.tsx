@@ -32,10 +32,12 @@ export function sortAndFilterConnectedClients(
   // get a unique (by name) list and sort by time last accessed
   const sortedAndUniqueClients = Object.keys(groupedByName)
     .map((key) => {
-      return groupedByName[key].sort(
-        (a: AttachedClient, b: AttachedClient) =>
-          a.lastAccessTime - b.lastAccessTime
-      )[0];
+      return groupedByName[key]
+        .sort(
+          (a: AttachedClient, b: AttachedClient) =>
+            a.lastAccessTime - b.lastAccessTime
+        )
+        .reverse()[0];
     })
     .sort((a, b) => b.lastAccessTime - a.lastAccessTime);
 

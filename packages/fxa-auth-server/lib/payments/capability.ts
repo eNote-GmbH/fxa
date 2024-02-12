@@ -401,10 +401,8 @@ export class CapabilityService {
 
     // Users with IAP Offering overlaps should not be allowed to proceed
     const iapRoadblockPlan = iapSubscribedPlans.find((plan) => {
-      return overlaps?.some(
-        (overlap) =>
-          overlap.type === 'offering' &&
-          iapProductIds.includes(overlap.offeringProductId)
+      return overlaps?.some((overlap) =>
+        iapProductIds.includes(plan.product_id)
       );
     });
 

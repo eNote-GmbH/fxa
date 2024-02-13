@@ -2,11 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import cacheManager, { Cacheable } from '@type-cacheable/core';
 import { OperationVariables } from '@apollo/client';
 import { GraphQLClient } from 'graphql-request';
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { determineLocale } from '@fxa/shared/l10n';
+import { FirestoreService } from '@fxa/shared/db/firestore';
 import { DEFAULT_LOCALE } from './constants';
 import { ContentfulClientConfig } from './contentful.client.config';
 import {
@@ -15,7 +18,15 @@ import {
   ContentfulError,
 } from './contentful.error';
 import { ContentfulErrorResponse } from './types';
+import { NetworkFirstStrategy } from './type-cachable-network-first';
+import { Firestore } from '@google-cloud/firestore';
+import {
+  FirestoreAdapter,
+  useAdapter,
+} from './type-cachable-firestore-adapter';
+import { FirestoreCacheable } from '@fxa/shared/db/type-cacheable';
 
+export const CONTENTFUL_QUERY_CACHE_KEY = 'contentfulQuery';
 const DEFAULT_CACHE_TTL = 300000; // Milliseconds
 
 @Injectable()
@@ -24,7 +35,7 @@ export class ContentfulClient {
     `${this.contentfulClientConfig.graphqlApiUri}/spaces/${this.contentfulClientConfig.graphqlSpaceId}/environments/${this.contentfulClientConfig.graphqlEnvironment}?access_token=${this.contentfulClientConfig.graphqlApiKey}`
   );
   private locales: string[] = [];
-  private graphqlResultCache: Record<string, unknown> = {};
+  private graphqlMemCache: Record<string, unknown> = {};
 
   constructor(private contentfulClientConfig: ContentfulClientConfig) {
     this.setupCacheBust();
@@ -39,6 +50,26 @@ export class ContentfulClient {
     return result;
   }
 
+  @FirestoreCacheable(
+    {
+      cacheKey: (args: any) => {
+        // Sort variables prior to stringifying to not be caller order dependent
+        const variablesString = JSON.stringify(
+          args[1],
+          Object.keys(args[1] as Record<string, unknown>).sort()
+        );
+        const queryHash = createHash('sha256')
+          .update(JSON.stringify(args[0]))
+          .digest('hex');
+        const variableHash = createHash('sha256')
+          .update(variablesString)
+          .digest('hex');
+        return `${CONTENTFUL_QUERY_CACHE_KEY}:${queryHash}:${variableHash}`;
+      },
+      strategy: new NetworkFirstStrategy(),
+    },
+    CONTENTFUL_QUERY_CACHE_KEY
+  )
   async query<Result, Variables extends OperationVariables>(
     query: TypedDocumentNode<Result, Variables>,
     variables: Variables
@@ -48,10 +79,10 @@ export class ContentfulClient {
       variables,
       Object.keys(variables as Record<string, unknown>).sort()
     );
-    const cacheKey = variablesString + query;
+    const cacheKey = variablesString + JSON.stringify(query);
 
-    if (this.graphqlResultCache[cacheKey]) {
-      return this.graphqlResultCache[cacheKey] as Result;
+    if (this.graphqlMemCache[cacheKey]) {
+      return this.graphqlMemCache[cacheKey] as Result;
     }
 
     try {
@@ -60,7 +91,7 @@ export class ContentfulClient {
         variables,
       });
 
-      this.graphqlResultCache[cacheKey] = response;
+      this.graphqlMemCache[cacheKey] = response;
 
       return response;
     } catch (e) {
@@ -107,7 +138,7 @@ export class ContentfulClient {
 
     setInterval(() => {
       this.locales = [];
-      this.graphqlResultCache = {};
+      this.graphqlMemCache = {};
     }, cacheTTL);
   }
 }

@@ -35,10 +35,10 @@ test.describe('force auth react', () => {
     await page.waitForSelector('input[name="password"]');
 
     expect(
-      await page.getByText('Enter your password').isVisible()
+      await page.getByText('Enter your password').toBeVisible()
     ).toBeTruthy();
-    expect(await page.getByText(credentials.email).isVisible()).toBeTruthy();
-    expect(await page.getByText('Sign in').isVisible()).toBeTruthy();
+    expect(await page.getByText(credentials.email).toBeVisible()).toBeTruthy();
+    expect(await page.getByText('Sign in').toBeVisible()).toBeTruthy();
   });
 
   test('redirects to signup with unregistered email', async ({
@@ -64,8 +64,10 @@ test.describe('force auth react', () => {
     await page.waitForSelector('input[name="newPassword"]');
     await page.waitForSelector('input[name="confirmPassword"]');
 
-    expect(await page.getByText('Set your password').isVisible()).toBeTruthy();
-    expect(await page.getByText(randoEmail).isVisible()).toBeTruthy();
-    expect(await page.getByText('Create account').isVisible()).toBeTruthy();
+    expect(
+      await page.getByText('Set your password').toBeVisible()
+    ).toBeTruthy();
+    expect(await page.getByText(randoEmail).toBeVisible()).toBeTruthy();
+    expect(await page.getByText('Create account').toBeVisible()).toBeTruthy();
   });
 });

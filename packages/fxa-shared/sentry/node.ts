@@ -9,6 +9,11 @@ import { SentryConfigOpts } from './models/SentryConfigOpts';
 import { ILogger } from '../log';
 import { tagCriticalEvent, tagFxaName } from './tag';
 import { buildSentryConfig } from './config-builder';
+import {
+  getCurrentHub,
+  setupEventContextTrace,
+  setupGlobalHub,
+} from '@sentry/opentelemetry';
 
 export type ExtraOpts = {
   integrations?: any[];
@@ -45,6 +50,8 @@ export function initSentry(config: InitSentryOpts, log: ILogger) {
   ];
 
   try {
+    setupGlobalHub();
+
     Sentry.init({
       // Defaults Options
       instrumenter: 'otel',
@@ -56,6 +63,11 @@ export function initSentry(config: InitSentryOpts, log: ILogger) {
       beforeSend,
       ...opts,
     });
+
+    const client = Sentry.getClient();
+    if (client) {
+      setupEventContextTrace(client);
+    }
   } catch (e) {
     log.debug('Issue initializing sentry!');
     log.error(e);

@@ -3,9 +3,12 @@ import { TracingOpts } from '../config';
 import {
   SentrySpanProcessor,
   SentryPropagator,
-} from '@sentry/opentelemetry-node';
+  setOpenTelemetryContextAsyncContextStrategy,
+  wrapContextManagerClass,
+} from '@sentry/opentelemetry';
 import { TracingPiiFilter } from '../pii-filters';
 import { ILogger } from '../../log';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 
 /**
  * Important must be called after calling Sentry.init()!
@@ -33,11 +36,21 @@ export function addSentryTraceExporter(
   const spanProcessor = new SentrySpanProcessor();
   const propagator = new SentryPropagator();
 
+  // Important, without breadcrumbs and other contextual data will be off!
+  // See, https://www.npmjs.com/package/@sentry/opentelemetry
+  const SentryContextManager = wrapContextManagerClass(
+    AsyncLocalStorageContextManager
+  );
+  const contextManager = new SentryContextManager();
+
   // Register sentry implementations
   provider.addSpanProcessor(spanProcessor);
   provider.register({
-    propagator: propagator,
+    propagator,
+    contextManager,
   });
+
+  setOpenTelemetryContextAsyncContextStrategy();
 
   // Sentry doesn't have a 'true exporter' rather it piggy backs on the propagator, which
   // is close enough to an exporter...

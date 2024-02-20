@@ -2,6 +2,7 @@ import { PurchaseDetails, TermsAndPrivacy } from '@fxa/payments/ui/server';
 
 import { getCartData, getContentfulContent } from '../../_lib/apiClient';
 import { app } from '../../_nestapp/app';
+import { auth, signIn, signOut } from 'apps/payments/next/auth';
 
 interface CheckoutParams {
   offeringId: string;
@@ -23,6 +24,8 @@ export default async function Index({ params }: { params: CheckoutParams }) {
   const [contentful, cart] = await Promise.all([contentfulData, cartData]);
   /* eslint-disable @typescript-eslint/no-unused-vars */
   const cartService = await app.getCartService();
+  const session = await auth();
+  console.log('Session here', session);
 
   return (
     <>
@@ -43,7 +46,44 @@ export default async function Index({ params }: { params: CheckoutParams }) {
           className="h-[640px] flex items-center justify-center"
           aria-label="Section under construction"
         >
-          Section Under Construction
+          {!session ? (
+            <div className="flex flex-col gap-4">
+              <form
+                action={async () => {
+                  'use server';
+                  await signIn('fxa');
+                }}
+              >
+                <button className="flex items-center justify-center bg-blue-500 font-semibold h-12 rounded-md text-white w-full p-4">
+                  <div className="block">Sign In - Login</div>
+                </button>
+              </form>
+              <form
+                action={async () => {
+                  'use server';
+                  await signIn('fxa', undefined, { prompt: 'none' });
+                }}
+              >
+                <button className="flex items-center justify-center bg-blue-500 font-semibold h-12 rounded-md text-white w-full p-4">
+                  <div className="block">Sign In - No Prompt</div>
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <p>Hello {session?.user?.id}</p>
+              <form
+                action={async () => {
+                  'use server';
+                  await signOut();
+                }}
+              >
+                <button className="flex items-center justify-center bg-blue-500 font-semibold h-12 rounded-md text-white w-full p-4">
+                  <div className="block">Sign Out</div>
+                </button>
+              </form>
+            </div>
+          )}
         </section>
 
         <TermsAndPrivacy

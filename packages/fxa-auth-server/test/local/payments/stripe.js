@@ -4086,17 +4086,10 @@ describe('#integration - StripeHelper', () => {
   });
 
   describe('fetchInvoicesForActiveSubscriptions', () => {
-    it('returns empty array if no stripe customer', async () => {
-      const noCustomer = '192499bcb0cf4da2bf1b37f1a37f3b88';
-      const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
-        noCustomer,
-        'paid'
-      );
-      assert.deepEqual(result, []);
-    });
-
     it('returns empty array if customer has no active subscriptions', async () => {
-      sandbox.stub(stripeHelper, 'fetchCustomer').resolves({});
+      sandbox
+        .stub(stripeHelper.stripe.subscriptions, 'list')
+        .resolves({ data: [] });
       const result = await stripeHelper.fetchInvoicesForActiveSubscriptions(
         existingUid,
         'paid'
@@ -4105,9 +4098,9 @@ describe('#integration - StripeHelper', () => {
     });
 
     it('fetches invoices no older than earliestCreatedDate', async () => {
-      sandbox.stub(stripeHelper, 'fetchCustomer').resolves({
-        subscriptions: { data: [] },
-      });
+      sandbox
+        .stub(stripeHelper.stripe.subscriptions, 'list')
+        .resolves({ data: [] });
       sandbox.stub(stripeHelper.stripe.invoices, 'list').resolves({ data: [] });
       const expectedDateTime = 1706667661086;
       const expectedDate = new Date(expectedDateTime);
@@ -4137,20 +4130,18 @@ describe('#integration - StripeHelper', () => {
         id: 'idString',
         subscription: 'idSub',
       };
-      sandbox.stub(stripeHelper, 'fetchCustomer').resolves({
-        subscriptions: {
-          data: [
-            {
-              id: 'idNull',
-            },
-            {
-              id: 'subIdExpanded',
-            },
-            {
-              id: 'idSub',
-            },
-          ],
-        },
+      sandbox.stub(stripeHelper.stripe.subscriptions, 'list').resolves({
+        data: [
+          {
+            id: 'idNull',
+          },
+          {
+            id: 'subIdExpanded',
+          },
+          {
+            id: 'idSub',
+          },
+        ],
       });
       sandbox.stub(stripeHelper.stripe.invoices, 'list').resolves({
         data: [

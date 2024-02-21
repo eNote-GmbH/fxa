@@ -433,7 +433,11 @@ export class CapabilityService {
         eligibleSourcePlan: overlapAbbrev,
       };
 
-    if (!overlapAbbrev || overlapAbbrev.plan_id === targetPlan.plan_id)
+    if (
+      !overlapAbbrev ||
+      overlapAbbrev.plan_id === targetPlan.plan_id ||
+      overlapAbbrev.currency !== targetPlan.currency
+    )
       return {
         subscriptionEligibilityResult: SubscriptionEligibilityResult.INVALID,
       };

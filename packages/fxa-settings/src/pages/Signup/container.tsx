@@ -210,7 +210,7 @@ const SignupContainer = ({
         // If enabled, add in V2 key stretching support
         let credentialsV2 = undefined;
         let passwordV2 = undefined;
-        if (keyStretchExp.queryParamModel.isV2()) {
+        if (keyStretchExp.queryParamModel.isV2(config)) {
           credentialsV2 = await getCredentialsV2({
             password,
             clientSalt: await createSaltV2(),

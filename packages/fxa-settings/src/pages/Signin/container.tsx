@@ -8,6 +8,7 @@ import {
   isOAuthIntegration,
   isSyncDesktopV3Integration,
   useAuthClient,
+  useConfig,
 } from '../../models';
 import { MozServices } from '../../lib/types';
 import { useValidatedQueryParams } from '../../lib/hooks/useValidate';
@@ -82,6 +83,7 @@ const SigninContainer = ({
   integration: SigninContainerIntegration;
   serviceName: MozServices;
 } & RouteComponentProps) => {
+  const config = useConfig();
   const authClient = useAuthClient();
   const navigate = useNavigate();
   const location = useLocation() as ReturnType<typeof useLocation> & {
@@ -224,7 +226,7 @@ const SigninContainer = ({
       const v1Credentials = await getCredentials(email, password);
       let v2Credentials = null;
 
-      if (keyStretchExp.queryParamModel.isV2()) {
+      if (keyStretchExp.queryParamModel.isV2(config)) {
         const credentialStatusData = await credentialStatus({
           variables: {
             input: email,

@@ -173,6 +173,7 @@ export const Signup = ({
   };
 
   const onFocusAgeInput = () => {
+    setAgeCheckErrorText('');
     if (!hasAgeInputFocused) {
       GleanMetrics.registration.engage({ reason: 'age' });
       setHasAgeInputFocused(true);
@@ -444,7 +445,7 @@ export const Signup = ({
             onBlurCb={onBlurAgeInput}
             errorText={ageCheckErrorText}
             tooltipPosition="bottom"
-            anchorPosition="start"
+            anchorPosition="end"
             prefixDataTestId="age"
           />
         </FtlMsg>

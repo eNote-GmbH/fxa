@@ -39,7 +39,7 @@
     "dedent": "^1.5.1",
     "deep-equal": "2.2.0",
     "hapi-swagger": "^17.1.0",
-    "ip": "^1.1.8",
+    "ip": "^2.0.1",
     "ip-reputation-js-client": "^6.0.4",
     "lodash.isequal": "4.5.0",
     "lodash.merge": "4.6.2",

@@ -3,18 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React from 'react';
-import { typeByTestIdFn } from '../../lib/test-utils';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { renderWithLocalizationProvider } from 'fxa-react/lib/test-utils/localizationProvider';
 import { getFtlBundle, testAllL10n } from 'fxa-react/lib/test-utils';
 import { FluentBundle } from '@fluent/bundle';
 import { Subject } from './mocks';
 import { SHOW_BALLOON_TIMEOUT, HIDE_BALLOON_TIMEOUT } from '../../constants';
-
-export const inputNewPassword = typeByTestIdFn('new-password-input-field');
-export const inputVerifyPassword = typeByTestIdFn(
-  'verify-password-input-field'
-);
+import { MOCK_PASSWORD } from '../../pages/mocks';
 
 describe('FormPasswordWithBalloons component', () => {
   let bundle: FluentBundle;
@@ -68,11 +63,11 @@ describe('FormPasswordWithBalloons component', () => {
 
   it('displays the PasswordInfoBalloon for the signup form type when the confirm password field is in focus', async () => {
     renderWithLocalizationProvider(<Subject passwordFormType="signup" />);
+    const passwordField = screen.getByLabelText('Password');
     const confirmPasswordField = screen.getByLabelText('Repeat password');
 
-    act(() => {
-      fireEvent.focus(confirmPasswordField);
-    });
+    await fireEvent.input(passwordField, MOCK_PASSWORD);
+    fireEvent.focus(confirmPasswordField);
 
     await waitFor(
       () =>

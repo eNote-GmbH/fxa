@@ -3,9 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Injectable } from '@nestjs/common';
+import { Stripe } from 'stripe';
 import { StripeClient } from './stripe.client';
 
 @Injectable()
 export class StripeManager {
   constructor(private client: StripeClient) {}
+
+  async isCustomerStripeTaxEligible(customer: Stripe.Customer) {
+    return (
+      customer.tax?.automatic_tax === 'supported' ||
+      customer.tax?.automatic_tax === 'not_collecting'
+    );
+  }
 }

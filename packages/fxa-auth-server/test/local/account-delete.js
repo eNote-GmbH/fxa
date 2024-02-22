@@ -107,6 +107,9 @@ describe('AccountDeleteManager', function () {
       return [{ status: 'Active', billingAgreementId: 'B-test' }];
     });
     mockAuthModels.deleteAllPayPalBAs = sinon.spy(async () => {});
+    mockAuthModels.getAccountCustomerByUid = sinon.spy(async () => {
+      return { stripeCustomerId: 'cus_123' };
+    });
 
     mockOAuthDb = {
       removeTokensAndCodes: sinon.fake.resolves(),

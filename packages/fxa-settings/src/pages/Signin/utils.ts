@@ -10,14 +10,48 @@ import {
   AuthUiErrorNos,
   AuthUiErrors,
 } from '../../lib/auth-errors/auth-errors';
+import { isOAuthIntegration } from '../../models';
+import { NavigateFn } from '@reach/router';
+import { hardNavigate } from 'fxa-react/lib/utils';
 
-export const getNavigationTarget = ({
+// TODO in Sync signin ticket
+// function getSyncNavigate() {
+// const searchParams = new URLSearchParams(location.search);
+// searchParams.set('showSuccessMessage', 'true');
+// const to = `/connect_another_device?${searchParams}`
+// }
+
+export async function handleNavigation(
+  navigationOptions: NavigationOptions,
+  navigate: NavigateFn
+) {
+  const { to, state, shouldHardNavigate } = await getNavigationTarget(
+    navigationOptions
+  );
+  if (shouldHardNavigate) {
+    // Hard navigate to RP, or (temp until CAD is Reactified) CAD
+    hardNavigate(to);
+    return;
+  }
+  navigate(to, { state });
+}
+
+const getNavigationTarget = async ({
   email,
-  verificationReason,
-  verificationMethod,
-  verified,
-  wantsTwoStepAuthentication,
+  signinData: {
+    verified,
+    verificationReason,
+    verificationMethod,
+    keyFetchToken,
+    uid,
+    sessionToken,
+  },
+  unwrapBKey,
+  integration,
+  finishOAuthFlowHandler,
 }: NavigationOptions) => {
+  const isOAuth = isOAuthIntegration(integration);
+
   // Note, all navigations are missing query params. Add these when working on
   // subsequent tickets.
   if (!verified) {
@@ -27,11 +61,8 @@ export const getNavigationTarget = ({
       ((verificationReason === VerificationReasons.SIGN_IN ||
         verificationReason === VerificationReasons.CHANGE_PASSWORD) &&
         verificationMethod === VerificationMethods.TOTP_2FA) ||
-      wantsTwoStepAuthentication
+      (isOAuth && integration.wantsTwoStepAuthentication())
     ) {
-      // TODO with signin_totp_code ticket, content server says this (double check it):
-      // Login requests that ask for 2FA but don't have it setup on their account
-      // will return an error.
       return {
         to: '/signin_totp_code',
         state: { verificationReason, verificationMethod },
@@ -41,7 +72,13 @@ export const getNavigationTarget = ({
       // if (verificationMethod !== VerificationMethods.EMAIL_OTP) {
       //  send email verification since this screen doesn't do it automatically
       // }
-      return { to: '/confirm_signup_code' };
+      return {
+        to: '/confirm_signup_code',
+        state: {
+          keyFetchToken,
+          unwrapBKey,
+        },
+      };
     } else {
       // TODO: Pretty sure we want this to be the default. The check used to be:
       // if (
@@ -60,8 +97,36 @@ export const getNavigationTarget = ({
         },
       };
     }
-    // Verified account, but session hasn't been verified
   }
+
+  if (isOAuth) {
+    const { redirect, code, state } = await finishOAuthFlowHandler(
+      uid,
+      sessionToken,
+      keyFetchToken,
+      unwrapBKey
+    );
+
+    // TODO in Sync signin ticket
+    // if (integration.isSync()) {
+    //   firefox.fxaOAuthLogin({
+    //     action: 'signin',
+    //     code,
+    //     redirect,
+    //     state,
+    //   })
+    // TODO: don't hard navigate once CAD is converted to React
+    //   return { to: getSyncNavigate(), shouldHardNavigate: true }
+    // }
+    return { to: redirect, shouldHardNavigate: true };
+  }
+
+  // TODO in Sync signin ticket
+  // if (integration.isSync()) {
+  // TODO: don't hard navigate once CAD is converted to React
+  //   return { to: getSyncNavigate(), shouldHardNavigate: true }
+  // }
+
   return { to: '/settings' };
 };
 

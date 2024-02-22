@@ -20,7 +20,7 @@ import ThirdPartyAuth from '../../components/ThirdPartyAuth';
 import { BrandMessagingPortal } from '../../components/BrandMessaging';
 import GleanMetrics from '../../lib/glean';
 import AppLayout from '../../components/AppLayout';
-import { NavigationOptions, SigninFormData, SigninProps } from './interfaces';
+import { SigninFormData, SigninProps } from './interfaces';
 import Avatar from '../../components/Settings/Avatar';
 import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 import classNames from 'classnames';
@@ -35,7 +35,8 @@ import {
   AuthUiErrors,
   getLocalizedErrorMessage,
 } from '../../lib/auth-errors/auth-errors';
-import { getNavigationTarget } from './utils';
+import { handleNavigation } from './utils';
+import { currentAccount } from '../../lib/cache';
 
 export const viewName = 'signin';
 
@@ -57,6 +58,7 @@ const Signin = ({
   avatarData,
   avatarLoading,
   localizedErrorFromLocationState,
+  finishOAuthFlowHandler,
 }: SigninProps & RouteComponentProps) => {
   usePageViewEvent(viewName, REACT_ENTRYPOINT);
   const location = useLocation();
@@ -107,9 +109,6 @@ const Signin = ({
     }
   }, [isPasswordNeededRef]);
 
-  const wantsTwoStepAuthentication =
-    isOAuth && integration.wantsTwoStepAuthentication();
-
   const signInWithCachedAccount = useCallback(
     async (sessionToken: hexstring) => {
       setSigninLoading(true);
@@ -120,17 +119,23 @@ const Signin = ({
       if (data) {
         GleanMetrics.cachedLogin.success();
 
-        const navigationOptions: NavigationOptions = {
+        const storedLocalAccount = currentAccount();
+        const navigationOptions = {
           email,
-          verified: data.verified,
-          verificationMethod: data.verificationMethod,
-          verificationReason: data.verificationReason,
-          sessionVerified: data.sessionVerified,
-          wantsTwoStepAuthentication,
+          signinData: {
+            verified: data.verified,
+            verificationMethod: data.verificationMethod,
+            verificationReason: data.verificationReason,
+            // Because the cached signin was a success, we know
+            // these values exist
+            uid: storedLocalAccount!.uid,
+            sessionToken: storedLocalAccount!.sessionToken!,
+          },
+          integration,
+          finishOAuthFlowHandler,
         };
 
-        const { to, state } = getNavigationTarget(navigationOptions);
-        state ? navigate(to, { state }) : navigate(to);
+        await handleNavigation(navigationOptions, navigate);
       }
       if (error) {
         const localizedErrorMessage = getLocalizedErrorMessage(
@@ -150,7 +155,8 @@ const Signin = ({
       ftlMsgResolver,
       navigate,
       setLocalizedBannerMessage,
-      wantsTwoStepAuthentication,
+      integration,
+      finishOAuthFlowHandler,
     ]
   );
 
@@ -175,16 +181,15 @@ const Signin = ({
 
         storeAccountData(accountData);
 
-        const navigationOptions: NavigationOptions = {
+        const navigationOptions = {
           email,
-          verified: data.signIn.verified,
-          verificationMethod: data.signIn.verificationMethod,
-          verificationReason: data.signIn.verificationReason,
-          wantsTwoStepAuthentication,
+          signinData: data.signIn,
+          unwrapBKey: data.unwrapBKey,
+          integration,
+          finishOAuthFlowHandler,
         };
 
-        const { to, state } = getNavigationTarget(navigationOptions);
-        state ? navigate(to, { state }) : navigate(to);
+        await handleNavigation(navigationOptions, navigate);
       }
       if (error) {
         GleanMetrics.login.error({ reason: error.message });
@@ -254,7 +259,8 @@ const Signin = ({
       navigate,
       sendUnblockEmailHandler,
       setLocalizedBannerMessage,
-      wantsTwoStepAuthentication,
+      finishOAuthFlowHandler,
+      integration,
     ]
   );
 

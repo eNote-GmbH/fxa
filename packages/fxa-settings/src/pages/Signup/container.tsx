@@ -38,6 +38,7 @@ import { Constants } from '../../lib/constants';
 import { createSaltV2 } from 'fxa-auth-client/lib/salt';
 import { KeyStretchExperiment } from '../../models/experiments/key-stretch-experiment';
 import { handleGQLError } from './utils';
+import { wantsKeyFetchToken } from '../../lib/integrations/utils';
 
 /*
  * In content-server, the `email` param is optional. If it's provided, we
@@ -194,8 +195,7 @@ const SignupContainer = ({
       const service = integration.getService();
       const options: BeginSignUpOptions = {
         verificationMethod: 'email-otp',
-        // keys must be true to receive keyFetchToken for oAuth and syncDesktop
-        keys: isOAuth || isSyncDesktopV3,
+        keys: wantsKeyFetchToken(integration),
         service: service !== MozServices.Default ? service : undefined,
         atLeast18AtReg,
       };

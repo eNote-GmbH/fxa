@@ -13,7 +13,7 @@ import * as CryptoModule from 'fxa-auth-client/lib/crypto';
 import { LocationProvider } from '@reach/router';
 import { renderWithLocalizationProvider } from 'fxa-react/lib/test-utils/localizationProvider';
 import SigninContainer from './container';
-import { SigninContainerIntegration, SigninProps } from './interfaces';
+import { SigninIntegration, SigninProps } from './interfaces';
 import { MozServices } from '../../lib/types';
 import { screen, waitFor } from '@testing-library/react';
 import { ModelDataProvider } from '../../lib/model-data';
@@ -38,7 +38,7 @@ import VerificationReasons from '../../constants/verification-reasons';
 import { AuthUiErrors } from '../../lib/auth-errors/auth-errors';
 import { GraphQLError } from 'graphql';
 
-let integration: SigninContainerIntegration;
+let integration: SigninIntegration;
 
 // TODO with Sync ticket
 // function mockSyncDesktopV3Integration() {

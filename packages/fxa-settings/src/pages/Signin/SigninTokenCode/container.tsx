@@ -31,7 +31,7 @@ const SigninTokenCodeContainer = ({
   // cache instead of passing it via location state, depending on
   // if we reference it in another spot or two and if we need
   // some action to happen dependent on it that should occur
-  // without first reaching /signin.
+  // without first reaching /signin. FXA-9177
   const { email: emailFromLocationState, verificationReason } =
     location.state || {};
   // read from localStorage if email isn't provided via router state

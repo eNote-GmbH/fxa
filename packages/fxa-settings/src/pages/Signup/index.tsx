@@ -252,10 +252,11 @@ export const Signup = ({
         ) {
           await firefox.fxaLogin({
             email,
-            keyFetchToken: data.SignUp.keyFetchToken,
+            // keyFetchToken and unwrapBKey should always exist if Sync integration
+            keyFetchToken: data.SignUp.keyFetchToken!,
+            unwrapBKey: data.unwrapBKey!,
             sessionToken: data.SignUp.sessionToken,
             uid: data.SignUp.uid,
-            unwrapBKey: data.unwrapBKey,
             verified: false,
             services: {
               sync: {

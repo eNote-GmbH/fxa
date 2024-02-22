@@ -6,6 +6,7 @@ import VerificationMethods from '../../constants/verification-methods';
 import VerificationReasons from '../../constants/verification-reasons';
 import { AuthUiError } from '../../lib/auth-errors/auth-errors';
 import { AccountAvatar } from '../../lib/interfaces';
+import { FinishOAuthFlowHandler } from '../../lib/oauth/hooks';
 import { MozServices } from '../../lib/types';
 import { Integration } from '../../models';
 
@@ -16,11 +17,6 @@ export interface AvatarResponse {
 }
 
 export type SigninIntegration = Pick<Integration, 'type' | 'isSync'>;
-
-export type SigninContainerIntegration = Pick<
-  Integration,
-  'type' | 'isSync' | 'getService'
->;
 
 export interface LocationState {
   email?: string;
@@ -42,6 +38,7 @@ export interface SigninProps {
   avatarData: AvatarResponse | undefined;
   avatarLoading: boolean;
   localizedErrorFromLocationState?: string;
+  finishOAuthFlowHandler: FinishOAuthFlowHandler;
 }
 
 export type BeginSigninHandler = (
@@ -63,7 +60,10 @@ export interface BeginSigninResponse {
     verified: boolean;
     verificationMethod: VerificationMethods;
     verificationReason: VerificationReasons;
+    // keyFetchToken and unwrapBKey are included if options.keys=true
+    keyFetchToken?: hexstring;
   };
+  unwrapBKey?: hexstring;
 }
 
 export interface BeginSigninError {
@@ -142,9 +142,17 @@ export interface SendUnblockEmailHandlerResponse {
 
 export interface NavigationOptions {
   email?: string;
-  sessionVerified?: boolean;
-  verificationReason: VerificationReasons;
-  verificationMethod: VerificationMethods;
-  verified: boolean;
-  wantsTwoStepAuthentication?: boolean;
+  signinData: {
+    uid: string;
+    sessionToken: hexstring;
+    verified: boolean;
+    verificationMethod: VerificationMethods;
+    verificationReason: VerificationReasons;
+    // keyFetchToken and unwrapBKey are included if options.keys=true
+    // These will never exist for the cached signin (prompt=none)
+    keyFetchToken?: hexstring;
+  };
+  unwrapBKey?: hexstring;
+  integration: any; // todo
+  finishOAuthFlowHandler: FinishOAuthFlowHandler;
 }

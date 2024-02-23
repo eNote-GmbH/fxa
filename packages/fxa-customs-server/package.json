@@ -45,12 +45,10 @@
     "ip-reputation-js-client": "^6.0.4",
     "lodash.isequal": "4.5.0",
     "lodash.merge": "4.6.2",
-    "memcached": "^2.2.2",
-    "mocha": "^10.3.0"
+    "memcached": "^2.2.2"
   },
   "devDependencies": {
     "@types/dedent": "^0",
-    "@types/mocha": "^10",
     "audit-filter": "^0.5.0",
     "chai": "^4.3.6",
     "eslint": "^7.32.0",

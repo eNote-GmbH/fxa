@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const { tracingConfig } = require('fxa-shared/tracing/config');
+const { makeRedisConfig } = require('fxa-shared/db/config');
 
 module.exports = function (fs, path, url, convict) {
   var conf = convict({
@@ -186,51 +187,7 @@ module.exports = function (fs, path, url, convict) {
         env: 'RECORD_LIFETIME_SECONDS',
       },
     },
-    redis: {
-      useRedis: {
-        default: true,
-        env: 'REDIS_USE_REDIS',
-        format: Boolean,
-        doc: 'Should we use Redis for caching?',
-      },
-      host: {
-        default: 'localhost',
-        env: 'REDIS_HOST',
-        format: String,
-        doc: 'IP address or host name for Redis server',
-      },
-      password: {
-        default: '',
-        env: 'REDIS_PASSWORD',
-        format: String,
-        sensitive: true,
-        doc: `Password for connecting to redis`,
-      },
-      port: {
-        default: 6379,
-        env: 'REDIS_PORT',
-        format: 'port',
-        doc: 'Port for Redis server',
-      },
-      maxPending: {
-        default: 1000,
-        env: 'REDIS_POOL_MAX_PENDING',
-        format: 'int',
-        doc: 'Pending request limit for Redis',
-      },
-      retryCount: {
-        default: 5,
-        env: 'REDIS_POOL_RETRY_COUNT',
-        format: 'int',
-        doc: 'Retry limit for Redis connection attempts',
-      },
-      initialBackoff: {
-        default: '100 milliseconds',
-        env: 'REDIS_POOL_TIMEOUT',
-        format: 'duration',
-        doc: 'Initial backoff for Redis connection retries, increases exponentially with each attempt',
-      },
-    },
+    redis: makeRedisConfig(),
     allowedIPs: {
       doc: 'An array of IPs that will not be blocked or rate-limited.',
       format: Array,

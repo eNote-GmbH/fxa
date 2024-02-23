@@ -1,6 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import { config } from '../../config';
+
 import assert from 'assert';
 import { getUidAndEmailByStripeCustomerId } from 'fxa-shared/db/models/auth';
 import { commaSeparatedListToArray } from 'fxa-shared/lib/utils';
@@ -321,6 +323,14 @@ export class CapabilityService {
     targetPlanId: string,
     useFirestoreProductConfigs = false
   ): Promise<SubscriptionChangeEligibility> {
+    const emptyEligibilityResult: {
+      subscriptionEligibilityResult: SubscriptionEligibilityResult;
+      eligibleSourcePlan?: AbbrevPlan;
+    } = {
+      subscriptionEligibilityResult: SubscriptionEligibilityResult.INVALID,
+    };
+    const contentfulEnabled = config.getProperties().contentful.enabled;
+
     const allPlansByPlanId = await this.allAbbrevPlansByPlanId();
 
     const targetPlan = allPlansByPlanId[targetPlanId];
@@ -329,6 +339,36 @@ export class CapabilityService {
     const [stripeSubscribedPlans, iapSubscribedPlans] =
       await this.getAllSubscribedAbbrevPlans(uid, allPlansByPlanId);
 
+    if (contentfulEnabled) {
+      if (!this.eligibilityManager) {
+        if (this.logToSentry('elgibilityResult.CapabilityManagerNotFound')) {
+          Sentry.captureMessage(
+            `CapabilityManager not found.`,
+            'error' as SeverityLevel
+          );
+        }
+
+        return emptyEligibilityResult;
+      }
+
+      try {
+        const eligibilityManagerResult =
+          await this.eligibilityFromEligibilityManager(
+            stripeSubscribedPlans,
+            iapSubscribedPlans,
+            targetPlan
+          );
+
+        return eligibilityManagerResult;
+      } catch (error) {
+        this.log.error('subscriptions.getPlanEligibility', { error: error });
+        Sentry.captureException(error);
+      }
+
+      return emptyEligibilityResult;
+    }
+
+    // TODO: will be removed in FXA-8918
     const stripeEligibilityResult = await this.eligibilityFromStripeMetadata(
       stripeSubscribedPlans,
       iapSubscribedPlans,
@@ -366,6 +406,7 @@ export class CapabilityService {
       Sentry.captureException(error);
     }
     return stripeEligibilityResult;
+    // END TODO: will be removed in FXA-8918
   }
 
   /**
@@ -753,6 +794,7 @@ export class CapabilityService {
   /**
    * Fetch the list of capabilities for the given plan ids from Stripe.
    */
+  // TODO: will be removed in FXA-8918
   private async planIdsToClientCapabilitiesFromStripe(
     subscribedPrices: string[]
   ): Promise<ClientIdCapabilityMap> {
@@ -789,6 +831,7 @@ export class CapabilityService {
   /**
    * Retrieve the client capabilities from Stripe
    */
+  // TODO: will be removed in FXA-8918
   async getClientsFromStripe() {
     let result: ClientIdCapabilityMap = {};
 
@@ -845,6 +888,36 @@ export class CapabilityService {
    * Retrieve the client capabilities
    */
   async getClients() {
+    const emptyClients: {
+      clientId: string;
+      capabilities: string[];
+    }[] = [];
+    const contentfulEnabled = config.getProperties().contentful.enabled;
+
+    if (contentfulEnabled) {
+      if (!this.capabilityManager) {
+        if (this.logToSentry('getClients.CapabilityManagerNotFound')) {
+          Sentry.captureMessage(
+            `CapabilityManager not found.`,
+            'error' as SeverityLevel
+          );
+        }
+
+        return emptyClients;
+      }
+
+      try {
+        const clientsFromContentful = await this.capabilityManager.getClients();
+
+        return clientsFromContentful;
+      } catch (error) {
+        this.log.error('subscriptions.getClients', { error: error });
+        Sentry.captureException(error);
+      }
+      return emptyClients;
+    }
+
+    // TODO: will be removed in FXA-8918
     const clientsFromStripe = await this.getClientsFromStripe();
 
     if (!this.capabilityManager) {
@@ -886,6 +959,7 @@ export class CapabilityService {
       Sentry.captureException(error);
     }
     return clientsFromStripe;
+    // END TODO: will be removed in FXA-8918
   }
 
   /**
@@ -894,6 +968,43 @@ export class CapabilityService {
   async planIdsToClientCapabilities(
     subscribedPrices: string[]
   ): Promise<ClientIdCapabilityMap> {
+    const emptyCapabilities: ClientIdCapabilityMap = {};
+    const contentfulEnabled = config.getProperties().contentful.enabled;
+
+    if (contentfulEnabled) {
+      if (!this.capabilityManager) {
+        if (
+          this.logToSentry(
+            'planIdsToClientCapabilities.CapabilityManagerNotFound'
+          )
+        ) {
+          Sentry.captureMessage(
+            `CapabilityManager not found.`,
+            'error' as SeverityLevel
+          );
+        }
+
+        return emptyCapabilities;
+      }
+
+      try {
+        const contentfulCapabilities =
+          await this.capabilityManager.planIdsToClientCapabilities(
+            subscribedPrices
+          );
+
+        return contentfulCapabilities;
+      } catch (error) {
+        this.log.error('subscriptions.planIdsToClientCapabilities', {
+          error: error,
+        });
+        Sentry.captureException(error);
+      }
+
+      return emptyCapabilities;
+    }
+
+    // TODO: will be removed in FXA-8918
     const stripeCapabilities = await this.planIdsToClientCapabilitiesFromStripe(
       subscribedPrices
     );
@@ -948,5 +1059,6 @@ export class CapabilityService {
     }
 
     return stripeCapabilities;
+    // END TODO: will be removed in FXA-8918
   }
 }

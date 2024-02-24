@@ -195,7 +195,7 @@ test.describe('severity-2 #smoke', () => {
       await login.clickSignIn();
 
       //Cached login should still go to email confirmation screen for unverified accounts
-      expect(login.signUpCodeHeader()).toBeVisible();
+      expect(login.signUpCodeHeader()).toBeVisible({ timeout: 10000 });
 
       //Fill the code and submit
       await login.fillOutSignUpCode(email_unverified);

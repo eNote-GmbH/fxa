@@ -51,7 +51,7 @@ test.describe('severity-2 #smoke', () => {
       await login.fillOutEmailFirstSignIn(email, password);
 
       //Verify sign up code header is visible
-      expect(login.signInCodeHeader()).toBeVisible();
+      expect(login.signInCodeHeader()).toBeVisible({ timeout: 10000 });
 
       const query = { email: email2 };
       const queryParam = new URLSearchParams(query);

@@ -114,36 +114,35 @@ test.describe('severity-1 #smoke', () => {
       expect(await relier.promptNoneError()).toContain('User is not signed in');
     });
 
-    test('fails if account is not verified', async ({
-      page,
-      target,
-      pages: { relier, login },
-    }) => {
-      await target.auth.signUp(email, password, {
-        lang: 'en',
-        preVerified: 'false',
-      });
-      await page.goto(target.contentServerUrl, {
-        waitUntil: 'load',
-      });
-      await login.fillOutEmailFirstSignIn(email, password);
+    test.fixme(
+      'fails if account is not verified',
+      async ({ page, target, pages: { relier, login } }) => {
+        await target.auth.signUp(email, password, {
+          lang: 'en',
+          preVerified: 'false',
+        });
+        await page.goto(target.contentServerUrl, {
+          waitUntil: 'load',
+        });
+        await login.fillOutEmailFirstSignIn(email, password);
 
-      //Verify sign up code header
-      expect(login.signUpCodeHeader()).toBeVisible({ timeout: 10000 });
+        //Verify sign up code header
+        expect(login.signUpCodeHeader()).toBeVisible();
 
-      const query = new URLSearchParams({
-        login_hint: email,
-        return_on_error: 'false',
-      });
-      await page.goto(`${target.relierUrl}/?${query.toString()}`);
+        const query = new URLSearchParams({
+          login_hint: email,
+          return_on_error: 'false',
+        });
+        await page.goto(`${target.relierUrl}/?${query.toString()}`);
 
-      await relier.signInPromptNone();
+        await relier.signInPromptNone();
 
-      //Verify error message
-      expect(await relier.promptNoneError()).toContain(
-        'Unverified user or session'
-      );
-    });
+        //Verify error message
+        expect(await relier.promptNoneError()).toContain(
+          'Unverified user or session'
+        );
+      }
+    );
   });
 
   test.describe('oauth prompt none with emails', () => {

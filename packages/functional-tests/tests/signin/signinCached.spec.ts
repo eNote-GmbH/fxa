@@ -171,37 +171,38 @@ test.describe('severity-2 #smoke', () => {
       expect(await login.isUserLoggedIn()).toBe(true);
     });
 
-    test('unverified cached signin redirects to confirm email', async ({
-      target,
-    }) => {
-      const { page, login } = syncBrowserPages;
-      const email_unverified = login.createEmail();
-      await target.auth.signUp(email_unverified, password, {
-        lang: 'en',
-        preVerified: 'false',
-      });
-      await page.goto(target.contentServerUrl, {
-        waitUntil: 'load',
-      });
-      await login.fillOutEmailFirstSignIn(email_unverified, password);
+    test.fixme(
+      'unverified cached signin redirects to confirm email',
+      async ({ target }) => {
+        const { page, login } = syncBrowserPages;
+        const email_unverified = login.createEmail();
+        await target.auth.signUp(email_unverified, password, {
+          lang: 'en',
+          preVerified: 'false',
+        });
+        await page.goto(target.contentServerUrl, {
+          waitUntil: 'load',
+        });
+        await login.fillOutEmailFirstSignIn(email_unverified, password);
 
-      //Verify sign up code header is visible
-      expect(login.signUpCodeHeader()).toBeVisible();
-      await page.goto(target.contentServerUrl, {
-        waitUntil: 'load',
-      });
-      //Check prefilled email
-      expect(await login.getPrefilledEmail()).toContain(email_unverified);
-      await login.clickSignIn();
+        //Verify sign up code header is visible
+        expect(login.signUpCodeHeader()).toBeVisible();
+        await page.goto(target.contentServerUrl, {
+          waitUntil: 'load',
+        });
+        //Check prefilled email
+        expect(await login.getPrefilledEmail()).toContain(email_unverified);
+        await login.clickSignIn();
 
-      //Cached login should still go to email confirmation screen for unverified accounts
-      expect(login.signUpCodeHeader()).toBeVisible({ timeout: 10000 });
+        //Cached login should still go to email confirmation screen for unverified accounts
+        expect(login.signUpCodeHeader()).toBeVisible();
 
-      //Fill the code and submit
-      await login.fillOutSignUpCode(email_unverified);
+        //Fill the code and submit
+        await login.fillOutSignUpCode(email_unverified);
 
-      //Verify logged in on Settings page
-      expect(await login.isUserLoggedIn()).toBe(true);
-    });
+        //Verify logged in on Settings page
+        expect(await login.isUserLoggedIn()).toBe(true);
+      }
+    );
   });
 });

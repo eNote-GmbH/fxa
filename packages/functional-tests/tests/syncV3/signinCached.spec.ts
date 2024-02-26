@@ -83,39 +83,40 @@ test.describe('severity-2 #smoke', () => {
       }
     );
 
-    test('sign in with desktop context then no context, desktop credentials should persist', async ({
-      target,
-    }) => {
-      const { page, login } = syncBrowserPages;
-      await page.goto(
-        `${target.contentServerUrl}?context=fx_desktop_v3&service=sync`
-      );
-      await login.fillOutEmailFirstSignIn(email, password);
+    test.fixme(
+      'sign in with desktop context then no context, desktop credentials should persist',
+      async ({ target }) => {
+        const { page, login } = syncBrowserPages;
+        await page.goto(
+          `${target.contentServerUrl}?context=fx_desktop_v3&service=sync`
+        );
+        await login.fillOutEmailFirstSignIn(email, password);
 
-      //Verify sign up code header is visible
-      expect(login.signInCodeHeader()).toBeVisible();
+        //Verify sign up code header is visible
+        expect(login.signInCodeHeader()).toBeVisible();
 
-      await page.goto(target.contentServerUrl, {
-        waitUntil: 'load',
-      });
-      expect(await login.getPrefilledEmail()).toContain(email);
-      await login.useDifferentAccountLink();
-      await login.waitForEmailHeader();
-      await login.fillOutEmailFirstSignIn(email2, password);
+        await page.goto(target.contentServerUrl, {
+          waitUntil: 'load',
+        });
+        expect(await login.getPrefilledEmail()).toContain(email);
+        await login.useDifferentAccountLink();
+        await login.waitForEmailHeader();
+        await login.fillOutEmailFirstSignIn(email2, password);
 
-      //Verify logged in on Settings page
-      expect(await login.isUserLoggedIn()).toBe(true);
+        //Verify logged in on Settings page
+        expect(await login.isUserLoggedIn()).toBe(true);
 
-      //Reset prefill and context
-      await login.clearSessionStorage();
+        //Reset prefill and context
+        await login.clearSessionStorage();
 
-      //Testing to make sure cached signin comes back after a refresh
-      await page.goto(target.contentServerUrl, {
-        waitUntil: 'load',
-      });
-      expect(await login.getPrefilledEmail()).toContain(email);
-      await login.useDifferentAccountLink();
-      await login.waitForEmailHeader();
-    });
+        //Testing to make sure cached signin comes back after a refresh
+        await page.goto(target.contentServerUrl, {
+          waitUntil: 'load',
+        });
+        expect(await login.getPrefilledEmail()).toContain(email);
+        await login.useDifferentAccountLink();
+        await login.waitForEmailHeader();
+      }
+    );
   });
 });

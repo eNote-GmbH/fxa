@@ -13,6 +13,7 @@ const nextConfig = {
     svgr: false,
   },
   experimental: {
+    instrumentationHook: true,
     serverComponentsExternalPackages: [
       '@nestjs/core',
       '@nestjs/common',

@@ -8,21 +8,22 @@ import { CartService } from '@fxa/payments/cart';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
+import { singleton } from './singleton';
 
 class AppSingleton {
   private app!: Awaited<
     ReturnType<typeof NestFactory.createApplicationContext>
   >;
 
-  async getApp() {
-    if (this.app) return this.app;
-    this.app = await NestFactory.createApplicationContext(AppModule);
-    return this.app;
+  async initialize() {
+    if (!this.app) {
+      this.app = await NestFactory.createApplicationContext(AppModule);
+    }
   }
 
-  async getCartService() {
-    return (await this.getApp()).get(CartService);
+  getCartService() {
+    return this.app.get(CartService);
   }
 }
 
-export const app = new AppSingleton();
+export const app = singleton('nestApp', new AppSingleton());

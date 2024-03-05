@@ -63,6 +63,7 @@ export interface BeginSigninResponse {
     verified: boolean;
     verificationMethod: VerificationMethods;
     verificationReason: VerificationReasons;
+    keyFetchToken: hexstring;
   };
 }
 

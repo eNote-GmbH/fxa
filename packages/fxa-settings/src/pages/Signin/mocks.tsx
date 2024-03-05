@@ -14,6 +14,16 @@ import {
   MOCK_SESSION_TOKEN,
   MOCK_UID,
   MOCK_AVATAR_NON_DEFAULT,
+  MOCK_AVATAR_DEFAULT,
+  MOCK_AUTH_PW,
+  MOCK_CLIENT_SALT,
+  MOCK_KEY_FETCH_TOKEN,
+  MOCK_PASSWORD_CHANGE_TOKEN,
+  MOCK_WRAP_KB,
+  MOCK_AUTH_PW_V2,
+  MOCK_WRAP_KB_V2,
+  MOCK_KA,
+  MOCK_KEY_FETCH_TOKEN_2,
 } from '../mocks';
 import {
   BeginSigninError,
@@ -31,6 +41,19 @@ import {
   AuthUiErrorNos,
   AuthUiErrors,
 } from '../../lib/auth-errors/auth-errors';
+import {
+  AVATAR_QUERY,
+  BEGIN_SIGNIN_MUTATION,
+  CREDENTIAL_STATUS_MUTATION,
+  GET_ACCOUNT_KEYS_MUTATION,
+  PASSWORD_CHANGE_FINISH_MUTATION,
+  PASSWORD_CHANGE_START_MUTATION,
+} from './gql';
+import { ApolloError } from '@apollo/client';
+import { GraphQLError } from 'graphql';
+
+// Extend base mocks
+export * from '../mocks';
 
 // TODO: There's some sharing opportunity with other parts of the codebase
 // probably move these or a version of these to pages/mocks and share
@@ -65,6 +88,156 @@ export function createMockSigninSyncIntegration(): SigninIntegration {
   };
 }
 
+export function mockGqlAvatarUseQuery() {
+  return {
+    request: { query: AVATAR_QUERY },
+    result: {
+      data: MOCK_AVATAR_DEFAULT,
+    },
+  };
+}
+
+export function mockGqlBeginSigninMutation() {
+  return {
+    request: {
+      query: BEGIN_SIGNIN_MUTATION,
+      variables: {
+        input: {
+          email: MOCK_EMAIL,
+          authPW: MOCK_AUTH_PW,
+          options: {
+            verificationMethod: VerificationMethods.EMAIL_OTP,
+          },
+        },
+      },
+    },
+    result: createBeginSigninResponse(),
+  };
+}
+
+export function mockGqlCredentialStatusMutation() {
+  return {
+    request: {
+      query: CREDENTIAL_STATUS_MUTATION,
+      variables: {
+        input: MOCK_EMAIL,
+      },
+    },
+    result: {
+      data: {
+        credentialStatus: {
+          upgradeNeeded: true,
+          version: 2,
+          clientSalt: MOCK_CLIENT_SALT,
+        },
+      },
+    },
+  };
+}
+
+export function mockGqlPasswordChangeStartMutation() {
+  return {
+    request: {
+      query: PASSWORD_CHANGE_START_MUTATION,
+      variables: {
+        input: {
+          email: MOCK_EMAIL,
+          oldAuthPW: MOCK_AUTH_PW,
+        },
+      },
+    },
+    result: {
+      data: {
+        passwordChangeStart: {
+          keyFetchToken: MOCK_KEY_FETCH_TOKEN,
+          passwordChangeToken: MOCK_PASSWORD_CHANGE_TOKEN,
+        },
+      },
+    },
+  };
+}
+
+export function mockGqlGetAccountKeysMutation() {
+  return {
+    request: {
+      query: GET_ACCOUNT_KEYS_MUTATION,
+      variables: {
+        input: MOCK_KEY_FETCH_TOKEN,
+      },
+    },
+    result: {
+      data: {
+        wrappedAccountKeys: {
+          kA: MOCK_KA,
+          wrapKB: MOCK_WRAP_KB,
+        },
+      },
+    },
+  };
+}
+
+export function mockGqlPasswordChangeFinishMutation() {
+  return {
+    request: {
+      query: PASSWORD_CHANGE_FINISH_MUTATION,
+      variables: {
+        input: {
+          passwordChangeToken: MOCK_PASSWORD_CHANGE_TOKEN,
+          authPW: MOCK_AUTH_PW,
+          wrapKb: MOCK_WRAP_KB,
+          authPWVersion2: MOCK_AUTH_PW_V2,
+          wrapKbVersion2: MOCK_WRAP_KB_V2,
+          clientSalt: MOCK_CLIENT_SALT,
+        },
+      },
+    },
+    result: {
+      data: {
+        passwordChangeFinish: {
+          uid: MOCK_UID,
+          sessionToken: MOCK_SESSION_TOKEN,
+          verified: true,
+          authAt: 'foo',
+          keyFetchToken: MOCK_KEY_FETCH_TOKEN,
+          keyFetchToken2: MOCK_KEY_FETCH_TOKEN_2,
+        },
+      },
+    },
+  };
+}
+
+export function mockBeginSigninMutationWithV2Password() {
+  return {
+    request: {
+      query: BEGIN_SIGNIN_MUTATION,
+      variables: {
+        input: {
+          email: MOCK_EMAIL,
+          authPW: MOCK_AUTH_PW_V2,
+          options: {
+            verificationMethod: VerificationMethods.EMAIL_OTP,
+          },
+        },
+      },
+    },
+    result: createBeginSigninResponse(),
+  };
+}
+
+export function mockGqlError(
+  error: AuthUiError = AuthUiErrors.UNEXPECTED_ERROR
+) {
+  return new ApolloError({
+    graphQLErrors: [
+      new GraphQLError(error.message, {
+        extensions: {
+          errno: error.errno,
+        },
+      }),
+    ],
+  });
+}
+
 export const MOCK_VERIFICATION = {
   verificationMethod: VerificationMethods.EMAIL_OTP,
   verificationReason: VerificationReasons.SIGN_IN,
@@ -78,6 +251,7 @@ export function createBeginSigninResponse({
   verified = true,
   verificationMethod = MOCK_VERIFICATION.verificationMethod,
   verificationReason = MOCK_VERIFICATION.verificationReason,
+  keyFetchToken = MOCK_KEY_FETCH_TOKEN,
 }: Partial<BeginSigninResponse['signIn']> = {}): { data: BeginSigninResponse } {
   return {
     data: {
@@ -89,6 +263,7 @@ export function createBeginSigninResponse({
         verified,
         verificationMethod,
         verificationReason,
+        keyFetchToken,
       },
     },
   };

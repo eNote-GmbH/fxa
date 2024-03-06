@@ -15,7 +15,6 @@ import CardHeader from '../../components/CardHeader';
 import AppLayout from '../../components/AppLayout';
 import Banner, { BannerType } from '../../components/Banner';
 import { copyRecoveryCodes } from '../../lib/totp';
-import { useForm } from 'react-hook-form';
 import FormVerifyCode from '../../components/FormVerifyCode';
 import {
   AuthUiErrors,
@@ -50,10 +49,6 @@ const InlineRecoverySetup = ({
     'signin-recovery-code-required-error',
     'Backup authentication code required'
   );
-
-  const { handleSubmit, register } = useForm<FormData>({
-    mode: 'onBlur',
-  });
 
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [successfulTotpSetup, setSuccessfulTotpSetup] =

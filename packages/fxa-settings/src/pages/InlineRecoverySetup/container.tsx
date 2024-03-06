@@ -8,13 +8,13 @@ import LoadingSpinner from 'fxa-react/components/LoadingSpinner';
 import { useCallback, useEffect, useState } from 'react';
 import InlineRecoverySetup from './index';
 import { AuthUiErrors } from '../../lib/auth-errors/auth-errors';
-import { useFinishOAuthFlowHandler } from '../../lib/oauth/hooks';
+// import { useFinishOAuthFlowHandler } from '../../lib/oauth/hooks';
 import { getCode } from '../../lib/totp';
 import { MozServices } from '../../lib/types';
 import {
   OAuthIntegration,
   useAccount,
-  useAuthClient,
+  // useAuthClient,
   useSession,
 } from '../../models';
 import { TotpToken } from '../InlineTotpSetup';
@@ -32,11 +32,12 @@ export const InlineRecoverySetupContainer = ({
   const account = useAccount();
   const session = useSession();
   const navigate = useNavigate();
-  const authClient = useAuthClient();
-  const { finishOAuthFlowHandler, oAuthDataError } = useFinishOAuthFlowHandler(
-    authClient,
-    integration
-  );
+
+  // const authClient = useAuthClient();
+  // const { finishOAuthFlowHandler, oAuthDataError } = useFinishOAuthFlowHandler(
+  //   authClient,
+  //   integration
+  // );
 
   const location = useLocation() as ReturnType<typeof useLocation> & {
     state: {

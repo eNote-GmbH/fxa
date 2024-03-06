@@ -35,7 +35,6 @@ module.exports = function (config, i18n, statsd) {
     require('./routes/get-version.json'),
     require('./routes/get-metrics-flow')(config),
     require('./routes/get-well-known-change-password')(),
-    require('./routes/navigation-timing')(config, statsd),
     require('./routes/post-metrics')(),
     require('./routes/redirect-download-firefox')(config),
     require('./routes/post-third-party-auth-redirect')(config),

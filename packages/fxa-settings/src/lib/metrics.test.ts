@@ -57,14 +57,14 @@ jest.mock('../models', () => ({
 }));
 
 const deviceId = 'v8v0b6';
-const flowBeginTime = window.performance.timeOrigin - 500;
+const flowBeginTime = Date.now() - 500;
 const flowId = 'lWOSc42Ga5g';
 
 const eventGroup = 'great';
 const eventType = 'escape';
 const eventSlug = `${eventGroup}.${eventType}`;
 
-const dateNow = window.performance.timeOrigin + 500;
+const dateNow = Date.now() + 500;
 
 // Sometimes native properties are read-only,
 // and cannot be traditionally mocked, so let's
@@ -207,10 +207,6 @@ describe('logEvents', () => {
       // this timestamp comes from stubbing Date.now, flowBeginTime, and performance.timeOrigin
       events: [{ type: eventSlug, offset: 250 }],
     });
-    expect(window.performance.getEntriesByType).toHaveBeenNthCalledWith(
-      1,
-      'navigation'
-    );
   });
 
   it('includes passed in eventProperties in the payload', () => {

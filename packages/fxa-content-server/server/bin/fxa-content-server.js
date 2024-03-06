@@ -241,17 +241,24 @@ function makeApp() {
   });
 
   // The sentry error handler must be before any other error middleware
-  app.use(
-    sentry.sentryModule.Handlers.errorHandler({
+  app.use((_err, req) => {
+    return sentry.sentryModule.Handlers.errorHandler({
       shouldHandleError(error) {
-        const success = tryCaptureValidationError(error);
+        // A lot of garbage gets posted to the metrics endpoint.
+        // We are no longer reporting validation errors on this endpoint!
+        if (req.path === '/metrics' && error?.details instanceof Map) {
+          console.log('!!! ignoring /metrics error');
+          return false;
+        }
+
+        const success = tryCaptureValidationError(error, req.path);
 
         // If the validation was explicitly captured, we return false. Otherwise the
         // error is reported twice.
         return !success;
       },
-    })
-  );
+    });
+  });
 
   // log and capture any errors
   app.use((err, req, res, next) => {

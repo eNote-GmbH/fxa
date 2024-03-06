@@ -37,7 +37,6 @@ const {
   DOMAIN: DOMAIN_TYPE,
   EXPERIMENT: EXPERIMENT_TYPE,
   HEX32: HEX32_TYPE,
-  INTEGER: INTEGER_TYPE,
   NEWSLETTERS: NEWSLETTERS,
   OFFSET: OFFSET_TYPE,
   REFERRER: REFERRER_TYPE,
@@ -49,10 +48,6 @@ const {
   UTM: UTM_TYPE,
   UTM_CAMPAIGN: UTM_CAMPAIGN_TYPE,
 } = validation.TYPES;
-
-// a user can disable navigationTiming, in which case all values are `null`
-// negative values are allowed until we figure out the cause of #4722
-const NAVIGATION_TIMING_TYPE = INTEGER_TYPE.allow(null).required();
 
 const BODY_SCHEMA = {
   broker: STRING_TYPE.regex(BROKER_PATTERN).required(),
@@ -98,32 +93,8 @@ const BODY_SCHEMA = {
       })
     )
     .required(),
-  navigationTiming: joi
-    .object()
-    .keys({
-      connectEnd: NAVIGATION_TIMING_TYPE.required(),
-      connectStart: NAVIGATION_TIMING_TYPE.required(),
-      domainLookupEnd: NAVIGATION_TIMING_TYPE.required(),
-      domainLookupStart: NAVIGATION_TIMING_TYPE.required(),
-      domComplete: NAVIGATION_TIMING_TYPE.required(),
-      domContentLoadedEventEnd: NAVIGATION_TIMING_TYPE.required(),
-      domContentLoadedEventStart: NAVIGATION_TIMING_TYPE.required(),
-      domInteractive: NAVIGATION_TIMING_TYPE.required(),
-      domLoading: NAVIGATION_TIMING_TYPE.required(),
-      fetchStart: NAVIGATION_TIMING_TYPE.required(),
-      loadEventEnd: NAVIGATION_TIMING_TYPE.required(),
-      loadEventStart: NAVIGATION_TIMING_TYPE.required(),
-      navigationStart: NAVIGATION_TIMING_TYPE.required(),
-      redirectEnd: NAVIGATION_TIMING_TYPE.required(),
-      redirectStart: NAVIGATION_TIMING_TYPE.required(),
-      requestStart: NAVIGATION_TIMING_TYPE.required(),
-      responseEnd: NAVIGATION_TIMING_TYPE.required(),
-      responseStart: NAVIGATION_TIMING_TYPE.required(),
-      secureConnectionStart: NAVIGATION_TIMING_TYPE.required(),
-      unloadEventEnd: NAVIGATION_TIMING_TYPE.required(),
-      unloadEventStart: NAVIGATION_TIMING_TYPE.required(),
-    })
-    .optional(),
+  // no longer used. allow any object for legacy support.
+  navigationTiming: joi.object().optional(),
   newsletters: NEWSLETTERS.optional(),
   numStoredAccounts: OFFSET_TYPE.min(0).optional(),
   // TODO: Delete plan_id and product_id after the camel-cased equivalents
@@ -195,6 +166,11 @@ module.exports = function () {
 
       // don't wait around to send a response.
       res.json({ success: true });
+
+      // We no longer report timing data from metrics.
+      if (metrics.navigationTiming) {
+        metrics.navigationTiming = undefined;
+      }
 
       process.nextTick(() => {
         metrics.agent = req.get('user-agent');

@@ -21,9 +21,10 @@ function getClient(url: string, version: SaltVersion) {
 test.describe('auth-client-tests', () => {
   let email = '';
   let password = '';
+  let credentials: any;
 
   async function signUp(client: AuthClient) {
-    const credentials = await client.signUp(email, password, {
+    credentials = await client.signUp(email, password, {
       keys: true,
       preVerified: 'true',
     });

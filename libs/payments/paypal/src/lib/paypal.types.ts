@@ -13,7 +13,7 @@ export interface BillingAgreement {
   firstName: string;
   lastName: string;
   state: string;
-  status: BillingAgreementStatus.Active | BillingAgreementStatus.Cancelled;
+  status: BillingAgreementStatus;
   street: string;
   street2: string;
   zip: string;

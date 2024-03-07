@@ -109,7 +109,7 @@ export const NVPBAUpdateTransactionResponseFactory = (
 ): NVPBAUpdateTransactionResponse => ({
   ...NVPResponseFactory(),
   BILLINGAGREEMENTID: faker.string.sample(),
-  BILLINGAGREEMENTSTATUS: faker.helpers.enumValue(BillingAgreementStatus),
+  BILLINGAGREEMENTSTATUS: faker.string.sample(), // Paypal docs are non-descriptive. This field may be refined further.
   EMAIL: faker.internet.email(),
   PAYERSTATUS: 'verified',
   FIRSTNAME: faker.person.firstName(),

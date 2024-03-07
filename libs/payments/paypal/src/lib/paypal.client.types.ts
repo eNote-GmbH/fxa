@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { BillingAgreementStatus } from './paypal.types';
+
 export enum PaypalMethods {
   BillAgreementUpdate = 'BillAgreementUpdate',
   CreateBillingAgreement = 'CreateBillingAgreement',
@@ -93,7 +95,9 @@ export interface NVPRefundTransactionResponse extends NVPSuccessResponse {
 
 export interface NVPBAUpdateTransactionResponse extends NVPSuccessResponse {
   BILLINGAGREEMENTID: string;
-  BILLINGAGREEMENTSTATUS: string;
+  BILLINGAGREEMENTSTATUS:
+    | BillingAgreementStatus.Active
+    | BillingAgreementStatus.Cancelled;
   EMAIL: string;
   PAYERSTATUS: string;
   FIRSTNAME: string;

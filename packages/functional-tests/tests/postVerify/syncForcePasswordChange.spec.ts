@@ -4,6 +4,7 @@
 
 import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
 let email;
+let emailUserCreds;
 const password = 'password';
 const newPassword = 'new_password';
 let syncBrowserPages;
@@ -14,7 +15,7 @@ test.describe('severity-2 #smoke', () => {
       syncBrowserPages = await newPagesForSync(target);
       const { login } = syncBrowserPages;
       email = login.createEmail('forcepwdchange{id}');
-      await target.auth.signUp(email, password, {
+      emailUserCreds = await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'true',
       });
@@ -22,9 +23,16 @@ test.describe('severity-2 #smoke', () => {
 
     test.afterEach(async ({ target }) => {
       await syncBrowserPages.browser?.close();
-      if (email) {
+      try {
         // Cleanup any accounts created during the test
-        await target.auth.accountDestroy(email, newPassword);
+        await target.auth.accountDestroy(
+          email,
+          newPassword,
+          {},
+          emailUserCreds.sessionToken
+        );
+      } catch (e) {
+        // ignore
       }
     });
 

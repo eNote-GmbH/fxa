@@ -10,6 +10,8 @@ let syncBrowserPages;
 let browserEmail: string;
 let otherEmail: string;
 let skipTest = false;
+let browerUserCreds;
+let otherUserCreds;
 
 test.describe.configure({ mode: 'parallel' });
 
@@ -24,12 +26,12 @@ test.describe('fxa_status web channel message in Settings', () => {
     syncBrowserPages = await newPagesForSync(target);
     const { login } = syncBrowserPages;
     browserEmail = login.createEmail();
-    await target.auth.signUp(browserEmail, password, {
+    browerUserCreds = await target.auth.signUp(browserEmail, password, {
       lang: 'en',
       preVerified: 'true',
     });
     otherEmail = login.createEmail();
-    await target.auth.signUp(otherEmail, password, {
+    otherUserCreds = await target.auth.signUp(otherEmail, password, {
       lang: 'en',
       preVerified: 'true',
     });
@@ -45,8 +47,18 @@ test.describe('fxa_status web channel message in Settings', () => {
     if (!skipTest) {
       await syncBrowserPages.browser?.close();
       // Cleanup any accounts created during the test
-      await target.auth.accountDestroy(browserEmail, password);
-      await target.auth.accountDestroy(otherEmail, password);
+      await target.auth.accountDestroy(
+        browserEmail,
+        password,
+        {},
+        browerUserCreds.sessionToken
+      );
+      await target.auth.accountDestroy(
+        otherEmail,
+        password,
+        {},
+        otherUserCreds.sessionToken
+      );
     }
   });
 

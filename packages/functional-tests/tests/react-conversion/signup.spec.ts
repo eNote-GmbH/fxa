@@ -34,12 +34,12 @@ test.beforeEach(async ({ pages: { configPage, login } }) => {
 });
 
 test.afterEach(async ({ target }) => {
-  if (email) {
-    // Cleanup any accounts created during the test
-    const accountStatus = await target.auth.accountStatusByEmail(email);
-    if (accountStatus.exists) {
-      await target.auth.accountDestroy(email, PASSWORD);
-    }
+  // Cleanup any accounts created during the test
+  const creds = await target.auth.signIn(email, PASSWORD);
+  try {
+    await target.auth.accountDestroy(email, PASSWORD, {}, creds.sessionToken);
+  } catch (e) {
+    // ignore
   }
 });
 

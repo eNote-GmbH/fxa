@@ -7,6 +7,8 @@ const password = 'passwordzxcv';
 let email;
 let email2;
 let syncBrowserPages;
+let emailUserCreds;
+let email2UserCreds;
 
 test.describe('severity-2 #smoke', () => {
   test.describe('signin cached', () => {
@@ -16,11 +18,11 @@ test.describe('severity-2 #smoke', () => {
       const { login } = syncBrowserPages;
       email = login.createEmail('sync{id}');
       email2 = login.createEmail();
-      await target.auth.signUp(email, password, {
+      emailUserCreds = await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'true',
       });
-      await target.auth.signUp(email2, password, {
+      email2UserCreds = await target.auth.signUp(email2, password, {
         lang: 'en',
         preVerified: 'true',
       });
@@ -29,9 +31,27 @@ test.describe('severity-2 #smoke', () => {
     test.afterEach(async ({ target }) => {
       test.slow(); //The cleanup was timing out and exceeding 3000ms
       await syncBrowserPages.browser?.close();
-      if (email) {
-        // Cleanup any accounts created during the test
-        await target.auth.accountDestroy(email, password);
+      // Cleanup any accounts created during the test
+      try {
+        await target.auth.accountDestroy(
+          email,
+          password,
+          {},
+          emailUserCreds.sessionToken
+        );
+      } catch (e) {
+        // ignore
+      }
+
+      try {
+        await target.auth.accountDestroy(
+          email2,
+          password,
+          {},
+          email2UserCreds.sessionToken
+        );
+      } catch (e) {
+        // ignore
       }
     });
 

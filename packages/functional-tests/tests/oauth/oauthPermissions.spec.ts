@@ -5,6 +5,7 @@
 import { test, expect } from '../../lib/fixtures/standard';
 
 let email;
+let emailUserCreds;
 const password = 'passwordzxcv';
 
 test.describe('severity-1 #smoke', () => {
@@ -21,10 +22,14 @@ test.describe('severity-1 #smoke', () => {
     });
 
     test.afterEach(async ({ target }) => {
-      if (email) {
-        // Cleanup any accounts created during the test
-        await target.auth.accountDestroy(email, password);
-      }
+      // Cleanup any accounts created during the test
+      const credentials = await target.auth.signIn(email, password);
+      await target.auth.accountDestroy(
+        email,
+        password,
+        {},
+        credentials.sessionToken
+      );
     });
 
     test('signup without `prompt=consent`', async ({

@@ -8,6 +8,7 @@ import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
 const firstPassword = 'password';
 const secondPassword = 'new_password';
 let email;
+let emailUserCreds;
 let syncBrowserPages;
 
 test.describe.configure({ mode: 'parallel' });
@@ -19,7 +20,7 @@ test.describe('severity-2 #smoke', () => {
       syncBrowserPages = await newPagesForSync(target);
       const { login, connectAnotherDevice, page } = syncBrowserPages;
       email = login.createEmail('sync{id}');
-      await target.auth.signUp(email, firstPassword, {
+      emailUserCreds = await target.auth.signUp(email, firstPassword, {
         lang: 'en',
         preVerified: 'true',
       });
@@ -45,7 +46,12 @@ test.describe('severity-2 #smoke', () => {
     test.afterEach(async ({ target }, test) => {
       await syncBrowserPages.browser?.close();
       if (email) {
-        await target.auth.accountDestroy(email, secondPassword);
+        await target.auth.accountDestroy(
+          email,
+          secondPassword,
+          {},
+          emailUserCreds.sessionToken
+        );
       }
     });
 

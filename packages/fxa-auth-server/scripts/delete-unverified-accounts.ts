@@ -235,9 +235,27 @@ const init = async () => {
       return 0;
     }
 
-    const queue = new PQueue({ interval: 1000, intervalCap: taskLimit });
+    // Scaling suggestion is 500/5/50 rule, may start at 500/sec, and increase every 5 minutes by 50%.
+    // They also note increased latency may occur past 1000/sec, so we stop increasing as we approach that.
+    let lastScaleUp = Date.now();
+    let rateLimit = taskLimit;
+    let queue = new PQueue({ interval: 1000, intervalCap: rateLimit });
+
+    // We will only check if we need to increase our rate limit every 10 seconds or so
+    let checkCount = 0;
 
     for (const x of accounts) {
+      if (
+        checkCount++ > 10 * rateLimit &&
+        rateLimit < 950 &&
+        Date.now() - lastScaleUp > 6 * 60 * 1000
+      ) {
+        await queue.onIdle();
+        lastScaleUp = Date.now();
+        rateLimit = Math.floor(rateLimit * 1.5);
+        queue = new PQueue({ interval: 1000, intervalCap: rateLimit });
+        checkCount = 0;
+      }
       queue.add(async () => {
         try {
           const result = await accountDeleteManager.enqueue({

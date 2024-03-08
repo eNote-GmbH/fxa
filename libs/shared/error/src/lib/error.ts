@@ -5,8 +5,12 @@
 import { MultiError, VError, Options } from 'verror';
 
 export class BaseError extends VError {
-  constructor(options: Options | Error, message: string, ...params: any[]) {
-    super(options, message, ...params);
+  constructor(
+    options: Options | Error | string | undefined,
+    paramsOrMessage?: string | any,
+    ...restParams: any[]
+  ) {
+    super(options as any, paramsOrMessage, restParams);
   }
 }
 

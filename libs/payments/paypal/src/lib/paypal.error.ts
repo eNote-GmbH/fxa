@@ -47,3 +47,9 @@ export class PayPalNVPError extends BaseError {
     this.errorCode = errorCode;
   }
 }
+
+export class PaypalCustomerNotUpdatedError extends BaseError {
+  constructor(...args: ConstructorParameters<typeof BaseError>) {
+    super(...args);
+  }
+}

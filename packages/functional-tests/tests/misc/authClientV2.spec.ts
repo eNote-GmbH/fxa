@@ -50,7 +50,8 @@ test.describe('auth-client-tests', () => {
   });
 
   test.afterEach(async ({ target }) => {
-    await curClient?.accountDestroy(email, password);
+    const newCreds = await curClient?.signIn(email, password, { keys: true });
+    await curClient?.accountDestroy(email, password, {}, newCreds.sessionToken);
   });
 
   test('it creates with v1 and signs in', async ({ target }) => {

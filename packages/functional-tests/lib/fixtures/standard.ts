@@ -35,10 +35,20 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     const password = 'passwordzxcv';
     await target.email.clear(email);
     let credentials: Credentials;
+
     try {
       credentials = await target.createAccount(email, password);
     } catch (e) {
-      await target.auth.accountDestroy(email, password);
+      const newCreds = await target.auth.signIn(
+        credentials.email,
+        credentials.password
+      );
+      await target.auth.accountDestroy(
+        email,
+        password,
+        {},
+        newCreds.sessionToken
+      );
       credentials = await target.createAccount(email, password);
     }
 
@@ -47,11 +57,16 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     //teardown
     await target.email.clear(credentials.email);
     try {
+      const newCreds = await target.auth.signIn(
+        credentials.email,
+        credentials.password
+      );
+
       await target.auth.accountDestroy(
         credentials.email,
         credentials.password,
         {},
-        credentials.sessionToken
+        newCreds.sessionToken
       );
     } catch (error: any) {
       if (error.message === 'Unconfirmed session') {

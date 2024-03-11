@@ -198,25 +198,27 @@ async signOut() {
 }
 ```
 
-6. Use `beforeEach` and `afterEach`: Use `beforeEach` and `afterEach` hooks to set up and tear down the test environment, or using `test.slow()` to mark the test as slow and tripling the test timeout, or running a test in a particular environment etc.
+6. Use `fixtures` to set up and tear down the test environment or run a test in a particular environment etc.
 
-7. When writing any test that use Firefox Sync, use the `newPagesForSync` helper function. This function creates a new browser and a new browser context to avoid any Sync data being shared between tests. After your test is complete, ensure that the browser is closed to free up memory.
+7. Use `test.slow()` to mark the test as slow and triple the test timeout.
+
+8. When writing tests that use Firefox Sync, use the `newPagesForSync` helper function. This function creates a new browser and a new browser context to avoid any Sync data being shared between tests. After your test is complete, ensure that the browser is closed to free up memory.
 
 Example:
 
 ```ts
-let syncBrowserPages;
-test.beforeEach(async ({ target, pages: { login } }) => {
-  test.slow();
-  syncBrowserPages = await newPagesForSync(target);
-});
-
-test.afterEach(async () => {
-  await syncBrowserPages.browser?.close();
+import { test as base, newPagesForSync } from '../../lib/fixtures/standard';
+const test = base.extend({
+  syncBrowserPages: async ({ target }, use) => {
+    const syncBrowserPages = await newPagesForSync(target);
+    await use(syncBrowserPages);
+    await syncBrowserPages.browser?.close();
+  },
 });
 
 test('open directly to /signup page, refresh on the /signup page', async ({
   target,
+  syncBrowserPages,
 }) => {
   // Open new pages in browser specifcally for Sync
   const { page, login } = syncBrowserPages;

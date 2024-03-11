@@ -2,13 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
-
+import { expect } from '../../lib/fixtures/standard';
 import uaStrings from '../../lib/ua-strings';
+import { test } from '../../tests/syncV3/fixtures';
 
 const password = 'passwordzxcv';
-let syncBrowserPages;
 let browserSignedInEmail;
 let otherEmail;
 
@@ -16,9 +15,8 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('severity-2 #smoke', () => {
   test.describe('Firefox desktop user info handshake', () => {
-    test.beforeEach(async ({ target, page }) => {
+    test.beforeEach(async ({ target, syncBrowserPages }) => {
       test.slow();
-      syncBrowserPages = await newPagesForSync(target);
       const { login } = syncBrowserPages;
       browserSignedInEmail = login.createEmail();
       await target.auth.signUp(browserSignedInEmail, password, {
@@ -33,7 +31,6 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test.afterEach(async ({ target }) => {
-      await syncBrowserPages.browser?.close();
       const emails = [browserSignedInEmail, otherEmail];
       for (const email of emails) {
         if (email) {
@@ -45,6 +42,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Non-Sync - user signed into browser, user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -85,6 +83,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Sync - no user signed into browser, no user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -101,6 +100,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Sync - no user signed into browser, user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -121,6 +121,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Non-Sync - no user signed into browser, no user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -142,6 +143,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Sync force_auth page - user signed into browser is different to requested user', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -166,6 +168,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Non-Sync force_auth page - user signed into browser is different to requested user', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -190,6 +193,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Sync - user signed into browser, no user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -214,6 +218,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Non-Sync - user signed into browser, no user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page } = syncBrowserPages;
       const query = new URLSearchParams({
@@ -239,6 +244,7 @@ test.describe('severity-2 #smoke', () => {
 
     test('Non-Sync settings page - no user signed into browser, user signed in locally', async ({
       target,
+      syncBrowserPages,
     }) => {
       const { login, page, settings } = syncBrowserPages;
       const query = new URLSearchParams({

@@ -2,14 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
+import { expect } from '../../lib/fixtures/standard';
+import { test } from '../../tests/syncV3/fixtures';
 
 const makeUid = () =>
   [...Array(32)]
     .map(() => Math.floor(Math.random() * 16).toString(16))
     .join('');
-
-let syncBrowserPages;
 
 test.describe.configure({ mode: 'parallel' });
 
@@ -17,16 +16,11 @@ test.describe('severity-1 #smoke', () => {
   test.describe('Desktop Sync V3 force auth', () => {
     test.beforeEach(async ({ target }) => {
       test.slow();
-      syncBrowserPages = await newPagesForSync(target);
-    });
-
-    test.afterEach(async () => {
-      await syncBrowserPages.browser?.close();
     });
 
     test('sync v3 with a registered email, no uid', async ({
       credentials,
-      target,
+      syncBrowserPages,
     }) => {
       const {
         fxDesktopV3ForceAuth,
@@ -51,7 +45,7 @@ test.describe('severity-1 #smoke', () => {
 
     test('sync v3 with a registered email, registered uid', async ({
       credentials,
-      target,
+      syncBrowserPages,
     }) => {
       const {
         fxDesktopV3ForceAuth,
@@ -74,7 +68,7 @@ test.describe('severity-1 #smoke', () => {
 
     test('sync v3 with a registered email, unregistered uid', async ({
       credentials,
-      target,
+      syncBrowserPages,
     }) => {
       const {
         fxDesktopV3ForceAuth,
@@ -102,6 +96,7 @@ test.describe('severity-1 #smoke', () => {
     test('sync v3 with an unregistered email, no uid', async ({
       credentials,
       pages: { configPage },
+      syncBrowserPages,
     }) => {
       const config = await configPage.getConfig();
       test.skip(
@@ -136,6 +131,7 @@ test.describe('severity-1 #smoke', () => {
     test('sync v3 with an unregistered email, registered uid', async ({
       credentials,
       pages: { configPage },
+      syncBrowserPages,
     }) => {
       const config = await configPage.getConfig();
       test.skip(
@@ -162,6 +158,7 @@ test.describe('severity-1 #smoke', () => {
     test('sync v3 with an unregistered email, unregistered uid', async ({
       credentials,
       pages: { configPage },
+      syncBrowserPages,
     }) => {
       const config = await configPage.getConfig();
       test.skip(
@@ -189,7 +186,7 @@ test.describe('severity-1 #smoke', () => {
 
     test('blocked with an registered email, unregistered uid', async ({
       credentials,
-      target,
+      syncBrowserPages,
     }) => {
       const { fxDesktopV3ForceAuth, login, connectAnotherDevice } =
         syncBrowserPages;

@@ -2,8 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { expect, newPagesForSync, test } from '../../lib/fixtures/standard';
-import { createCustomEventDetail, FirefoxCommand } from '../../lib/channels';
+import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
+import {
+  test as base,
+  expect,
+  newPagesForSync,
+} from '../../lib/fixtures/standard';
 import {
   syncDesktopV3QueryParams,
   syncMobileOAuthQueryParams,
@@ -19,6 +23,16 @@ const eventDetailLinkAccount = createCustomEventDetail(
     ok: true,
   }
 );
+
+const test = base.extend({
+  syncBrowserPages: async ({ target }, use) => {
+    const syncBrowserPages = await newPagesForSync(target);
+
+    await use(syncBrowserPages);
+
+    await syncBrowserPages.browser?.close();
+  },
+});
 
 test.beforeEach(async ({ pages: { configPage, login } }) => {
   test.slow();
@@ -108,10 +122,9 @@ test.describe('severity-1 #smoke', () => {
     });
 
     test('signup oauth webchannel - sync mobile or FF desktop 123+', async ({
-      target,
+      syncBrowserPages,
     }) => {
       test.fixme(true, 'FXA-9096');
-      const syncBrowserPages = await newPagesForSync(target);
       const { page, signupReact, login } = syncBrowserPages;
 
       const customEventDetail = createCustomEventDetail(
@@ -148,9 +161,10 @@ test.describe('severity-1 #smoke', () => {
       await signupReact.checkWebChannelMessage(FirefoxCommand.OAuthLogin);
     });
 
-    test('signup sync desktop v3, verify account', async ({ target }) => {
+    test('signup sync desktop v3, verify account', async ({
+      syncBrowserPages,
+    }) => {
       test.slow();
-      const syncBrowserPages = await newPagesForSync(target);
       const { page, signupReact, login } = syncBrowserPages;
 
       await signupReact.goto('/', syncDesktopV3QueryParams);
@@ -180,8 +194,6 @@ test.describe('severity-1 #smoke', () => {
 
       await page.waitForURL(/connect_another_device/);
       await expect(page.getByText('You’re signed into Firefox')).toBeVisible();
-
-      await syncBrowserPages.browser?.close();
     });
   });
 });

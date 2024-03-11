@@ -2,20 +2,32 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
+import {
+  test as base,
+  expect,
+  newPagesForSync,
+} from '../../lib/fixtures/standard';
 
 const password = 'passwordzxcv';
-let syncBrowserPages;
 let email;
 let email2;
 
-test.describe('severity-1 #smoke', () => {
-  test.describe('signin with OAuth after Sync', () => {
-    test.beforeEach(async ({ target }) => {
-      test.slow();
-      syncBrowserPages = await newPagesForSync(target);
-    });
+const test = base.extend({
+  syncBrowserPages: async ({ target }, use) => {
+    const syncBrowserPages = await newPagesForSync(target);
 
+    await use(syncBrowserPages);
+
+    await syncBrowserPages.browser?.close();
+  },
+});
+
+test.describe('severity-1 #smoke', () => {
+  test.beforeEach(async ({ target }) => {
+    test.slow();
+  });
+
+  test.describe('signin with OAuth after Sync', () => {
     test.afterEach(async ({ target }) => {
       if (email) {
         await target.auth.accountDestroy(email, password);
@@ -25,10 +37,12 @@ test.describe('severity-1 #smoke', () => {
         await target.auth.accountDestroy(email2, password);
         email2 = '';
       }
-      await syncBrowserPages.browser?.close();
     });
 
-    test('signin to OAuth with Sync creds', async ({ target }) => {
+    test('signin to OAuth with Sync creds', async ({
+      target,
+      syncBrowserPages,
+    }) => {
       const {
         configPage,
         page,
@@ -77,20 +91,14 @@ test.describe('severity-1 #smoke', () => {
   });
 
   test.describe('signin to Sync after OAuth', () => {
-    test.beforeEach(async ({ target }) => {
-      test.slow();
-      syncBrowserPages = await newPagesForSync(target);
-    });
-
     test.afterEach(async ({ target }) => {
       if (email) {
         await target.auth.accountDestroy(email, password);
         email = '';
       }
-      await syncBrowserPages.browser?.close();
     });
 
-    test('email-first Sync signin', async ({ target }) => {
+    test('email-first Sync signin', async ({ target, syncBrowserPages }) => {
       const {
         configPage,
         page,

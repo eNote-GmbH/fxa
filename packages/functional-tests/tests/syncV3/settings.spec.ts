@@ -2,21 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect, newPagesForSync } from '../../lib/fixtures/standard';
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
+import { expect } from '../../lib/fixtures/standard';
+import { test } from '../../tests/syncV3/fixtures';
 
 const firstPassword = 'password';
 const secondPassword = 'new_password';
 let email;
-let syncBrowserPages;
 
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('severity-2 #smoke', () => {
   test.describe('Firefox Desktop Sync v3 settings', () => {
-    test.beforeEach(async ({ target }) => {
+    test.beforeEach(async ({ target, syncBrowserPages }) => {
       test.slow();
-      syncBrowserPages = await newPagesForSync(target);
       const { login, connectAnotherDevice, page } = syncBrowserPages;
       email = login.createEmail('sync{id}');
       await target.auth.signUp(email, firstPassword, {
@@ -42,14 +41,16 @@ test.describe('severity-2 #smoke', () => {
       await expect(connectAnotherDevice.fxaConnected).toBeEnabled();
     });
 
-    test.afterEach(async ({ target }, test) => {
-      await syncBrowserPages.browser?.close();
+    test.afterEach(async ({ target }) => {
       if (email) {
         await target.auth.accountDestroy(email, secondPassword);
       }
     });
 
-    test('sign in, change the password', async ({ target }) => {
+    test('sign in, change the password', async ({
+      target,
+      syncBrowserPages,
+    }) => {
       const { changePassword, settings, page } = syncBrowserPages;
 
       //Goto settings sync url
@@ -69,7 +70,7 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('sign in, change the password by browsing directly to settings', async ({
-      target,
+      syncBrowserPages,
     }) => {
       const { login, changePassword, settings } = syncBrowserPages;
 
@@ -90,8 +91,10 @@ test.describe('severity-2 #smoke', () => {
   });
 
   test.describe('Firefox Desktop Sync v3 settings - delete account', () => {
-    test('sign in, delete the account', async ({ target }) => {
-      syncBrowserPages = await newPagesForSync(target);
+    test('sign in, delete the account', async ({
+      target,
+      syncBrowserPages,
+    }) => {
       const { login, settings, deleteAccount, page } = syncBrowserPages;
       test.slow();
       email = login.createEmail('sync{id}');

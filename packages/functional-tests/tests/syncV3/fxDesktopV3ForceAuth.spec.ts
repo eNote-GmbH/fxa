@@ -20,8 +20,13 @@ test.describe('severity-1 #smoke', () => {
       syncBrowserPages = await newPagesForSync(target);
     });
 
-    test.afterEach(async () => {
+    test.afterEach(async ({ credentials, target }) => {
       await syncBrowserPages.browser?.close();
+      // try {
+      //   await target.auth.accountDestroy(credentials.email, credentials.password, {}, credentials.sessionToken);
+      // } catch (err) {
+      //   // ignore
+      // }
     });
 
     test('sync v3 with a registered email, no uid', async ({
@@ -188,25 +193,47 @@ test.describe('severity-1 #smoke', () => {
     });
 
     test('blocked with an registered email, unregistered uid', async ({
-      credentials,
       target,
+      credentials,
     }) => {
       const { fxDesktopV3ForceAuth, login, connectAnotherDevice } =
         syncBrowserPages;
 
       const uid = makeUid();
-      await fxDesktopV3ForceAuth.openWithReplacementParams(credentials, {
-        uid,
-      });
+      const email = `block.${Date.now()}@restmail.net`;
+      const newCreds = await target.auth.signUp(email, 'passwordzxcv');
+      await fxDesktopV3ForceAuth.openWithReplacementParams(
+        {
+          ...newCreds,
+          email,
+        },
+        {
+          uid,
+        }
+      );
       await fxDesktopV3ForceAuth.noSuchWebChannelMessage('fxaccounts:logout');
-      await login.setPassword(credentials.password);
+      await login.setPassword('passwordzxcv');
       await login.submit();
       await fxDesktopV3ForceAuth.checkWebChannelMessage(
         'fxaccounts:can_link_account'
       );
-      await login.unblock(credentials.email);
+      await login.unblock(email);
+      await login.fillOutSignInCode(email);
       await expect(connectAnotherDevice.fxaConnected).toBeVisible();
       await fxDesktopV3ForceAuth.checkWebChannelMessage('fxaccounts:login');
+
+      await target.auth.accountDestroy(
+        email,
+        'passwordzxcv',
+        {},
+        newCreds.sessionToken
+      );
+      await target.auth.accountDestroy(
+        credentials.email,
+        credentials.password,
+        {},
+        credentials.sessionToken
+      );
     });
   });
 });

@@ -57,17 +57,23 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     //teardown
     await target.email.clear(credentials.email);
     try {
-      const newCreds = await target.auth.signIn(
-        credentials.email,
-        credentials.password
-      );
-
-      await target.auth.accountDestroy(
-        credentials.email,
-        credentials.password,
-        {},
-        newCreds.sessionToken
-      );
+      try {
+        const newCreds = await target.auth.signIn(
+          credentials.email,
+          credentials.password,
+          { keys: true }
+        );
+        await target.auth.accountDestroy(
+          credentials.email,
+          credentials.password,
+          {},
+          newCreds.sessionToken
+        );
+      } catch (e) {
+        if (e.error !== 'Request blocked') {
+          throw e;
+        }
+      }
     } catch (error: any) {
       if (error.message === 'Unconfirmed session') {
         // If totp was enabled we'll need a verified session to destroy the account

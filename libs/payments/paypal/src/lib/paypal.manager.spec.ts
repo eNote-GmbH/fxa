@@ -1,6 +1,11 @@
 import { faker } from '@faker-js/faker';
 import { Kysely } from 'kysely';
 
+import {
+  InvoiceFactory,
+  StripeClient,
+  StripeManager,
+} from '@fxa/payments/stripe';
 import { DB, testAccountDatabaseSetup } from '@fxa/shared/db/mysql/account';
 
 import { NVPSetExpressCheckoutResponseFactory } from './factories';
@@ -11,6 +16,8 @@ describe('paypalManager', () => {
   let kyselyDb: Kysely<DB>;
   let paypalClient: PayPalClient;
   let paypalManager: PayPalManager;
+  let stripeClient: StripeClient;
+  let stripeManager: StripeManager;
 
   beforeAll(async () => {
     kyselyDb = await testAccountDatabaseSetup([
@@ -25,7 +32,9 @@ describe('paypalManager', () => {
       signature: faker.string.uuid(),
     });
 
-    paypalManager = new PayPalManager(kyselyDb, paypalClient);
+    stripeClient = new StripeClient({} as any);
+    stripeManager = new StripeManager(stripeClient);
+    paypalManager = new PayPalManager(kyselyDb, paypalClient, stripeManager);
   });
 
   afterAll(async () => {
@@ -56,6 +65,23 @@ describe('paypalManager', () => {
       expect(result).toEqual(successfulSetExpressCheckoutResponse.TOKEN);
       expect(paypalClient.setExpressCheckout).toBeCalledTimes(1);
       expect(paypalClient.setExpressCheckout).toBeCalledWith({ currencyCode });
+    });
+  });
+
+  describe('processZeroInvoice', () => {
+    it('finalizes invoices with no amount set to zero', async () => {
+      const mockInvoice = InvoiceFactory();
+
+      stripeManager.finalizeInvoiceWithoutAutoAdvance = jest
+        .fn()
+        .mockResolvedValueOnce({});
+
+      const result = await paypalManager.processZeroInvoice(mockInvoice.id);
+
+      expect(result).toEqual({});
+      expect(stripeManager.finalizeInvoiceWithoutAutoAdvance).toBeCalledWith(
+        mockInvoice.id
+      );
     });
   });
 });

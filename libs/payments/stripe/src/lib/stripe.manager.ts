@@ -10,6 +10,20 @@ import { StripeClient } from './stripe.client';
 export class StripeManager {
   constructor(private client: StripeClient) {}
 
+  /**
+   * Finalizes an invoice and marks auto_advance as false.
+   */
+  async finalizeInvoiceWithoutAutoAdvance(invoiceId: string) {
+    return this.client.finalizeInvoice(invoiceId, {
+      auto_advance: false,
+    });
+  }
+
+  /**
+   * Check if customer's automatic tax status indicates that they're eligible for automatic tax.
+   * Creating a subscription with automatic_tax enabled requires a customer with an address
+   * that is in a recognized location with an active tax registration.
+   */
   async isCustomerStripeTaxEligible(customer: Stripe.Customer) {
     if (!customer.tax) {
       // TODO: FXA-8891

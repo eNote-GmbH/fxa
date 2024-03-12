@@ -9,3 +9,4 @@ export { SubscriptionItemFactory } from './lib/factories/subscription-item.facto
 export { SubscriptionFactory } from './lib/factories/subscription.factory';
 export * from './lib/stripe.client';
 export * from './lib/stripe.manager';
+export * from './lib/stripe.types';

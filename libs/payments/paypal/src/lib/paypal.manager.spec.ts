@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { Kysely } from 'kysely';
 
+import { CustomerFactory, SubscriptionFactory } from '@fxa/payments/stripe';
 import { DB, testAccountDatabaseSetup } from '@fxa/shared/db/mysql/account';
 
 import {
@@ -101,6 +102,55 @@ describe('paypalManager', () => {
       expect(result).toEqual(expected);
       expect(paypalClient.baUpdate).toBeCalledTimes(1);
       expect(paypalClient.baUpdate).toBeCalledWith({ billingAgreementId });
+    });
+  });
+
+  describe('getCustomerPayPalSubscriptions', () => {
+    it('return all customer subscriptions where collection method is send_invoice', async () => {
+      const mockPayPalSubscription1 = SubscriptionFactory({
+        collection_method: 'send_invoice',
+        status: 'active',
+      });
+
+      const mockPayPalSubscription2 = SubscriptionFactory({
+        collection_method: 'send_invoice',
+        status: 'active',
+      });
+
+      const mockPayPalSubscription3 = SubscriptionFactory({
+        collection_method: 'send_invoice',
+        status: 'past_due',
+      });
+
+      const mockOtherSubscription = SubscriptionFactory({
+        collection_method: 'charge_automatically',
+        status: 'active',
+      });
+
+      const mockCustomer = CustomerFactory({
+        subscriptions: {
+          object: 'list',
+          data: [
+            mockPayPalSubscription1,
+            mockPayPalSubscription2,
+            mockPayPalSubscription3,
+            mockOtherSubscription,
+          ],
+          has_more: true,
+          url: '/v1/customers/customer12345/subscriptions',
+        },
+      });
+
+      const expected = [
+        mockPayPalSubscription1,
+        mockPayPalSubscription2,
+        mockPayPalSubscription3,
+      ];
+
+      const result = await paypalManager.getCustomerPayPalSubscriptions(
+        mockCustomer
+      );
+      expect(result).toEqual(expected);
     });
   });
 

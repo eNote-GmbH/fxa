@@ -3,6 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Injectable } from '@nestjs/common';
+import { Stripe } from 'stripe';
+
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 import { AccountDatabase } from '@fxa/shared/db/mysql/account';
 import { PayPalClient } from './paypal.client';
 import { BillingAgreement, BillingAgreementStatus } from './paypal.types';
@@ -33,6 +36,14 @@ export class PayPalManager {
       street2: response.STREET2,
       zip: response.ZIP,
     };
+  }
+
+  async getCustomerPayPalSubscriptions(customer: Stripe.Customer) {
+    return customer.subscriptions?.data.filter(
+      (sub) =>
+        ACTIVE_SUBSCRIPTION_STATUSES.includes(sub.status) &&
+        sub.collection_method === 'send_invoice'
+    );
   }
 
   /**

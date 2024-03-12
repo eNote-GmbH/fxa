@@ -6,8 +6,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, RouteComponentProps } from '@reach/router';
 import { FtlMsg } from 'fxa-react/lib/utils';
 import { useFtlMsgResolver } from '../../../models';
-import { usePageViewEvent } from '../../../lib/metrics';
-// import { useAlertBar } from '../../models';
 import { RecoveryCodesImage } from '../../../components/images';
 import CardHeader from '../../../components/CardHeader';
 import LinkExternal from 'fxa-react/components/LinkExternal';
@@ -15,25 +13,24 @@ import FormVerifyCode, {
   FormAttributes,
 } from '../../../components/FormVerifyCode';
 import { MozServices } from '../../../lib/types';
-import { REACT_ENTRYPOINT } from '../../../constants';
 import GleanMetrics from '../../../lib/glean';
 
 export type SigninRecoveryCodeProps = {
-  email: string;
   serviceName?: MozServices;
+  submitRecoveryCode: (code: string) => Promise<void>; // update type
 };
 
 export const viewName = 'signin-recovery-code';
 
 const SigninRecoveryCode = ({
-  email,
   serviceName,
+  submitRecoveryCode,
 }: SigninRecoveryCodeProps & RouteComponentProps) => {
-  usePageViewEvent(viewName, REACT_ENTRYPOINT);
   useEffect(() => {
     GleanMetrics.loginBackupCode.view();
   }, []);
 
+  // TODO: move up to container?
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>('');
   const ftlMsgResolver = useFtlMsgResolver();
   const localizedCustomCodeRequiredMessage = ftlMsgResolver.getMsg(
@@ -50,28 +47,13 @@ const SigninRecoveryCode = ({
     submitButtonText: 'Confirm',
   };
 
-  const onSubmit = async () => {
-    try {
-      GleanMetrics.loginBackupCode.submit();
-
-      // Check recovery code
-      // Log success event
-      GleanMetrics.loginBackupCode.success();
-      // The await of isDone is not entirely necessary when we are not
-      // redirecting the user to an RP.  However at the time of implementation
-      // for the Glean ping the redirect logic has not been implemented.
-      await GleanMetrics.isDone();
-
-      // Check if isForcePasswordChange
-    } catch (e) {
-      // TODO: error handling, error message confirmation
-      // This will likely use auth-errors, and errors should be displayed in a tooltip or banner
-    }
+  // is this really necessary? or can be skipped and directly pass submitRecoveryCode to FormVerifyCode?
+  const onSubmit = async (code: string) => {
+    submitRecoveryCode(code);
+    // more here??
   };
 
   return (
-    // TODO: redirect to force_auth or signin if user has not initiated sign in
-
     <>
       <CardHeader
         headingWithDefaultServiceFtlId="signin-recovery-code-heading-w-default-service"

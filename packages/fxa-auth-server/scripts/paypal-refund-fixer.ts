@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { AuthLogger } from '../lib/types';
-import { ACTIVE_SUBSCRIPTION_STATUSES } from 'fxa-shared/subscriptions/stripe';
 import { StatsD } from 'hot-shots';
 import stripe from 'stripe';
 import Container from 'typedi';
 
-import { CurrencyHelper } from '../lib/payments/currencies';
 import { PayPalClient, RefundType } from '@fxa/payments/paypal';
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
+import { CurrencyHelper } from '../lib/payments/currencies';
 import { PayPalHelper } from '../lib/payments/paypal/helper';
 import { STRIPE_INVOICE_METADATA, StripeHelper } from '../lib/payments/stripe';
 import { configureSentry } from '../lib/sentry';

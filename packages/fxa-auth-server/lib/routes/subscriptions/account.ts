@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import jwt from '../../oauth/jwt';
-import { ACTIVE_SUBSCRIPTION_STATUSES } from 'fxa-shared/subscriptions/stripe';
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 
 export async function sendFinishSetupEmailForStubAccount({
   uid,

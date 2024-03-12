@@ -8,10 +8,12 @@ import {
   Account,
   getUidAndEmailByStripeCustomerId,
 } from 'fxa-shared/db/models/auth';
-import { ACTIVE_SUBSCRIPTION_STATUSES } from 'fxa-shared/subscriptions/stripe';
 import isA from 'joi';
 import { Stripe } from 'stripe';
 import Container from 'typedi';
+
+import { RefundType } from '@fxa/payments/paypal';
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 
 import { ConfigType } from '../../../config';
 import SUBSCRIPTIONS_DOCS from '../../../docs/swagger/subscriptions-api';
@@ -22,7 +24,6 @@ import {
 } from '../../../lib/sentry';
 import error from '../../error';
 import { PayPalHelper, RefusedError } from '../../payments/paypal';
-import { RefundType } from '@fxa/payments/paypal';
 import {
   CUSTOMER_RESOURCE,
   FormattedSubscriptionForEmail,

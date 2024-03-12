@@ -2,15 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import assert from 'assert';
+import * as Sentry from '@sentry/node';
+import { SeverityLevel } from '@sentry/types';
+
 import { getUidAndEmailByStripeCustomerId } from 'fxa-shared/db/models/auth';
 import { commaSeparatedListToArray } from 'fxa-shared/lib/utils';
 import { ALL_RPS_CAPABILITIES_KEY } from 'fxa-shared/subscriptions/configuration/base';
 import { productUpgradeFromProductConfig } from 'fxa-shared/subscriptions/configuration/utils';
 import { metadataFromPlan } from 'fxa-shared/subscriptions/metadata';
-import {
-  ACTIVE_SUBSCRIPTION_STATUSES,
-  getSubscriptionUpdateEligibility,
-} from 'fxa-shared/subscriptions/stripe';
+import { getSubscriptionUpdateEligibility } from 'fxa-shared/subscriptions/stripe';
 import {
   AbbrevPlan,
   ClientIdCapabilityMap,
@@ -29,8 +29,7 @@ import {
   intervalComparison,
   OfferingComparison,
 } from '@fxa/payments/eligibility';
-import * as Sentry from '@sentry/node';
-import { SeverityLevel } from '@sentry/types';
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 
 import error from '../error';
 import { authEvents } from '../events';

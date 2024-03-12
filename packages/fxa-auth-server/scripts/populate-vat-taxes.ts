@@ -2,9 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import program from 'commander';
-import { ACTIVE_SUBSCRIPTION_STATUSES } from 'fxa-shared/subscriptions/stripe';
 import Stripe from 'stripe';
 
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 import { setupProcessingTaskObjects } from '../lib/payments/processing-tasks-setup';
 
 const pckg = require('../package.json');

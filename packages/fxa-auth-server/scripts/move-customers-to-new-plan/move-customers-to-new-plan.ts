@@ -8,10 +8,10 @@ import Container from 'typedi';
 import fs from 'fs';
 import PQueue from 'p-queue';
 
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 import { AppConfig, AuthFirestore } from '../../lib/types';
 import { ConfigType } from '../../config';
 import { StripeHelper } from '../../lib/payments/stripe';
-import { ACTIVE_SUBSCRIPTION_STATUSES } from 'fxa-shared/subscriptions/stripe';
 
 /**
  * Firestore subscriptions contain additional expanded information

@@ -6,6 +6,8 @@ import { ServerRoute } from '@hapi/hapi';
 import isA from 'joi';
 import * as Sentry from '@sentry/node';
 import { SeverityLevel } from '@sentry/types';
+
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 import { getAccountCustomerByUid } from 'fxa-shared/db/models/auth';
 import {
   AbbrevPlan,
@@ -16,7 +18,6 @@ import {
 import * as invoiceDTO from 'fxa-shared/dto/auth/payments/invoice';
 import * as couponDTO from 'fxa-shared/dto/auth/payments/coupon';
 import {
-  ACTIVE_SUBSCRIPTION_STATUSES,
   DeepPartial,
   filterCustomer,
   filterIntent,

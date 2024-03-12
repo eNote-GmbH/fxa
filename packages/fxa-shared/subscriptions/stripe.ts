@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import pick from 'lodash.pick';
 import omitBy from 'lodash.omitby';
+
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
 import {
   Plan,
   SubscriptionStripeError,
@@ -15,13 +17,6 @@ const isCapabilityKey = (value: string, key: string) =>
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
-
-/** Represents all subscription statuses that are considered active for a customer */
-export const ACTIVE_SUBSCRIPTION_STATUSES: Stripe.Subscription['status'][] = [
-  'active',
-  'past_due',
-  'trialing',
-];
 
 // Stripe minimum charge amounts as set here
 // https://stripe.com/docs/currencies#minimum-and-maximum-charge-amounts

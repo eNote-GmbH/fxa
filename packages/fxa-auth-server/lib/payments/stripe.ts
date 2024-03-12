@@ -11,6 +11,10 @@ import {
   CacheClearStrategyContext,
   CacheUpdate,
 } from '@type-cacheable/core';
+
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '@fxa/payments/stripe';
+import { ContentfulManager } from '@fxa/shared/contentful';
+
 import {
   createAccountCustomer,
   deleteAccountCustomer,
@@ -38,11 +42,7 @@ import {
   SUBSCRIPTIONS_RESOURCE,
 } from 'fxa-shared/payments/stripe';
 import { PlanConfig } from 'fxa-shared/subscriptions/configuration/plan';
-import {
-  ACTIVE_SUBSCRIPTION_STATUSES,
-  getMinimumAmount,
-  singlePlan,
-} from 'fxa-shared/subscriptions/stripe';
+import { getMinimumAmount, singlePlan } from 'fxa-shared/subscriptions/stripe';
 import {
   AbbrevPlan,
   AbbrevProduct,
@@ -81,7 +81,6 @@ import {
 } from './stripe-firestore';
 import { stripeInvoiceToLatestInvoiceItemsDTO } from './stripe-formatter';
 import { generateIdempotencyKey, roundTime } from './utils';
-import { ContentfulManager } from '@fxa/shared/contentful';
 
 // Maintains backwards compatibility. Some type defs hoisted to fxa-shared/payments/stripe
 export * from 'fxa-shared/payments/stripe';

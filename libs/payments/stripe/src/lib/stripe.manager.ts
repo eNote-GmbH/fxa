@@ -5,10 +5,17 @@
 import { Injectable } from '@nestjs/common';
 import { Stripe } from 'stripe';
 import { StripeClient } from './stripe.client';
+import { AuthLogger, AuthRequest } from '@fxa/shared/types';
 
 @Injectable()
 export class StripeManager {
-  constructor(private client: StripeClient) {}
+  constructor(
+    private client: StripeClient,
+    private db: any,
+    private push: any,
+    private profile: any,
+    private log: AuthLogger
+  ) {}
 
   async isCustomerStripeTaxEligible(customer: Stripe.Customer) {
     if (!customer.tax) {
@@ -20,5 +27,17 @@ export class StripeManager {
       customer.tax?.automatic_tax === 'supported' ||
       customer.tax?.automatic_tax === 'not_collecting'
     );
+  }
+
+  async customerChanged(uid: string, email: string) {
+    const devices = await Promise.all([
+      this.db.devices(uid),
+      this.profile.deleteCache(uid),
+    ]);
+    await this.push.notifyProfileUpdated(uid, devices);
+    this.log.notifyAttachedServices('profileDataChange', {} as AuthRequest, {
+      uid,
+      email,
+    });
   }
 }

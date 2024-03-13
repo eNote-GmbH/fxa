@@ -44,6 +44,7 @@ import { AccountResolver } from './account.resolver';
 import { AuthClientService } from '../../backend/auth-client.service';
 import { FirestoreService } from '../../backend/firestore.service';
 import { BasketService } from '../../newsletters/basket.service';
+import { stat } from 'node:fs';
 
 export const chance = new Chance();
 
@@ -476,5 +477,44 @@ describe('#integration - AccountResolver', () => {
 
     expect(user).toBeDefined();
     expect(user.verifierSetAt).toBeDefined();
+  });
+
+  it('deletes accounts', async () => {
+    const result = await resolver.deleteAccounts(
+      [USER_1.email, USER_2.uid],
+      'joe'
+    );
+
+    const user1 = result.find((x) => x.locator === USER_1.email);
+    expect(user1?.status).toEqual('Pending');
+    expect(user1?.taskName).not.toEqual('');
+
+    const user2 = result.find((x) => x.locator === USER_2.uid);
+    expect(user2?.status).toEqual('Pending');
+    expect(user2?.taskName).not.toEqual('');
+
+    const statusResult = await resolver.getDeleteStatus([
+      user1!.taskName,
+      user2!.taskName,
+    ]);
+
+    expect(statusResult.length).toBe(2);
+    expect(
+      statusResult.find((x) => x.taskName === user1!.taskName)?.status
+    ).toBeDefined();
+    expect(
+      statusResult.find((x) => x.taskName === user2!.taskName)?.status
+    ).toBeDefined();
+  });
+
+  it('attempts to delete invalid account and indicates failure', async () => {
+    const result = await resolver.deleteAccounts(
+      ['foobazzzz@mozilla.com'],
+      'joe'
+    );
+    expect(result).toBeDefined();
+    expect(result[0].locator).toEqual('foobazzzz@mozilla.com');
+    expect(result[0].status).toEqual('No account found');
+    expect(result[0].taskName).toEqual('');
   });
 });

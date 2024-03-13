@@ -8,6 +8,7 @@ import { makeMySQLConfig, makeRedisConfig } from 'fxa-shared/db/config';
 import { GuardConfig, USER_EMAIL_HEADER } from 'fxa-shared/guards';
 import { tracingConfig } from 'fxa-shared/tracing/config';
 import path from 'path';
+import { CloudTasksConvictConfigFactory } from '@fxa/shared/cloud-tasks';
 
 convict.addFormats(require('convict-format-with-moment'));
 convict.addFormats(require('convict-format-with-validator'));
@@ -576,6 +577,7 @@ const conf = convict({
       env: 'NEWSLETTER_HOST',
     },
   },
+  cloudTasks: CloudTasksConvictConfigFactory(),
 });
 
 const configDir = __dirname;

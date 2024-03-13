@@ -8,30 +8,30 @@ import { StripeClient } from './stripe.client';
 import { StripeManager } from './stripe.manager';
 
 describe('StripeManager', () => {
+  let manager: StripeManager;
+  let mockStripeClient: StripeClient;
+  let mockResult: any;
+
+  beforeEach(async () => {
+    mockResult = {};
+    mockStripeClient = {};
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        { provide: StripeClient, useValue: mockStripeClient },
+        StripeManager,
+      ],
+    }).compile();
+
+    manager = module.get<StripeManager>(StripeManager);
+  });
+
+  it('should be defined', async () => {
+    expect(manager).toBeDefined();
+    expect(manager).toBeInstanceOf(StripeManager);
+  });
+
   describe('isCustomerStripeTaxEligible', () => {
-    let manager: StripeManager;
-    let mockStripeClient: StripeClient;
-    let mockResult: any;
-
-    beforeEach(async () => {
-      mockResult = {};
-      mockStripeClient = {};
-
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          { provide: StripeClient, useValue: mockStripeClient },
-          StripeManager,
-        ],
-      }).compile();
-
-      manager = module.get<StripeManager>(StripeManager);
-    });
-
-    it('should be defined', async () => {
-      expect(manager).toBeDefined();
-      expect(manager).toBeInstanceOf(StripeManager);
-    });
-
     it('should throw an error if no tax in customer', async () => {
       const mockCustomer = CustomerFactory();
 
@@ -74,4 +74,40 @@ describe('StripeManager', () => {
       expect(result).toEqual(true);
     });
   });
+
+  // describe('addTaxIdToCustomer', () => {
+  //   it('updates stripe if theres a tax id on the customer', async () => {
+  //     const customer = deepCopy(customer1);
+  //     stripeHelper.taxIds = { EUR: 'EU1234' };
+  //     sandbox.stub(stripeHelper.stripe.customers, 'update').resolves(customer);
+  //     stripeFirestore.insertCustomerRecordWithBackfill = sandbox
+  //       .stub()
+  //       .resolves({});
+  //     await stripeHelper.addTaxIdToCustomer(customer);
+  //     sinon.assert.calledOnceWithExactly(
+  //       stripeHelper.stripe.customers.update,
+  //       customer.id,
+  //       {
+  //         invoice_settings: {
+  //           custom_fields: [{ name: MOZILLA_TAX_ID, value: 'EU1234' }],
+  //         },
+  //       }
+  //     );
+  //     sinon.assert.calledOnceWithExactly(
+  //       stripeFirestore.insertCustomerRecordWithBackfill,
+  //       customer.metadata.userid,
+  //       customer
+  //     );
+  //   });
+
+  //   it('does not update stripe with no tax id found', async () => {
+  //     const customer = deepCopy(customer1);
+  //     stripeHelper.taxIds = { EUR: 'EU1234' };
+  //     sandbox.stub(stripeHelper.stripe.customers, 'update').resolves({});
+
+  //     await stripeHelper.addTaxIdToCustomer(customer, 'usd');
+
+  //     sinon.assert.notCalled(stripeHelper.stripe.customers.update);
+  //   });
+  // });
 });

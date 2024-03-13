@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import InlineRecoverySetup, { viewName } from '.';
 import { REACT_ENTRYPOINT } from '../../constants';
@@ -66,7 +66,10 @@ describe('InlineRecoverySetup', () => {
   it('renders "showConfirmation" content as expected', async () => {
     renderWithRouter(<InlineRecoverySetup {...props} />);
 
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Continue' }))
+    );
 
     screen.getByRole('heading', {
       name: `Confirm backup authentication code to continue to ${MozServices.Default}`,
@@ -82,7 +85,10 @@ describe('InlineRecoverySetup', () => {
     renderWithRouter(
       <InlineRecoverySetup serviceName={MOCK_SERVICE_NAME} {...props} />
     );
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Continue' }))
+    );
     screen.getByRole('heading', {
       name: `Confirm backup authentication code to continue to ${MOCK_SERVICE_NAME}`,
     });
@@ -92,12 +98,21 @@ describe('InlineRecoverySetup', () => {
     renderWithRouter(
       <InlineRecoverySetup serviceName={MOCK_SERVICE_NAME} {...props} />
     );
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-    await user.type(
-      screen.getByLabelText('Backup authentication code'),
-      'chargingelephant'
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Continue' }))
     );
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+    await act(
+      async () =>
+        await user.type(
+          screen.getByLabelText('Backup authentication code'),
+          'chargingelephant'
+        )
+    );
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    );
     await screen.findByText('Incorrect backup authentication code');
   });
 
@@ -111,16 +126,26 @@ describe('InlineRecoverySetup', () => {
         {...{ verifyTotpHandler, successfulSetupHandler }}
       />
     );
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-    await user.type(
-      screen.getByLabelText('Backup authentication code'),
-      MOCK_RECOVERY_CODES[0]
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Continue' }))
     );
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
-    // there's a delay to display the success message
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    expect(verifyTotpHandler).toHaveBeenCalled();
-    expect(successfulSetupHandler).toHaveBeenCalled();
+    await act(
+      async () =>
+        await user.type(
+          screen.getByLabelText('Backup authentication code'),
+          MOCK_RECOVERY_CODES[0]
+        )
+    );
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    );
+
+    await waitFor(() => {
+      expect(verifyTotpHandler).toHaveBeenCalled();
+      expect(successfulSetupHandler).toHaveBeenCalled();
+    });
   });
 
   it('shows an error when failed to verify totp', async () => {
@@ -133,12 +158,21 @@ describe('InlineRecoverySetup', () => {
         {...{ verifyTotpHandler, successfulSetupHandler }}
       />
     );
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-    await user.type(
-      screen.getByLabelText('Backup authentication code'),
-      MOCK_RECOVERY_CODES[0]
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Continue' }))
     );
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+    await act(
+      async () =>
+        await user.type(
+          screen.getByLabelText('Backup authentication code'),
+          MOCK_RECOVERY_CODES[0]
+        )
+    );
+    await act(
+      async () =>
+        await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    );
     expect(verifyTotpHandler).toHaveBeenCalled();
     expect(successfulSetupHandler).not.toHaveBeenCalled();
     await screen.findByText(

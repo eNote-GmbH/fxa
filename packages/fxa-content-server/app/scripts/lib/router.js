@@ -239,7 +239,12 @@ Router = Router.extend({
         InlineTotpSetupView
       );
     },
-    'inline_recovery_setup(/)': createViewHandler(InlineRecoverySetupView),
+    'inline_recovery_setup(/)': function () {
+      this.createReactOrBackboneViewHandler(
+        'inline_recovery_setup',
+        InlineRecoverySetupView
+      );
+    },
     'legal(/)': function () {
       this.createReactViewHandler('legal');
     },

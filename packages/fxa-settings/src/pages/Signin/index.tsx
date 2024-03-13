@@ -28,7 +28,6 @@ import {
 } from '../../lib/auth-errors/auth-errors';
 import GleanMetrics from '../../lib/glean';
 import { usePageViewEvent } from '../../lib/metrics';
-import { ERRORS as OAuthError } from '../../lib/oauth/oauth-errors';
 import { StoredAccountData, storeAccountData } from '../../lib/storage-utils';
 import { isOAuthIntegration, useFtlMsgResolver } from '../../models';
 import {
@@ -234,7 +233,6 @@ const Signin = ({
               break;
             case AuthUiErrors.TOTP_REQUIRED.errno:
             case AuthUiErrors.INSUFFICIENT_ACR_VALUES.errno:
-            case OAuthError.MISMATCH_ACR_VALUES.errno:
               navigate('/inline_totp_setup');
               break;
             default:

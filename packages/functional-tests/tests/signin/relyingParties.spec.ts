@@ -107,11 +107,10 @@ test.describe('severity-1 #smoke', () => {
     page,
     pages: { login },
   }, { project }) => {
-    test.fixme(true, 'pocket logout hangs after link clicked');
     test.skip(project.name !== 'production', 'uses prod pocket');
     await page.goto('https://getpocket.com/login');
     await Promise.all([
-      page.click('a:has-text("Continue with Firefox")'),
+      page.click('a:has-text("Continue with Mozilla")'),
       page.waitForNavigation(),
     ]);
     await login.login(credentials.email, credentials.password);

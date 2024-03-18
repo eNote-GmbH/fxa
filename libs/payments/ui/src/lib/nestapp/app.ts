@@ -8,6 +8,9 @@ import { CartService } from '@fxa/payments/cart';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
+import { LocalizerServer } from '@fxa/shared/l10n/server';
+
+const NEST_APP: symbol = Symbol.for('nestapp');
 
 class AppSingleton {
   private app!: Awaited<
@@ -20,9 +23,17 @@ class AppSingleton {
     return this.app;
   }
 
+  async getLocalizerServer() {
+    return (await this.getApp()).get(LocalizerServer);
+  }
+
   async getCartService() {
     return (await this.getApp()).get(CartService);
   }
 }
 
-export const app = new AppSingleton();
+if (!(global as any)[NEST_APP]) {
+  (global as any)[NEST_APP] = new AppSingleton();
+}
+
+export const app = (global as any)[NEST_APP] as AppSingleton;

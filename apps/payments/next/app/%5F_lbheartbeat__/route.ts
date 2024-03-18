@@ -4,7 +4,7 @@
 
 import { NextResponse } from 'next/server';
 
-import { app } from '../_nestapp/app';
+import { app } from '@fxa/payments/ui/server';
 
 export const dynamic = 'force-dynamic';
 

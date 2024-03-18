@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { test, expect } from '../../lib/fixtures/standard';
+
+const AGE_21 = '21';
 let newEmail;
 
 test.describe('severity-1 #smoke', () => {
@@ -133,9 +135,13 @@ test.describe('severity-1 #smoke', () => {
       if (config.showReactApp.signUpRoutes !== true) {
         await login.fillOutFirstSignUp(newEmail, credentials.password);
       } else {
-        await signupReact.fillOutEmailFirst(newEmail);
-        await signupReact.fillOutSignupForm(credentials.password);
-        await signupReact.fillOutCodeForm(newEmail);
+        await signupReact.fillOutEmailForm({ email: newEmail, submit: true });
+        await signupReact.fillOutSignupForm({
+          password: credentials.password,
+          age: AGE_21,
+          submit: true,
+        });
+        await signupReact.fillOutCodeForm({ email: newEmail, submit: true });
       }
 
       expect(await settings.alertBarText()).toContain(

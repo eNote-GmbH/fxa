@@ -4,6 +4,7 @@
 
 import { expect, test } from '../../lib/fixtures/standard';
 
+const AGE_21 = '21';
 const password = 'passwordzxcv';
 let email;
 let email2;
@@ -17,12 +18,22 @@ test.describe('severity-1 #smoke', () => {
     test.afterEach(async ({ target }) => {
       if (email) {
         const creds = await target.auth.signIn(email, password);
-        await target.auth.accountDestroy(email, password, {}, creds.sessionToken);
+        await target.auth.accountDestroy(
+          email,
+          password,
+          {},
+          creds.sessionToken
+        );
         email = '';
       }
       if (email2) {
         const creds = await target.auth.signIn(email2, password);
-        await target.auth.accountDestroy(email2, password, {}, creds.sessionToken);
+        await target.auth.accountDestroy(
+          email2,
+          password,
+          {},
+          creds.sessionToken
+        );
         email2 = '';
       }
     });
@@ -59,9 +70,13 @@ test.describe('severity-1 #smoke', () => {
       if (config.showReactApp.signUpRoutes !== true) {
         await login.fillOutFirstSignUp(email2, password);
       } else {
-        await signupReact.fillOutEmailFirst(email2);
-        await signupReact.fillOutSignupForm(password);
-        await signupReact.fillOutCodeForm(email2);
+        await signupReact.fillOutEmailForm({ email: email2, submit: true });
+        await signupReact.fillOutSignupForm({
+          password: password,
+          age: AGE_21,
+          submit: true,
+        });
+        await signupReact.fillOutCodeForm({ email: email2, submit: true });
       }
 
       // RP is logged in, logout then back in again
@@ -81,7 +96,12 @@ test.describe('severity-1 #smoke', () => {
     test.afterEach(async ({ target }) => {
       if (email) {
         const creds = await target.auth.signIn(email, password);
-        await target.auth.accountDestroy(email, password, {}, creds.sessionToken);
+        await target.auth.accountDestroy(
+          email,
+          password,
+          {},
+          creds.sessionToken
+        );
         email = '';
       }
     });
@@ -105,9 +125,13 @@ test.describe('severity-1 #smoke', () => {
       if (config.showReactApp.signUpRoutes !== true) {
         await login.fillOutFirstSignUp(email, password);
       } else {
-        await signupReact.fillOutEmailFirst(email);
-        await signupReact.fillOutSignupForm(password);
-        await signupReact.fillOutCodeForm(email);
+        await signupReact.fillOutEmailForm({ email: email, submit: true });
+        await signupReact.fillOutSignupForm({
+          password: password,
+          age: AGE_21,
+          submit: true,
+        });
+        await signupReact.fillOutCodeForm({ email: email, submit: true });
       }
       expect(await relier.isLoggedIn()).toBe(true);
       await page.goto(

@@ -32,9 +32,19 @@ test.describe('severity-2 #smoke', () => {
       );
 
       if (config.showReactApp.signUpRoutes === true) {
-        await signupReact.fillOutEmailFirst(credentials.email);
-        await signupReact.fillOutSignupForm(credentials.password);
-        await signupReact.fillOutCodeForm(credentials.email);
+        await signupReact.fillOutEmailForm({
+          email: credentials.email,
+          submit: true,
+        });
+        await signupReact.fillOutSignupForm({
+          password: credentials.password,
+          age: '21',
+          submit: true,
+        });
+        await signupReact.fillOutCodeForm({
+          email: credentials.email,
+          submit: true,
+        });
       } else {
         await login.fillOutFirstSignUp(credentials.email, credentials.password);
       }

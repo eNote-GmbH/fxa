@@ -5,6 +5,7 @@
 import { test, expect } from '../../lib/fixtures/standard';
 
 let email = '';
+const AGE_21 = '21';
 const PASSWORD = 'passwordzxcv';
 
 test.describe('severity-1 #smoke', () => {
@@ -123,8 +124,12 @@ test.describe('severity-1 #smoke', () => {
         // Dont register account and attempt to login via relier
         await login.fillOutFirstSignUp(email, password, { verify: false });
       } else {
-        await signupReact.fillOutEmailFirst(email);
-        await signupReact.fillOutSignupForm(password);
+        await signupReact.fillOutEmailForm({ email: email, submit: true });
+        await signupReact.fillOutSignupForm({
+          password: password,
+          age: AGE_21,
+          submit: true,
+        });
       }
 
       await relier.goto();
@@ -165,8 +170,12 @@ test.describe('severity-1 #smoke', () => {
         // Dont register account and attempt to login via relier
         await login.fillOutFirstSignUp(email, PASSWORD, { verify: false });
       } else {
-        await signupReact.fillOutEmailFirst(email);
-        await signupReact.fillOutSignupForm(PASSWORD);
+        await signupReact.fillOutEmailForm({ email: email, submit: true });
+        await signupReact.fillOutSignupForm({
+          password: PASSWORD,
+          age: AGE_21,
+          submit: true,
+        });
       }
 
       // go back to the OAuth app, the /oauth flow should

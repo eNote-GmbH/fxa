@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { BaseLayout } from '../layout';
 
 export abstract class SettingsLayout extends BaseLayout {
@@ -5,8 +6,16 @@ export abstract class SettingsLayout extends BaseLayout {
     return this.page.locator('[data-testid="drop-down-bento-menu"]');
   }
 
+  get avatarDropDownMenuToggle() {
+    return this.page.getByTestId('drop-down-avatar-menu-toggle');
+  }
+
   get avatarMenu() {
-    return this.page.locator('[data-testid=drop-down-avatar-menu]');
+    return this.page.getByTestId('avatar');
+  }
+
+  get avatarMenuSignOut() {
+    return this.page.getByTestId('avatar-menu-sign-out');
   }
 
   goto(query?: string) {
@@ -65,9 +74,9 @@ export abstract class SettingsLayout extends BaseLayout {
   }
 
   async signOut() {
-    await this.clickAvatarIcon();
-    const waitForURL = this.page.waitForURL(this.target.baseUrl);
-    await this.clickSignOut();
-    return waitForURL;
+    await this.avatarDropDownMenuToggle.click();
+    await this.avatarMenuSignOut.click();
+
+    await expect(this.page).toHaveURL(this.target.baseUrl);
   }
 }

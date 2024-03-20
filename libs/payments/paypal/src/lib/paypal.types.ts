@@ -7,6 +7,10 @@ export enum BillingAgreementStatus {
   Cancelled = 'cancelled',
 }
 
+export enum STRIPE_CUSTOMER_METADATA {
+  PAYPAL_AGREEMENT = 'paypalAgreementId',
+}
+
 export interface BillingAgreement {
   city: string;
   countryCode: string;

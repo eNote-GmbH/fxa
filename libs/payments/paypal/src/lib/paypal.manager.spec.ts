@@ -21,6 +21,7 @@ import {
 import { PayPalClient } from './paypal.client';
 import { PayPalManager } from './paypal.manager';
 import { BillingAgreementStatus } from './paypal.types';
+import { ResultPaypalCustomerFactory } from './paypalCustomer/paypalCustomer.factories';
 import { PaypalCustomerManager } from './paypalCustomer/paypalCustomer.manager';
 
 describe('PaypalManager', () => {
@@ -121,6 +122,26 @@ describe('PaypalManager', () => {
       expect(result).toEqual(expected);
       expect(paypalClient.baUpdate).toBeCalledTimes(1);
       expect(paypalClient.baUpdate).toBeCalledWith({ billingAgreementId });
+    });
+  });
+
+  describe('getCustomerBillingAgreementId', () => {
+    it(`returns the customer's current PayPal billing agreement ID`, async () => {
+      const mockPayPalCustomer = ResultPaypalCustomerFactory();
+      const mockStripeCustomer = CustomerFactory({
+        metadata: {
+          paypalAgreementId: mockPayPalCustomer.billingAgreementId,
+        },
+      });
+
+      paypalCustomerManager.fetchPaypalCustomersByBillingAgreementId = jest
+        .fn()
+        .mockResolvedValueOnce([mockPayPalCustomer]);
+
+      const result = await paypalManager.getCustomerBillingAgreementId(
+        mockStripeCustomer
+      );
+      expect(result).toEqual(mockPayPalCustomer.billingAgreementId);
     });
   });
 

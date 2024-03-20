@@ -17,7 +17,7 @@ export interface AvatarResponse {
 }
 
 export type SigninIntegration =
-  | Pick<Integration, 'type' | 'isSync' | 'getService'>
+  | Pick<Integration, 'type' | 'isSync' | 'getService' | 'wantsKeys'>
   | SigninOAuthIntegration;
 
 export type SigninOAuthIntegration = Pick<

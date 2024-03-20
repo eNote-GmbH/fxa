@@ -45,7 +45,7 @@ const SigninTokenCodeContainer = ({
     useQuery<TotpStatusResponse>(GET_TOTP_STATUS);
 
   if (Object.keys(signinLocationState).length < 1) {
-    hardNavigateToContentServer(`/${location.search ? location.search : ''}`);
+    hardNavigateToContentServer(`/${location.search || ''}`);
     return <LoadingSpinner fullScreen />;
   }
 

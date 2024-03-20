@@ -79,7 +79,8 @@ const Signin = ({
   // We must use a ref because we may update this value in a callback
   let isPasswordNeededRef = useRef(
     (!sessionToken && hasPassword) ||
-      (isOAuth && (integration.wantsKeys() || integration.wantsLogin()))
+      integration.wantsKeys() ||
+      (isOAuth && integration.wantsLogin())
   );
 
   const localizedPasswordFormLabel = ftlMsgResolver.getMsg(
@@ -190,6 +191,7 @@ const Signin = ({
           email,
           signinData: data.signIn,
           unwrapBKey: data.unwrapBKey,
+          verified: data.signIn.verified,
           integration,
           finishOAuthFlowHandler,
           queryParams: location.search,

@@ -70,6 +70,7 @@ export function createMockSigninWebIntegration(): SigninIntegration {
     type: IntegrationType.Web,
     isSync: () => false,
     getService: () => MozServices.Default,
+    wantsKeys: () => false,
   };
 }
 

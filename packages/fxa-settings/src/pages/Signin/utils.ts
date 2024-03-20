@@ -17,20 +17,30 @@ import {
 import { isOAuthIntegration } from '../../models';
 import { NavigateFn } from '@reach/router';
 import { hardNavigate } from 'fxa-react/lib/utils';
-import { FinishOAuthFlowHandler } from '../../lib/oauth/hooks';
 import { currentAccount } from '../../lib/cache';
 
-// TODO in FXA-9059:
-// function getSyncNavigate() {
-// const searchParams = new URLSearchParams(location.search);
-// searchParams.set('showSuccessMessage', 'true');
-// const to = `/connect_another_device?${searchParams}`
-// }
+interface NavigationTarget {
+  to: string;
+  state?: SigninLocationState;
+  shouldHardNavigate?: boolean;
+}
+
+// TODO: don't hard navigate once ConnectAnotherDevice is converted to React
+// CAD tells Sync the user is signed in
+export function getSyncNavigate(queryParams: string) {
+  const searchParams = new URLSearchParams(queryParams);
+  searchParams.set('showSuccessMessage', 'true');
+  return {
+    to: `/connect_another_device?${searchParams}`,
+    shouldHardNavigate: true,
+  };
+}
 
 export async function handleNavigation(
   navigationOptions: NavigationOptions,
   navigate: NavigateFn
 ) {
+  console.log('navigationOptions', navigationOptions);
   const { to, state, shouldHardNavigate } = await getNavigationTarget(
     navigationOptions
   );
@@ -46,46 +56,6 @@ export async function handleNavigation(
   }
 }
 
-export async function getOAuthRedirectAndHandleSync(
-  finishOAuthFlowHandler: FinishOAuthFlowHandler,
-  {
-    uid,
-    sessionToken,
-    keyFetchToken,
-    unwrapBKey,
-  }: {
-    uid: hexstring;
-    sessionToken: hexstring;
-    keyFetchToken?: string;
-    unwrapBKey?: string;
-  }
-) {
-  const { redirect } =
-    keyFetchToken && unwrapBKey
-      ? await finishOAuthFlowHandler(
-          uid,
-          sessionToken,
-          keyFetchToken,
-          unwrapBKey
-        )
-      : await finishOAuthFlowHandler(uid, sessionToken);
-
-  // TODO in FXA-9059 Sync signin ticket. Do we want to do firefox.fxAOAuthLogin here
-  // if the session isn't verified?
-  //
-  // if (integration.isSync()) {
-  //   firefox.fxaOAuthLogin({
-  //     action: 'signin',
-  //     code,
-  //     redirect,
-  //     state,
-  //   })
-  // TODO: don't hard navigate once ConnectAnotherDevice is converted to React
-  //   return { to: getSyncNavigate(), shouldHardNavigate: true }
-  // }
-  return { to: redirect, shouldHardNavigate: true };
-}
-
 const getNavigationTarget = async ({
   email,
   signinData,
@@ -94,7 +64,7 @@ const getNavigationTarget = async ({
   finishOAuthFlowHandler,
   redirectTo,
   queryParams = '',
-}: NavigationOptions) => {
+}: NavigationOptions): Promise<NavigationTarget> => {
   const isOAuth = isOAuthIntegration(integration);
   const {
     verified,
@@ -105,8 +75,8 @@ const getNavigationTarget = async ({
     sessionToken,
   } = signinData;
 
-  // oAuthResult result will need to be obtained at the next step, once session is verified
-  if (!verified) {
+  const getUnverifiedNav = () => {
+    // TODO in FXA-9177 Consider storing state in Apollo cache instead of location state
     const state = {
       email,
       uid,
@@ -118,60 +88,62 @@ const getNavigationTarget = async ({
       ...(unwrapBKey && { unwrapBKey }),
     };
 
-    // TODO in FXA-9177 Consider storing state in Apollo cache instead of location state
-    if (
-      ((verificationReason === VerificationReasons.SIGN_IN ||
-        verificationReason === VerificationReasons.CHANGE_PASSWORD) &&
-        verificationMethod === VerificationMethods.TOTP_2FA) ||
-      (isOAuth && integration.wantsTwoStepAuthentication())
-    ) {
-      return {
-        to: `/signin_totp_code${queryParams}`,
-        state,
-      };
-    } else if (verificationReason === VerificationReasons.SIGN_UP) {
-      return {
-        to: `/confirm_signup_code${queryParams}`,
-        state,
-      };
-    } else {
-      return {
-        to: `/signin_token_code${queryParams}`,
-        state,
-      };
-    }
+    const getUnverifiedNavTo = () => {
+      if (
+        ((verificationReason === VerificationReasons.SIGN_IN ||
+          verificationReason === VerificationReasons.CHANGE_PASSWORD) &&
+          verificationMethod === VerificationMethods.TOTP_2FA) ||
+        (isOAuth && integration.wantsTwoStepAuthentication())
+      ) {
+        return `/signin_totp_code${queryParams}`;
+      } else if (verificationReason === VerificationReasons.SIGN_UP) {
+        return `/confirm_signup_code${queryParams}`;
+      }
+      return `/signin_token_code${queryParams}`;
+    };
+
+    return { to: getUnverifiedNavTo(), state };
+  };
+
+  if (!verified) {
+    return getUnverifiedNav();
   }
 
   if (verificationReason === VerificationReasons.CHANGE_PASSWORD) {
     return {
-      to:
-        queryParams.length > 1
-          ? `/post_verify/password/force_password_change${queryParams}`
-          : '/post_verify/password/force_password_change',
+      to: `/post_verify/password/force_password_change${queryParams}`,
       // TODO in FXA-6653: remove shouldHardNavigate when this route is converted to React
       shouldHardNavigate: true,
     };
   }
 
-  // TODO in FXA-9059 handle sync desktop v3 integration post-sign in navigation
-
-  // oAuthResult can only be obtained when the session is verified
+  // OAuth redirect can only be obtained when the session is verified
   // otherwise oauth/authorization endpoint throws an "unconfirmed session" error
-  if (verified && isOAuth) {
-    const oAuthResult = await getOAuthRedirectAndHandleSync(
-      finishOAuthFlowHandler,
-      {
-        uid,
-        sessionToken,
-        keyFetchToken,
-        unwrapBKey,
-      }
+  if (isOAuth) {
+    const { redirect } = await finishOAuthFlowHandler(
+      uid,
+      sessionToken,
+      keyFetchToken,
+      unwrapBKey
     );
 
-    return {
-      to: oAuthResult.to,
-      shouldHardNavigate: oAuthResult.shouldHardNavigate,
-    };
+    //
+    if (integration.isSync()) {
+      // TODO in FXA-9059 Sync signin ticket. Do we want to do firefox.fxAOAuthLogin here
+      // if the session isn't verified?
+      //
+      //   firefox.fxaOAuthLogin({
+      //     action: 'signin',
+      //     code,
+      //     redirect,
+      //     state,
+      //   })
+      return getSyncNavigate(queryParams);
+    }
+    return { to: redirect, shouldHardNavigate: true };
+  }
+  if (integration.isSync()) {
+    return getSyncNavigate(queryParams);
   }
 
   if (redirectTo) {
@@ -208,6 +180,7 @@ export const handleGQLError = (error: any) => {
 
 // When SigninLocationState is not available from the router state,
 // this method can be used to check local storage
+// TODO clean this up
 export function getStoredAccountInfo() {
   const { email, sessionToken, uid, verified } = currentAccount() || {};
   if (email && sessionToken && uid && verified !== undefined) {
@@ -218,5 +191,6 @@ export function getStoredAccountInfo() {
       verified,
     } as SigninLocationState;
     return currentAccountData;
-  } else return {} as SigninLocationState;
+  }
+  return {} as SigninLocationState;
 }

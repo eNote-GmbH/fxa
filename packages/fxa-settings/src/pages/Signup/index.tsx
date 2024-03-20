@@ -246,10 +246,7 @@ export const Signup = ({
         const getOfferedSyncEngines = () =>
           getSyncEngineIds(offeredSyncEngineConfigs || []);
 
-        if (
-          isSyncDesktopV3Integration(integration) ||
-          isSyncOAuthIntegration(integration)
-        ) {
+        if (integration.isSync()) {
           await firefox.fxaLogin({
             email,
             // keyFetchToken and unwrapBKey should always exist if Sync integration

@@ -18,6 +18,7 @@ import { isOAuthIntegration } from '../../models';
 import { NavigateFn } from '@reach/router';
 import { hardNavigate } from 'fxa-react/lib/utils';
 import { currentAccount } from '../../lib/cache';
+import firefox from '../../lib/channels/firefox';
 
 interface NavigationTarget {
   to: string;
@@ -26,7 +27,15 @@ interface NavigationTarget {
 }
 
 // TODO: don't hard navigate once ConnectAnotherDevice is converted to React
-// CAD tells Sync the user is signed in
+// In Backbone and React, 'confirm_signup_code' and 'signin_token_code' send key/token
+// data up to Sync with fxa_login and then the CAD page (currently Backbone) completes
+// the signin with fxa_status.
+//
+// In Backbone happy path signin (session is verified after signin) as well as Backbone
+// 'signin_totp_code', we send key/token data up on the CAD page itself with an fxa_status
+// message. We don't want to do this with React signin until CAD is converted to React
+// because we'd need to pass this data back to Backbone. This means temporarily we need
+// to send the sync data up _before_ we hard navigate to CAD in these two flows.
 export function getSyncNavigate(queryParams: string) {
   const searchParams = new URLSearchParams(queryParams);
   searchParams.set('showSuccessMessage', 'true');
@@ -38,13 +47,27 @@ export function getSyncNavigate(queryParams: string) {
 
 export async function handleNavigation(
   navigationOptions: NavigationOptions,
-  navigate: NavigateFn
+  navigate: NavigateFn,
+  tempHandleSyncLogin = false
 ) {
-  console.log('navigationOptions', navigationOptions);
   const { to, state, shouldHardNavigate } = await getNavigationTarget(
     navigationOptions
   );
+  // debugger;
   if (shouldHardNavigate) {
+    if (tempHandleSyncLogin && navigationOptions.integration.isSync()) {
+      console.log('hi hello');
+      await firefox.fxaLogin({
+        email: navigationOptions.email,
+        // keyFetchToken and unwrapBKey should always exist if Sync integration
+        keyFetchToken: navigationOptions.signinData.keyFetchToken!,
+        unwrapBKey: navigationOptions.unwrapBKey!,
+        sessionToken: navigationOptions.signinData.sessionToken,
+        uid: navigationOptions.signinData.uid,
+        verified: navigationOptions.signinData.verified,
+      });
+    }
+
     // Hard navigate to RP, or (temp until CAD is Reactified) CAD
     hardNavigate(to);
     return;

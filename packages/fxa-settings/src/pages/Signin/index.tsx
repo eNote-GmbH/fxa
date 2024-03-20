@@ -197,7 +197,7 @@ const Signin = ({
           queryParams: location.search,
         };
 
-        await handleNavigation(navigationOptions, navigate);
+        await handleNavigation(navigationOptions, navigate, true);
       }
       if (error) {
         GleanMetrics.login.error({ reason: error.message });

@@ -293,6 +293,7 @@ export class Firefox extends EventTarget {
   }
 
   async fxaLogin(options: FxALoginRequest): Promise<void> {
+    console.log('sending fxaLogin', options);
     this.send(FirefoxCommand.Login, options);
 
     // We must wait for the browser to send a web channel message

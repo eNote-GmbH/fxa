@@ -138,10 +138,7 @@ const SigninContainer = ({
     queryParamModel.email || emailFromLocationState
   );
 
-  const isOAuth = isOAuthIntegration(integration);
-  const isSyncOAuth = isOAuth && integration.isSync();
-  const isSyncDesktopV3 = isSyncDesktopV3Integration(integration);
-  const isSyncWebChannel = isSyncOAuth || isSyncDesktopV3;
+  const isSync = integration.isSync();
 
   useEffect(() => {
     (async () => {
@@ -171,14 +168,14 @@ const SigninContainer = ({
                 hasLinkedAccount,
                 hasPassword,
               });
-              if (isSyncWebChannel) {
+              if (isSync) {
                 firefox.fxaCanLinkAccount({ email });
               }
             }
           } catch (error) {
             hardNavigateToContentServer(`/?prefillEmail=${email}`);
           }
-        } else if (isSyncWebChannel) {
+        } else if (isSync) {
           // TODO: Probably move this to the Index page onsubmit once
           // the index page is converted to React, we need to run it in
           // signup and signin for Sync

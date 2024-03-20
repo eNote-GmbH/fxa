@@ -4,6 +4,22 @@ updates:
     directory: '/'
     schedule:
       interval: 'daily'
+    groups:
+      storybook:
+        patterns:
+          - "@storybook/*"
+      google-cloud:
+        patterns:
+          - "@google-cloud/*"
+      nx:
+        patterns:
+          - "@nx/*"
+      sentry:
+        patterns:
+          - "@sentry/*"
+      open-telemetry:
+        patterns:
+          - "@opentelemetry/*"
     open-pull-requests-limit: 6
     labels:
       - 'maintenance'

@@ -9,8 +9,5 @@
     "stripe": "11.14.0",
     "tslib": "2.5.0",
     "typescript": "^5.3.3"
-  },
-  "scripts": {
-    "start": "next start"
   }
 }

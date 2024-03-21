@@ -99,6 +99,7 @@ const SignupContainer = ({
   const isSyncOAuth = isOAuth && integration.isSync();
   const isSyncDesktopV3 = isSyncDesktopV3Integration(integration);
   const isSyncWebChannel = isSyncOAuth || isSyncDesktopV3;
+  const wantsKeys = integration.wantsKeys();
 
   useEffect(() => {
     (async () => {
@@ -195,7 +196,7 @@ const SignupContainer = ({
       const service = integration.getService();
       const options: BeginSignUpOptions = {
         verificationMethod: VerificationMethods.EMAIL_OTP,
-        keys: integration.wantsKeys(),
+        keys: wantsKeys,
         ...(service !== MozServices.Default && { service }),
         atLeast18AtReg,
       };
@@ -247,9 +248,11 @@ const SignupContainer = ({
           return {
             data: {
               ...data,
-              unwrapBKey: credentialsV2
-                ? credentialsV2.unwrapBKey
-                : credentialsV1.unwrapBKey,
+              ...(wantsKeys && {
+                unwrapBKey: credentialsV2
+                  ? credentialsV2.unwrapBKey
+                  : credentialsV1.unwrapBKey,
+              }),
             },
           };
         } else return { data: undefined };
@@ -258,7 +261,7 @@ const SignupContainer = ({
         return handleGQLError(error);
       }
     },
-    [beginSignup, integration, keyStretchExp, config]
+    [beginSignup, integration, keyStretchExp, config, wantsKeys]
   );
 
   // TODO: probably a better way to read this?

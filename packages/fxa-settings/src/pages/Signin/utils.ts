@@ -53,11 +53,9 @@ export async function handleNavigation(
   const { to, state, shouldHardNavigate } = await getNavigationTarget(
     navigationOptions
   );
-  // debugger;
   if (shouldHardNavigate) {
     if (tempHandleSyncLogin && navigationOptions.integration.isSync()) {
-      console.log('hi hello');
-      await firefox.fxaLogin({
+      firefox.fxaLogin({
         email: navigationOptions.email,
         // keyFetchToken and unwrapBKey should always exist if Sync integration
         keyFetchToken: navigationOptions.signinData.keyFetchToken!,

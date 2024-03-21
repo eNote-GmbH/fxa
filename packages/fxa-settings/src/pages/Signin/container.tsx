@@ -139,6 +139,7 @@ const SigninContainer = ({
   );
 
   const isSync = integration.isSync();
+  const wantsKeys = integration.wantsKeys();
 
   useEffect(() => {
     (async () => {
@@ -211,7 +212,7 @@ const SigninContainer = ({
       const service = integration.getService();
       const options = {
         verificationMethod: VerificationMethods.EMAIL_OTP,
-        keys: integration.wantsKeys(),
+        keys: wantsKeys,
         ...(service !== MozServices.Default && { service }),
       };
 
@@ -277,10 +278,10 @@ const SigninContainer = ({
                 password,
                 clientSalt:
                   credentialStatusData.data?.credentialStatus.clientSalt ||
-                  (await createSaltV2()),
+                  createSaltV2(),
               });
 
-              const kB = await unwrapKB(wrapKb, v1Credentials.unwrapBKey);
+              const kB = unwrapKB(wrapKb, v1Credentials.unwrapBKey);
               const keys = await getKeysV2({
                 kB,
                 v1: v1Credentials,
@@ -327,7 +328,17 @@ const SigninContainer = ({
               },
             });
 
-            return { data };
+            if (data) {
+              return {
+                data: {
+                  ...data,
+                  ...(wantsKeys && {
+                    unwrapBKey: v2Credentials.unwrapBKey,
+                  }),
+                },
+              };
+            }
+            return { data: undefined };
           } catch (error) {
             return handleGQLError(error);
           }
@@ -350,7 +361,18 @@ const SigninContainer = ({
             },
           },
         });
-        return { data };
+
+        if (data) {
+          return {
+            data: {
+              ...data,
+              ...(wantsKeys && {
+                unwrapBKey: v1Credentials.unwrapBKey,
+              }),
+            },
+          };
+        }
+        return { data: undefined };
       } catch (error) {
         // TODO consider additional error handling - any non-gql errors will return an unexpected error
         return handleGQLError(error);
@@ -365,6 +387,7 @@ const SigninContainer = ({
       keyStretchExp.queryParamModel,
       passwordChangeFinish,
       passwordChangeStart,
+      wantsKeys,
     ]
   );
 

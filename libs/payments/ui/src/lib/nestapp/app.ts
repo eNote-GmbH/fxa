@@ -23,10 +23,14 @@ class AppSingleton {
   }
 
   async getLocalizerServer() {
+    // Temporary until Next.js canary lands
+    await this.initialize();
     return this.app.get(LocalizerServer);
   }
 
   async getCartService() {
+    // Temporary until Next.js canary lands
+    await this.initialize();
     return this.app.get(CartService);
   }
 }

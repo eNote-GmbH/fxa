@@ -6,7 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}", "{sourceRoot}/public/locales"],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/payments/next",
@@ -26,7 +26,7 @@
           ]
         }
       },
-      "dependsOn": ["l10n-bundle"]
+      "dependsOn": ["l10n-prime", "l10n-bundle"]
     },
     "serve": {
       "executor": "@nx/next:server",
@@ -89,18 +89,6 @@
     "l10n-bundle": {
       "dependsOn": ["l10n-merge"],
       "command": "./_scripts/l10n/bundle.sh apps/payments/next branding,react,payments"
-    },
-    "l10n-watch": {
-      "dependsOn": ["watch-ftl"],
-      "command": "yarn grunt watch-ftl"
-    },
-    "prebuild": {
-      "dependsOn": ["l10n-prime"],
-      "command": "yarn l10n-prime"
-    },
-    "watch-ftl": {
-      "dependsOn": ["l10n-watch"],
-      "commmand": "yarn l10n-watch"
     },
     "storybook": {
       "executor": "@nx/storybook:storybook",

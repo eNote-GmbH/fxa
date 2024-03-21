@@ -9,31 +9,26 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 import { LocalizerServer } from '@fxa/shared/l10n/server';
-
-const NEST_APP: symbol = Symbol.for('nestapp');
+import { singleton } from '../utils/singleton';
 
 class AppSingleton {
   private app!: Awaited<
     ReturnType<typeof NestFactory.createApplicationContext>
   >;
 
-  async getApp() {
-    if (this.app) return this.app;
-    this.app = await NestFactory.createApplicationContext(AppModule);
-    return this.app;
+  async initialize() {
+    if (!this.app) {
+      this.app = await NestFactory.createApplicationContext(AppModule);
+    }
   }
 
   async getLocalizerServer() {
-    return (await this.getApp()).get(LocalizerServer);
+    return this.app.get(LocalizerServer);
   }
 
   async getCartService() {
-    return (await this.getApp()).get(CartService);
+    return this.app.get(CartService);
   }
 }
 
-if (!(global as any)[NEST_APP]) {
-  (global as any)[NEST_APP] = new AppSingleton();
-}
-
-export const app = (global as any)[NEST_APP] as AppSingleton;
+export const app = singleton('nestApp', new AppSingleton()) as AppSingleton;

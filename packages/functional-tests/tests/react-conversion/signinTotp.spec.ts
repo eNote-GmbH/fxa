@@ -6,9 +6,7 @@ import { test, expect } from '../../lib/fixtures/standard';
 
 test.describe('severity-1 #smoke', () => {
   test.describe('two step auth', () => {
-    test.beforeEach(async ({ pages: { configPage } }) => {
-      const config = await configPage.getConfig();
-      test.skip(config.showReactApp.signInRoutes !== true);
+    test.beforeEach(async ({}) => {
       test.slow();
     });
 

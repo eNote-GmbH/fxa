@@ -16,7 +16,9 @@ export class SigninReactPage extends BaseLayout {
   }
 
   get authenticationCodeTextbox() {
-    return this.page.getByRole('textbox', { name: 'code' });
+    return this.page
+      .getByRole('textbox', { name: 'code' })
+      .or(this.page.getByPlaceholder('Enter 6-digit code'));
   }
 
   get authenticationCodeTextboxTooltip() {

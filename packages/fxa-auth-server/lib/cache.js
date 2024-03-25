@@ -4,108 +4,81 @@
 
 'use strict';
 
-const Memcached = require('memcached');
+const { RedisShared } = require('fxa-shared/db/redis');
+const { Container } = require('typedi');
+const { AuthLogger } = require('./types');
+const { StatsD } = require('hot-shots');
 
-const NOP = function () {
-  return arguments[arguments.length - 1]();
-};
-const NULL_CACHE = {
-  add: NOP,
-  del: NOP,
-  get: NOP,
-};
+function resolveLogger() {
+  if (Container.has(AuthLogger)) return Container.get(AuthLogger);
+}
+function resolveMetrics() {
+  if (Container.has(StatsD)) {
+    return Container.get(StatsD);
+  }
+}
 
-module.exports = (log, config, namespace) => {
-  let _cache;
+export class MetricsRedis extends RedisShared {
+  constructor(config) {
+    super(config.redis.metrics, resolveLogger(), resolveMetrics());
+    this.enabled = config.redis.metrics.enabled;
+    this.config = config;
+    this.prefix = config.redis.metrics.prefix;
+    this.lifetime = config.redis.metrics.lifetime;
+  }
 
-  const CACHE_ADDRESS = config.memcached.address;
-  const CACHE_IDLE = config.memcached.idle;
-  const CACHE_LIFETIME = config.memcached.lifetime;
+  /**
+   * Add data to the cache, keyed by a string.
+   * If the key already exists,
+   * the call will fail.
+   *
+   * Fails silently if the cache is not enabled.
+   *
+   * @param {string} key
+   * @param data
+   */
+  async add(key, data) {
+    if (!this.enabled) {
+      return;
+    }
 
-  return {
-    /**
-     * Add data to the cache, keyed by a string.
-     * If the key already exists,
-     * the call will fail.
-     *
-     * Fails silently if the cache is not enabled.
-     *
-     * @param {string} key
-     * @param data
-     */
-    async add(key, data) {
-      const cache = await getCache();
-      return await new Promise((resolve, reject) => {
-        cache.add(key, data, CACHE_LIFETIME, (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(result);
-        });
-      });
-    },
+    const result = await this.redis.exists(key);
+    if (result === 1) {
+      throw Error('Key already exists');
+    }
 
-    /**
-     * Delete data from the cache, keyed by a string.
-     *
-     * Fails silently if the cache is not enabled.
-     *
-     * @param {string} key
-     */
-    async del(key) {
-      const cache = await getCache();
-      return await new Promise((resolve, reject) => {
-        cache.del(key, (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(result);
-        });
-      });
-    },
+    // Set the value in redis. We use 'EX' to set the expiration time in seconds.
+    return this.redis.set(key, JSON.stringify(data), 'EX', this.lifetime);
+  }
 
-    /**
-     * Fetch data from the cache, keyed by a string.
-     *
-     * Fails silently if the cache is not enabled.
-     *
-     * @param {string} key
-     */
-    async get(key) {
-      const cache = await getCache();
-      return await new Promise((resolve, reject) => {
-        cache.get(key, (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(result);
-        });
-      });
-    },
-  };
+  /**
+   * Delete data from the cache, keyed by a string.
+   *
+   * Fails silently if the cache is not enabled.
+   *
+   * @param {string} key
+   */
+  async del(key) {
+    if (!this.enabled) {
+      return;
+    }
 
-  async function getCache() {
+    return this.redis.del(key);
+  }
+
+  /**
+   * Fetch data from the cache, keyed by a string.
+   *
+   * Fails silently if the cache is not enabled.
+   *
+   * @param {string} key
+   */
+  async get(key) {
     try {
-      if (_cache) {
-        return _cache;
-      }
-
-      if (CACHE_ADDRESS === 'none') {
-        _cache = NULL_CACHE;
-      } else {
-        _cache = new Memcached(CACHE_ADDRESS, {
-          timeout: 500,
-          retries: 1,
-          retry: 1000,
-          reconnect: 1000,
-          idle: CACHE_IDLE,
-          namespace,
-        });
-      }
-      return _cache;
+      const value = await this.redis.get(key);
+      return JSON.parse(value);
     } catch (err) {
-      log.error('cache.getCache', { err: err });
-      return NULL_CACHE;
+      return {};
     }
   }
-};
+}

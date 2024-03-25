@@ -11,7 +11,6 @@ import {
 } from '@fxa/payments/stripe';
 import { AccountDatabase } from '@fxa/shared/db/mysql/account';
 import { PayPalClient } from './paypal.client';
-import { PayPalClientError } from './paypal.error';
 import { BillingAgreement, BillingAgreementStatus } from './paypal.types';
 import { PaypalCustomerManager } from './paypalCustomer/paypalCustomer.manager';
 
@@ -25,21 +24,10 @@ export class PayPalManager {
   ) {}
 
   /**
-   * Cancel a billing agreement.
-   *
-   * Errors from PayPal canceling the agreement are ignored as they only occur
-   * if the agreement is no longer valid, isn't present anymore, etc. Other errors
-   * processing the request are not ignored.
-   *
+   * Cancels a billing agreement.
    */
   async cancelBillingAgreement(billingAgreementId: string): Promise<void> {
-    try {
-      await this.client.baUpdate({ billingAgreementId, cancel: true });
-    } catch (err) {
-      if (!PayPalClientError.hasPayPalNVPError(err)) {
-        throw err;
-      }
-    }
+    await this.client.baUpdate({ billingAgreementId, cancel: true });
   }
 
   /**

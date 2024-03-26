@@ -154,7 +154,6 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     { target, pages: { login }, emailOptions },
     use
   ): Promise<void> => {
-    //const emails = login.createEmail(emailOptions[0].prefix); // Generate email based on the prefix
     const emails = await Promise.all(
       emailOptions.map(async (emailOptions) =>
         login.createEmail(emailOptions.prefix)
@@ -164,11 +163,12 @@ export const test = base.extend<TestOptions, WorkerOptions>({
 
     // Pass the generated email to the test along with the password
     await use(emails);
-    await Promise.all(
-      emails.map(
-        async (emails) => await teardownEmail(target, emails, password)
-      )
-    );
+    for (const [index, email] of emails.entries()) {
+      const emailExists = await target.auth.accountStatusByEmail(email);
+      if (emailExists.exists) {
+        await teardownEmail(target, email, emailOptions[index].password);
+      }
+    }
   },
 });
 

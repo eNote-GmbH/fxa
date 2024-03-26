@@ -28,7 +28,8 @@ export async function createPaypalCustomer(
   return fetchPaypalCustomer(
     db,
     paypalCustomer.uid,
-    paypalCustomer.billingAgreementId
+    paypalCustomer.billingAgreementId,
+    paypalCustomer.status
   );
 }
 
@@ -40,12 +41,14 @@ export async function createPaypalCustomer(
 export async function fetchPaypalCustomer(
   db: AccountDatabase,
   uid: Buffer,
-  billingAgreementId: string
+  billingAgreementId: string,
+  status: string
 ) {
   return db
     .selectFrom('paypalCustomers')
     .where('uid', '=', uid)
     .where('billingAgreementId', '=', billingAgreementId)
+    .where('status', '=', status)
     .selectAll()
     .executeTakeFirstOrThrow();
 }

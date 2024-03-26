@@ -5,7 +5,10 @@
 import { Injectable } from '@nestjs/common';
 import { PayPalClient } from './paypal.client';
 import { PayPalManager } from './paypal.manager';
-import { CurrencyManager } from '@fxa/payments/currency';
+import {
+  CurrencyManager,
+  CurrencyCountryMismatch,
+} from '@fxa/payments/currency';
 
 @Injectable()
 export class PayPalService {
@@ -24,6 +27,8 @@ export class PayPalService {
     token: string;
     currency: string;
   }) {
+    const { uid, token, currency } = options;
+
     const billingAgreement = await this.paypalClient.createBillingAgreement(
       options
     );
@@ -34,13 +39,10 @@ export class PayPalService {
 
     const country = agreementDetails.countryCode;
 
-    // if (
-    //   !this.paypalHelper.currencyHelper.isCurrencyCompatibleWithCountry(
-    //     currency,
-    //     country
-    //   )
-    // ) {
-    //   throw error.currencyCountryMismatch(currency, country);
-    // }
+    if (
+      !this.currencyManager.isCurrencyCompatibleWithCountry(currency, country)
+    ) {
+      throw new CurrencyCountryMismatch(currency, country);
+    }
   }
 }

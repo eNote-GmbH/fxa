@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Injectable } from '@nestjs/common';
-import { Stripe } from 'stripe';
 
 import { StripeClient } from './stripe.client';
 import { STRIPE_MINIMUM_CHARGE_AMOUNTS } from './stripe.constants';
 import { CustomerDeletedError, SubscriptionStripeError } from './stripe.error';
+import { StripeCustomer } from './stripe.client.types';
 
 @Injectable()
 export class StripeManager {
@@ -63,15 +63,10 @@ export class StripeManager {
    * Creating a subscription with automatic_tax enabled requires a customer with an address
    * that is in a recognized location with an active tax registration.
    */
-  async isCustomerStripeTaxEligible(customer: Stripe.Customer) {
-    if (!customer.tax) {
-      // TODO: FXA-8891
-      throw new Error('customer.tax is not present');
-    }
-
+  async isCustomerStripeTaxEligible(customer: StripeCustomer) {
     return (
-      customer.tax?.automatic_tax === 'supported' ||
-      customer.tax?.automatic_tax === 'not_collecting'
+      customer.tax.automatic_tax === 'supported' ||
+      customer.tax.automatic_tax === 'not_collecting'
     );
   }
 }

@@ -40,7 +40,7 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     { scope: 'worker', auto: true },
   ],
 
-  emailOptions: [{ prefix: '', password: '' }], // Default options for the fixture
+  emailOptions: [{ prefix: '', password: 'passwordzxcv' }], // Default options for the fixture
 
   credentials: async ({ target }, use, testInfo) => {
     const email = EmailClient.emailFromTestTitle(testInfo.title);
@@ -156,33 +156,41 @@ export const test = base.extend<TestOptions, WorkerOptions>({
   ): Promise<void> => {
     //const emails = login.createEmail(emailOptions[0].prefix); // Generate email based on the prefix
     const emails = await Promise.all(
-      emailOptions.map(async (t) => login.createEmail(t.prefix))
+      emailOptions.map(async (emailOptions) =>
+        login.createEmail(emailOptions.prefix)
+      )
     );
     await login.clearCache(); // Clear cache for each email
 
     // Pass the generated email to the test along with the password
     await use(emails);
-
-    // Teardown
-    try {
-      if (!emails) {
-        return;
-      }
-      const creds = await target.auth.signIn(
-        emailOptions[0].prefix,
-        emailOptions[0].password
-      );
-      await target.auth.accountDestroy(
-        emailOptions[0].prefix,
-        emailOptions[0].password,
-        {},
-        creds.sessionToken
-      );
-    } catch (e) {
-      // ignore
-    }
+    await Promise.all(
+      emails.map(
+        async (emails) => await teardownEmail(target, emails, password)
+      )
+    );
   },
 });
+
+export async function teardownEmail(
+  target: BaseTarget,
+  email: string,
+  password: string
+) {
+  try {
+    const creds = await target.auth.signIn(email, password);
+    await target.auth.accountDestroy(email, password, {}, creds.sessionToken);
+  } catch (error) {
+    // If the account is not created during the execution of the test, which
+    // can happen if the test fails prematurly, an exception will be thrown
+    // during email cleanup
+    const ERROR = 'Bad Request';
+    const MESSAGE = 'Unknown account';
+    if (!(error.error === ERROR && error.message == MESSAGE)) {
+      throw error;
+    }
+  }
+}
 
 export async function newPages(browser: Browser, target: BaseTarget) {
   const context = await browser.newContext();

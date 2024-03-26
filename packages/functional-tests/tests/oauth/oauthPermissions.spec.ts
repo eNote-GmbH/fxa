@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { test, expect, password } from '../../lib/fixtures/standard';
-//const password = 'passwordzxcv';
 
 test.describe('severity-1 #smoke', () => {
   test.describe('oauth permissions for trusted reliers - sign up', () => {

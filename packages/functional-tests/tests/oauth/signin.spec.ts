@@ -2,11 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect } from '../../lib/fixtures/standard';
+import { test, expect, password } from '../../lib/fixtures/standard';
 
 let email = '';
 const AGE_21 = '21';
-const PASSWORD = 'passwordzxcv';
 
 test.describe('severity-1 #smoke', () => {
   test.describe('OAuth signin', () => {
@@ -86,14 +85,14 @@ test.describe('severity-1 #smoke', () => {
     }) => {
       // Create unverified account via backend
       email = login.createEmail();
-      await target.auth.signUp(email, PASSWORD, {
+      await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'false',
       });
 
       await relier.goto();
       await relier.clickEmailFirst();
-      await login.login(email, PASSWORD);
+      await login.login(email, password);
 
       // User is shown confirm email page
       await login.fillOutSignInCode(email);
@@ -164,10 +163,10 @@ test.describe('severity-1 #smoke', () => {
 
       if (config.showReactApp.signUpRoutes !== true) {
         // Dont register account and attempt to login via relier
-        await login.fillOutFirstSignUp(email, PASSWORD, { verify: false });
+        await login.fillOutFirstSignUp(email, password, { verify: false });
       } else {
         await signupReact.fillOutEmailForm(email);
-        await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+        await signupReact.fillOutSignupForm(password, AGE_21);
       }
 
       // go back to the OAuth app, the /oauth flow should
@@ -182,11 +181,11 @@ test.describe('severity-1 #smoke', () => {
 
     test('verified, blocked', async ({ target, pages: { login, relier } }) => {
       const blockedEmail = login.createEmail('blocked{id}');
-      await target.createAccount(blockedEmail, PASSWORD);
+      await target.createAccount(blockedEmail, password);
 
       await relier.goto();
       await relier.clickEmailFirst();
-      await login.login(blockedEmail, PASSWORD);
+      await login.login(blockedEmail, password);
 
       await login.unblock(blockedEmail);
       expect(await relier.isLoggedIn()).toBe(true);
@@ -197,7 +196,7 @@ test.describe('severity-1 #smoke', () => {
       pages: { login, relier },
     }) => {
       const blockedEmail = login.createEmail('blocked{id}');
-      await target.createAccount(blockedEmail, PASSWORD);
+      await target.createAccount(blockedEmail, password);
 
       await relier.goto();
       await relier.clickEmailFirst();

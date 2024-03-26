@@ -13,10 +13,19 @@ const DEBUG = !!process.env.DEBUG;
 export { expect };
 export type POMS = ReturnType<typeof createPages>;
 
+type EmailFixtureOptions = {
+  prefix: string; // Prefix for the email address
+  password: string; // Password for the email address
+};
+
+export const password = 'passwordzxcv';
+
 export type TestOptions = {
   pages: POMS;
   syncBrowserPages: POMS;
   credentials: Credentials;
+  emailOptions: EmailFixtureOptions[];
+  emails: string[];
 };
 export type WorkerOptions = { targetName: TargetName; target: ServerTarget };
 
@@ -30,6 +39,8 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     },
     { scope: 'worker', auto: true },
   ],
+
+  emailOptions: [{ prefix: '', password: '' }], // Default options for the fixture
 
   credentials: async ({ target }, use, testInfo) => {
     const email = EmailClient.emailFromTestTitle(testInfo.title);
@@ -137,6 +148,39 @@ export const test = base.extend<TestOptions, WorkerOptions>({
         },
       ],
     });
+  },
+
+  emails: async (
+    { target, pages: { login }, emailOptions },
+    use
+  ): Promise<void> => {
+    //const emails = login.createEmail(emailOptions[0].prefix); // Generate email based on the prefix
+    const emails = await Promise.all(
+      emailOptions.map(async (t) => login.createEmail(t.prefix))
+    );
+    await login.clearCache(); // Clear cache for each email
+
+    // Pass the generated email to the test along with the password
+    await use(emails);
+
+    // Teardown
+    try {
+      if (!emails) {
+        return;
+      }
+      const creds = await target.auth.signIn(
+        emailOptions[0].prefix,
+        emailOptions[0].password
+      );
+      await target.auth.accountDestroy(
+        emailOptions[0].prefix,
+        emailOptions[0].password,
+        {},
+        creds.sessionToken
+      );
+    } catch (e) {
+      // ignore
+    }
   },
 });
 

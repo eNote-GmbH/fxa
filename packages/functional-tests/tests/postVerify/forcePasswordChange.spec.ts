@@ -2,42 +2,33 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect } from '../../lib/fixtures/standard';
-let email;
-const password = 'password';
+import { test, expect, password } from '../../lib/fixtures/standard';
+
 const newPassword = 'new_password';
 let emailUserCreds;
 
 test.describe('severity-2 #smoke', () => {
   test.describe('post verify - force password change', () => {
-    test.beforeEach(async ({ target, pages: { login } }) => {
+    test.use({
+      emailOptions: [
+        { prefix: 'forcepwdchange{id}', password: 'passwordzxcv' },
+      ],
+    });
+    test.beforeEach(async ({ emails, target, pages: { login } }) => {
       test.slow();
-      email = login.createEmail('forcepwdchange{id}');
+      const [email] = emails;
       emailUserCreds = await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'true',
       });
-      await login.clearCache();
-    });
-
-    test.afterEach(async ({ target }) => {
-      // Cleanup any accounts created during the test
-      try {
-        await target.auth.accountDestroy(
-          email,
-          newPassword,
-          {},
-          emailUserCreds.sessionToken
-        );
-      } catch (e) {
-        // ignore
-      }
     });
 
     test('navigate to page directly and can change password', async ({
+      emails,
       target,
       pages: { page, login, postVerify },
     }) => {
+      const [email] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
@@ -56,8 +47,10 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('force change password on login - oauth', async ({
+      emails,
       pages: { login, postVerify, relier },
     }) => {
+      const [email] = emails;
       await relier.goto();
       await relier.clickEmailFirst();
       await login.fillOutEmailFirstSignIn(email, password);

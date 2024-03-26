@@ -3,9 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
-import { expect, test } from '../../lib/fixtures/standard';
+import { expect, test, password } from '../../lib/fixtures/standard';
 
-const firstPassword = 'password';
 const secondPassword = 'new_password';
 let email;
 
@@ -13,14 +12,18 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('severity-2 #smoke', () => {
   test.describe('Firefox Desktop Sync v3 settings', () => {
+    test.use({
+      emailOptions: [{ prefix: 'sync{id}', password: 'passwordzxcv' }],
+    });
     test.beforeEach(
       async ({
+        emails,
         target,
         syncBrowserPages: { login, connectAnotherDevice, page },
       }) => {
+        const [email] = emails;
         test.slow();
-        email = login.createEmail('sync{id}');
-        await target.auth.signUp(email, firstPassword, {
+        await target.auth.signUp(email, password, {
           lang: 'en',
           preVerified: 'true',
         });
@@ -34,7 +37,7 @@ test.describe('severity-2 #smoke', () => {
           `${target.contentServerUrl}?context=fx_desktop_v3&service=sync&action=email`
         );
         await login.respondToWebChannelMessage(customEventDetail);
-        await login.fillOutEmailFirstSignIn(email, firstPassword);
+        await login.fillOutEmailFirstSignIn(email, password);
         expect(login.signInCodeHeader()).toBeVisible();
 
         await login.checkWebChannelMessage(FirefoxCommand.LinkAccount);
@@ -44,22 +47,12 @@ test.describe('severity-2 #smoke', () => {
       }
     );
 
-    test.afterEach(async ({ target }) => {
-      if (email) {
-        const creds = await target.auth.signIn(email, secondPassword);
-        await target.auth.accountDestroy(
-          email,
-          secondPassword,
-          {},
-          creds.sessionToken
-        );
-      }
-    });
-
     test('sign in, change the password', async ({
+      emails,
       target,
       syncBrowserPages: { changePassword, settings, page },
     }) => {
+      const [email] = emails;
       //Goto settings sync url
       await page.goto(
         `${target.contentServerUrl}/settings?context=fx_desktop_v3&service=sync`
@@ -67,7 +60,7 @@ test.describe('severity-2 #smoke', () => {
 
       //Change password
       await settings.password.clickChange();
-      await changePassword.fillOutChangePassword(firstPassword, secondPassword);
+      await changePassword.fillOutChangePassword(password, secondPassword);
       await changePassword.submit();
 
       //Verify success message
@@ -77,15 +70,17 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('sign in, change the password by browsing directly to settings', async ({
+      emails,
       syncBrowserPages: { login, changePassword, settings },
     }) => {
+      const [email] = emails;
       //Goto settings non-sync url
       await settings.goto();
 
       //Change password
       await settings.password.clickChange();
       await login.noSuchWebChannelMessage(FirefoxCommand.ChangePassword);
-      await changePassword.fillOutChangePassword(firstPassword, secondPassword);
+      await changePassword.fillOutChangePassword(password, secondPassword);
       await changePassword.submit();
 
       //Verify success message
@@ -96,20 +91,25 @@ test.describe('severity-2 #smoke', () => {
   });
 
   test.describe('Firefox Desktop Sync v3 settings - delete account', () => {
+    test.use({
+      emailOptions: [{ prefix: 'sync{id}', password: 'passwordzxcv' }],
+    });
+
     test('sign in, delete the account', async ({
+      emails,
       target,
       syncBrowserPages: { login, settings, deleteAccount, page },
     }) => {
+      const [email] = emails;
       test.slow();
-      email = login.createEmail('sync{id}');
-      await target.auth.signUp(email, firstPassword, {
+      await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'true',
       });
       await page.goto(
         `${target.contentServerUrl}?context=fx_desktop_v3&service=sync&action=email`
       );
-      await login.fillOutEmailFirstSignIn(email, firstPassword);
+      await login.fillOutEmailFirstSignIn(email, password);
       await login.fillOutSignInCode(email);
 
       //Go to setting page
@@ -122,7 +122,7 @@ test.describe('severity-2 #smoke', () => {
       await deleteAccount.clickContinue();
 
       //Enter password
-      await deleteAccount.setPassword(firstPassword);
+      await deleteAccount.setPassword(password);
       await deleteAccount.submit();
 
       const success = await page.waitForSelector('.success');

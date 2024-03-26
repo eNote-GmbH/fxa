@@ -4,6 +4,8 @@
 
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
 import { expect, test as base } from '../../lib/fixtures/standard';
+import { password } from '../../lib/fixtures/standard';
+
 import {
   syncDesktopV3QueryParams,
   syncMobileOAuthQueryParams,
@@ -11,7 +13,6 @@ import {
 
 const AGE_12 = '12';
 const AGE_21 = '21';
-const PASSWORD = 'passwordzxcv';
 
 const eventDetailLinkAccount = createCustomEventDetail(
   FirefoxCommand.LinkAccount,
@@ -28,8 +29,8 @@ export const test = base.extend({
     await use(email);
 
     try {
-      const creds = await target.auth.signIn(email, PASSWORD);
-      await target.auth.accountDestroy(email, PASSWORD, {}, creds.sessionToken);
+      const creds = await target.auth.signIn(email, password);
+      await target.auth.accountDestroy(email, password, {}, creds.sessionToken);
     } catch (error) {
       // If the account is not created during the execution of the test, which
       // can happen if the test fails prematurly, an exception will be thrown
@@ -64,7 +65,7 @@ test.describe('severity-1 #smoke', () => {
       await signupReact.fillOutEmailForm(email);
       await signupReact.waitForRoot();
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+      await signupReact.fillOutSignupForm(password, AGE_21);
 
       await signupReact.fillOutCodeForm(email);
 
@@ -92,7 +93,7 @@ test.describe('severity-1 #smoke', () => {
 
       await signupReact.fillOutEmailForm(email);
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+      await signupReact.fillOutSignupForm(password, AGE_21);
 
       await signupReact.fillOutCodeForm(email);
 
@@ -123,7 +124,7 @@ test.describe('severity-1 #smoke', () => {
 
       await signupReact.fillOutEmailForm(email);
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+      await signupReact.fillOutSignupForm(password, AGE_21);
 
       await signupReact.fillOutCodeForm(email);
       // redirectUri should have fallen back to the clientInfo config redirect URI
@@ -172,7 +173,7 @@ test.describe('severity-1 #smoke', () => {
       await expect(login.CWTSEngineCreditCards).toBeHidden();
       await expect(login.CWTSEngineAddresses).toBeHidden();
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+      await signupReact.fillOutSignupForm(password, AGE_21);
 
       await signupReact.fillOutCodeForm(email);
       await page.waitForURL(/connect_another_device/);
@@ -210,7 +211,7 @@ test.describe('severity-1 #smoke', () => {
       await expect(login.CWTSEngineCreditCards).toBeVisible();
       await expect(login.CWTSEngineAddresses).toBeHidden();
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+      await signupReact.fillOutSignupForm(password, AGE_21);
 
       await login.checkWebChannelMessage(FirefoxCommand.Login);
 
@@ -257,7 +258,7 @@ test.describe('severity-2 #smoke', () => {
 
       await signupReact.fillOutEmailForm(email);
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_12);
+      await signupReact.fillOutSignupForm(password, AGE_12);
 
       await expect(page).toHaveURL(/cannot_create_account/);
       await expect(signupReact.cannotCreateAccountHeading).toBeVisible();
@@ -286,7 +287,7 @@ test.describe('severity-2 #smoke', () => {
 
       await signupReact.fillOutEmailForm(email);
 
-      await signupReact.fillOutSignupForm(PASSWORD, AGE_21);
+      await signupReact.fillOutSignupForm(password, AGE_21);
 
       await signupReact.fillOutCodeForm(email);
       /*

@@ -11,7 +11,7 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('fxa_status web channel message in Settings', () => {
   test.use({
-    emailOptions: [{ password: '' }, { password: '' }],
+    emailOptions: [{ password }, { password }],
   });
   test.beforeEach(
     async ({

@@ -8,6 +8,9 @@ let email;
 
 test.describe('severity-1 #smoke', () => {
   test.describe('Sign up with code', () => {
+    test.use({
+      emailOptions: [{ password }],
+    });
     test.beforeEach(async ({ pages: { configPage, login } }) => {
       const config = await configPage.getConfig();
       test.skip(
@@ -15,16 +18,16 @@ test.describe('severity-1 #smoke', () => {
         'these tests are specific to backbone, skip if serving React version'
       );
       test.slow();
-      email = login.createEmail();
-      await login.clearCache();
     });
 
     test('bounced email', async ({
+      emails,
       credentials,
       target,
       page,
       pages: { login },
     }) => {
+      const [email] = emails;
       const client = await login.getFxaClient(target);
       await page.goto(target.contentServerUrl);
       await login.fillOutFirstSignUp(email, password);
@@ -39,10 +42,12 @@ test.describe('severity-1 #smoke', () => {
     });
 
     test('valid code then click back', async ({
+      emails,
       target,
       page,
       pages: { login },
     }) => {
+      const [email] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
@@ -54,10 +59,12 @@ test.describe('severity-1 #smoke', () => {
     });
 
     test('invalid code', async ({
+      emails,
       target,
       page,
       pages: { login, signinTokenCode },
     }) => {
+      const [email] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });

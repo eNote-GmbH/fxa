@@ -11,7 +11,7 @@ test.describe.configure({ mode: 'parallel' });
 test.describe('severity-2 #smoke', () => {
   test.describe('Firefox desktop user info handshake', () => {
     test.use({
-      emailOptions: [{ password: '' }, { prefix: 'sync{id}', password: '' }],
+      emailOptions: [{ password }, { prefix: 'sync{id}', password }],
     });
     test.beforeEach(async ({ emails, target, syncBrowserPages: { login } }) => {
       test.slow();

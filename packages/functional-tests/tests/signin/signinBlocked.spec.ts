@@ -8,10 +8,10 @@ test.describe('severity-2 #smoke', () => {
   test.describe('signin blocked', () => {
     test.use({
       emailOptions: [
-        { password: '' },
-        { prefix: 'blocked{id}', password: '' },
-        { prefix: 'blocked{id}', password: '' },
-        { prefix: 'blocked{id}', password: '' },
+        { password },
+        { prefix: 'blocked{id}', password },
+        { prefix: 'blocked{id}', password },
+        { prefix: 'blocked{id}', password },
       ],
     });
 

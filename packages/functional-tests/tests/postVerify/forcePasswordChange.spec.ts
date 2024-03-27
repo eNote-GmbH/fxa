@@ -17,7 +17,7 @@ test.describe('severity-2 #smoke', () => {
       emailOptions: [
         {
           prefix: 'forcepwdchange{id}',
-          password: '',
+          password,
           newPassword: 'new_password',
         },
       ],

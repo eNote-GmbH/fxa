@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { expect, test } from '../../lib/fixtures/standard';
+import { expect, test, password } from '../../lib/fixtures/standard';
 
-const PASSWORD = 'passwordzxcv';
 let email;
 
 test.describe.configure({ mode: 'parallel' });
@@ -48,7 +47,7 @@ test.describe('Firefox Desktop Sync v3 email first', () => {
     target,
     syncBrowserPages: { page, login },
   }) => {
-    await target.auth.signUp(email, PASSWORD, {
+    await target.auth.signUp(email, password, {
       lang: 'en',
       preVerified: 'true',
     });

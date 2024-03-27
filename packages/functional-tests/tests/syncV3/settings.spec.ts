@@ -3,9 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
-import { expect, test, password } from '../../lib/fixtures/standard';
+import {
+  expect,
+  test,
+  password,
+  newPassword,
+} from '../../lib/fixtures/standard';
 
-const secondPassword = 'new_password';
 let email;
 
 test.describe.configure({ mode: 'parallel' });
@@ -13,7 +17,9 @@ test.describe.configure({ mode: 'parallel' });
 test.describe('severity-2 #smoke', () => {
   test.describe('Firefox Desktop Sync v3 settings', () => {
     test.use({
-      emailOptions: [{ prefix: 'sync{id}', password: 'passwordzxcv' }],
+      emailOptions: [
+        { prefix: 'sync{id}', password: 'passwordzxcv', newPassword },
+      ],
     });
     test.beforeEach(
       async ({
@@ -60,7 +66,7 @@ test.describe('severity-2 #smoke', () => {
 
       //Change password
       await settings.password.clickChange();
-      await changePassword.fillOutChangePassword(password, secondPassword);
+      await changePassword.fillOutChangePassword(password, newPassword);
       await changePassword.submit();
 
       //Verify success message
@@ -80,7 +86,7 @@ test.describe('severity-2 #smoke', () => {
       //Change password
       await settings.password.clickChange();
       await login.noSuchWebChannelMessage(FirefoxCommand.ChangePassword);
-      await changePassword.fillOutChangePassword(password, secondPassword);
+      await changePassword.fillOutChangePassword(password, newPassword);
       await changePassword.submit();
 
       //Verify success message

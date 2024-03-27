@@ -2,16 +2,24 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect, password } from '../../lib/fixtures/standard';
+import {
+  test,
+  expect,
+  password,
+  newPassword,
+} from '../../lib/fixtures/standard';
 
-const newPassword = 'new_password';
 let emailUserCreds;
 
 test.describe('severity-2 #smoke', () => {
   test.describe('post verify - force password change', () => {
     test.use({
       emailOptions: [
-        { prefix: 'forcepwdchange{id}', password: 'passwordzxcv' },
+        {
+          prefix: 'forcepwdchange{id}',
+          password: 'passwordzxcv',
+          newPassword: 'new_password',
+        },
       ],
     });
     test.beforeEach(async ({ emails, target, pages: { login } }) => {

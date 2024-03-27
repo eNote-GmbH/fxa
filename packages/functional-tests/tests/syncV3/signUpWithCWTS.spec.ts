@@ -3,10 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
-import { expect, test } from '../../lib/fixtures/standard';
+import { expect, test, password } from '../../lib/fixtures/standard';
 import uaStrings from '../../lib/ua-strings';
 
-const password = 'passwordzxcv';
 let email;
 
 test.describe.configure({ mode: 'parallel' });

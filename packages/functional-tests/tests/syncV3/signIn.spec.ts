@@ -3,9 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { EmailHeader, EmailType } from '../../lib/email';
-import { expect, test } from '../../lib/fixtures/standard';
+import { expect, test, password } from '../../lib/fixtures/standard';
 
-const password = 'passwordzxcv';
 let email;
 
 test.describe.configure({ mode: 'parallel' });

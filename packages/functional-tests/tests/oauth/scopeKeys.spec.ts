@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect } from '../../lib/fixtures/standard';
+import { test, expect, password } from '../../lib/fixtures/standard';
 
-const PASSWORD = 'passwordzxcv';
 const CODE_CHALLENGE = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';
 const CODE_CHALLENGE_METHOD = 'S256';
 
@@ -15,7 +14,7 @@ test.describe('OAuth scopeKeys', () => {
     pages: { login },
   }) => {
     const email = login.createEmail('sync{id}');
-    await target.createAccount(email, PASSWORD);
+    await target.createAccount(email, password);
 
     const query = new URLSearchParams({
       client_id: '7f368c6886429f19', // eslint-disable-line camelcase
@@ -35,7 +34,7 @@ test.describe('OAuth scopeKeys', () => {
 
     await page.goto(target.contentServerUrl + `/?${query.toString()}`);
 
-    await login.login(email, PASSWORD);
+    await login.login(email, password);
     await login.fillOutSignInCode(email);
 
     expect(await login.notesHeader()).toBe(true);

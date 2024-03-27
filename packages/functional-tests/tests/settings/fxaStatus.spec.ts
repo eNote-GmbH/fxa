@@ -2,10 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { expect, test } from '../../lib/fixtures/standard';
+import { expect, test, password } from '../../lib/fixtures/standard';
 import { oauthWebchannelV1 } from '../../lib/query-params';
 
-const password = 'passwordzxcv';
 let browserEmail: string;
 let otherEmail: string;
 let skipTest = false;
@@ -45,8 +44,18 @@ test.describe('fxa_status web channel message in Settings', () => {
       // Cleanup any accounts created during the test
       const credsBrowser = await target.auth.signIn(browserEmail, password);
       const credsEmail = await target.auth.signIn(otherEmail, password);
-      await target.auth.accountDestroy(browserEmail, password, {}, credsBrowser.sessionToken);
-      await target.auth.accountDestroy(otherEmail, password, {}, credsEmail.sessionToken);
+      await target.auth.accountDestroy(
+        browserEmail,
+        password,
+        {},
+        credsBrowser.sessionToken
+      );
+      await target.auth.accountDestroy(
+        otherEmail,
+        password,
+        {},
+        credsEmail.sessionToken
+      );
     }
   });
 

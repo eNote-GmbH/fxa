@@ -2,9 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect } from '../../lib/fixtures/standard';
-
-const PASSWORD = 'passwordzxcv';
+import { test, expect, password } from '../../lib/fixtures/standard';
 
 test.describe('severity-2 #smoke', () => {
   test.describe('OAuth `login_hint` and `email` param', () => {
@@ -76,15 +74,15 @@ test.describe('severity-2 #smoke', () => {
       pages: { login, relier },
     }) => {
       const email = login.createEmail();
-      await target.createAccount(email, PASSWORD);
+      await target.createAccount(email, password);
 
       const loginHintEmail = login.createEmail();
-      await target.createAccount(loginHintEmail, PASSWORD);
+      await target.createAccount(loginHintEmail, password);
 
       // Create a cached login
       await relier.goto();
       await relier.clickEmailFirst();
-      await login.login(email, PASSWORD);
+      await login.login(email, password);
       expect(await relier.isLoggedIn()).toBe(true);
       await relier.signOut();
 

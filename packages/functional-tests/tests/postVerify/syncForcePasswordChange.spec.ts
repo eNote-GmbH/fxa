@@ -10,7 +10,7 @@ test.describe('severity-2 #smoke', () => {
   test.describe('post verify - force password change sync', () => {
     test.use({
       emailOptions: [
-        { prefix: 'forcepwdchange{id}', password: 'passwordzxcv' },
+        { prefix: 'forcepwdchange{id}', password: 'passwordzxcv', newPassword },
       ],
     });
     test.beforeEach(async ({ emails, target, syncBrowserPages: { login } }) => {

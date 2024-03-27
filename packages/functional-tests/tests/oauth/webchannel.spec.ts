@@ -3,9 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { FirefoxCommand, createCustomEventDetail } from '../../lib/channels';
-import { test, expect } from '../../lib/fixtures/standard';
-
-const PASSWORD = 'Password123!';
+import { test, expect, password } from '../../lib/fixtures/standard';
 
 test.describe('severity-1 #smoke', () => {
   test.describe('oauth webchannel', () => {
@@ -45,7 +43,7 @@ test.describe('severity-1 #smoke', () => {
       await expect(login.CWTSEngineBookmarks).toBeVisible();
       await expect(login.CWTSEngineHistory).toBeVisible();
 
-      await login.fillOutFirstSignUp(email, PASSWORD, {
+      await login.fillOutFirstSignUp(email, password, {
         enterEmail: false,
         waitForNavOnSubmit: false,
       });

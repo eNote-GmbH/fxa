@@ -114,7 +114,6 @@ test.describe('severity-1 #smoke', () => {
 
       // Create unverified account
       email = login.createEmail();
-      const password = 'passwordzxcv';
 
       await relier.goto();
       await relier.clickEmailFirst();

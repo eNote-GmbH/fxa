@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { test, expect } from '../../lib/fixtures/standard';
+import { test, expect, password } from '../../lib/fixtures/standard';
 
-const PASSWORD = 'passwordzxcv';
 let email;
 
 test.describe('severity-1 #smoke', () => {
@@ -20,12 +19,22 @@ test.describe('severity-1 #smoke', () => {
       await login.clearCache();
     });
 
-    test('bounced email', async ({ target, page, pages: { login } }) => {
+    test('bounced email', async ({
+      credentials,
+      target,
+      page,
+      pages: { login },
+    }) => {
       const client = await login.getFxaClient(target);
       await page.goto(target.contentServerUrl);
-      await login.fillOutFirstSignUp(email, PASSWORD);
+      await login.fillOutFirstSignUp(email, password);
 
-      await client.accountDestroy(email, PASSWORD);
+      await target.auth.accountDestroy(
+        email,
+        password,
+        {},
+        credentials.sessionToken
+      );
       await login.waitForPasswordHeader();
     });
 
@@ -37,7 +46,7 @@ test.describe('severity-1 #smoke', () => {
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
-      await login.fillOutFirstSignUp(email, PASSWORD, {
+      await login.fillOutFirstSignUp(email, password, {
         waitForNavOnSubmit: false,
       });
       await page.goBack({ waitUntil: 'load' });
@@ -52,7 +61,7 @@ test.describe('severity-1 #smoke', () => {
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
-      await login.fillOutFirstSignUp(email, PASSWORD, { verify: false });
+      await login.fillOutFirstSignUp(email, password, { verify: false });
       await login.setCode('1234');
       await signinTokenCode.clickSubmitButton();
       expect(await login.getTooltipError()).toContain(

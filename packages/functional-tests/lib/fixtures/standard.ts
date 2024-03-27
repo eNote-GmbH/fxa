@@ -16,9 +16,11 @@ export type POMS = ReturnType<typeof createPages>;
 type EmailFixtureOptions = {
   prefix: string; // Prefix for the email address
   password: string; // Password for the email address
+  newPassword?: string;
 };
 
 export const password = 'passwordzxcv';
+export const newPassword = 'new_password';
 
 export type TestOptions = {
   pages: POMS;
@@ -40,7 +42,7 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     { scope: 'worker', auto: true },
   ],
 
-  emailOptions: [{ prefix: '', password: 'passwordzxcv' }], // Default options for the fixture
+  emailOptions: [{ prefix: '', password: '' }], // Default options for the fixture
 
   credentials: async ({ target }, use, testInfo) => {
     const email = EmailClient.emailFromTestTitle(testInfo.title);
@@ -166,7 +168,8 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     for (const [index, email] of emails.entries()) {
       const emailExists = await target.auth.accountStatusByEmail(email);
       if (emailExists.exists) {
-        await teardownEmail(target, email, emailOptions[index].password);
+        const x = emailOptions[index];
+        await teardownEmail(target, email, x.newPassword ?? x.password);
       }
     }
   },

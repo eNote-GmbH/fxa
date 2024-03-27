@@ -7,10 +7,7 @@ import { expect, test, password } from '../../lib/fixtures/standard';
 test.describe('severity-2 #smoke', () => {
   test.describe('sync signin cached', () => {
     test.use({
-      emailOptions: [
-        { prefix: '', password: 'passwordzxcv' },
-        { prefix: 'sync{id}', password: 'passwordzxcv' },
-      ],
+      emailOptions: [{ password: '' }, { prefix: 'sync{id}', password: '' }],
     });
     test.beforeEach(async ({ emails, target, syncBrowserPages: { login } }) => {
       test.slow(); //This test has steps for email rendering that runs slow on stage

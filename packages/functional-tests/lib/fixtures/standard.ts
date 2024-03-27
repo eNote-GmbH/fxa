@@ -14,7 +14,7 @@ export { expect };
 export type POMS = ReturnType<typeof createPages>;
 
 type EmailFixtureOptions = {
-  prefix: string; // Prefix for the email address
+  prefix?: string; // Prefix for the email address
   password: string; // Password for the email address
   newPassword?: string;
 };
@@ -42,7 +42,7 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     { scope: 'worker', auto: true },
   ],
 
-  emailOptions: [{ prefix: '', password: '' }], // Default options for the fixture
+  emailOptions: [{ password: '' }], // Default options for the fixture
 
   credentials: async ({ target }, use, testInfo) => {
     const email = EmailClient.emailFromTestTitle(testInfo.title);

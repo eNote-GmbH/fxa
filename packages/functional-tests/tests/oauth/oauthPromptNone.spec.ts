@@ -7,7 +7,7 @@ import { test, expect, password } from '../../lib/fixtures/standard';
 test.describe('severity-1 #smoke', () => {
   test.describe('oauth prompt none', () => {
     test.use({
-      emailOptions: [{ prefix: '', password: 'passwordzxcv' }],
+      emailOptions: [{ password: '' }],
     });
     test.beforeEach(async ({ pages: { login } }, { project }) => {
       test.slow();
@@ -158,7 +158,7 @@ test.describe('severity-1 #smoke', () => {
 
   test.describe('oauth prompt none with emails', () => {
     test.use({
-      emailOptions: [{ prefix: '', password: 'passwordzxcv' }],
+      emailOptions: [{ password: '' }],
     });
     test.beforeEach(async ({ pages: { login } }, { project }) => {
       test.slow();

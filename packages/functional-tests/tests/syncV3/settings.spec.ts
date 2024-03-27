@@ -10,16 +10,12 @@ import {
   newPassword,
 } from '../../lib/fixtures/standard';
 
-let email;
-
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('severity-2 #smoke', () => {
   test.describe('Firefox Desktop Sync v3 settings', () => {
     test.use({
-      emailOptions: [
-        { prefix: 'sync{id}', password: 'passwordzxcv', newPassword },
-      ],
+      emailOptions: [{ prefix: 'sync{id}', password: '', newPassword }],
     });
     test.beforeEach(
       async ({
@@ -98,7 +94,7 @@ test.describe('severity-2 #smoke', () => {
 
   test.describe('Firefox Desktop Sync v3 settings - delete account', () => {
     test.use({
-      emailOptions: [{ prefix: 'sync{id}', password: 'passwordzxcv' }],
+      emailOptions: [{ prefix: 'sync{id}', password: '' }],
     });
 
     test('sign in, delete the account', async ({

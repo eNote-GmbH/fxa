@@ -7,10 +7,7 @@ import { test, expect, password } from '../../lib/fixtures/standard';
 test.describe('severity-1 #smoke', () => {
   test.describe('Oauth sign up', () => {
     test.use({
-      emailOptions: [
-        { prefix: '', password: 'passwordzxcv' },
-        { prefix: 'bounced{id}', password: 'passwordzxcv' },
-      ],
+      emailOptions: [{ password: '' }, { prefix: 'bounced{id}', password: '' }],
     });
     test.beforeEach(async ({ pages: { configPage, login } }) => {
       const config = await configPage.getConfig();

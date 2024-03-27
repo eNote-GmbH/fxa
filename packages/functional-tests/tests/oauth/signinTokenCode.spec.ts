@@ -8,7 +8,7 @@ import { test, expect, password } from '../../lib/fixtures/standard';
 test.describe('severity-2 #smoke', () => {
   test.describe('OAuth signin token code', () => {
     test.use({
-      emailOptions: [{ prefix: 'sync{id}', password: 'passwordzxcv' }],
+      emailOptions: [{ prefix: 'sync{id}', password: '' }],
     });
     function toQueryString(obj) {
       return Object.entries(obj)

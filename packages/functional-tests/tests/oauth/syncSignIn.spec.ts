@@ -19,10 +19,7 @@ test.describe('severity-1 #smoke', () => {
 
   test.describe('signin with OAuth after Sync', () => {
     test.use({
-      emailOptions: [
-        { prefix: '', password: 'passwordzxcv' },
-        { prefix: 'sync{id}', password: 'passwordzxcv' },
-      ],
+      emailOptions: [{ password: '' }, { prefix: 'sync{id}', password: '' }],
     });
     test('signin to OAuth with Sync creds', async ({
       emails,
@@ -74,7 +71,7 @@ test.describe('severity-1 #smoke', () => {
 
   test.describe('signin to Sync after OAuth', () => {
     test.use({
-      emailOptions: [{ prefix: 'sync{id}', password: 'passwordzxcv' }],
+      emailOptions: [{ prefix: 'sync{id}', password: '' }],
     });
     test('email-first Sync signin', async ({
       emails,

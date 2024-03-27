@@ -1,10 +1,13 @@
 import { PurchaseDetails, TermsAndPrivacy } from '@fxa/payments/ui/server';
-import { getCartData, getContentfulContent } from '../../../../_lib/apiClient';
+import {
+  getCartData,
+  getContentfulContent,
+} from '../../../../../../_lib/apiClient';
 import { headers } from 'next/headers';
 import Image from 'next/image';
-import checkLogo from '../../../../../images/check.svg';
-import circledConfirm from '../../../../../images/circled-confirm.svg';
-import { formatPlanPricing } from '../../../../../../../../libs/payments/ui/src/lib/utils/helpers';
+import checkLogo from '../../../../../../../images/check.svg';
+import circledConfirm from '../../../../../../../images/circled-confirm.svg';
+import { formatPlanPricing } from '@fxa/payments/ui';
 import {
   getBundle,
   getFormattedMsg,
@@ -13,7 +16,7 @@ import {
   getLocalizedDate,
   getLocalizedDateString,
 } from '@fxa/shared/l10n';
-import { CheckoutSearchParams } from '../../layout';
+import { CheckoutSearchParams } from '../../../layout';
 // import { app } from '../../_nestapp/app';
 
 export const dynamic = 'force-dynamic';

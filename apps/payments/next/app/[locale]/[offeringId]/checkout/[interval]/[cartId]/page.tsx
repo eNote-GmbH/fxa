@@ -1,9 +1,12 @@
 import { PurchaseDetails, TermsAndPrivacy } from '@fxa/payments/ui/server';
-import { getCartData, getContentfulContent } from '../../../_lib/apiClient';
+import {
+  getCartData,
+  getContentfulContent,
+} from '../../../../../_lib/apiClient';
 import { app } from '@fxa/payments/ui/server';
 import { headers } from 'next/headers';
 import { getLocaleFromRequest } from '@fxa/shared/l10n';
-import { CheckoutSearchParams } from '../layout';
+import { CheckoutSearchParams } from '../../layout';
 import { auth, signIn, signOut } from 'apps/payments/next/auth';
 
 export const dynamic = 'force-dynamic';

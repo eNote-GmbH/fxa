@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { PurchaseDetails, TermsAndPrivacy } from '@fxa/payments/ui/server';
 import { getBundle, getLocaleFromRequest } from '@fxa/shared/l10n';
 
-import { getCartData, getContentfulContent } from '../../../../_lib/apiClient';
-import checkLogo from '../../../../../images/check.svg';
-import errorIcon from '../../../../../images/error.svg';
-import { CheckoutSearchParams } from '../../layout';
+import {
+  getCartData,
+  getContentfulContent,
+} from '../../../../../../_lib/apiClient';
+import checkLogo from '../../../../../../../images/check.svg';
+import errorIcon from '../../../../../../../images/error.svg';
+import { CheckoutSearchParams } from '../../../layout';
 // import { app } from '../../_nestapp/app';
 
 // forces dynamic rendering

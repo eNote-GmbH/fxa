@@ -42,7 +42,7 @@ export const test = base.extend<TestOptions, WorkerOptions>({
     { scope: 'worker', auto: true },
   ],
 
-  emailOptions: [{ password: '' }], // Default options for the fixture
+  emailOptions: [{ prefix: '', password }], // Default options for the fixture
 
   credentials: async ({ target }, use, testInfo) => {
     const email = EmailClient.emailFromTestTitle(testInfo.title);
@@ -158,7 +158,7 @@ export const test = base.extend<TestOptions, WorkerOptions>({
   ): Promise<void> => {
     const emails = await Promise.all(
       emailOptions.map(async (emailOptions) =>
-        login.createEmail(emailOptions.prefix)
+        login.createEmail(emailOptions.prefix ?? '')
       )
     );
     await login.clearCache(); // Clear cache for each email

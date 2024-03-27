@@ -5,73 +5,65 @@
 import { expect, test, password } from '../../lib/fixtures/standard';
 import { oauthWebchannelV1 } from '../../lib/query-params';
 
-let browserEmail: string;
-let otherEmail: string;
 let skipTest = false;
 
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('fxa_status web channel message in Settings', () => {
+  test.use({
+    emailOptions: [
+      { prefix: '', password: 'passwordzxcv' },
+      { prefix: '', password: 'passwordzxcv' },
+    ],
+  });
   test.beforeEach(
-    async ({ target, pages: { configPage }, syncBrowserPages: { login } }) => {
+    async ({
+      emails,
+      target,
+      pages: { configPage },
+      syncBrowserPages: { login },
+    }) => {
       test.slow();
       // Ensure that the feature flag is enabled
+      const [email, otherEmail] = emails;
       const config = await configPage.getConfig();
       skipTest = config.featureFlags.sendFxAStatusOnSettings !== true;
       test.skip(skipTest);
-
-      browserEmail = login.createEmail();
-      await target.auth.signUp(browserEmail, password, {
+      await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'true',
       });
-      otherEmail = login.createEmail();
       await target.auth.signUp(otherEmail, password, {
         lang: 'en',
         preVerified: 'true',
       });
       // First we sign the browser into an account
       await login.goto('load', 'context=fx_desktop_v3&service=sync');
-      await login.fillOutEmailFirstSignIn(browserEmail, password);
+      await login.fillOutEmailFirstSignIn(email, password);
       // Then, we sign into a **different** account
       await login.goto();
       await login.useDifferentAccountLink();
       await login.fillOutEmailFirstSignIn(otherEmail, password);
     }
   );
-  test.afterEach(async ({ target }) => {
-    if (!skipTest) {
-      // Cleanup any accounts created during the test
-      const credsBrowser = await target.auth.signIn(browserEmail, password);
-      const credsEmail = await target.auth.signIn(otherEmail, password);
-      await target.auth.accountDestroy(
-        browserEmail,
-        password,
-        {},
-        credsBrowser.sessionToken
-      );
-      await target.auth.accountDestroy(
-        otherEmail,
-        password,
-        {},
-        credsEmail.sessionToken
-      );
-    }
-  });
 
   test('message is sent when loading with context = oauth_webchannel_v1', async ({
+    emails,
     syncBrowserPages: { settings },
   }) => {
+    const [email, otherEmail] = emails;
     // We verify that even though another email is signed in, when
     // accessing the setting with a `context=oauth_webchannel_v1` the account
     // signed into the browser takes precedence
     await settings.goto(oauthWebchannelV1.toString());
-    expect(await settings.primaryEmail.statusText()).toBe(browserEmail);
+    expect(await settings.primaryEmail.statusText()).toBe(email);
   });
 
   test('message is not sent when loading without oauth web channel context', async ({
+    emails,
     syncBrowserPages: { settings },
   }) => {
+    const [email, otherEmail] = emails;
     // We verify that when accessing the setting without the `context=oauth_webchannel_v1`
     // the newer account takes precedence
     await settings.goto();

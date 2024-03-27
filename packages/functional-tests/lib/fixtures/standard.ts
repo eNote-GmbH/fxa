@@ -187,9 +187,10 @@ export async function teardownEmail(
     // If the account is not created during the execution of the test, which
     // can happen if the test fails prematurly, an exception will be thrown
     // during email cleanup
-    const ERROR = 'Bad Request';
-    const MESSAGE = 'Unknown account';
-    if (!(error.error === ERROR && error.message == MESSAGE)) {
+    const ERROR_1 = 'Bad Request';
+    const ERROR_2 = 'Request blocked';
+    //const MESSAGE_2 = 'Invalid credentials';
+    if (!(error.error === ERROR_1) && !(error.error === ERROR_2)) {
       throw error;
     }
   }

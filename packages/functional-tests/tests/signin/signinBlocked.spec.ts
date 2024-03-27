@@ -3,55 +3,42 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { test, expect, password } from '../../lib/fixtures/standard';
-let blockedEmail;
-let email;
-let newEmail;
-let unverifiedEmail;
 
 test.describe('severity-2 #smoke', () => {
   test.describe('signin blocked', () => {
-    test.beforeEach(async ({ target, pages: { login } }) => {
+    test.use({
+      emailOptions: [
+        { prefix: '', password: 'passwordzxcv' },
+        { prefix: 'blocked{id}', password: 'passwordzxcv' },
+        { prefix: 'blocked{id}', password: 'passwordzxcv' },
+        { prefix: 'blocked{id}', password: 'passwordzxcv' },
+      ],
+    });
+
+    test.beforeEach(async ({ emails, target, pages: { login } }) => {
       test.slow(); //This test has steps for email rendering that runs slow on stage
-      blockedEmail = login.createEmail('blocked{id}');
+      const [email, blockedEmail, newEmail, unverifiedEmail] = emails;
       await target.auth.signUp(blockedEmail, password, {
         lang: 'en',
         preVerified: 'true',
       });
-      email = await login.createEmail();
       await target.auth.signUp(email, password, {
         lang: 'en',
         preVerified: 'true',
       });
-      newEmail = login.createEmail('blocked{id}');
-      unverifiedEmail = login.createEmail('blocked{id}');
       await target.auth.signUp(unverifiedEmail, password, {
         lang: 'en',
         preVerified: 'false',
       });
-      await login.clearCache();
     });
 
-    test.afterEach(async ({ target }) => {
-      test.slow(); //The cleanup was timing out and exceeding 3000ms
-      const emails = [blockedEmail, email, newEmail, unverifiedEmail];
-      for (const email of emails) {
-        if (email) {
-          try {
-            const creds = await target.auth.signIn(email, password);
-            await target.auth.accountDestroy(
-              email,
-              password,
-              {},
-              creds.sessionToken
-            );
-          } catch (e) {
-            // Handle any errors if needed
-          }
-        }
-      }
-    });
-
-    test('valid code entered', async ({ target, page, pages: { login } }) => {
+    test('valid code entered', async ({
+      emails,
+      target,
+      page,
+      pages: { login },
+    }) => {
+      const [email, blockedEmail, newEmail, unverifiedEmail] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
@@ -69,10 +56,12 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('incorrect code entered', async ({
+      emails,
       target,
       page,
       pages: { login },
     }) => {
+      const [email, blockedEmail, newEmail, unverifiedEmail] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
@@ -96,10 +85,12 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('resend', async ({
+      emails,
       target,
       page,
       pages: { login, resetPassword },
     }) => {
+      const [email, blockedEmail, newEmail, unverifiedEmail] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
@@ -125,10 +116,12 @@ test.describe('severity-2 #smoke', () => {
     });
 
     test('with primary email changed', async ({
+      emails,
       target,
       page,
       pages: { login, settings, secondaryEmail },
     }) => {
+      const [email, blockedEmail, newEmail, unverifiedEmail] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });
@@ -159,8 +152,9 @@ test.describe('severity-2 #smoke', () => {
       expect(await login.isUserLoggedIn()).toBe(true);
     });
 
-    test('unverified', async ({ target, page, pages: { login } }) => {
+    test('unverified', async ({ emails, target, page, pages: { login } }) => {
       test.fixme(true, 'FXA-9226');
+      const [email, blockedEmail, newEmail, unverifiedEmail] = emails;
       await page.goto(target.contentServerUrl, {
         waitUntil: 'load',
       });

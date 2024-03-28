@@ -20,35 +20,33 @@ export function strategy(
     return {
       authenticate: async function (req: Request, h: ResponseToolkit) {
         const auth = req.headers.authorization;
-        let tokenId: string | null = null;
 
-        if (!auth) {
-          const error = AppError.unauthorized('Token not found');
-          error.isMissing = true;
-          throw error;
-        }
-
-        if (auth.indexOf('Bearer') > -1) {
-          tokenId = auth.split(' ')[1];
-        } else if (auth.indexOf('Hawk') > -1) {
+        if (auth.indexOf('Hawk') > -1) {
+          // If a Hawk token is found, lets parse it and get the token's id
           const parsedHeader = parseAuthorizationHeader(auth);
-          tokenId = parsedHeader.id;
-        }
-
-        if (!tokenId) {
-          throw AppError.unauthorized('Token not provided');
-        }
-
-        try {
-          const token = await getCredentialsFunc(tokenId);
+          const token = await getCredentialsFunc(parsedHeader.id);
           return h.authenticated({
             credentials: token,
           });
-        } catch (err) {
-          const error = AppError.unauthorized('Token not found');
-          error.isMissing = true;
-          throw error;
         }
+
+        if (auth.indexOf('Bearer') > -1) {
+          const tokenId = auth.split(' ')[1];
+          try {
+            const token = await getCredentialsFunc(tokenId);
+            return h.authenticated({
+              credentials: token,
+            });
+          } catch (err) {
+            const error = AppError.unauthorized('Token not found');
+            error.isMissing = true;
+            throw error;
+          }
+        }
+
+        const error = AppError.unauthorized('Token not found');
+        error.isMissing = true;
+        throw error;
       },
       payload: async function (req: Request, h: ResponseToolkit) {
         // Since we skip Hawk header validation, we don't need to perform payload validation either

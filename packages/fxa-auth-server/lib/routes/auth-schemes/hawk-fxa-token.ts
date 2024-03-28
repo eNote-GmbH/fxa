@@ -16,14 +16,16 @@ import { Request, ResponseToolkit } from '@hapi/hapi';
 export function strategy(
   getCredentialsFunc: (tokenId: string) => Promise<any>
 ) {
-  return function () {
+  return function (server: any, options: any) {
     return {
       authenticate: async function (req: Request, h: ResponseToolkit) {
         const auth = req.headers.authorization;
         let tokenId: string | null = null;
 
         if (!auth) {
-          throw AppError.unauthorized('Token not provided');
+          const error = AppError.unauthorized('Token not found');
+          error.isMissing = true;
+          throw error;
         }
 
         if (auth.indexOf('Bearer') > -1) {
@@ -37,10 +39,16 @@ export function strategy(
           throw AppError.unauthorized('Token not provided');
         }
 
-        const token = await getCredentialsFunc(tokenId);
-        return h.authenticated({
-          credentials: token,
-        });
+        try {
+          const token = await getCredentialsFunc(tokenId);
+          return h.authenticated({
+            credentials: token,
+          });
+        } catch (err) {
+          const error = AppError.unauthorized('Token not found');
+          error.isMissing = true;
+          throw error;
+        }
       },
       payload: async function (req: Request, h: ResponseToolkit) {
         // Since we skip Hawk header validation, we don't need to perform payload validation either

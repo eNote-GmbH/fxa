@@ -8,6 +8,7 @@ const fs = require('fs');
 const Hapi = require('@hapi/hapi');
 const HapiSwagger = require('hapi-swagger');
 const path = require('path');
+const url = require('url');
 const { getRemoteAddressChain } = require('./getRemoteAddressChain');
 const userAgent = require('./userAgent');
 const schemeRefreshToken = require('./routes/auth-schemes/refresh-token');
@@ -86,6 +87,32 @@ async function create(log, error, config, routes, db, statsd, glean) {
   const metricsContext = require('./metrics/context')(log, config);
   const metricsEvents = require('./metrics/events')(log, config, glean);
   const { sharedSecret: SUBSCRIPTIONS_SECRET } = config.subscriptions;
+
+  // Hawk needs to calculate request signatures based on public URL,
+  // not the local URL to which it is bound.
+  const publicURL = url.parse(config.publicUrl);
+  const defaultPorts = {
+    'http:': 80,
+    'https:': 443,
+  };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const hawkOptions = {
+    host: publicURL.hostname,
+    port: publicURL.port ? publicURL.port : defaultPorts[publicURL.protocol],
+
+    // We're seeing massive clock skew in deployed clients, and it's
+    // making auth harder than it needs to be.  This effectively disables
+    // the timestamp checks by setting it to a humongous value.
+    timestampSkewSec: 20 * 365 * 24 * 60 * 60, // 20 years, +/- a few days
+
+    nonceFunc: function nonceCheck(key, nonce, ts) {
+      // Since we've disabled timestamp checks, there's not much point
+      // keeping a nonce cache.  Instead we use this as an opportunity
+      // to report on the clock skew values seen in the wild.
+      const skew = Date.now() / 1000 - +ts;
+      log.trace('server.nonceFunc', { skew: skew });
+    },
+  };
 
   function makeCredentialFn(dbGetFn) {
     return function (id) {
@@ -370,6 +397,7 @@ async function create(log, error, config, routes, db, statsd, glean) {
     };
   };
 
+  await server.register(require('@hapi/hawk'));
   await server.register(require('hapi-auth-jwt2'));
 
   const hawkFxAToken = require('./routes/auth-schemes/hawk-fxa-token');
@@ -400,6 +428,11 @@ async function create(log, error, config, routes, db, statsd, glean) {
     'fxa-hawk-passwordChange-token',
     hawkFxAToken.strategy(makeCredentialFn(db.passwordChangeToken.bind(db)))
   );
+
+  // server.auth.strategy('sessionToken', 'hawk', {
+  //   getCredentialsFunc: makeCredentialFn(db.sessionToken.bind(db)),
+  //   hawk: hawkOptions,
+  // });
 
   server.auth.strategy('sessionToken', 'fxa-hawk-session-token');
   server.auth.strategy('keyFetchToken', 'fxa-hawk-keyFetch-token');

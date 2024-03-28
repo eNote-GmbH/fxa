@@ -164,10 +164,16 @@ function configure(config: SentryConfigOpts, log?: ILogger) {
 
   const opts = buildSentryConfig(config, log);
 
+  console.log('!!! opts', opts);
+
   try {
     Sentry.init({
       ...opts,
-      integrations: [new Sentry.BrowserTracing()],
+      integrations: [
+        Sentry.browserTracingIntegration({
+          enableInp: true,
+        }),
+      ],
       beforeSend: function (event: Sentry.Event, hint?: any) {
         return beforeSend(opts, event, hint);
       },

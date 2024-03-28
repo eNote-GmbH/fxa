@@ -2,9 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import AppError from '../../error';
-import { parseAuthorizationHeader } from '@hapi/hawk/lib/utils';
-import { Request, ResponseToolkit } from '@hapi/hapi';
+const AppError = require('../../error');
+const { parseAuthorizationHeader } = require('@hapi/hawk/lib/utils');
 
 /**
  * This function defines the authentication strategy for `hawk-fxa-token`.
@@ -13,12 +12,10 @@ import { Request, ResponseToolkit } from '@hapi/hapi';
  * @param {Function} getCredentialsFunc - The function to get the credentials.
  * @returns {Function}
  */
-export function strategy(
-  getCredentialsFunc: (tokenId: string) => Promise<any>
-) {
-  return function (server: any, options: any) {
+function strategy(getCredentialsFunc) {
+  return function (server, options) {
     return {
-      authenticate: async function (req: Request, h: ResponseToolkit) {
+      authenticate: async function (req, h) {
         const auth = req.headers.authorization;
 
         if (!auth) {
@@ -54,10 +51,14 @@ export function strategy(
         error.isMissing = true;
         throw error;
       },
-      payload: async function (req: Request, h: ResponseToolkit) {
+      payload: async function (req, h) {
         // Since we skip Hawk header validation, we don't need to perform payload validation either
         return h.continue;
       },
     };
   };
 }
+
+module.exports = {
+  strategy,
+};

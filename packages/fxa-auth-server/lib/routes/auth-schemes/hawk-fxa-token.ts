@@ -21,6 +21,16 @@ export function strategy(
       authenticate: async function (req: Request, h: ResponseToolkit) {
         const auth = req.headers.authorization;
 
+        if (!auth) {
+          if (req.auth.mode === 'optional') {
+            return h.continue;
+          }
+
+          const error = AppError.unauthorized('Token not found');
+          error.isMissing = true;
+          throw error;
+        }
+
         if (auth.indexOf('Hawk') > -1) {
           // If a Hawk token is found, lets parse it and get the token's id
           const parsedHeader = parseAuthorizationHeader(auth);
@@ -37,11 +47,7 @@ export function strategy(
             return h.authenticated({
               credentials: token,
             });
-          } catch (err) {
-            const error = AppError.unauthorized('Token not found');
-            error.isMissing = true;
-            throw error;
-          }
+          } catch (err) {}
         }
 
         const error = AppError.unauthorized('Token not found');

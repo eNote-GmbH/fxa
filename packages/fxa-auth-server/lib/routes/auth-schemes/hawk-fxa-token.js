@@ -52,7 +52,11 @@ function strategy(getCredentialsFunc) {
         throw error;
       },
       payload: async function (req, h) {
-        // Since we skip Hawk header validation, we don't need to perform payload validation either
+        // Since we skip Hawk header validation, we don't need to perform payload validation either...
+        // unless the route requires it.
+        if (req.route.settings.auth.payload === 'required' && !req.payload) {
+          throw AppError.invalidSignature('Payload is required');
+        }
         return h.continue;
       },
     };

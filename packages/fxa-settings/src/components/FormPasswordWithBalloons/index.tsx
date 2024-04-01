@@ -120,6 +120,12 @@ export const FormPasswordWithBalloons = ({
     };
   }, []);
 
+  // TODO in FXA-7482, review our password requirements and best way to display them
+  // For now, this most closely matches parity to Backbone for a space-only password
+  const isTooShort =
+    errors.newPassword?.types?.length ||
+    (getValues('newPassword') && getValues('newPassword').trim() === '');
+
   const showNewPwdBalloon = useCallback(() => {
     showSomethingTimerRef.current = setTimeout(() => {
       setIsNewPwdBalloonVisible(true);
@@ -167,7 +173,7 @@ export const FormPasswordWithBalloons = ({
     } else {
       // if there are errors on blur, announce a screen-reader only message
       // visual feedback is provided by the password strength ballon
-      if (errors.newPassword?.types?.length) {
+      if (isTooShort) {
         const srOnlyTooShortMessage = ftlMsgResolver.getMsg(
           'form-password-sr-too-short-message',
           'Password must contain at least 8 characters.'
@@ -291,7 +297,9 @@ export const FormPasswordWithBalloons = ({
               onBlurCb={onNewPwdBlur}
               onChange={() => onChangePassword('newPassword')}
               hasErrors={
-                formState.dirtyFields.newPassword ? errors.newPassword : false
+                formState.dirtyFields.newPassword
+                  ? errors.newPassword || isTooShort
+                  : false
               }
               inputRef={register({
                 required: true,
@@ -325,7 +333,7 @@ export const FormPasswordWithBalloons = ({
               <PasswordStrengthBalloon
                 {...{
                   hasUserTakenAction,
-                  isTooShort: errors.newPassword?.types?.length,
+                  isTooShort,
                   isSameAsEmail: errors.newPassword?.types?.notEmail,
                   isCommon: errors.newPassword?.types?.uncommon,
                 }}

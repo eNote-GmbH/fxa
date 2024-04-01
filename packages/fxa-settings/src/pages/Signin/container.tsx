@@ -65,6 +65,8 @@ import { useFinishOAuthFlowHandler } from '../../lib/oauth/hooks';
 import AppLayout from '../../components/AppLayout';
 import CardHeader from '../../components/CardHeader';
 import { setCurrentAccount } from '../../lib/storage-utils';
+import { searchParams } from '../../lib/utilities';
+import { QueryParams } from '../..';
 
 /*
  * In content-server, the `email` param is optional. If it's provided, we
@@ -111,9 +113,11 @@ function getAccountInfo(nonCachedEmail?: string) {
 const SigninContainer = ({
   integration,
   serviceName,
+  flowQueryParams,
 }: {
   integration: Integration;
   serviceName: MozServices;
+  flowQueryParams?: QueryParams;
 } & RouteComponentProps) => {
   const config = useConfig();
   const authClient = useAuthClient();
@@ -485,7 +489,11 @@ const SigninContainer = ({
   const sendUnblockEmailHandler = useCallback(
     async (email: string) => {
       try {
-        await authClient.sendUnblockCode(email);
+        await authClient.sendUnblockCode(email, {
+          metricsContext: flowQueryParams as unknown as ReturnType<
+            typeof searchParams
+          >,
+        });
         return { success: true };
       } catch (error) {
         const localizedErrorMessage = getLocalizedErrorMessage(
@@ -495,7 +503,7 @@ const SigninContainer = ({
         return { localizedErrorMessage };
       }
     },
-    [authClient, ftlMsgResolver]
+    [authClient, flowQueryParams, ftlMsgResolver]
   );
   // TODO: UX for this, FXA-8106
   if (oAuthDataError) {
